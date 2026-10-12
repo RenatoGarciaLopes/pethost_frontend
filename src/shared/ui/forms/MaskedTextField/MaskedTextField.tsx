@@ -6,20 +6,23 @@ import {
   maskCpf,
   maskCnpj,
   maskCep,
+  maskDate,
   maskPhone,
   unmaskCpf,
   unmaskCnpj,
   unmaskCep,
+  unmaskDate,
   unmaskPhone,
 } from "../../../lib/masks";
 
 /** Supported Brazilian numeric formats; presentation is not document validation. */
-export type MaskKind = "cpf" | "cnpj" | "cep" | "phone";
+export type MaskKind = "cpf" | "cnpj" | "cep" | "phone" | "date";
 const formats = {
   cpf: [maskCpf, unmaskCpf],
   cnpj: [maskCnpj, unmaskCnpj],
   cep: [maskCep, unmaskCep],
   phone: [maskPhone, unmaskPhone],
+  date: [maskDate, unmaskDate],
 } as const;
 /** Controlled MUI field; consumers store only digits. */
 export type MaskedTextFieldProps = Omit<TextFieldProps, "label" | "value" | "onChange" | "type"> & {
@@ -90,7 +93,8 @@ export function MaskedTextField({
         ...slotProps,
         htmlInput: (state) => ({
           ...(typeof htmlProps === "function" ? htmlProps(state) : htmlProps),
-          inputMode: "numeric",
+          // Telefone abre o teclado de telefone; o resto, o numérico (REQ-OREG-016).
+          inputMode: mask === "phone" ? "tel" : "numeric",
         }),
       }}
     />
