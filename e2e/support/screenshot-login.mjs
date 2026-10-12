@@ -7,6 +7,8 @@ import { chromium } from "@playwright/test";
 const out = process.argv[2] ?? "test-results/screens";
 const base = process.env.SCREENSHOT_BASE_URL ?? "http://localhost:3100";
 const browser = await chromium.launch();
+/** A tela se monta em ordem e a cena se desenha sozinha: espera tudo assentar antes de capturar. */
+const SETTLE_MS = 1800;
 
 const shots = [
   { name: "login-desktop", path: "/login", viewport: { width: 1440, height: 960 } },
@@ -18,6 +20,7 @@ const shots = [
 for (const shot of shots) {
   const page = await browser.newPage({ viewport: shot.viewport });
   await page.goto(`${base}${shot.path}`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(SETTLE_MS);
   await page.screenshot({ path: `${out}/${shot.name}.png` });
   await page.close();
 }
@@ -25,6 +28,7 @@ for (const shot of shots) {
 // Estado de erro: credencial errada contra o backend simulado.
 const page = await browser.newPage({ viewport: { width: 1440, height: 960 } });
 await page.goto(`${base}/login`, { waitUntil: "networkidle" });
+await page.waitForTimeout(SETTLE_MS);
 await page.getByLabel("E-mail").fill("tutora@pethost.test");
 await page.getByLabel(/^Senha/).fill("errada");
 await page.getByRole("button", { name: "Entrar" }).click();
@@ -33,6 +37,7 @@ await page.screenshot({ path: `${out}/login-error-desktop.png` });
 
 // Campos vazios: validação no envio.
 await page.goto(`${base}/login`, { waitUntil: "networkidle" });
+await page.waitForTimeout(SETTLE_MS);
 await page.getByRole("button", { name: "Entrar" }).click();
 await page.screenshot({ path: `${out}/login-validation-desktop.png` });
 

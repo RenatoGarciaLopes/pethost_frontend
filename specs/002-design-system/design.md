@@ -15,7 +15,7 @@ src/shared/theme/
   tokens/radii.ts · tokens/typography.ts
   tokens/springs.ts       `SPRING_ASSENTAR` e `SPRING_ACOLHER` (curvas linear() de design/06-movimento)
   overrides/<Componente>.ts   styleOverrides por componente MUI (Button, TextField, Chip, Card, Paper, Switch, ToggleButton, Tooltip)
-  variants/               variants novas: Button `quiet`; Chip `sticker`, `ok`, `attention`; Paper `panel`
+  variants/               variants novas: Button `quiet`; Chip `ok` (usado pelo `ChipPicker`)
   types/mui.d.ts          module augmentation (cores `grama`, `gema`, `ceu`; variants)
   integrations/stripe/toStripeAppearance.ts
   createQuintalTheme.ts   compõe tudo; exporta `quintalTheme`
