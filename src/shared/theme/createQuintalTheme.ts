@@ -10,6 +10,7 @@ import { quintalSwitch } from "./overrides/Switch";
 import { quintalToggleButton } from "./overrides/ToggleButton";
 import { quintalTooltip } from "./overrides/Tooltip";
 import { quintalLink } from "./overrides/Link";
+import { quintalFormLabel } from "./overrides/FormLabel";
 import { createTheme, type Shadows } from "@mui/material/styles";
 import { quintalColors as c } from "./tokens/colors";
 import { accountTones, feedbackColors, sceneColors, surfaceColors } from "./tokens/semantic";
@@ -62,5 +63,6 @@ export const quintalTheme = createTheme({
     MuiToggleButton: quintalToggleButton,
     MuiTooltip: quintalTooltip,
     MuiLink: quintalLink,
+    MuiFormLabel: quintalFormLabel,
   },
 });

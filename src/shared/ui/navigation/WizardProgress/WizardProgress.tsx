@@ -172,8 +172,9 @@ export function WizardProgress({ steps, currentIndex, variant = "auto", label = 
 
 const visuallyHidden = {
   position: "absolute",
-  width: 1,
-  height: 1,
+  // Em px: no `sx` do MUI, `1` significa 100%.
+  width: "1px",
+  height: "1px",
   margin: -1,
   padding: 0,
   overflow: "hidden",
