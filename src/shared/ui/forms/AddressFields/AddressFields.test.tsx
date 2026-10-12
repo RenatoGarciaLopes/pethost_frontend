@@ -76,6 +76,7 @@ describe("AddressFields", () => {
     expect(field("Rua")).toHaveValue("");
   });
 
+  // Digita tecla a tecla e espera duas buscas: com a suíte inteira em paralelo passa dos 5 s padrão.
   it("REQ-OREG-005 trocar o CEP não sobrescreve o que a pessoa editou", async () => {
     useViaCep();
     const { user } = renderWithProviders(<Harness />);
@@ -90,7 +91,7 @@ describe("AddressFields", () => {
     await waitFor(() => expect(field("Cidade")).toHaveValue("São Paulo"));
     expect(field("Bairro")).toHaveValue("Bela Vista");
     expect(field("Rua")).toHaveValue("Rua que eu escrevi");
-  });
+  }, 15_000);
 
   it("REQ-OREG-007 voltando com endereço preenchido, os campos já vêm liberados (sem buscar CEP incompleto)", () => {
     renderWithProviders(<Harness address={{ ...empty, zipCode: "8702", street: "Rua A", city: "Maringá" }} />);
