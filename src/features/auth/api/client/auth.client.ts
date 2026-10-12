@@ -4,7 +4,7 @@ import { sessionResultSchema, type SessionResult } from "@/shared/auth/contracts
 import type { LoginFormValues } from "../../schemas/loginFormSchema";
 
 /** Corpo que a API espera no login e na reativação (`modulo-auth.md` seções 2.1 e 2.10). */
-export function toLoginRequest(values: LoginFormValues) {
+function toLoginRequest(values: LoginFormValues) {
   return { email: values.email, password: values.password, role: values.role };
 }
 

@@ -3,7 +3,7 @@ import { accountRoleSchema } from "@/shared/auth/contracts/session";
 import { authCopy } from "../lib/authCopy";
 
 /** Limite de tamanho da senha no login (protege o servidor; não revela a política de senha forte). */
-export const LOGIN_PASSWORD_MAX = 128;
+const LOGIN_PASSWORD_MAX = 128;
 
 /**
  * Formulário de entrar (spec 010, REQ-AUTH-003). E-mail é normalizado (sem espaços, minúsculo);

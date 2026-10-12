@@ -55,7 +55,7 @@ export function createSessionReader(deps: SessionReaderDeps) {
 }
 
 /** Estado da sessão, memorizado por requisição (`cache` do React). */
-export const getSessionState = cache(createSessionReader({ readCookies: cookies, readHeaders: headers }));
+const getSessionState = cache(createSessionReader({ readCookies: cookies, readHeaders: headers }));
 
 /**
  * Conta atual ou `null`. Para página que funciona com ou sem sessão (ex.: `/login`).

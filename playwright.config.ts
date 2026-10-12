@@ -44,7 +44,8 @@ const config = defineConfig({
       : []),
     {
       command: "node node_modules/next/dist/bin/next dev -p 3100",
-      url: "http://localhost:3100",
+      // Pronto quando a tela de entrar responde (a home chega na spec 040).
+      url: "http://localhost:3100/login",
       env: {
         BACKEND_URL: isReal ? backendUrl! : "http://localhost:5099",
         BACKEND_API_PREFIX: process.env.E2E_BACKEND_API_PREFIX ?? "/api/v1",

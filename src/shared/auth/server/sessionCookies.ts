@@ -8,7 +8,7 @@ export const REFRESH_COOKIE = "pethost_rt";
 
 const ACCESS_PATH = "/";
 const REFRESH_PATH = "/api";
-export const DEFAULT_REFRESH_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+const DEFAULT_REFRESH_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 
 /** Tokens da resposta de sessão da API (`modulo-auth.md` seção 2.6). */
 export interface SessionTokens {

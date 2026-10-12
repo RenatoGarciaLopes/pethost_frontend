@@ -20,7 +20,7 @@ const base = {
 };
 
 /** "i" dentro de um círculo levemente torto (traço de mão). */
-export function InfoIcon(props: IconProps) {
+function InfoIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
       <path d="M12 2.8c5.2.1 9.2 4 9.1 9.3-.1 5.1-4.2 9.1-9.3 9-5.1-.1-9-4.2-8.9-9.3.1-5 4.1-9.1 9.1-9Z" />
@@ -41,7 +41,7 @@ export function OkIcon(props: IconProps) {
 }
 
 /** Triângulo de atenção, arredondado. */
-export function AttentionIcon(props: IconProps) {
+function AttentionIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
       <path d="M10.4 3.9c.7-1.2 2.5-1.2 3.2 0l7.6 13.6c.7 1.2-.2 2.7-1.6 2.7H4.4c-1.4 0-2.3-1.5-1.6-2.7Z" />

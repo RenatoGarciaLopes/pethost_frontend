@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "../errors/ApiError";
-import { accountQueryKey, createQueryClient, getQueryClient, shouldRetry } from "./queryClient";
+import { createQueryClient, getQueryClient, shouldRetry } from "./queryClient";
 
 describe("getQueryClient", () => {
   it("REQ-HTTP-018 no servidor cria uma instância nova por chamada", () => {
@@ -24,11 +24,5 @@ describe("shouldRetry", () => {
     expect(shouldRetry(0, new ApiError({ status: 404, code: "X", message: "x" }))).toBe(false);
     expect(shouldRetry(0, new ApiError({ status: 401, code: "SESSION_EXPIRED", message: "x" }))).toBe(false);
     expect(shouldRetry(0, new Error("bug"))).toBe(false);
-  });
-});
-
-describe("accountQueryKey", () => {
-  it("REQ-HTTP-018 toda chave começa pela conta, para nunca misturar dados de tutor e anfitrião", () => {
-    expect(accountQueryKey("acc-1", "pets", { page: 2 })).toEqual(["account", "acc-1", "pets", { page: 2 }]);
   });
 });

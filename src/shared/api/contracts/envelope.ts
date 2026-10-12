@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 /** Mensagens de validação de um campo; `field` pode ser aninhado (`address.zipCode`). */
-export const apiFieldErrorSchema = z.object({
+const apiFieldErrorSchema = z.object({
   field: z.string(),
   messages: z.array(z.string()),
 });
 
 /** Corpo de `error` no envelope da API (`modulo-auth.md` seção 3). */
-export const apiErrorBodySchema = z.object({
+const apiErrorBodySchema = z.object({
   code: z.string(),
   message: z.string(),
   details: z.union([z.array(apiFieldErrorSchema), z.object({ traceId: z.string() }).passthrough()]).optional(),
@@ -33,6 +33,4 @@ export function apiSuccessSchema<TData extends z.ZodTypeAny>(data: TData) {
   });
 }
 
-export type ApiFieldError = z.infer<typeof apiFieldErrorSchema>;
 export type ApiErrorBody = z.infer<typeof apiErrorBodySchema>;
-export type ApiErrorEnvelope = z.infer<typeof apiErrorEnvelopeSchema>;

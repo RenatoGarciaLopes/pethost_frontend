@@ -31,13 +31,3 @@ export function getQueryClient({ isServer = runningOnServer }: { isServer?: bool
   browserClient ??= createQueryClient();
   return browserClient;
 }
-
-/**
- * Chave de query com a conta na frente. A mesma pessoa pode ter conta de tutor e de anfitrião;
- * com a conta na chave, trocar de conta nunca mostra dado da outra (REQ-HTTP-018).
- *
- * @example useQuery({ queryKey: accountQueryKey(user.id, "pets"), ... })
- */
-export function accountQueryKey(accountId: string, ...parts: unknown[]): readonly unknown[] {
-  return ["account", accountId, ...parts];
-}

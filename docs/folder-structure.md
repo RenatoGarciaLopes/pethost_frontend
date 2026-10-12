@@ -141,10 +141,6 @@ pethost_frontend/
       config/
         env.server.test.ts
         env.server.ts
-      lib/
-        color/
-          contrastRatio.test.ts
-          contrastRatio.ts
       theme/
         tokens/
           colors.test.ts
@@ -152,6 +148,9 @@ pethost_frontend/
           contrast.test.ts
           typography.test.ts
     test/
+      a11y/
+        contrastRatio.test.ts
+        contrastRatio.ts
       architecture/
         fixtures/
           app/

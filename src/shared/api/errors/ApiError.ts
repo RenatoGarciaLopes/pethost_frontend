@@ -1,9 +1,5 @@
 import type { ApiErrorBody } from "../contracts/envelope";
 
-/** Códigos gerados pelo próprio front ou pelo BFF, além dos códigos da API. */
-export type LocalErrorCode =
-  "NETWORK_ERROR" | "CONTRACT_MISMATCH" | "SESSION_EXPIRED" | "CSRF_REJECTED" | "ROUTE_NOT_ALLOWED";
-
 /** Mapa campo → mensagens, com o caminho da API preservado (`address.zipCode`). */
 export type FieldErrors = Record<string, string[]>;
 

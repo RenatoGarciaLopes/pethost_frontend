@@ -14,13 +14,14 @@ updated: 2026-10-11
 | `app/(auth)/admin/login/page.tsx` | RSC                      | Igual, com `variant="admin"`                                                                                                                  |
 | `app/(auth)/layout.tsx`           | RSC                      | Cabeçalho simples da marca (sem menu); metadados `robots: noindex`                                                                            |
 
-Sem `'use cache'` (lê sessão). A cena e o texto são servidor; a única ilha é o formulário.
+Sem `'use cache'` (lê sessão). Texto e layout são servidor; ilhas client: o formulário, a cena (`DoorScene`, Motion) e os `Reveal` da montagem (REQ-AUTH-020).
 
 ## Árvore
 
 ```
 LoginScreen (features/auth · server)          layout de duas colunas / empilhado no celular
-├─ DoorScene (shared/ui/brand · server, CSS)  aria-hidden; reage ao hover/foco do formulário via :has()
+├─ Reveal (shared/ui/motion · client)        saudação, título, cartão, campos e garantias entram em ordem
+├─ DoorScene (shared/ui/brand · client, Motion) aria-hidden; monta-se sozinha, reage ao formulário pelos atributos, é de brincar
 ├─ TrustList (shared/ui/data-display · server) só no computador
 └─ LoginForm (features/auth · client)         a ilha
    ├─ SegmentedControl  (shared/ui/forms)     REQ-AUTH-001/002 (oculto no admin)
@@ -36,7 +37,7 @@ LoginScreen (features/auth · server)          layout de duas colunas / empilhad
 | `LoginRequest`                        | `shared/api/generated` → `features/auth/api/contracts` | `{ email, password, role }`                                                                                                    |
 | `SessionUser`                         | `shared/auth/contracts/session.ts`                     | O BFF devolve só isso                                                                                                          |
 | `loginFormSchema` / `LoginFormValues` | `features/auth/schemas/loginFormSchema.ts`             | email (trim, minúsculas, formato), password (obrigatória, máx. 128, **sem** regra de força: o login não vaza a política), role |
-| `toLoginRequest`                      | `features/auth/api/mappers`                            | Values → request                                                                                                               |
+| `toLoginRequest`                      | `features/auth/api/client/auth.client.ts` (interno)    | Values → request                                                                                                               |
 | `AccountRole`                         | `shared/auth/contracts`                                | `'owner' \| 'host' \| 'admin'`                                                                                                 |
 
 ## Lógica pura (`features/auth/lib`)

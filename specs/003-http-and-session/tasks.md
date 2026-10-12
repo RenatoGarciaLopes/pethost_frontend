@@ -48,3 +48,10 @@ updated: 2026-10-11
 - **T12:** `AppProviders` ligado no `app/layout.tsx`.
 - **E2E:** `e2e/mocked/session.spec.ts` 10 de 10 (desktop e celular).
 - **Dívida de testes** (o Renato pediu para deixar testes novos para depois): T15 sem caso para `owner.user`, `host: null` e busca de `/users/me`; caso de 502 na conferência de sessão.
+
+## Registro (2026-10-12, limpeza de código morto)
+
+- `accountQueryKey` removido: nenhuma query usava. REQ-HTTP-018 segue com `getQueryClient` (um por requisição no servidor, um estável no navegador) e com o cache limpo no login e na troca de conta; a chave por conta volta em `queryClient.ts` com a primeira query por conta (spec 014), com o teste dela.
+- Deixaram de ser exportados (só o próprio arquivo usa): `toLoginRequest`, `BFF_PREFIX`, `DEFAULT_TIMEOUT_MS`, `DEFAULT_REFRESH_MAX_AGE_SECONDS`, `getSessionState`, `SESSION_REFRESH_PATH`, `ROLE_HOME`, `ADMIN_LOGIN_PATH`, `apiFieldErrorSchema`, `apiErrorBodySchema`.
+- Removidos sem uso: `LocalErrorCode`, `ApiFieldError`, `ApiErrorEnvelope`.
+- `tsconfig.json`: `noUnusedLocals` e `noUnusedParameters` ligados.
