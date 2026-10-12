@@ -1,7 +1,4 @@
-import type { AccountRole } from "@/shared/auth/contracts/session";
-
-/** Papéis que a pessoa escolhe na tela de entrar (o admin tem entrada própria). */
-export type SelectableRole = Extract<AccountRole, "owner" | "host">;
+import type { PersonalRole } from "@/shared/auth/contracts/session";
 
 /**
  * Textos da tela de entrar (spec 010, seção Microcopy). Erros vindos da API não ficam aqui:
@@ -15,7 +12,7 @@ export const authCopy = {
   roles: {
     owner: { label: "Sou tutor", help: "Conta de quem tem pet e vai viajar." },
     host: { label: "Sou anfitrião", help: "Conta de quem recebe pets em casa. Tem senha própria." },
-  } satisfies Record<SelectableRole, { label: string; help: string }>,
+  } satisfies Record<PersonalRole, { label: string; help: string }>,
   email: "E-mail",
   password: "Senha",
   submit: "Entrar",

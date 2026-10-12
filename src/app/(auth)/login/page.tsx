@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { LoginScreen } from "@/features/auth/index.server";
-import { getSession } from "@/shared/auth/server/getSession";
-import { resolvePostLoginPath } from "@/shared/config/appRoutes";
+import { redirectIfSignedIn } from "@/shared/auth/server/redirectIfSignedIn";
 import { firstParam, type SearchParams } from "@/shared/lib/url/searchParams";
 import { AuthPageFallback } from "../AuthPageFallback";
 
@@ -28,8 +26,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
 async function LoginGate({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const next = firstParam(params.next) ?? null;
-  const user = await getSession();
-  if (user) redirect(resolvePostLoginPath(user.role, next));
+  await redirectIfSignedIn(next);
 
   // `?as=host` marca "Sou anfitrião" (REQ-AUTH-001).
   return (
