@@ -6,7 +6,7 @@ import { http, HttpResponse } from "msw";
  */
 const API = "http://localhost:5099/api/v1";
 export const DEMO = { email: "tutora@pethost.test", password: "senha-de-teste", role: "owner" };
-const user = {
+const demoUser = {
   id: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c",
   fullName: "Camila Souza",
   email: DEMO.email,
@@ -14,8 +14,9 @@ const user = {
   isActive: true,
 };
 
-const accessTokens = new Set();
-const refreshTokens = new Set();
+/** Token → conta dona dele: o `/users/me` e o refresh devolvem a conta certa (tutor ou anfitrião). */
+const accessTokens = new Map();
+const refreshTokens = new Map();
 let counter = 0;
 
 const encode = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -30,14 +31,17 @@ export const fail = (status, code, details) =>
     { status },
   );
 
-/** Abre uma sessão nova (tokens guardados em memória, aceitos pelo `/users/me` e pelo refresh). */
-export function issueSession() {
+/**
+ * Abre uma sessão nova para a conta (a de demonstração por padrão), com os tokens guardados em memória
+ * e aceitos pelo `/users/me` e pelo refresh.
+ */
+export function issueSession(user = demoUser) {
   counter += 1;
   const expiresAt = Math.floor(Date.now() / 1000) + 900;
   const accessToken = `${encode({ alg: "none" })}.${encode({ sub: user.id, exp: expiresAt, n: counter })}.e2e`;
   const refreshToken = `rt-e2e-${counter}`;
-  accessTokens.add(accessToken);
-  refreshTokens.add(refreshToken);
+  accessTokens.set(accessToken, user);
+  refreshTokens.set(refreshToken, user);
   return { accessToken, refreshToken, expiresAt, user };
 }
 
@@ -49,9 +53,10 @@ export const sessionHandlers = [
   }),
   http.post(`${API}/auth/sessions/refresh`, async ({ request }) => {
     const { refreshToken } = await request.json().catch(() => ({}));
+    const user = refreshTokens.get(refreshToken);
     // Uso único, como na API (GETDEL).
     if (!refreshTokens.delete(refreshToken)) return fail(401, "AUTH_REFRESH_TOKEN_INVALID");
-    return ok(issueSession());
+    return ok(issueSession(user));
   }),
   http.post(`${API}/auth/sessions/logout`, async ({ request }) => {
     const { refreshToken } = await request.json().catch(() => ({}));
@@ -60,7 +65,8 @@ export const sessionHandlers = [
   }),
   http.get(`${API}/users/me`, ({ request }) => {
     const token = (request.headers.get("authorization") ?? "").replace(/^Bearer /, "");
-    return accessTokens.has(token) ? ok(user) : fail(401, "UNAUTHORIZED");
+    const user = accessTokens.get(token);
+    return user ? ok(user) : fail(401, "UNAUTHORIZED");
   }),
 ];
 

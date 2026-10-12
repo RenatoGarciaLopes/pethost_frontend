@@ -17,6 +17,7 @@ updated: 2026-10-12
 - **Rótulos:** em tinta com foco e sem asterisco no tema (`overrides/FormLabel.ts`), conforme a regra 6 de `17-cadastros-e-formularios.md`.
 - **`FormActions`** ganhou `busy` (desabilita e marca `aria-busy`) e fica transparente a partir de `sm`.
 - **CSP:** o projeto ainda não tem CSP; quando tiver, liberar `connect-src https://viacep.com.br`.
+- **Depois da 012:** a feature virou tabela de variantes (`REGISTRATION_VARIANTS`); os arquivos `ownerRegistrationSchema.ts` e `toOwnerRegisterBody.ts` da matriz abaixo viraram `registrationSchemas.ts` e `toRegisterBody.ts`, e `registerOwner` virou `registerAccount(path, body)`. Ver `specs/012-host-registration/design.md`.
 - **Re-renderização:** o wizard não assina valores do formulário; a régua da senha fica dentro do `Controller` da senha; `ServerFormError` assina só `errors.root`; `AddressFields` observa só o CEP.
 
 ## Decisão: onde mora o formulário de conta

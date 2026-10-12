@@ -131,3 +131,13 @@ O primeiro verify parou na formatação porque o checkout Windows tinha CRLF (co
 | `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 24 de 24 (cadastro completo, CEP, cookies HttpOnly e redirecionamento com sessão, no computador e no celular) |
 
 Observação: o `next dev` da porta 3000 é de outro processo; o E2E rodou contra `next build` + `next start -p 3100`, desligado no fim.
+
+## 12/10/2026 · Cadastro de anfitrião (spec 012)
+
+| Verificação                                                                                | Resultado                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                           | 78 arquivos, 499 testes verdes                                                                                                                                   |
+| `next build` (backend simulado)                                                            | compilou; `/register/host` como Partial Prerender                                                                                                                |
+| `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 30 de 30 (jornada do anfitrião sem CPF, corpo sem `cpf` e sem `role`, 409 com `as=host`, cookies HttpOnly, redirecionamento com sessão)                          |
+| `npm run test:coverage`                                                                    | **abaixo da meta de 80%** (cerca de 75% na 011): dívida de testes da 010 e do design system, que já falhava desde o primeiro commit; sendo paga na branch da 010 |
+| E2E real                                                                                   | não rodado: precisa da API de teste                                                                                                                              |

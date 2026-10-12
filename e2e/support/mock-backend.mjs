@@ -2,6 +2,7 @@ import express from "express";
 import { createMiddleware } from "@mswjs/http-middleware";
 import { http, HttpResponse } from "msw";
 import { ownersHandlers } from "./handlers/owners.mjs";
+import { usersHandlers } from "./handlers/users.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 
 /**
@@ -14,6 +15,7 @@ const handlers = [
   http.post("http://localhost:5099/__e2e/refresh-token", () => HttpResponse.json({ refreshToken: seedRefreshToken() })),
   ...sessionHandlers,
   ...ownersHandlers,
+  ...usersHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

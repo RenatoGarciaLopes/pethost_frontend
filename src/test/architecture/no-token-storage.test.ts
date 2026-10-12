@@ -59,7 +59,7 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("REQ-OREG-014 senha e CPF nunca vão para URL nem query key", () => {
+  it("REQ-OREG-014 REQ-HREG-008 senha e CPF nunca vão para URL nem query key", () => {
     const PERSONAL = /(cpf|password|senha)/i;
     const offenders = files.flatMap(({ file, code }) =>
       [
@@ -74,7 +74,7 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("REQ-OREG-014 formulários com senha ou CPF não guardam rascunho fora da memória", () => {
+  it("REQ-OREG-014 REQ-HREG-008 formulários com senha ou CPF não guardam rascunho fora da memória", () => {
     const offenders = files
       .filter(({ code }) => /(cpf|password)/i.test(code))
       .filter(({ code }) => /\bpersist\(|createJSONStorage|indexedDB/.test(code))

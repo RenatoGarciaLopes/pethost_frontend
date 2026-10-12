@@ -26,8 +26,9 @@ const birthDateSchema = z.string().superRefine((digits, context) => {
 /**
  * Conta de pessoa, comum a tutor e anfitrião: nome, e-mail, senha forte, celular, nascimento e endereço.
  * Telefone, nascimento e CEP ficam só com dígitos (os campos mascarados guardam assim).
+ * É o cadastro de anfitrião inteiro (spec 012, REQ-HREG-002): o CPF dele fica para a verificação.
  */
-const accountFormSchema = z.object({
+export const hostRegistrationSchema = z.object({
   fullName: z.string().trim().min(1, errors.fullNameMissing).max(FULL_NAME_MAX, errors.tooLong(FULL_NAME_MAX)),
   email: z
     .string()
@@ -43,11 +44,16 @@ const accountFormSchema = z.object({
 });
 
 /** Cadastro de tutor (spec 011, REQ-OREG-003): a conta mais o CPF. */
-export const ownerRegistrationSchema = accountFormSchema.extend({
+export const ownerRegistrationSchema = hostRegistrationSchema.extend({
   cpf: z.string().min(1, errors.cpfMissing).refine(isValidCpf, errors.cpfInvalid),
 });
 
-/** Valores digitados (antes da normalização). */
-export type OwnerRegistrationInput = z.input<typeof ownerRegistrationSchema>;
-/** Valores validados e normalizados, prontos para o mapper. */
+/**
+ * Valores digitados (antes da normalização). O formulário é o mesmo nas duas variantes:
+ * o anfitrião só não mostra o CPF, e o mapper dele não leva a chave.
+ */
+export type RegistrationInput = z.input<typeof ownerRegistrationSchema>;
+/** Valores validados e normalizados do anfitrião, prontos para o mapper. */
+export type HostRegistrationValues = z.output<typeof hostRegistrationSchema>;
+/** Valores validados e normalizados do tutor, prontos para o mapper. */
 export type OwnerRegistrationValues = z.output<typeof ownerRegistrationSchema>;
