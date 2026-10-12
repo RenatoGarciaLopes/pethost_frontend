@@ -4,7 +4,7 @@ import { toSafeInternalPath } from "@/shared/lib/url/toSafeInternalPath";
 /** Tela de login (spec 010). */
 export const LOGIN_PATH = "/login";
 /** Rota do BFF que renova a sessão e volta para `next` (REQ-HTTP-016). */
-export const SESSION_REFRESH_PATH = "/api/auth/sessions/refresh";
+const SESSION_REFRESH_PATH = "/api/auth/sessions/refresh";
 
 /** Login com `next` seguro; sem `next` quando o destino é a raiz ou é inseguro. */
 export function loginRedirectPath(next: string): string {
@@ -18,7 +18,7 @@ export function refreshRedirectPath(next: string): string {
 }
 
 /** Casa de cada papel: destino depois do login e do "voltar" do 404 (REQ-SHELL-016). */
-export const ROLE_HOME: Readonly<Record<AccountRole, string>> = {
+const ROLE_HOME: Readonly<Record<AccountRole, string>> = {
   owner: "/",
   host: "/host",
   admin: "/admin/host-applications",

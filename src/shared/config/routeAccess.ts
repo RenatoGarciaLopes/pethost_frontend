@@ -1,7 +1,7 @@
 import type { AccountRole } from "@/shared/auth/contracts/session";
 import { LOGIN_PATH } from "./appRoutes";
 
-export const ADMIN_LOGIN_PATH = "/admin/login";
+const ADMIN_LOGIN_PATH = "/admin/login";
 
 export type RouteAccess = { kind: "public" } | { kind: "protected"; roles: readonly AccountRole[]; loginPath: string };
 

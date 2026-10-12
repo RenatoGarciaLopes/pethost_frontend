@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { contrastRatio } from "../../lib/color/contrastRatio";
+import { contrastRatio } from "@/test/a11y/contrastRatio";
 import { quintalColors as c } from "./colors";
 
 it("REQ-DS-002 tinta sobre coral passa AA; branco sobre coral falha", () => {

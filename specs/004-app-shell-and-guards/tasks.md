@@ -9,7 +9,7 @@ updated: 2026-10-11
 Cada tarefa: teste vermelho → código → verde → `npm run verify`. Um commit por tarefa.
 
 - [x] **T1 · Casa do papel** (2026-10-11) (REQ-SHELL-016): `appRoutes.test.ts` → `ROLE_HOME`, `homeOf`, `resolvePostLoginPath` em `shared/config/appRoutes.ts`
-- [x] **T2 · Tabela de navegação** (2026-10-11) (REQ-SHELL-002): `navigation.test.ts` → `shared/config/navigation.ts` (só telas existentes com `available: true`)
+- [ ] **T2 · Tabela de navegação** (REQ-SHELL-002), feita junto da casca (T7), que é o primeiro uso. A versão de 2026-10-11 saiu em 2026-10-12 por não ter uso (código morto): `navigation.test.ts` → `shared/config/navigation.ts` (só telas existentes com `available: true`)
 - [x] **T3 · Acesso por rota** (2026-10-11) (REQ-SHELL-009): `routeAccess.test.ts`, `readRoleHint.test.ts` → `routeAccess.ts`, `readRoleHint.ts`
 - [x] **T4 · Proxy** (2026-10-11) (REQ-SHELL-009, 011): `src/proxy.int.test.ts` → `src/proxy.ts`
 - [x] **T5 · requireRole** (2026-10-11) (REQ-SHELL-010): `requireRole.int.test.ts` (MSW) → `shared/auth/server/requireRole.ts`
@@ -32,3 +32,8 @@ Cada tarefa: teste vermelho → código → verde → `npm run verify`. Um commi
 - **T6 (parcial):** layouts com guarda em `(owner)/owner`, `(account)`, `(host)/host` e `(admin)/admin/(panel)`; a casca (T7) ainda não entra.
 - **Dívida de testes:** `proxy.int.test.ts` (guardRoute) e `requireRole.int.test.ts`.
 - **Cache Components:** a guarda dos layouts virou `RoleGate` (`shared/auth/server/RoleGate.tsx`), que confere o papel dentro de `<Suspense>` com o `SniffLoader`; os quatro layouts de área usam `<RoleGate roles=...>`.
+
+## Registro (2026-10-12)
+
+- `shared/config/navigation.ts` (`NAV_ITEMS`, `navItemsFor`) e o teste removidos: nada usava. Voltam com o `AppShell` (T7). As specs que citam `NAV_ITEMS` continuam valendo.
+- `app/page.tsx` (página de teste do tema) removida: `/` dá 404 até a home (spec 040). O Playwright espera o Next pronto em `/login`.

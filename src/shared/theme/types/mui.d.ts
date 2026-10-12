@@ -22,20 +22,13 @@ declare module "@mui/material/styles" {
     scene?: typeof sceneColors;
   }
 }
+declare module "@mui/material/Chip" {
+  interface ChipPropsVariantOverrides {
+    ok: true;
+  }
+}
 declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     quiet: true;
-  }
-}
-declare module "@mui/material/Chip" {
-  interface ChipPropsVariantOverrides {
-    sticker: true;
-    ok: true;
-    attention: true;
-  }
-}
-declare module "@mui/material/Paper" {
-  interface PaperPropsVariantOverrides {
-    panel: true;
   }
 }
