@@ -1,0 +1,6 @@
+# Mesmo fim de linha (LF) em qualquer máquina: o Prettier exige LF e o Windows com core.autocrlf=true trocaria por CRLF.
+* text=auto eol=lf
+*.png binary
+*.webp binary
+*.woff2 binary
+*.ico binary
