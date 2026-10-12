@@ -1,10 +1,12 @@
 /**
- * Textos do cadastro (spec 011, seção Microcopy). Erros vindos da API não ficam aqui:
- * a frase de cada código vem de `getErrorMessage` (`shared/api/errors/errorCopy.ts`).
+ * Textos do cadastro (specs 011 e 012, seção Microcopy). Os textos só do anfitrião começam com `host`.
+ * Erros vindos da API não ficam aqui: a frase de cada código vem de `getErrorMessage`
+ * (`shared/api/errors/errorCopy.ts`).
  * Nenhum texto supõe gênero (não há campo de tratamento).
  */
 export const registrationCopy = {
   pageTitle: "Criar conta · PetHost",
+  hostPageTitle: "Criar conta de anfitrião · PetHost",
   choice: {
     title: "Como você vai usar o PetHost?",
     legend: "Escolha o tipo de conta",
@@ -20,17 +22,23 @@ export const registrationCopy = {
     login: "Entrar",
   },
   steps: {
-    person: { label: "Você", title: "Primeiro, você" },
+    person: {
+      label: "Você",
+      title: "Primeiro, você",
+      hostIntro: "O CPF e os documentos ficam pra verificação, no próximo passo.",
+    },
     address: {
       label: "Onde você mora",
       title: "Onde você mora",
       why: "Pra mostrar cantinhos perto de você e pro pagamento.",
+      hostWhy: "Pro seu cadastro e pra verificação de quem você é.",
     },
   },
   fields: {
     fullName: "Seu nome completo",
     email: "E-mail",
     password: "Crie uma senha",
+    hostPasswordHelp: "Se você também tem conta de tutor, esta senha é só da conta de anfitrião.",
     phone: "Celular com DDD",
     birthDate: "Quando você nasceu?",
     birthDateHelp: "O PetHost é pra quem tem 18 anos ou mais.",
@@ -74,17 +82,21 @@ export const registrationCopy = {
   },
   dataUse: {
     title: "O que a gente faz com cada dado",
-    items: [
-      { field: "Nome e celular", use: "Pro anfitrião saber com quem está falando." },
-      { field: "CPF", use: "Pra identificar quem paga. Não aparece pra ninguém." },
-      { field: "Endereço", use: "Pra mostrar cantinhos perto de você e pro pagamento." },
-      { field: "Senha", use: "Guardada embaralhada. Nem a gente consegue ler." },
-    ],
+    items: {
+      contact: { field: "Nome e celular", use: "Pro anfitrião saber com quem está falando." },
+      hostContact: { field: "Nome e celular", use: "Pro tutor saber com quem está falando." },
+      cpf: { field: "CPF", use: "Pra identificar quem paga. Não aparece pra ninguém." },
+      address: { field: "Endereço", use: "Pra mostrar cantinhos perto de você e pro pagamento." },
+      hostAddress: { field: "Endereço", use: "Pro seu cadastro e pra verificação de quem você é." },
+      password: { field: "Senha", use: "Guardada embaralhada. Nem a gente consegue ler." },
+    },
   },
   success: {
     title: (firstName: string) => `Prazer, ${firstName}!`,
     owner: "Sua conta de tutor está pronta. Agora apresenta seu pet pra gente.",
+    host: "Sua conta de anfitrião está pronta. Agora mostra quem você é: é rapidinho e protege quem deixa o pet com você.",
     addPet: "Apresentar meu pet",
+    startVerification: "Começar a verificação",
     later: "Fazer isso depois",
     backToNext: "Voltar pra onde eu estava",
   },

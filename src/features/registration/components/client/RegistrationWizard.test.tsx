@@ -1,5 +1,4 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
@@ -8,73 +7,35 @@ import { server } from "@/test/msw/server";
 import { renderWithProviders } from "@/test/render";
 import { registrationCopy } from "../../lib/registrationCopy";
 import { RegistrationWizard } from "./RegistrationWizard";
+import {
+  ACCOUNT_BODY,
+  continueButton,
+  field,
+  fill,
+  fillPerson,
+  heading,
+  reachSubmit,
+  submitButton,
+  viaCepHandler,
+} from "./registrationWizardTestHelpers";
 
 const router = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 const { fields, fieldErrors, actions, steps } = registrationCopy;
 const REGISTER_URL = "*/api/owners/register";
-
-/** Endereço que o ViaCEP devolve para o CEP de teste. */
-const VIACEP_ADDRESS = {
-  cep: "87020-000",
-  logradouro: "Avenida Brasil",
-  bairro: "Zona 01",
-  localidade: "Maringá",
-  uf: "PR",
-};
+const OWNER = { withCpf: true };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // ViaCEP simulado: 87020000 existe, o resto não.
-  server.use(
-    http.get("https://viacep.com.br/ws/:cep/json/", ({ params }) =>
-      HttpResponse.json(params.cep === "87020000" ? VIACEP_ADDRESS : { erro: true }),
-    ),
-  );
+  server.use(viaCepHandler);
 });
 
 function renderWizard(next: string | null = null) {
-  return renderWithProviders(<RegistrationWizard next={next} aside={<p>faixa lateral</p>} />, {
+  return renderWithProviders(<RegistrationWizard role="owner" next={next} aside={<p>faixa lateral</p>} />, {
     theme: quintalTheme,
   });
 }
-
-/** Campo pelo começo do rótulo (o MUI acrescenta " *" nos obrigatórios). */
-const field = (label: string) => screen.getByLabelText(new RegExp(`^${label.replace("?", "\\?")}`));
-const heading = () => screen.getByRole("heading", { level: 1 });
-const continueButton = () => screen.getByRole("button", { name: actions.toAddress });
-
-/** Cola o texto no campo (mais rápido que digitar tecla a tecla no jsdom). */
-async function fill(user: UserEvent, label: string, text: string) {
-  await user.click(field(label));
-  await user.paste(text);
-}
-
-async function fillPerson(user: UserEvent) {
-  await fill(user, fields.fullName, "Camila Souza");
-  await fill(user, fields.email, "camila@exemplo.com");
-  await fill(user, fields.password, "Senha#forte1");
-  await fill(user, fields.phone, "44999990000");
-  await fill(user, fields.birthDate, "15031990");
-  await fill(user, fields.cpf, "52998224725");
-}
-
-async function fillAddress(user: UserEvent) {
-  await fill(user, "CEP", "87020000");
-  await screen.findByDisplayValue("Avenida Brasil");
-  await fill(user, "Número", "120");
-}
-
-/** Passo 1 válido, passo 2 com endereço do CEP: pronto para "Criar minha conta". */
-async function reachSubmit(user: UserEvent) {
-  await fillPerson(user);
-  await user.click(continueButton());
-  await screen.findByRole("heading", { level: 1, name: steps.address.title });
-  await fillAddress(user);
-}
-
-const submitButton = () => screen.getByRole("button", { name: new RegExp(`${actions.submit}|${actions.submitting}`) });
 
 // Formulário inteiro preenchido no jsdom: cada caso leva alguns segundos.
 vi.setConfig({ testTimeout: 30_000 });
@@ -106,7 +67,7 @@ describe("RegistrationWizard: caminho feliz", () => {
 
   it("REQ-OREG-002 passo 1 válido vai ao endereço e foca o título do passo", async () => {
     const { user } = renderWizard();
-    await fillPerson(user);
+    await fillPerson(user, OWNER);
     await user.click(continueButton());
     const title = await screen.findByRole("heading", { level: 1, name: steps.address.title });
     await waitFor(() => expect(title).toHaveFocus());
@@ -115,7 +76,7 @@ describe("RegistrationWizard: caminho feliz", () => {
 
   it("REQ-OREG-007 voltar mantém tudo o que já foi respondido", async () => {
     const { user } = renderWizard();
-    await fillPerson(user);
+    await fillPerson(user, OWNER);
     await user.click(continueButton());
     await screen.findByRole("heading", { level: 1, name: steps.address.title });
     await fill(user, "CEP", "87020000");
@@ -156,7 +117,7 @@ describe("RegistrationWizard: caminho feliz", () => {
     expect(field(fields.cpf)).toHaveAttribute("autocomplete", "off");
     expect(field(fields.cpf)).toHaveAttribute("inputmode", "numeric");
 
-    await fillPerson(user);
+    await fillPerson(user, OWNER);
     await user.click(continueButton());
     await screen.findByRole("heading", { level: 1, name: steps.address.title });
     expect(field("CEP")).toHaveAttribute("autocomplete", "postal-code");
@@ -169,7 +130,7 @@ describe("RegistrationWizard: caminho feliz", () => {
   it("REQ-OREG-017 o botão de continuar diz o que vem", async () => {
     const { user } = renderWizard();
     expect(continueButton()).toHaveAttribute("type", "submit");
-    await fillPerson(user);
+    await fillPerson(user, OWNER);
     await user.click(continueButton());
     await screen.findByRole("heading", { level: 1, name: steps.address.title });
     expect(screen.getByRole("button", { name: actions.submit })).toHaveAttribute("type", "submit");
@@ -189,7 +150,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
       }),
     );
     const { user } = renderWizard();
-    await reachSubmit(user);
+    await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
     const busy = await screen.findByRole("button", { name: actions.submitting });
@@ -203,24 +164,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
     release();
 
     expect(await screen.findByRole("heading", { level: 1, name: "Prazer, Camila!" })).toBeInTheDocument();
-    expect(bodies).toEqual([
-      {
-        fullName: "Camila Souza",
-        email: "camila@exemplo.com",
-        password: "Senha#forte1",
-        phone: "44999990000",
-        birthDate: "1990-03-15",
-        cpf: "52998224725",
-        address: {
-          zipCode: "87020000",
-          street: "Avenida Brasil",
-          number: "120",
-          neighborhood: "Zona 01",
-          city: "Maringá",
-          state: "PR",
-        },
-      },
-    ]);
+    expect(bodies).toEqual([{ ...ACCOUNT_BODY, cpf: "52998224725" }]);
   });
 
   it("REQ-OREG-009 400 do CEP fica no passo 2 com a mensagem no campo", async () => {
@@ -233,7 +177,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
       ),
     );
     const { user } = renderWizard();
-    await reachSubmit(user);
+    await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
     expect(await screen.findByText("CEP inválido na API.")).toBeInTheDocument();
@@ -251,7 +195,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
       ),
     );
     const { user } = renderWizard();
-    await reachSubmit(user);
+    await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
     expect(await screen.findByRole("heading", { level: 1, name: steps.person.title })).toBeInTheDocument();
@@ -264,7 +208,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
       http.post(REGISTER_URL, () => HttpResponse.json(apiFail("AUTH_EMAIL_ALREADY_REGISTERED"), { status: 409 })),
     );
     const { user } = renderWizard("/hosts/42");
-    await reachSubmit(user);
+    await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
     const alert = await screen.findByRole("alert");
@@ -282,7 +226,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
       http.post(REGISTER_URL, () => HttpResponse.json(apiFail("OWNER_CPF_ALREADY_REGISTERED"), { status: 409 })),
     );
     const { user } = renderWizard();
-    await reachSubmit(user);
+    await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
     expect(await screen.findByRole("heading", { level: 1, name: steps.person.title })).toBeInTheDocument();
@@ -298,7 +242,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
       ),
     );
     const { user } = renderWizard();
-    await reachSubmit(user);
+    await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
     expect(await screen.findByText(actions.countdown(2))).toBeInTheDocument();
@@ -315,7 +259,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
       }),
     );
     const { user } = renderWizard();
-    await reachSubmit(user);
+    await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
     const alert = await screen.findByRole("alert");

@@ -2,13 +2,17 @@
 
 import { Stack, Typography } from "@mui/material";
 import { AddressFields } from "@/shared/ui/forms/AddressFields";
-import { registrationCopy } from "../../lib/registrationCopy";
+import type { RegistrationVariant } from "../../lib/registrationVariants";
 
-/** Passo 2, "Onde você mora" (REQ-OREG-002, 005, 006): por que pedimos o endereço e os campos com CEP. */
-export function AddressStep() {
+export interface AddressStepProps {
+  variant: RegistrationVariant;
+}
+
+/** Passo 2, "Onde você mora" (REQ-OREG-002, 005, 006): por que pedimos o endereço (da variante) e os campos com CEP. */
+export function AddressStep({ variant }: AddressStepProps) {
   return (
     <Stack spacing={3}>
-      <Typography color="text.secondary">{registrationCopy.steps.address.why}</Typography>
+      <Typography color="text.secondary">{variant.intro.address}</Typography>
       <AddressFields name="address" />
     </Stack>
   );

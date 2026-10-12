@@ -131,3 +131,13 @@ O primeiro verify parou na formatação porque o checkout Windows tinha CRLF (co
 | `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 24 de 24 (cadastro completo, CEP, cookies HttpOnly e redirecionamento com sessão, no computador e no celular) |
 
 Observação: o `next dev` da porta 3000 é de outro processo; o E2E rodou contra `next build` + `next start -p 3100`, desligado no fim.
+
+## 12/10/2026 · Cadastro de anfitrião (spec 012)
+
+| Verificação                                                                                | Resultado                                                                                                                               |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest), depois do rebase sobre `dev`             | 96 arquivos, 616 testes verdes                                                                                                          |
+| `next build` (backend simulado)                                                            | compilou; `/register/host` como Partial Prerender                                                                                       |
+| `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 30 de 30 (jornada do anfitrião sem CPF, corpo sem `cpf` e sem `role`, 409 com `as=host`, cookies HttpOnly, redirecionamento com sessão) |
+| `npm run test:coverage`                                                                    | 96,75% statements, 94,95% branches, 96,09% funções, 97,33% linhas (meta de 80% atendida depois da dívida da 010 paga)                   |
+| E2E real                                                                                   | não rodado: precisa da API de teste                                                                                                     |

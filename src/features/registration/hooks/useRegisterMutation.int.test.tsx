@@ -6,34 +6,35 @@ import { describe, expect, it } from "vitest";
 import { apiFail, apiOk, sessionUserFixture } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
 import { createTestQueryClient } from "@/test/render";
-import type { OwnerRegistrationValues } from "../schemas/ownerRegistrationSchema";
+import type { RegisterPath } from "../api/client/registration.client";
+import type { HostRegisterBody, OwnerRegisterBody } from "../api/contracts/registerBodies";
 import { useRegisterMutation } from "./useRegisterMutation";
 
-const values: OwnerRegistrationValues = {
+const hostBody: HostRegisterBody = {
   fullName: "Camila Souza",
   email: "camila@exemplo.com",
   password: "Senha#forte1",
   phone: "44999990000",
-  birthDate: "15031990",
-  cpf: "52998224725",
+  birthDate: "1990-03-15",
   address: {
     zipCode: "87020000",
     street: "Avenida Brasil",
     number: "120",
-    complement: "",
     neighborhood: "Zona 01",
     city: "Maringá",
     state: "PR",
   },
 };
 
-function setup() {
+const ownerBody: OwnerRegisterBody = { ...hostBody, cpf: "52998224725" };
+
+function setup(path: RegisterPath = "/owners/register") {
   const queryClient = createTestQueryClient();
   queryClient.setQueryData(["account", "outra-conta", "pets"], [{ id: "pet-1" }]);
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  return { queryClient, ...renderHook(() => useRegisterMutation(), { wrapper }) };
+  return { queryClient, ...renderHook(() => useRegisterMutation(path), { wrapper }) };
 }
 
 describe("useRegisterMutation", () => {
@@ -43,7 +44,7 @@ describe("useRegisterMutation", () => {
     );
     const { queryClient, result } = setup();
 
-    act(() => result.current.mutate(values));
+    act(() => result.current.mutate(ownerBody));
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual({ user: sessionUserFixture });
@@ -58,10 +59,30 @@ describe("useRegisterMutation", () => {
     );
     const { queryClient, result } = setup();
 
-    act(() => result.current.mutate(values));
+    act(() => result.current.mutate(ownerBody));
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toMatchObject({ status: 409, code: "AUTH_EMAIL_ALREADY_REGISTERED" });
     expect(queryClient.getQueryData(["account", "outra-conta", "pets"])).toEqual([{ id: "pet-1" }]);
+  });
+
+  it("REQ-HREG-004 REQ-HREG-007 anfitrião: POST no cadastro de usuários do BFF com o corpo pronto e cache limpo", async () => {
+    const hostUser = { ...sessionUserFixture, role: "host" };
+    const calls: { url: string; body: unknown }[] = [];
+    server.use(
+      http.post("*/api/users/register", async ({ request }) => {
+        calls.push({ url: new URL(request.url).pathname, body: await request.json() });
+        return HttpResponse.json(apiOk({ user: hostUser }), { status: 201 });
+      }),
+      http.post("*/api/owners/register", () => HttpResponse.json(apiFail("NOT_FOUND"), { status: 404 })),
+    );
+    const { queryClient, result } = setup("/users/register");
+
+    act(() => result.current.mutate(hostBody));
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(calls).toEqual([{ url: "/api/users/register", body: hostBody }]);
+    expect(result.current.data).toEqual({ user: hostUser });
+    expect(queryClient.getQueryCache().getAll()).toEqual([]);
   });
 });

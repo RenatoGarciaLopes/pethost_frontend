@@ -1,15 +1,15 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { motion } from "motion/react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { FormProvider, get, useForm, type FieldErrors, type FieldPath } from "react-hook-form";
+import { FormProvider, get, useForm, type FieldErrors } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { loginRedirectPath, registerPath } from "@/shared/config/appRoutes";
 import { useCountdown } from "@/shared/hooks/useCountdown";
 import { MOTION_ASSENTAR } from "@/shared/theme/tokens/springs";
@@ -17,27 +17,25 @@ import { Notice } from "@/shared/ui/feedback/Notice";
 import { FormActions } from "@/shared/ui/forms/FormActions";
 import { Reveal } from "@/shared/ui/motion/Reveal";
 import { WizardProgress } from "@/shared/ui/navigation/WizardProgress";
+import type { RegisterBody } from "../../api/contracts/registerBodies";
 import { useRegisterMutation } from "../../hooks/useRegisterMutation";
 import { registrationCopy } from "../../lib/registrationCopy";
-import { REGISTRATION_FIELDS, REGISTRATION_STEPS, stepIndexOf } from "../../lib/registrationSteps";
-import {
-  ownerRegistrationSchema,
-  type OwnerRegistrationInput,
-  type OwnerRegistrationValues,
-} from "../../schemas/ownerRegistrationSchema";
+import { stepIndexOf, type RegistrationField } from "../../lib/registrationSteps";
+import { REGISTRATION_VARIANTS } from "../../lib/registrationVariants";
+import type { RegistrationInput } from "../../schemas/registrationSchemas";
 import { AddressStep } from "./AddressStep";
 import { PersonStep } from "./PersonStep";
 import { RegistrationSuccess } from "./RegistrationSuccess";
 import { ServerFormError } from "./ServerFormError";
 
 export interface RegistrationWizardProps {
+  /** Qual cadastro: tutor (spec 011) ou anfitrião (spec 012). */
+  role: PersonalRole;
   /** Destino pedido na URL; validado antes de virar link (REQ-OREG-013). */
   next: string | null;
   /** Faixa lateral do computador ("o que a gente faz com cada dado"), renderizada no servidor. */
   aside: ReactNode;
 }
-
-type RegistrationField = FieldPath<OwnerRegistrationInput>;
 
 /** Aviso do topo do passo: qual situação e a frase pronta. */
 type RegistrationNotice =
@@ -45,7 +43,8 @@ type RegistrationNotice =
   | { kind: "emailTaken"; message: string }
   | { kind: "rateLimited"; error: ApiError };
 
-const EMPTY_VALUES: OwnerRegistrationInput = {
+/** O anfitrião não mostra o CPF; a chave fica vazia e o mapper dele não a leva. */
+const EMPTY_VALUES: RegistrationInput = {
   fullName: "",
   email: "",
   password: "",
@@ -57,28 +56,25 @@ const EMPTY_VALUES: OwnerRegistrationInput = {
 
 const { actions } = registrationCopy;
 
-/** Campos com erro, na ordem da tela. */
-const fieldsWithError = (errors: FieldErrors<OwnerRegistrationInput>) =>
-  REGISTRATION_FIELDS.filter((field) => get(errors, field));
-
 /**
- * Cadastro de tutor em 2 passos (spec 011). Um único formulário (React Hook Form) para os dois passos,
- * então voltar e trocar de passo nunca apaga nada (REQ-OREG-007). Valida cada campo ao sair dele e o
+ * Cadastro de tutor (spec 011) ou de anfitrião (spec 012) em 2 passos; o que muda entre os dois vem de
+ * `REGISTRATION_VARIANTS`. Um único formulário (React Hook Form) para os dois passos, então voltar e trocar de passo nunca apaga nada (REQ-OREG-007). Valida cada campo ao sair dele e o
  * passo inteiro no "Continuar" (REQ-OREG-003); envia uma vez só (REQ-OREG-008) e leva os erros da API
  * ao passo e ao campo certos (REQ-OREG-009 a 012). Senha e CPF só existem em memória (REQ-OREG-014).
  *
  * O componente não assina valores do formulário: cada campo re-renderiza só a si mesmo ao digitar.
  *
- * @example <RegistrationWizard next={null} aside={<DataUseAside />} />
+ * @example <RegistrationWizard role="host" next={null} aside={<DataUseAside role="host" />} />
  */
-export function RegistrationWizard({ next, aside }: RegistrationWizardProps) {
+export function RegistrationWizard({ role, next, aside }: RegistrationWizardProps) {
+  const variant = REGISTRATION_VARIANTS[role];
   const router = useRouter();
-  const form = useForm<OwnerRegistrationInput, unknown, OwnerRegistrationValues>({
-    resolver: zodResolver(ownerRegistrationSchema),
+  const form = useForm<RegistrationInput, unknown, RegisterBody>({
+    resolver: variant.resolver,
     mode: "onTouched",
     defaultValues: EMPTY_VALUES,
   });
-  const mutation = useRegisterMutation();
+  const mutation = useRegisterMutation(variant.path);
   const countdown = useCountdown();
   const [stepIndex, setStepIndex] = useState(0);
   const [notice, setNotice] = useState<RegistrationNotice | null>(null);
@@ -106,13 +102,13 @@ export function RegistrationWizard({ next, aside }: RegistrationWizardProps) {
 
   /** Erros do formulário (do envio ou da API) em outro passo: volta para ele e foca o primeiro campo. */
   function showFieldsWithError(fields: readonly RegistrationField[]) {
-    const index = stepIndexOf(fields);
+    const index = stepIndexOf(variant.steps, fields);
     if (index === undefined || index === stepIndex) return;
-    goToStep(index, fields.find((field) => REGISTRATION_STEPS[index].fields.includes(field)) ?? "heading");
+    goToStep(index, fields.find((field) => variant.steps[index].fields.includes(field)) ?? "heading");
   }
 
   function handleApiError(error: unknown) {
-    const message = getErrorMessage(error, { role: "owner" });
+    const message = getErrorMessage(error, { role });
     if (!isApiError(error)) {
       // Falha do próprio front (bug), não da API: aparece no console em desenvolvimento.
       if (process.env.NODE_ENV !== "production") console.error("[cadastro] falha inesperada", error);
@@ -121,7 +117,7 @@ export function RegistrationWizard({ next, aside }: RegistrationWizardProps) {
 
     switch (error.code) {
       case "VALIDATION_ERROR":
-        return showFieldsWithError(applyFieldErrors(form.setError, error, { fields: REGISTRATION_FIELDS }));
+        return showFieldsWithError(applyFieldErrors(form.setError, error, { fields: variant.fields }));
       case "AUTH_EMAIL_ALREADY_REGISTERED":
         setNotice({ kind: "emailTaken", message });
         return goToStep(0, null);
@@ -138,24 +134,31 @@ export function RegistrationWizard({ next, aside }: RegistrationWizardProps) {
 
   async function continueToAddress(event: FormEvent) {
     event.preventDefault();
-    if (await form.trigger(REGISTRATION_STEPS[0].fields, { shouldFocus: true })) goToStep(1, "heading");
+    if (await form.trigger(variant.steps[0].fields, { shouldFocus: true })) goToStep(1, "heading");
   }
 
   function submit(event: FormEvent) {
     return form.handleSubmit(
-      (values) => {
+      (body) => {
         if (mutation.isPending) return;
         setNotice(null);
-        mutation.mutate(values, { onError: handleApiError });
+        mutation.mutate(body, { onError: handleApiError });
       },
       (errors) => showFieldsWithError(fieldsWithError(errors)),
     )(event);
   }
 
-  if (mutation.isSuccess) return <RegistrationSuccess fullName={mutation.data.user.fullName} next={next} />;
+  /** Campos com erro, na ordem da tela. */
+  function fieldsWithError(errors: FieldErrors<RegistrationInput>) {
+    return variant.fields.filter((field) => get(errors, field));
+  }
 
-  const step = REGISTRATION_STEPS[stepIndex];
-  const isLastStep = stepIndex === REGISTRATION_STEPS.length - 1;
+  if (mutation.isSuccess) {
+    return <RegistrationSuccess role={role} fullName={mutation.data.user.fullName} next={next} />;
+  }
+
+  const step = variant.steps[stepIndex];
+  const isLastStep = stepIndex === variant.steps.length - 1;
   const blocked = countdown.isRunning;
   // Fim da contagem do limite: o aviso some e o envio volta.
   const visibleNotice = notice?.kind === "rateLimited" && !blocked ? null : notice;
@@ -171,7 +174,7 @@ export function RegistrationWizard({ next, aside }: RegistrationWizardProps) {
       }}
     >
       <Reveal order={0}>
-        <WizardProgress steps={REGISTRATION_STEPS} currentIndex={stepIndex} />
+        <WizardProgress steps={variant.steps} currentIndex={stepIndex} />
       </Reveal>
 
       <Reveal order={1}>
@@ -198,7 +201,7 @@ export function RegistrationWizard({ next, aside }: RegistrationWizardProps) {
                   tone={visibleNotice.kind === "rateLimited" ? "atencao" : "erro"}
                   action={
                     visibleNotice.kind === "emailTaken" ? (
-                      <Button variant="contained" component={NextLink} href={loginRedirectPath(next, "owner")}>
+                      <Button variant="contained" component={NextLink} href={loginRedirectPath(next, role)}>
                         {actions.login}
                       </Button>
                     ) : undefined
@@ -215,7 +218,7 @@ export function RegistrationWizard({ next, aside }: RegistrationWizardProps) {
 
             <FormProvider {...form}>
               <Box component="form" noValidate onSubmit={isLastStep ? submit : continueToAddress}>
-                {isLastStep ? <AddressStep /> : <PersonStep />}
+                {isLastStep ? <AddressStep variant={variant} /> : <PersonStep variant={variant} />}
                 <ServerFormError />
                 <Box sx={{ mt: 4 }}>
                   <FormActions
