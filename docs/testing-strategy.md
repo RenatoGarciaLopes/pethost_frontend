@@ -9,7 +9,7 @@ Spec 001 implementada em 11/10/2026. D3 aprovada: testes ao lado do código, apo
 | integration                  | Node     | *.int.test.ts                                 |
 | integration-dom              | jsdom    | *.int.test.tsx                                |
 
-Integração é excluída dos projetos unit/component. passWithNoTests desligado; integration-dom cobre o cliente de autenticação e os hooks de login/reativação via MSW na spec 010. test:integration reúne os dois projetos de integração. A matriz detalhada está em [login-coverage.md](login-coverage.md).
+Integração é excluída dos projetos unit/component. passWithNoTests desligado; integration-dom cobre o cliente de autenticação e os hooks de login/reativação via MSW na spec 010. test:integration reúne os dois projetos de integração. A matriz detalhada está na nota `development/resources/auth.md` do vault.
 
 src/test/setup/vitest.setup.ts instala jest-dom e MSW estrito, limpa handlers/DOM e encerra servidor. Requisição sem handler é rejeitada e reprova no afterEach com método e URL. src/test/msw/server.ts oferece server, recordUnhandledRequest, takeUnhandledRequests e formatUnhandledRequestMessage. server-only tem alias para setup/server-only.stub.ts somente nos testes.
 
