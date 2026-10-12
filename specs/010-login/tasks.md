@@ -108,3 +108,15 @@ Pedido do Renato: tirar o cachorro correndo da tela de entrar, a página se cons
 **Pendências**
 
 - Testes de componente do `Reveal` e da `DoorScene` (plantar, porta, foco preservado) entram na dívida de testes.
+
+## Registro de testes (2026-10-12, feat/010-login-motion)
+
+Dívida de cobertura quantitativa paga sem alterar código de produção ou thresholds. Matriz detalhada por recurso, níveis aplicáveis e limites em [login-coverage.md](../../docs/login-coverage.md); comandos e métricas em [validation.md](../../docs/validation.md#12102026--dívida-de-cobertura-em-feat010-login-motion).
+
+- Componentes: LoginForm, LoginScreen e TrustList por composição; validação, conta errada, foco, reativação com credenciais do último envio, suspensão sem link, contagem 429, falhas, admin e links.
+- Integração MSW: auth.client e hooks de login/reativação, contratos, cache e redirecionamentos.
+- Guards e parâmetros: regras de acesso, sessão/papel, caminho seguro, RoleGate e parâmetros repetidos.
+- Biblioteca visual: DoorScene e hooks de foco/ponteiro, flores, limite de plantio, movimento reduzido, marca, loader, turma, feedback, Reveal e WizardProgress.
+- E2E: cinco novas jornadas em desktop e celular para validação sem POST, conta errada, sucesso/HttpOnly/next seguro, next externo e cena com foco/movimento reduzido. Reativação e 429 são verificados nos testes do formulário com MSW, sem afirmar E2E dessas situações ou integração à API real.
+
+O link de suporte segue pendente de definição do canal. A documentação de validação no vault aguarda sincronização, respeitando o escopo de escrita somente no worktree.

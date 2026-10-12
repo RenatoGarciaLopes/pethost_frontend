@@ -93,3 +93,27 @@ Dívida de testes (testes novos ficaram para depois, a pedido do Renato): ver a 
 | Conferência visual (Chromium, 1440 × 960 e 390 × 844, movimento reduzido)                  | montagem em ordem, cena interativa, foco preservado ao clicar na cena, `h1` visível no celular, 9 carregamentos sem erro no console |
 
 Observação de ambiente: havia outro `next dev` aberto na mesma pasta (porta 3000, outro processo, apontando para outro backend). O Next 16 não deixa abrir um segundo `next dev` na mesma pasta, então a suíte E2E rodou contra `next build` + `next start -p 3100` com o backend simulado.
+
+## 12/10/2026 · Dívida de cobertura em feat/010-login-motion
+
+Entrega restrita ao worktree `pethost_frontend-010`, com testes e documentação. Código de produção, thresholds de 80%, includes/excludes de cobertura e dependências não foram alterados. Matriz de recursos, paths, níveis aplicáveis e limites em [login-coverage.md](login-coverage.md).
+
+| Verificação                                          | Resultado                                                                                                             |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Baseline `npm.cmd run test:coverage`                 | 57 arquivos, 338 testes passando; cobertura falhou: statements 63,28%, branches 58,16%, funções 58,24%, linhas 62,92% |
+| Final `npm.cmd run test:coverage`                    | 75 arquivos, 455 testes passando; exit 0, todos os thresholds atendidos                                               |
+| Statements                                           | 96,87% (992/1024)                                                                                                     |
+| Branches                                             | 95,22% (758/796)                                                                                                      |
+| Funções                                              | 97,19% (277/285)                                                                                                      |
+| Linhas                                               | 97,57% (887/909)                                                                                                      |
+| `npm.cmd run test:e2e:mocked -- --workers=1`         | 28/28 passando, desktop e celular, Next real com backend MSW simulado                                                 |
+| `npm.cmd run verify`                                 | Exit 0: format, lint, typecheck e 455 testes em 75 arquivos aprovados                                                 |
+| Paths da matriz de documentação e `git diff --check` | Conferidos                                                                                                            |
+
+Foram adicionados 117 casos Vitest em 18 arquivos de suíte e cinco jornadas Playwright executadas nos dois projetos. Conta suspensa mantém frase sem link, conforme pendência de canal de suporte registrada na spec 010 e decisão do usuário. Os testes de reativação verificam credenciais do último envio mesmo após editar os campos, bloqueio de envio duplicado e falha da reativação.
+
+Limitações de ambiente e correções nos testes: Turbopack recusou o link de `node_modules` fora da raiz do worktree; a validação do browser usou `node node_modules/next/dist/bin/next dev --webpack -p 3100`, com `BACKEND_URL=http://localhost:5099` e `BACKEND_API_PREFIX=/api/v1`. O backend simulado já disponível foi reutilizado sem alterar seu processo. O servidor Next iniciado por esta tarefa foi encerrado ao terminar os E2E. As execuções de browser e cobertura foram sequenciadas depois de timeouts sob carga; uma execução E2E anterior perdeu um artefato de trace por sobreposição de runners e foi substituída pela execução completa 28/28. A verificação de fontes aceita ambas as formas de aspas da serialização CSS. O teste da abertura breve da porta usa MutationObserver e casos independentes para porta/capacho, preservando animações Motion reais.
+
+Nenhum E2E contra a API .NET real foi executado; MSW não prova integração completa com o backend. Não foram instaladas dependências, lidas configurações do backend, alterados outros worktrees, feitos push ou ações na porta 3000. A evidência no vault permanece pendente de sincronização por restrição explícita de escrever somente neste worktree; o registro técnico completo fica neste repositório.
+
+O primeiro verify parou na formatação porque o checkout Windows tinha CRLF (core.autocrlf=true) e o Prettier exige LF. Os finais de linha dos arquivos rastreados foram normalizados apenas na cópia local; o diff confirmou conteúdo versionado de produção e configurações inalterados. O verify completo acima passou após essa normalização.

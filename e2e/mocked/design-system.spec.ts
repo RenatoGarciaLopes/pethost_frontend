@@ -15,9 +15,9 @@ test("REQ-DS-003 fontes locais e título Caprasimo sem Google Fonts", async ({ p
     size: getComputedStyle(document.body).fontSize,
   }));
   expect(fonts.display).toBeTruthy();
-  expect(fonts.actual.replaceAll('"', "")).toContain(fonts.display.trim().replaceAll('"', ""));
+  expect(fonts.actual.replace(/["']/g, "")).toContain(fonts.display.trim().replace(/["']/g, ""));
   expect(fonts.actual).toMatch(/caprasimo/i);
-  expect(fonts.body.replaceAll('"', "")).toContain(fonts.bodyVariable.trim().replaceAll('"', ""));
+  expect(fonts.body.replace(/["']/g, "")).toContain(fonts.bodyVariable.trim().replace(/["']/g, ""));
   expect(fonts.body).toMatch(/atkinsonHyperlegibleNext/i);
   expect(fonts.size).toBe("17px");
   expect(remoteFonts).toEqual([]);
