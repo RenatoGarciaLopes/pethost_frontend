@@ -117,3 +117,17 @@ Limitações de ambiente e correções nos testes: Turbopack recusou o link de `
 Nenhum E2E contra a API .NET real foi executado; MSW não prova integração completa com o backend. Não foram instaladas dependências, lidas configurações do backend, alterados outros worktrees, feitos push ou ações na porta 3000.
 
 O primeiro verify parou na formatação porque o checkout Windows tinha CRLF (core.autocrlf=true) e o Prettier exige LF. Os finais de linha dos arquivos rastreados foram normalizados apenas na cópia local; o diff confirmou conteúdo versionado de produção e configurações inalterados. O verify completo acima passou após essa normalização.
+
+## 12/10/2026 · Cadastro de tutor (spec 011)
+
+| Verificação                                                                                | Resultado                                                                                                     |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `npx tsc --noEmit`                                                                         | 0 erros                                                                                                       |
+| `npx eslint .`                                                                             | 0 problemas                                                                                                   |
+| `npx prettier --check .`                                                                   | tudo formatado                                                                                                |
+| `npx vitest run --maxWorkers=2`                                                            | 76 arquivos, 459 testes verdes                                                                                |
+| `npm run storybook:test` (a11y em modo `error`)                                            | 32 arquivos, 99 testes verdes                                                                                 |
+| `next build` (backend simulado)                                                            | compilou; `/register` e `/register/owner` como Partial Prerender                                              |
+| `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 24 de 24 (cadastro completo, CEP, cookies HttpOnly e redirecionamento com sessão, no computador e no celular) |
+
+Observação: o `next dev` da porta 3000 é de outro processo; o E2E rodou contra `next build` + `next start -p 3100`, desligado no fim.

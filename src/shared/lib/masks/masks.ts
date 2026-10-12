@@ -29,6 +29,10 @@ export function unmaskCep(value: string): string {
 export function unmaskPhone(value: string): string {
   return digits(value, 11);
 }
+/** Unmask a dd/mm/aaaa date (up to 8 digits), without checking the date exists. */
+export function unmaskDate(value: string): string {
+  return digits(value, 8);
+}
 /** Progressive CPF formatting. @example maskCpf("12345678901") */
 export function maskCpf(value: string): string {
   return group(unmaskCpf(value), [3, 3, 3, 2], [".", ".", "-"]);
@@ -49,4 +53,8 @@ export function maskPhone(value: string): string {
   const area = `(${raw.slice(0, 2)})`;
   if (raw.length === 2) return area;
   return `${area} ${group(raw.slice(2), raw.length > 10 ? [5, 4] : [4, 4], ["-"])}`;
+}
+/** Progressive date formatting, dd/mm/aaaa. @example maskDate("03051990") // "03/05/1990" */
+export function maskDate(value: string): string {
+  return group(unmaskDate(value), [2, 2, 4], ["/", "/"]);
 }

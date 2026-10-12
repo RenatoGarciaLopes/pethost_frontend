@@ -5,7 +5,7 @@ import { http, HttpResponse } from "msw";
  * Conta de demonstração: `tutora@pethost.test` com a senha `senha-de-teste` (só existe neste mock).
  */
 const API = "http://localhost:5099/api/v1";
-const DEMO = { email: "tutora@pethost.test", password: "senha-de-teste", role: "owner" };
+export const DEMO = { email: "tutora@pethost.test", password: "senha-de-teste", role: "owner" };
 const user = {
   id: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c",
   fullName: "Camila Souza",
@@ -19,14 +19,19 @@ const refreshTokens = new Set();
 let counter = 0;
 
 const encode = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
-const ok = (data, init) => HttpResponse.json({ success: true, data, timestamp: new Date().toISOString() }, init);
-const fail = (status, code) =>
+export const ok = (data, init) => HttpResponse.json({ success: true, data, timestamp: new Date().toISOString() }, init);
+export const fail = (status, code, details) =>
   HttpResponse.json(
-    { success: false, error: { code, message: code }, timestamp: new Date().toISOString() },
+    {
+      success: false,
+      error: { code, message: code, ...(details ? { details } : {}) },
+      timestamp: new Date().toISOString(),
+    },
     { status },
   );
 
-function issueSession() {
+/** Abre uma sessão nova (tokens guardados em memória, aceitos pelo `/users/me` e pelo refresh). */
+export function issueSession() {
   counter += 1;
   const expiresAt = Math.floor(Date.now() / 1000) + 900;
   const accessToken = `${encode({ alg: "none" })}.${encode({ sub: user.id, exp: expiresAt, n: counter })}.e2e`;

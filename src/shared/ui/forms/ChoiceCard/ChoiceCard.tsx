@@ -51,7 +51,8 @@ export function ChoiceCard({ label, value, description, icon, checked = false, d
         checked={checked}
         disabled={disabled}
         slotProps={{ input: { "aria-label": [label, description].filter(Boolean).join(". ") } }}
-        sx={{ position: "absolute", width: 1, height: 1, padding: 0, opacity: 0 }}
+        // Em px: no `sx` do MUI, `1` significa 100% (o radio invisível cobria o cartão).
+        sx={{ position: "absolute", width: "1px", height: "1px", padding: 0, opacity: 0 }}
       />
       {icon && <Box aria-hidden="true">{icon}</Box>}
       <Box>

@@ -1,7 +1,7 @@
 ---
 spec: 011-owner-registration
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-12
 area: OREG
 ---
 
@@ -37,7 +37,7 @@ A spec também cria a porta de entrada `/register` (escolha entre tutor e anfitr
 
 | ID           | Critério                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| REQ-OREG-001 | Em `/register`, O SISTEMA DEVE mostrar dois cartões de escolha: "Tenho pet e vou viajar" (leva a `/register/owner`) e "Quero receber pets em casa" (leva a `/register/host`), preservando o `next` seguro da URL                                                                                                                                                                                                                                                                                |
+| REQ-OREG-001 | Em `/register`, O SISTEMA DEVE mostrar dois cartões de escolha (radio, nenhum marcado): "Tenho pet e vou viajar" e "Quero receber pets em casa", e um botão que diz para onde vai ("Continuar como tutor" leva a `/register/owner`, "Continuar como anfitrião" a `/register/host`), preservando o `next` seguro da URL; sem escolha, o botão fica desabilitado com a orientação ao lado                                                                                                         |
 | REQ-OREG-002 | O SISTEMA DEVE dividir o cadastro em 2 passos com `WizardProgress`: "Você" (nome, e-mail, senha, telefone, nascimento, CPF) e "Onde você mora" (CEP, rua, número, complemento opcional, bairro, cidade, UF)                                                                                                                                                                                                                                                                                     |
 | REQ-OREG-003 | O SISTEMA DEVE validar cada campo ao sair dele e todos os campos do passo ao tocar "Continuar", com as regras da API: nome até 120; e-mail válido até 160; senha forte (8 a 128, maiúscula, minúscula, número e símbolo); telefone com DDD de 10 a 13 dígitos; nascimento válido, não futuro e 18 anos ou mais; CPF com dígitos verificadores válidos e não repetidos; CEP com 8 dígitos; rua até 120; número até 10 (aceita "S/N"); complemento até 60; bairro e cidade até 80; UF entre as 27 |
 | REQ-OREG-004 | ENQUANTO a pessoa digita a senha, O SISTEMA DEVE atualizar a régua de 5 itens (`PasswordStrengthChecklist`) sem anunciar cada tecla, só a mudança de estado de cada item                                                                                                                                                                                                                                                                                                                        |
@@ -99,5 +99,6 @@ A spec também cria a porta de entrada `/register` (escolha entre tutor e anfitr
 
 - **Consentimento LGPD:** a API não recebe aceite de termos nem de privacidade. Precisa de campo (`acceptedTermsVersion`) no cadastro ou fica só como texto informativo com link? Levar ao produto e ao backend.
 - **Tratamento:** o design usa "Prazer, Camila!", que não depende de gênero. Nenhum outro texto desta spec flexiona gênero; manter assim até existir campo de tratamento.
+- **Link de suporte (REQ-OREG-011):** não existe canal de suporte definido (mesma pergunta da 010). O erro de CPF aparece no campo, sem link, até o canal existir.
 - **Rascunho:** a regra 5 de `17-cadastros-e-formularios.md` pede rascunho automático. Aqui não há rascunho fora da memória porque o formulário tem senha e CPF (REQ-OREG-014, REQ-HTTP-019). O formulário é curto; confirmar com o design.
 - **Divergência vault × API:** o vault fala em "CPF até o primeiro pagamento" no perfil; no cadastro o CPF é obrigatório (API). Sem conflito para esta tela.

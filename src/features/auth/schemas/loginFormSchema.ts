@@ -1,9 +1,7 @@
 import { z } from "zod";
 import { accountRoleSchema } from "@/shared/auth/contracts/session";
+import { PASSWORD_MAX } from "@/shared/lib/validation";
 import { authCopy } from "../lib/authCopy";
-
-/** Limite de tamanho da senha no login (protege o servidor; não revela a política de senha forte). */
-const LOGIN_PASSWORD_MAX = 128;
 
 /**
  * Formulário de entrar (spec 010, REQ-AUTH-003). E-mail é normalizado (sem espaços, minúsculo);
@@ -20,7 +18,7 @@ export const loginFormSchema = z.object({
   password: z
     .string()
     .min(1, authCopy.fieldErrors.passwordMissing)
-    .max(LOGIN_PASSWORD_MAX, authCopy.fieldErrors.passwordTooLong),
+    .max(PASSWORD_MAX, authCopy.fieldErrors.passwordTooLong),
 });
 
 /** Valores digitados (antes da normalização). */

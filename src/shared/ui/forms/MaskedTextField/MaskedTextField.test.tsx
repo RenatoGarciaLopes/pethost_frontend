@@ -113,3 +113,7 @@ it("REQ-DS-014 backspace junto à pontuação remove o dígito anterior", async 
   await user.keyboard("{Backspace}");
   expect(input).toHaveValue("124");
 });
+it("REQ-OREG-016 telefone abre o teclado de telefone", () => {
+  renderWithProviders(<MaskedTextField label="Celular com DDD" mask="phone" value="" onValueChange={() => {}} />);
+  expect(screen.getByRole("textbox", { name: "Celular com DDD" })).toHaveAttribute("inputmode", "tel");
+});

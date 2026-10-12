@@ -9,7 +9,8 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
-import type { AccountRole } from "@/shared/auth/contracts/session";
+import type { AccountRole, PersonalRole } from "@/shared/auth/contracts/session";
+import { registerPath } from "@/shared/config/appRoutes";
 import { useCountdown } from "@/shared/hooks/useCountdown";
 import { MOTION_ASSENTAR } from "@/shared/theme/tokens/springs";
 import { DOOR_TARGET_ATTR, DOOR_WARM_ATTR } from "@/shared/ui/brand/DoorScene";
@@ -18,7 +19,7 @@ import { PasswordField } from "@/shared/ui/forms/PasswordField";
 import { SegmentedControl } from "@/shared/ui/forms/SegmentedControl";
 import { Reveal } from "@/shared/ui/motion/Reveal";
 import { useLoginMutation, useReactivateMutation } from "../../hooks/useLoginMutation";
-import { authCopy, type SelectableRole } from "../../lib/authCopy";
+import { authCopy } from "../../lib/authCopy";
 import { loginFormSchema, type LoginFormInput, type LoginFormValues } from "../../schemas/loginFormSchema";
 
 export interface LoginFormProps {
@@ -40,7 +41,7 @@ type FormNotice =
 const ROLE_OPTIONS = (["owner", "host"] as const).map((role) => ({ value: role, label: authCopy.roles[role].label }));
 const FORM_FIELDS = ["email", "password", "role"] as const;
 
-const isSelectableRole = (role: AccountRole): role is SelectableRole => role === "owner" || role === "host";
+const isSelectableRole = (role: AccountRole): role is PersonalRole => role === "owner" || role === "host";
 
 /**
  * Formulário de entrar (spec 010). Única ilha client da tela: valida no blur e no envio, chama o BFF,
@@ -181,13 +182,13 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
           <Controller
             control={control}
             name="email"
-            render={({ field, fieldState }) => (
+            render={({ field: { ref, ...field }, fieldState }) => (
               <TextField
                 {...field}
+                inputRef={ref}
                 label={authCopy.email}
                 type="email"
                 autoComplete="email"
-                inputMode="email"
                 required
                 error={Boolean(fieldState.error)}
                 helperText={fieldState.error?.message}
@@ -201,9 +202,10 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
           <Controller
             control={control}
             name="password"
-            render={({ field, fieldState }) => (
+            render={({ field: { ref, ...field }, fieldState }) => (
               <PasswordField
                 {...field}
+                inputRef={ref}
                 label={authCopy.password}
                 autoComplete="current-password"
                 required
@@ -246,7 +248,7 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
           <Reveal order={7}>
             <Typography sx={{ textAlign: "center" }}>
               {authCopy.noAccount}{" "}
-              <Link component={NextLink} href={`/register/${selectableRole}`}>
+              <Link component={NextLink} href={registerPath(selectableRole, next)}>
                 {authCopy.register}
               </Link>
             </Typography>

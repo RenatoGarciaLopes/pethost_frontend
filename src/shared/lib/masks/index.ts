@@ -1,1 +1,12 @@
-export { maskCpf, maskCnpj, maskCep, maskPhone, unmaskCpf, unmaskCnpj, unmaskCep, unmaskPhone } from "./masks";
+export {
+  maskCpf,
+  maskCnpj,
+  maskCep,
+  maskDate,
+  maskPhone,
+  unmaskCpf,
+  unmaskCnpj,
+  unmaskCep,
+  unmaskDate,
+  unmaskPhone,
+} from "./masks";

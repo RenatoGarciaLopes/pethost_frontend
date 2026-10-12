@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { homeOf, loginRedirectPath, refreshRedirectPath, resolvePostLoginPath } from "./appRoutes";
+import { homeOf, loginRedirectPath, refreshRedirectPath, registerPath, resolvePostLoginPath } from "./appRoutes";
 
 describe("appRoutes", () => {
   it("REQ-HTTP-016 refresh e login levam o next seguro", () => {
@@ -7,6 +7,18 @@ describe("appRoutes", () => {
     expect(refreshRedirectPath("//evil.example")).toBe("/api/auth/sessions/refresh?next=%2F");
     expect(loginRedirectPath("/pets")).toBe("/login?next=%2Fpets");
     expect(loginRedirectPath("https://evil.example")).toBe("/login");
+  });
+
+  it("REQ-AUTH-001 o login pode vir com a conta marcada", () => {
+    expect(loginRedirectPath("/pets", "owner")).toBe("/login?as=owner&next=%2Fpets");
+    expect(loginRedirectPath(null, "host")).toBe("/login?as=host");
+  });
+
+  it("REQ-OREG-001 cadastro leva o next seguro", () => {
+    expect(registerPath()).toBe("/register");
+    expect(registerPath(undefined, "/hosts/42")).toBe("/register?next=%2Fhosts%2F42");
+    expect(registerPath("owner", "/hosts/42")).toBe("/register/owner?next=%2Fhosts%2F42");
+    expect(registerPath("host", "//evil.example")).toBe("/register/host");
   });
 });
 

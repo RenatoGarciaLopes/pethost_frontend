@@ -59,6 +59,30 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("REQ-OREG-014 senha e CPF nunca vão para URL nem query key", () => {
+    const PERSONAL = /(cpf|password|senha)/i;
+    const offenders = files.flatMap(({ file, code }) =>
+      [
+        ...code.matchAll(/queryKey:\s*(\[[^\]]*\])/g),
+        ...code.matchAll(/(?:searchParams|URLSearchParams\([^)]*\))\.(?:set|append)\(([^)]*)\)/g),
+        ...code.matchAll(/router\.(?:push|replace)\(([^;]*)\)/g),
+      ]
+        .filter((match) => PERSONAL.test(match[1]!))
+        .map((match) => `${file}: ${match[0]}`),
+    );
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("REQ-OREG-014 formulários com senha ou CPF não guardam rascunho fora da memória", () => {
+    const offenders = files
+      .filter(({ code }) => /(cpf|password)/i.test(code))
+      .filter(({ code }) => /\bpersist\(|createJSONStorage|indexedDB/.test(code))
+      .map(({ file }) => file);
+
+    expect(offenders).toEqual([]);
+  });
+
   it("cookies de sessão só são lidos no servidor", () => {
     const offenders = files
       .filter(({ code }) => /pethost_(at|rt)|ACCESS_COOKIE|REFRESH_COOKIE/.test(code))

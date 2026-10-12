@@ -7,4 +7,19 @@ export const formCopy = {
   missing: "Falta:",
   decrease: "Diminuir",
   increase: "Aumentar",
+  datePlaceholder: "dd/mm/aaaa",
+  /** Endereço brasileiro (`AddressFields`): rótulos genéricos, iguais em qualquer tela. */
+  address: {
+    zipCode: "CEP",
+    street: "Rua",
+    number: "Número",
+    numberHelp: "Sem número? Escreve S/N.",
+    complement: "Complemento (opcional)",
+    neighborhood: "Bairro",
+    city: "Cidade",
+    state: "UF",
+    statePlaceholder: "Escolha",
+    searching: "Buscando o endereço desse CEP…",
+    notFound: "Não achamos esse CEP. Preenche o endereço que a gente segue.",
+  },
 };

@@ -1,6 +1,7 @@
 import express from "express";
 import { createMiddleware } from "@mswjs/http-middleware";
 import { http, HttpResponse } from "msw";
+import { ownersHandlers } from "./handlers/owners.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 
 /**
@@ -12,6 +13,7 @@ const handlers = [
   // Só no mock: semeia um refresh token para o E2E testar o refresh sem login.
   http.post("http://localhost:5099/__e2e/refresh-token", () => HttpResponse.json({ refreshToken: seedRefreshToken() })),
   ...sessionHandlers,
+  ...ownersHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

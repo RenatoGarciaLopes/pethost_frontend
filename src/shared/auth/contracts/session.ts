@@ -5,6 +5,8 @@ import { PostApiV1AuthSessionsLoginResponse } from "@/shared/api/generated/sessi
 /** Papéis da API. O OpenAPI descreve como string livre; o front estreita aqui. */
 export const accountRoleSchema = z.enum(["owner", "host", "admin"]);
 export type AccountRole = z.infer<typeof accountRoleSchema>;
+/** Contas que a pessoa escolhe ao entrar ou se cadastrar (o admin tem entrada própria). */
+export type PersonalRole = Extract<AccountRole, "owner" | "host">;
 
 const generatedSession = unwrapData(PostApiV1AuthSessionsLoginResponse);
 

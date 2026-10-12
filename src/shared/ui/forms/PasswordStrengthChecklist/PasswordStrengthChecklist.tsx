@@ -1,9 +1,9 @@
 "use client";
 import { Box } from "@mui/material";
+import { PASSWORD_RULES, type PasswordRule } from "../../../lib/validation";
+import { OkIcon } from "../../feedback/feedbackIcons";
 import { formCopy } from "../formCopy";
 
-/** Keys of the five password rules from Auth.Domain.Users.Password (8–128 UTF-16 chars). */
-export type PasswordRule = "length" | "uppercase" | "lowercase" | "digit" | "special";
 /** Presentation of password creation hints; API remains the validation authority. */
 export interface PasswordStrengthChecklistProps {
   /** Current password, used in memory only and never printed. */ password: string;
@@ -11,7 +11,8 @@ export interface PasswordStrengthChecklistProps {
   /** Visible/accessible list title. */ label?: string;
 }
 /**
- * Live five-rule checklist; excludes whitespace from special characters.
+ * Live five-rule checklist reading `PASSWORD_RULES` (the same source as the form schema).
+ * The polite live region is not atomic: only the item whose state changed is announced, never each key.
  * Use when choosing a new password, not when checking an existing login password.
  * @example <PasswordStrengthChecklist password={password} labels={labels} />
  */
@@ -20,21 +21,44 @@ export function PasswordStrengthChecklist({
   labels,
   label = formCopy.passwordRequirements,
 }: PasswordStrengthChecklistProps) {
-  const rules: Record<PasswordRule, boolean> = {
-    length: password.length >= 8 && password.length <= 128,
-    uppercase: /\p{Lu}/u.test(password),
-    lowercase: /\p{Ll}/u.test(password),
-    digit: /\p{Nd}/u.test(password),
-    special: /[^\p{L}\p{Nd}\s]/u.test(password),
-  };
   return (
-    <Box component="ul" aria-label={label} aria-live="polite" aria-atomic="true" sx={{ pl: 3 }}>
-      {(Object.keys(rules) as PasswordRule[]).map((rule) => (
-        <li key={rule}>
-          <span aria-hidden="true">{rules[rule] ? "✓ " : "○ "}</span>
-          {rules[rule] ? formCopy.met : formCopy.missing} {labels[rule]}
-        </li>
-      ))}
+    <Box
+      component="ul"
+      aria-label={label}
+      aria-live="polite"
+      aria-atomic="false"
+      sx={{ listStyle: "none", p: 0, m: 0, display: "grid", gap: 0.75 }}
+    >
+      {(Object.keys(PASSWORD_RULES) as PasswordRule[]).map((rule) => {
+        const met = PASSWORD_RULES[rule](password);
+        return (
+          <Box component="li" key={rule} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* Desenhos de marca, não emoji: visto grama quando cumpre, círculo vazio quando falta. */}
+            {met ? (
+              <Box component="span" aria-hidden="true" sx={{ display: "inline-flex", color: "success.dark" }}>
+                <OkIcon width={20} height={20} />
+              </Box>
+            ) : (
+              <Box
+                component="span"
+                aria-hidden="true"
+                sx={{
+                  width: 18,
+                  height: 18,
+                  mx: "1px",
+                  flexShrink: 0,
+                  border: 2,
+                  borderColor: "text.primary",
+                  borderRadius: "50%",
+                }}
+              />
+            )}
+            <span>
+              {met ? formCopy.met : formCopy.missing} {labels[rule]}
+            </span>
+          </Box>
+        );
+      })}
     </Box>
   );
 }

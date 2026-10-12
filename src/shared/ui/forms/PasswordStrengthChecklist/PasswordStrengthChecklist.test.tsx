@@ -13,6 +13,8 @@ it("REQ-DS-011 checklist anuncia cinco regras da API sem expor senha", () => {
   const { rerender } = renderWithProviders(<PasswordStrengthChecklist password="" labels={labels} />);
   const list = screen.getByRole("list", { name: "Requisitos da senha" });
   expect(list).toHaveAttribute("aria-live", "polite");
+  // REQ-OREG-004: só o item que mudou é anunciado, não a lista inteira a cada tecla.
+  expect(list).toHaveAttribute("aria-atomic", "false");
   expect(within(list).getAllByRole("listitem")).toHaveLength(5);
   expect(within(list).getAllByText(/Falta:/)).toHaveLength(5);
   rerender(<PasswordStrengthChecklist password="Abcdef1!" labels={labels} />);

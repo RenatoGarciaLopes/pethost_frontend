@@ -1,10 +1,23 @@
 ---
 spec: 011-owner-registration
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-12
 ---
 
 # 011 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-12)
+
+- **Escolha em `/register`:** os cartões do design system são radio (`ChoiceCard` não serve de link), então a escolha marca o cartão e o botão "Continuar como …" leva ao formulário. REQ-OREG-001 ajustado.
+- **Sem `router.refresh()` no sucesso:** a página de cadastro com sessão redireciona (REQ-OREG-015); um refresh tiraria a pessoa da tela de sucesso. A mutação só tira as queries do cache (`removeQueries`); o cache de mutações fica, porque a tela de sucesso lê o resultado.
+- **Guarda das telas de quem não entrou:** `redirectIfSignedIn(next)` em `shared/auth/server`, usada também pelo login e pelo login de admin (antes repetida em cada página).
+- **Links:** `registerPath(role?, next?)` e `loginRedirectPath(next, as?)` em `appRoutes`; o "Criar conta" do login passou a levar o `next`.
+- **Schema de endereço em `shared`:** `createAddressSchema(messages)` (as frases vêm de quem usa), para 012, 015 e 030.
+- **Uma regra de senha só:** `PASSWORD_RULES` e `PASSWORD_MAX` em `shared/lib/validation/password.ts`; a régua, o cadastro e o login (limite de 128) leem dali.
+- **Rótulos:** em tinta com foco e sem asterisco no tema (`overrides/FormLabel.ts`), conforme a regra 6 de `17-cadastros-e-formularios.md`.
+- **`FormActions`** ganhou `busy` (desabilita e marca `aria-busy`) e fica transparente a partir de `sm`.
+- **CSP:** o projeto ainda não tem CSP; quando tiver, liberar `connect-src https://viacep.com.br`.
+- **Re-renderização:** o wizard não assina valores do formulário; a régua da senha fica dentro do `Controller` da senha; `ServerFormError` assina só `errors.root`; `AddressFields` observa só o CEP.
 
 ## Decisão: onde mora o formulário de conta
 
@@ -63,7 +76,7 @@ Regras dos campos: as da API (`modulo-auth.md` seção 5.1), repetidas no Zod s�
 ## Fluxo de dados
 
 - `registerOwner(values)` em `features/registration/api/client/registration.client.ts`: `bffClient.request({ method: "POST", path: "/owners/register", body }, sessionResultSchema)`.
-- `useRegisterMutation(variant)`: no sucesso, `queryClient.clear()`, guarda o primeiro nome para a tela de sucesso e chama `router.refresh()` (a casca passa a ver a sessão). Navegação só nos botões da tela de sucesso.
+- `useRegisterMutation()`: no sucesso, `queryClient.removeQueries()`; a tela de sucesso lê o nome do resultado da mutação. Sem `router.refresh()` (ver Decisões). Navegação só nos botões da tela de sucesso, que já carregam a página nova com a sessão.
 - `useCepLookup(cep)` (`shared/hooks`): `useQuery` com chave `["cep", cep]`, `enabled` com 8 dígitos, `staleTime` infinito, sem `retry`, tempo limite de 4 s; preenche só campos que a pessoa não editou (`getFieldState(...).isDirty`).
 - Validação por passo: `form.trigger(REGISTRATION_STEPS[i].fields)`.
 
@@ -94,16 +107,16 @@ Sem ajuste, essas rotas respondem 502 `CONTRACT_MISMATCH`. Proposta: `createSess
 
 ## Cria de reutilizável
 
-| Recurso                                            | Vai para                            | Quem mais usa                                                                            |
-| -------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| `AddressFields`                                    | `shared/ui/forms`                   | 012, 015, 030 (endereço da empresa)                                                      |
-| `fetchAddressByCep` + `viaCepResponseSchema`       | `shared/api/external/viaCep.ts`     | `useCepLookup`                                                                           |
-| `useCepLookup`                                     | `shared/hooks`                      | `AddressFields`                                                                          |
-| `isValidCpf`                                       | `shared/lib/documents`              | 015, 030                                                                                 |
-| `isAdult(birthDate, today)` e `parseBrazilianDate` | `shared/lib/date`                   | 012, 015                                                                                 |
-| `strongPasswordSchema` + `PASSWORD_RULES`          | `shared/lib/validation/password.ts` | 012, 013, 015; o `PasswordStrengthChecklist` passa a ler `PASSWORD_RULES` (uma regra só) |
-| `BirthDateField`, `CpfField`                       | `shared/ui/forms`                   | 012 (nascimento), 015, 030 (CPF)                                                         |
-| `features/registration` (variantes)                | feature                             | 012                                                                                      |
+| Recurso                                            | Vai para                            | Quem mais usa                                                                   |
+| -------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
+| `AddressFields`                                    | `shared/ui/forms`                   | 012, 015, 030 (endereço da empresa)                                             |
+| `fetchAddressByCep` (schema interno)               | `shared/api/external/viaCep.ts`     | `useCepLookup`                                                                  |
+| `useCepLookup`                                     | `shared/hooks`                      | `AddressFields`                                                                 |
+| `isValidCpf`                                       | `shared/lib/documents`              | 015, 030                                                                        |
+| `isAdult(birthDate, today)` e `parseBrazilianDate` | `shared/lib/date`                   | 012, 015                                                                        |
+| `isStrongPassword` + `PASSWORD_RULES`              | `shared/lib/validation/password.ts` | 012, 013, 015; o `PasswordStrengthChecklist` lê `PASSWORD_RULES` (uma regra só) |
+| `BirthDateField`, `CpfField`                       | `shared/ui/forms`                   | 012 (nascimento), 015, 030 (CPF)                                                |
+| `features/registration` (variantes)                | feature                             | 012                                                                             |
 
 ## Segurança e privacidade
 
