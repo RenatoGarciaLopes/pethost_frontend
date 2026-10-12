@@ -1,0 +1,12 @@
+.next
+out
+build
+coverage
+playwright-report
+test-results
+storybook-static
+node_modules
+package-lock.json
+src/shared/api/generated
+openapi
+plop-templates/*.hbs

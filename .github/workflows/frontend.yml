@@ -1,0 +1,59 @@
+# CI do frontend (spec 001, REQ-TOOL-014).
+# Roda em todo pull request e no push para main: verify, contratos, build, Storybook e E2E simulado.
+# O E2E contra a API real (projeto real-desktop) não roda aqui: exige a stack .NET (ver e2e/real/README.md).
+name: frontend
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Formatação, lint, tipos e testes (unit, component, integration)
+        run: npm run verify
+      - name: Contratos gerados batem com openapi/pethost.v1.json
+        run: npm run api:check
+      - name: Cobertura
+        run: npm run test:coverage
+      - name: Build
+        run: npm run build
+        env:
+          BACKEND_URL: http://localhost:5099
+          BACKEND_API_PREFIX: /api/v1
+
+  browser:
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Storybook (stories como testes, com acessibilidade)
+        run: npm run storybook:test
+      - name: E2E simulado (computador e celular)
+        run: npm run test:e2e:mocked
+        env:
+          CI: "true"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7

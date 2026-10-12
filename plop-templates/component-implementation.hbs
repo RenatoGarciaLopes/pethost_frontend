@@ -1,0 +1,28 @@
+{{#if isClient}}
+"use client";
+
+{{/if}}
+{{#if isServer}}
+import "server-only";
+
+{{/if}}
+/** Props de {{name}}. Documente cada prop adicionada com propósito e limites. */
+export interface {{name}}Props {
+  /** Conteúdo do componente; substitua pelas props do critério aprovado. */
+  children?: import("react").ReactNode;
+}
+
+/**
+ * O que é: preencher a responsabilidade de {{name}}.
+ * Quando usar: preencher os cenários e critérios (REQ-...).
+ * Quando NÃO usar: preencher os limites e alternativas.
+ * Props: children — conteúdo inicial; documente as props definitivas.
+ * @param props - Propriedades de apresentação do componente.
+ * @example
+ * ```tsx
+ * <{{name}}>Conteúdo</{{name}}>
+ * ```
+ */
+export function {{name}}({ children }: {{name}}Props) {
+  return <>{children}</>;
+}

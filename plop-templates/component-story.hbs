@@ -1,0 +1,14 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { {{name}} } from "./{{name}}";
+
+const meta = {
+  title: "{{layerPath}}/{{name}}",
+  component: {{name}},
+  parameters: { design: { board: "" } },
+} satisfies Meta<typeof {{name}}>;
+
+// O formato CSF do Storybook exige o meta como export default.
+export { meta as default };
+type Story = StoryObj<typeof meta>;
+
+export const Padrao: Story = {};

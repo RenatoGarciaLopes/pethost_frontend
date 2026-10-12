@@ -1,0 +1,59 @@
+import type { ApiError } from "./ApiError";
+
+/** Contexto opcional que muda a frase (ex.: o tipo de conta da tela). */
+export interface ErrorCopyContext {
+  role?: "owner" | "host";
+}
+
+type CopyEntry = string | ((error: ApiError, context: ErrorCopyContext) => string);
+
+export const GENERIC_ERROR_MESSAGE = "Deu um problema do nosso lado. Tenta de novo; se continuar, fala com a gente.";
+
+const roleLabel = { owner: "tutor", host: "anfitrião" } as const;
+
+/**
+ * Código de erro → frase da PetHost. Fonte única da microcopy de erro
+ * (antes em `produto/contrato-api.md` no vault, que agora aponta para cá).
+ * Motivos de recusa da verificação ficam na feature de verificação.
+ */
+export const errorCopy: Record<string, CopyEntry> = {
+  // Autenticação e conta
+  AUTH_INVALID_CREDENTIALS:
+    "E-mail ou senha não batem com essa conta. Confere se você é tutor ou anfitrião aqui em cima.",
+  AUTH_ACCOUNT_DEACTIVATED: "Essa conta está pausada. Quer reativar? É só confirmar a senha.",
+  AUTH_ACCOUNT_SUSPENDED: "Essa conta está suspensa. Fala com a gente pelo suporte.",
+  AUTH_EMAIL_ALREADY_REGISTERED: (_error, { role }) =>
+    role ? `Esse e-mail já tem conta de ${roleLabel[role]}. Quer entrar?` : "Esse e-mail já tem conta. Quer entrar?",
+  OWNER_CPF_ALREADY_REGISTERED:
+    "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
+  HOST_CPF_ALREADY_REGISTERED: "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
+  AUTH_LINKED_ACCOUNT_NOT_FOUND: "Não deu pra abrir a outra conta. Confere a senha dela.",
+  AUTH_PASSWORD_RESET_TOKEN_INVALID: "Esse link já venceu. Pede outro, leva um minuto.",
+
+  // Pets
+  PET_PHOTO_LIMIT_REACHED: "Já tem 3 fotos. Tira uma pra colocar outra.",
+  PET_PHOTO_ALREADY_EXISTS: "Essa foto já está na ficha.",
+  PET_MICROCHIP_ALREADY_REGISTERED: "Esse microchip já está em outro pet. Se é o seu, fala com o suporte.",
+  PET_KEEPER_NOT_FOUND: "Os pets da casa entram depois que sua verificação for aprovada.",
+
+  // Verificação de anfitrião
+  HOST_APPLICATION_ATTEMPTS_EXCEEDED: "Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.",
+  HOST_APPLICATION_BLOCKED: "Não foi possível confirmar sua identidade. Fala com o suporte.",
+  HOST_APPLICATION_DOCUMENT_ALREADY_EXISTS: "Essa foto já foi usada em outra vaga. Tira uma foto nova.",
+  HOST_IDENTITY_LOCKED: "Nome, nascimento e CPF ficam travados depois da verificação. Pra mudar, fala com o suporte.",
+
+  // Transversais da API
+  VALIDATION_ERROR: "Alguns campos precisam de ajuste. Confere as mensagens embaixo de cada um.",
+  UNAUTHORIZED: "Sua sessão terminou. Entra de novo pra continuar.",
+  FORBIDDEN: "Essa parte não está disponível pra sua conta.",
+  TOO_MANY_REQUESTS: ({ retryAfterSeconds: seconds }) =>
+    seconds === undefined
+      ? "Muitas tentativas seguidas. Respira e tenta de novo daqui a pouco."
+      : `Muitas tentativas seguidas. Respira e tenta de novo em ${seconds} ${seconds === 1 ? "segundo" : "segundos"}.`,
+  UNEXPECTED_ERROR: GENERIC_ERROR_MESSAGE,
+
+  // Locais (transporte e BFF)
+  NETWORK_ERROR: "Parece que a conexão caiu. Confere a internet e tenta de novo.",
+  SESSION_EXPIRED: "Sua sessão terminou. Entra de novo pra continuar.",
+  CSRF_REJECTED: "Por segurança, recarrega a página e tenta de novo.",
+};
