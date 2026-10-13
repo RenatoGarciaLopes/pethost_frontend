@@ -1,7 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { loginAccount, mockProfileImage, resetAccountMock } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
+// Antes e depois: os outros arquivos encontram as contas como no começo (senha, pausa, sessões).
 test.beforeEach(async ({ page }) => {
+  await resetAccountMock(page);
+});
+test.afterEach(async ({ page }) => {
   await resetAccountMock(page);
 });
 test("REQ-ACC-004/006/012 tutor guarda telefone e endereço e vê confirmação", async ({ page, baseURL }) => {

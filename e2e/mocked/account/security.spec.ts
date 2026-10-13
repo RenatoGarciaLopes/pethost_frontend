@@ -1,7 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { accountFixture, loginAccount, resetAccountMock } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
+// Antes e depois: os outros arquivos encontram as contas como no começo (senha, pausa, sessões).
 test.beforeEach(async ({ page }) => {
+  await resetAccountMock(page);
+});
+test.afterEach(async ({ page }) => {
   await resetAccountMock(page);
 });
 test("REQ-ACC-018/019 senha nova mantém a sessão e a senha antiga deixa de entrar", async ({ page, baseURL }) => {
