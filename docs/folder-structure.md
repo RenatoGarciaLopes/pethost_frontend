@@ -203,3 +203,37 @@ pethost_frontend/
 ```
 
 Features, widgets e bootstrap de produção ainda ausentes. Diretórios homônimos dentro de src/test/architecture/fixtures são dados de teste. Generated contém schemas, não transporte HTTP.
+
+## Adições da spec 013 (recuperação de senha)
+
+Responsabilidades preservadas: `shared/lib/url` concentra funções puras de URL; `shared/hooks` faz a ponte com o estado React e as APIs do navegador; `shared/api/contracts` guarda contratos de resposta que não são de auth; `features/auth` ganha schemas, cliente HTTP, mutações, telas e copy da recuperação. `e2e/mocked/auth` agrupa a jornada no navegador, com backend simulado.
+
+```text
+e2e/
+  mocked/auth/password.spec.ts
+  support/handlers/password.mjs
+src/app/(auth)/
+  forgot-password/page.tsx, page.test.ts
+  reset-password/page.tsx, page.test.ts
+src/features/auth/
+  api/client/password.client.ts, password.client.int.test.ts
+  components/PasswordScreen.tsx
+  components/client/
+    ForgotPasswordFlow.tsx, ForgotPasswordFlow.test.tsx
+    ForgotPasswordForm.tsx, ResetLinkSent.tsx
+    ResetPasswordFlow.tsx, ResetPasswordFlow.test.tsx
+    ResetPasswordForm.tsx, StepHeading.tsx, ErrorNotice.tsx
+  hooks/
+    usePasswordMutations.ts, usePasswordMutations.int.test.tsx
+    useErrorNotice.ts, useErrorNotice.test.tsx
+  lib/passwordCopy.ts
+  schemas/
+    forgotPasswordSchema.ts, forgotPasswordSchema.test.ts
+    resetPasswordSchema.ts, resetPasswordSchema.test.ts
+src/shared/
+  api/contracts/emptyData.ts
+  hooks/useUrlSecret.ts, useUrlSecret.test.tsx
+  lib/url/readSecretFromUrl.ts, readSecretFromUrl.test.ts
+```
+
+Recursos, uso e cobertura de cada peça na nota `development/resources/auth.md` do vault.

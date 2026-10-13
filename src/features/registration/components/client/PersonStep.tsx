@@ -11,7 +11,7 @@ import { registrationCopy } from "../../lib/registrationCopy";
 import type { RegistrationVariant } from "../../lib/registrationVariants";
 import type { RegistrationInput } from "../../schemas/registrationSchemas";
 
-const { fields, passwordRules } = registrationCopy;
+const { fields } = registrationCopy;
 
 type StringField = Exclude<keyof RegistrationInput, "address">;
 
@@ -91,7 +91,7 @@ export function PersonStep({ variant }: PersonStepProps) {
               autoComplete="new-password"
             />
             {/* A régua lê o valor do próprio campo: só este bloco re-renderiza a cada tecla (REQ-OREG-004). */}
-            <PasswordStrengthChecklist password={field.value} labels={passwordRules} />
+            <PasswordStrengthChecklist password={field.value} />
           </Stack>
         )}
       />

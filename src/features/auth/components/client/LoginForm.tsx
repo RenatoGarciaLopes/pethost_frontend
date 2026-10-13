@@ -10,7 +10,7 @@ import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import type { AccountRole, PersonalRole } from "@/shared/auth/contracts/session";
-import { registerPath } from "@/shared/config/appRoutes";
+import { forgotPasswordPath, registerPath } from "@/shared/config/appRoutes";
 import { useCountdown } from "@/shared/hooks/useCountdown";
 import { MOTION_ASSENTAR } from "@/shared/theme/tokens/springs";
 import { DOOR_TARGET_ATTR, DOOR_WARM_ATTR } from "@/shared/ui/brand/DoorScene";
@@ -217,7 +217,7 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
           />
           <Link
             component={NextLink}
-            href={`/forgot-password?as=${variant === "admin" ? "admin" : selectableRole}`}
+            href={forgotPasswordPath(variant === "admin" ? "admin" : selectableRole)}
             sx={{ display: "inline-block", mt: 1 }}
           >
             {authCopy.forgotPassword}

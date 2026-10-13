@@ -7,18 +7,17 @@ import { formCopy } from "../formCopy";
 /** Presentation of password creation hints; API remains the validation authority. */
 export interface PasswordStrengthChecklistProps {
   /** Current password, used in memory only and never printed. */ password: string;
-  /** Visible labels for the five API rules supplied by the form. */ labels: Record<PasswordRule, string>;
   /** Visible/accessible list title. */ label?: string;
 }
 /**
- * Live five-rule checklist reading `PASSWORD_RULES` (the same source as the form schema).
+ * Live five-rule checklist reading `PASSWORD_RULES` (the same source as the form schema), with the
+ * rule labels from `formCopy.passwordRules` (the same in every screen that creates a password).
  * The polite live region is not atomic: only the item whose state changed is announced, never each key.
  * Use when choosing a new password, not when checking an existing login password.
- * @example <PasswordStrengthChecklist password={password} labels={labels} />
+ * @example <PasswordStrengthChecklist password={password} />
  */
 export function PasswordStrengthChecklist({
   password,
-  labels,
   label = formCopy.passwordRequirements,
 }: PasswordStrengthChecklistProps) {
   return (
@@ -54,7 +53,7 @@ export function PasswordStrengthChecklist({
               />
             )}
             <span>
-              {met ? formCopy.met : formCopy.missing} {labels[rule]}
+              {met ? formCopy.met : formCopy.missing} {formCopy.passwordRules[rule]}
             </span>
           </Box>
         );

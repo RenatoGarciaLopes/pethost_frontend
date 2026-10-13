@@ -3,6 +3,14 @@ export const formCopy = {
   showPassword: "Mostrar",
   hidePassword: "Esconder",
   passwordRequirements: "Requisitos da senha",
+  /** As cinco regras da senha forte da API, iguais em toda tela que cria senha (`PasswordStrengthChecklist`). */
+  passwordRules: {
+    length: "8 caracteres ou mais",
+    uppercase: "uma letra maiúscula",
+    lowercase: "uma letra minúscula",
+    digit: "um número",
+    special: "um símbolo (como ! ou #)",
+  },
   met: "Atendido:",
   missing: "Falta:",
   decrease: "Diminuir",

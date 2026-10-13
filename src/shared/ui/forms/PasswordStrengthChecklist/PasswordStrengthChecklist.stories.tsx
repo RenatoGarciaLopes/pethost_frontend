@@ -9,13 +9,6 @@ const meta = {
   parameters: { design: { board: "Fluxo-Conta" } },
   args: {
     password: "",
-    labels: {
-      length: "De 8 a 128 caracteres",
-      uppercase: "Uma letra maiúscula",
-      lowercase: "Uma letra minúscula",
-      digit: "Um número",
-      special: "Um símbolo",
-    },
   },
 } satisfies Meta<typeof PasswordStrengthChecklist>;
 export default meta;

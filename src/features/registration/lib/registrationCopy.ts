@@ -45,13 +45,6 @@ export const registrationCopy = {
     cpf: "CPF",
     cpfHelp: "Pra identificar quem paga. Não aparece pra ninguém.",
   },
-  passwordRules: {
-    length: "8 caracteres ou mais",
-    uppercase: "uma letra maiúscula",
-    lowercase: "uma letra minúscula",
-    digit: "um número",
-    special: "um símbolo (como ! ou #)",
-  },
   fieldErrors: {
     fullNameMissing: "Falta seu nome.",
     emailMissing: "Falta o e-mail.",
