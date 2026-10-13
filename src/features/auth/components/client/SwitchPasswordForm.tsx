@@ -11,11 +11,11 @@ import type { PersonalRole, SessionUser } from "@/shared/auth/contracts/session"
 import { forgotPasswordPath, homeOf } from "@/shared/config/appRoutes";
 import { roleLabel } from "@/shared/config/roleLabels";
 import { PasswordField } from "@/shared/ui/forms/PasswordField";
-import { useErrorNotice } from "../../hooks/useErrorNotice";
+import { useErrorNotice } from "@/shared/hooks/useErrorNotice";
 import { useSwitchAccountMutation } from "../../hooks/useSwitchAccountMutation";
 import { switchCopy } from "../../lib/switchCopy";
 import { switchAccountSchema, type SwitchAccountValues } from "../../schemas/switchAccountSchema";
-import { ErrorNotice } from "./ErrorNotice";
+import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 
 export interface SwitchPasswordFormProps {
   current: PersonalRole;

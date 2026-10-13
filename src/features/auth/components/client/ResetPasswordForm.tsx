@@ -8,7 +8,7 @@ import { isApiError } from "@/shared/api/errors/ApiError";
 import { isStrongPassword } from "@/shared/lib/validation/password";
 import { PasswordField } from "@/shared/ui/forms/PasswordField";
 import { PasswordStrengthChecklist } from "@/shared/ui/forms/PasswordStrengthChecklist";
-import { useErrorNotice } from "../../hooks/useErrorNotice";
+import { useErrorNotice } from "@/shared/hooks/useErrorNotice";
 import { useResetPasswordMutation } from "../../hooks/usePasswordMutations";
 import { passwordCopy } from "../../lib/passwordCopy";
 import {
@@ -16,7 +16,7 @@ import {
   type ResetPasswordInput,
   type ResetPasswordValues,
 } from "../../schemas/resetPasswordSchema";
-import { ErrorNotice } from "./ErrorNotice";
+import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { StepHeading } from "./StepHeading";
 
 const { reset } = passwordCopy;

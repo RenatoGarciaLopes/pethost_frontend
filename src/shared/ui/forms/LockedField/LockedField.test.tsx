@@ -32,3 +32,30 @@ it("REQ-DS-014 preserva adornos de slots mantendo read-only obrigatório", () =>
   );
   expect(screen.getByText("Outro prefixo")).toBeVisible();
 });
+
+it("REQ-ACC-013 adorno final de objeto ou callback permanece operável com o cadeado", async () => {
+  const { user, rerender } = renderWithProviders(
+    <LockedField
+      label="CPF"
+      value="123"
+      reason="Conferido"
+      slotProps={{ input: { endAdornment: <button type="button">Esconder</button> } }}
+    />,
+  );
+  expect(screen.getByRole("button", { name: "Esconder" })).toBeVisible();
+  await user.tab();
+  await user.tab();
+  expect(screen.getByRole("button", { name: "Esconder" })).toHaveFocus();
+  expect(screen.getByRole("textbox")).toHaveAttribute("readonly");
+  expect(screen.getByText("🔒")).toHaveAttribute("aria-hidden", "true");
+  rerender(
+    <LockedField
+      label="CPF"
+      value="123"
+      reason="Conferido"
+      slotProps={{ input: () => ({ endAdornment: <button type="button">Mostrar</button>, readOnly: false }) }}
+    />,
+  );
+  expect(screen.getByRole("button", { name: "Mostrar" })).toBeVisible();
+  expect(screen.getByRole("textbox")).toHaveAttribute("readonly");
+});

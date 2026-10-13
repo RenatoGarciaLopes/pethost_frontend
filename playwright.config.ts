@@ -16,6 +16,9 @@ if (isReal && !backendUrl) {
 /** Browser projects and managed local servers; real mode requires a running .NET API. */
 const config = defineConfig({
   testDir: "e2e",
+  // Um worker: o backend simulado guarda estado (senha trocada, conta pausada, sessões) e é um só
+  // para todos os testes. Em paralelo, o reset de um teste derrubava a sessão de outro (spec 015).
+  workers: 1,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3100",

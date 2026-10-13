@@ -24,6 +24,12 @@ export function sessionUserOf(request) {
   return accessTokens.get(token);
 }
 
+/** Revoga access e refresh de todas as sessões só da conta indicada (mock 015). @example revokeUserSessions(user.id); */
+export function revokeUserSessions(userId) {
+  for (const [token, user] of accessTokens) if (user.id === userId) accessTokens.delete(token);
+  for (const [token, user] of refreshTokens) if (user.id === userId) refreshTokens.delete(token);
+}
+
 const encode = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
 export const ok = (data, init) => HttpResponse.json({ success: true, data, timestamp: new Date().toISOString() }, init);
 export const fail = (status, code, details) =>

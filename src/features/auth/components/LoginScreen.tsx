@@ -1,8 +1,10 @@
 import { Box, Container, Paper, Stack, Typography } from "@mui/material";
 import type { AccountRole } from "@/shared/auth/contracts/session";
+import type { LoginNotice } from "@/shared/config/appRoutes";
 import { DoorMark } from "@/shared/ui/brand/DoorMark";
 import { DoorScene } from "@/shared/ui/brand/DoorScene";
 import { TrustList } from "@/shared/ui/data-display/TrustList";
+import { Notice } from "@/shared/ui/feedback/Notice";
 import { Reveal } from "@/shared/ui/motion/Reveal";
 import { authCopy } from "../lib/authCopy";
 import { LoginForm } from "./client/LoginForm";
@@ -12,6 +14,8 @@ export interface LoginScreenProps {
   variant: "account" | "admin";
   initialRole: AccountRole;
   next: string | null;
+  /** Aviso fixo acima do formulário (ex.: conta pausada, REQ-ACC-024). */
+  notice?: LoginNotice;
 }
 
 /**
@@ -23,8 +27,13 @@ export interface LoginScreenProps {
  *   garantias (REQ-AUTH-017). O mesmo `h1` serve aos dois tamanhos.
  * - Admin: só o formulário, com o logo (REQ-AUTH-015).
  */
-export function LoginScreen({ variant, initialRole, next }: LoginScreenProps) {
-  const form = <LoginForm variant={variant} initialRole={initialRole} next={next} />;
+export function LoginScreen({ variant, initialRole, next, notice }: LoginScreenProps) {
+  const form = (
+    <Stack spacing={3}>
+      {notice && <Notice tone="info">{authCopy.notices[notice]}</Notice>}
+      <LoginForm variant={variant} initialRole={initialRole} next={next} />
+    </Stack>
+  );
 
   if (variant === "admin") {
     return (

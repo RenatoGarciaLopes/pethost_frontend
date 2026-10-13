@@ -1,8 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { bffClient } from "@/shared/api/client/bffClient";
-import { emptyDataSchema } from "@/shared/api/contracts/emptyData";
+import { logoutBestEffort } from "@/shared/auth/client/logoutBestEffort";
 import { requestPasswordReset, resetPassword } from "../api/client/password.client";
 
 /**
@@ -24,9 +23,7 @@ export function useResetPasswordMutation() {
   return useMutation({
     mutationFn: (body: Parameters<typeof resetPassword>[0]) => resetPassword(body),
     onSuccess: async () => {
-      await bffClient
-        .request({ method: "POST", path: "/auth/sessions/logout" }, emptyDataSchema)
-        .catch(() => undefined);
+      await logoutBestEffort();
       queryClient.clear();
     },
   });

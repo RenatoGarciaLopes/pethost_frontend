@@ -6,6 +6,8 @@ import {
   refreshRedirectPath,
   registerPath,
   resolvePostLoginPath,
+  isLoginNotice,
+  loginNoticePath,
 } from "./appRoutes";
 
 describe("appRoutes", () => {
@@ -49,5 +51,18 @@ describe("casa do papel", () => {
     expect(resolvePostLoginPath("host", "https://evil.example")).toBe("/host");
     expect(resolvePostLoginPath("owner", null)).toBe("/");
     expect(resolvePostLoginPath("admin", "/api/users/me")).toBe("/admin/host-applications");
+  });
+});
+
+describe("aviso no login", () => {
+  it("REQ-ACC-024 leva só a chave do aviso e a conta marcada", () => {
+    expect(loginNoticePath("conta-pausada", "host")).toBe("/login?as=host&aviso=conta-pausada");
+    expect(loginNoticePath("conta-pausada")).toBe("/login?aviso=conta-pausada");
+  });
+
+  it("REQ-ACC-024 só reconhece avisos da lista fixa", () => {
+    expect(isLoginNotice("conta-pausada")).toBe(true);
+    expect(isLoginNotice("<script>")).toBe(false);
+    expect(isLoginNotice(undefined)).toBe(false);
   });
 });

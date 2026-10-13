@@ -1,3 +1,4 @@
+import type { LoginNotice } from "@/shared/config/appRoutes";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 
 /**
@@ -32,4 +33,9 @@ export const authCopy = {
     passwordTooLong: "Essa senha passou do tamanho que a gente aceita.",
   },
   trust: ["Conversa antes de fechar", "Foto todo dia", "Pagamento guardado"],
+  /** Avisos fixos que chegam pela chave `?aviso=` (nunca texto da URL). */
+  notices: { "conta-pausada": "Sua conta está pausada. Quando quiser voltar, é só entrar." } satisfies Record<
+    LoginNotice,
+    string
+  >,
 } as const;

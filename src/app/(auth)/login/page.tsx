@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LoginScreen } from "@/features/auth/index.server";
+import { isLoginNotice } from "@/shared/config/appRoutes";
 import { redirectIfSignedIn } from "@/shared/auth/server/redirectIfSignedIn";
 import { firstParam, type SearchParams } from "@/shared/lib/url/searchParams";
 import { AuthPageFallback } from "../AuthPageFallback";
@@ -28,8 +29,15 @@ async function LoginGate({ searchParams }: LoginPageProps) {
   const next = firstParam(params.next) ?? null;
   await redirectIfSignedIn(next);
 
-  // `?as=host` marca "Sou anfitrião" (REQ-AUTH-001).
+  const aviso = firstParam(params.aviso);
+
+  // `?as=host` marca "Sou anfitrião" (REQ-AUTH-001); `?aviso=` só vale da lista fixa (REQ-ACC-024).
   return (
-    <LoginScreen variant="account" initialRole={firstParam(params.as) === "host" ? "host" : "owner"} next={next} />
+    <LoginScreen
+      variant="account"
+      initialRole={firstParam(params.as) === "host" ? "host" : "owner"}
+      next={next}
+      notice={isLoginNotice(aviso) ? aviso : undefined}
+    />
   );
 }
