@@ -1,10 +1,22 @@
 ---
 spec: 014-account-switch
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-13
 ---
 
 # 014 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-13)
+
+- **A 004 ainda não tem casca nem menu.** A 014 é o primeiro uso de `useLinkedAccounts`, `accountQueryKey` e `roleLabel`, que nascem aqui já no lugar previsto (`features/auth`, `shared/api/query`, `shared/config`); o `AccountMenu` da 004 importa de lá quando nascer.
+- **Região viva no `AppProviders`:** o anúncio "Agora você está na conta de…" precisa sobreviver à troca de rota, e a casca da 004 ainda não existe. `AnnouncerProvider` + `useAnnounce` (`shared/ui/feedback/Announcer`) ficam acima dos grupos de rota; a casca reaproveita.
+- **Senha que não confere aparece no campo, não num `Notice`:** o REQ-SWITCH-007 pede campo vazio e focado; um `Notice` que também pega o foco brigaria com o campo. A frase neutra vira o erro do campo, lida pelo leitor de tela ao focar. `429` e erro desconhecido usam o `ErrorNotice` da 013.
+- **Reaproveita a 013:** `PasswordScreen` (coluna estreita com o cartão), `StepHeading`, `ErrorNotice`, `useErrorNotice`. O schema reaproveita a senha do login (`loginFormSchema.shape.password`): só exigida, sem regra de força.
+- **"Agora não" leva à casa da conta atual** (`homeOf`), não ao histórico: quem abre o link direto não tem página anterior.
+- **Cor da conta:** `theme.palette.account` (`accountTones`, já no tema); a 004 chamava de `headerTone`.
+- **Sem `Suspense` próprio na página:** o do `RoleGate` do layout `(account)` cobre a leitura da sessão e de `searchParams`; a sessão vem do `cache()` do `getSession`, sem segundo `GET /users/me`.
+- **Barreira de requisição antes da guarda:** `await connection()` no conteúdo assíncrono da página e no `ConfirmedArea` do `RoleGate` evita que o relógio de validade da sessão (`Date.now`) seja avaliado no prerender, inclusive quando o leitor de sessão é reutilizado do cache React. A página tem `Suspense` local com `SniffLoader`, pois a fronteira do layout não cobre a avaliação independente do segmento. Detectado pelo E2E com Next 16.4; o leitor compartilhado não foi alterado.
+- **Destino da troca:** `homeOf` do papel novo. `/` e `/host` ainda não têm página (casa e casca são da 004); o mesmo vale para o login hoje.
 
 ## Rotas e renderização
 

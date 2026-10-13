@@ -8,3 +8,5 @@ import "server-only";
 export { LoginScreen } from "./components/LoginScreen";
 export type { LoginScreenProps } from "./components/LoginScreen";
 export { PasswordScreen } from "./components/PasswordScreen";
+export { AccountSwitchScreen } from "./components/AccountSwitchScreen";
+export type { AccountSwitchScreenProps } from "./components/AccountSwitchScreen";

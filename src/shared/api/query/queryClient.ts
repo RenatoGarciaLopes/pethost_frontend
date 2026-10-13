@@ -4,6 +4,14 @@ import { isApiError } from "../errors/ApiError";
 const STALE_TIME_MS = 60_000;
 const MAX_RETRIES = 2;
 
+/**
+ * Prefixo de consultas por usuário; nunca use senha ou token em parts (REQ-SWITCH-003/010).
+ * @example accountQueryKey(user.id, "linked-accounts") // ["account", user.id, "linked-accounts"]
+ */
+export function accountQueryKey(userId: string, ...parts: readonly unknown[]) {
+  return ["account", userId, ...parts] as const;
+}
+
 /** Repete só o que pode passar sozinho: rede caída e erro 5xx da API. */
 export function shouldRetry(failureCount: number, error: unknown): boolean {
   if (failureCount >= MAX_RETRIES || !isApiError(error)) return false;

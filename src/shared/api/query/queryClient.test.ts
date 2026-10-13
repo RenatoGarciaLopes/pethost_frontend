@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "../errors/ApiError";
-import { createQueryClient, getQueryClient, shouldRetry } from "./queryClient";
+import { accountQueryKey, createQueryClient, getQueryClient, shouldRetry } from "./queryClient";
+
+it("REQ-SWITCH-003 chave de conta separa usuários e mantém o prefixo para consultas", () => {
+  expect(accountQueryKey("user-1")).toEqual(["account", "user-1"]);
+  expect(accountQueryKey("user-1", "linked-accounts")).toEqual(["account", "user-1", "linked-accounts"]);
+  expect(accountQueryKey("user-2", "linked-accounts")).not.toEqual(accountQueryKey("user-1", "linked-accounts"));
+  expect(accountQueryKey("user-1", "pets", "pet-2")).toEqual(["account", "user-1", "pets", "pet-2"]);
+});
 
 describe("getQueryClient", () => {
   it("REQ-HTTP-018 no servidor cria uma instância nova por chamada", () => {

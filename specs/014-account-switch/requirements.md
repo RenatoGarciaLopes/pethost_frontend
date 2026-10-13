@@ -1,7 +1,7 @@
 ---
 spec: 014-account-switch
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-13
 area: SWITCH
 ---
 
