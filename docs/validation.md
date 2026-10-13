@@ -141,3 +141,15 @@ Observação: o `next dev` da porta 3000 é de outro processo; o E2E rodou contr
 | `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 30 de 30 (jornada do anfitrião sem CPF, corpo sem `cpf` e sem `role`, 409 com `as=host`, cookies HttpOnly, redirecionamento com sessão) |
 | `npm run test:coverage`                                                                    | 96,75% statements, 94,95% branches, 96,09% funções, 97,33% linhas (meta de 80% atendida depois da dívida da 010 paga)                   |
 | E2E real                                                                                   | não rodado: precisa da API de teste                                                                                                     |
+
+## 13/10/2026 · Recuperação de senha (spec 013)
+
+| Verificação                                                                             | Resultado                                                                                                                        |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest), depois do rebase sobre `dev`          | 107 arquivos, 690 testes verdes                                                                                                  |
+| `npm run test:coverage`                                                                 | 96,82% statements, 94,68% branches, 96,34% funções, 97,54% linhas                                                                |
+| `npx playwright test --project=mocked-desktop --project=mocked-mobile`, antes do rebase | 38 de 38 (14 casos da 013: pedido neutro, troca de senha, token fora da URL, token vencido, `Referrer-Policy`, `?as=` por papel) |
+| `next build`, Storybook e E2E mocked depois do rebase                                   | no CI do PR                                                                                                                      |
+| E2E real                                                                                | não rodado: precisa da API de teste                                                                                              |
+
+O teste de `ForgotPasswordForm` achou um bug: o erro de `role` vindo da API ficava no formulário sem aparecer; corrigido. Cobertura por suíte na nota `development/resources/auth.md` do vault. O mock local da porta 5099 era um processo antigo sem as rotas de senha; o E2E antes do rebase usou um proxy temporário com `e2e/support/handlers/password.mjs`, desligado no fim.
