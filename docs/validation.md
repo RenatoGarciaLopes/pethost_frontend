@@ -153,3 +153,16 @@ Observação: o `next dev` da porta 3000 é de outro processo; o E2E rodou contr
 | E2E real                                                                                | não rodado: precisa da API de teste                                                                                              |
 
 O teste de `ForgotPasswordForm` achou um bug: o erro de `role` vindo da API ficava no formulário sem aparecer; corrigido. Cobertura por suíte na nota `development/resources/auth.md` do vault. O mock local da porta 5099 era um processo antigo sem as rotas de senha; o E2E antes do rebase usou um proxy temporário com `e2e/support/handlers/password.mjs`, desligado no fim.
+
+## 13/10/2026 · Trocar de conta (spec 014)
+
+| Verificação                                                                                           | Resultado                                                                                                                          |
+| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                                      | 121 arquivos, 738 testes verdes                                                                                                    |
+| `npm run test:coverage`                                                                               | 96,99% statements, 94,88% branches, 96,64% funções, 97,60% linhas                                                                  |
+| `npx playwright test e2e/mocked/auth/switch.spec.ts --project=mocked-desktop --project=mocked-mobile` | 12 de 12 (troca para `/host` com cookies novos, senha errada, sem a outra conta, pausada, `?to=` inválido, admin, título e robots) |
+| Teste da leitura única das contas depois da troca                                                     | falhou antes da correção (2 leituras), passa depois (1)                                                                            |
+| `next build`, Storybook e E2E completo                                                                | no CI do PR                                                                                                                        |
+| E2E real                                                                                              | não rodado: precisa da API de teste com a mesma pessoa nas duas contas                                                             |
+
+Detalhes por suíte na nota `development/resources/auth.md` do vault. O E2E local usou o mock atual numa porta temporária (5100), porque o da 5099 é um processo antigo sem as rotas novas.

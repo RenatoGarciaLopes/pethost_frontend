@@ -1,5 +1,6 @@
 import "server-only";
 import { Box } from "@mui/material";
+import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import type { AccountRole } from "../contracts/session";
@@ -33,6 +34,7 @@ export function RoleGate({ roles, children }: RoleGateProps) {
 }
 
 async function ConfirmedArea({ roles, children }: RoleGateProps) {
+  await connection();
   await requireRole(roles);
   return children;
 }

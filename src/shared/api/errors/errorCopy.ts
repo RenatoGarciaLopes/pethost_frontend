@@ -1,4 +1,5 @@
 import type { ApiError } from "./ApiError";
+import { roleLabel } from "@/shared/config/roleLabels";
 
 /** Contexto opcional que muda a frase (ex.: o tipo de conta da tela). */
 export interface ErrorCopyContext {
@@ -8,8 +9,6 @@ export interface ErrorCopyContext {
 type CopyEntry = string | ((error: ApiError, context: ErrorCopyContext) => string);
 
 export const GENERIC_ERROR_MESSAGE = "Deu um problema do nosso lado. Tenta de novo; se continuar, fala com a gente.";
-
-const roleLabel = { owner: "tutor", host: "anfitrião" } as const;
 
 /**
  * Código de erro → frase da PetHost. Fonte única da microcopy de erro
@@ -23,7 +22,7 @@ export const errorCopy: Record<string, CopyEntry> = {
   AUTH_ACCOUNT_DEACTIVATED: "Essa conta está pausada. Quer reativar? É só confirmar a senha.",
   AUTH_ACCOUNT_SUSPENDED: "Essa conta está suspensa. Fala com a gente pelo suporte.",
   AUTH_EMAIL_ALREADY_REGISTERED: (_error, { role }) =>
-    role ? `Esse e-mail já tem conta de ${roleLabel[role]}. Quer entrar?` : "Esse e-mail já tem conta. Quer entrar?",
+    role ? `Esse e-mail já tem conta de ${roleLabel(role)}. Quer entrar?` : "Esse e-mail já tem conta. Quer entrar?",
   OWNER_CPF_ALREADY_REGISTERED:
     "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
   HOST_CPF_ALREADY_REGISTERED: "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
