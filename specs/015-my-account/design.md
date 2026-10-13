@@ -1,10 +1,19 @@
 ---
 spec: 015-my-account
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-13
 ---
 
 # 015 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-13)
+
+- **Depois de pausar, o login com aviso:** a casa pública (`/`) ainda não existe (004). `DeactivateForm` vai para `/login?as=<papel>&aviso=conta-pausada`; o login mostra "Sua conta está pausada. Quando quiser voltar, é só entrar." de uma lista fixa (`LOGIN_NOTICES`, `loginNoticePath`, `isLoginNotice` em `appRoutes`). Texto vindo da URL nunca aparece. Quando a casa existir, ela pode ler a mesma chave.
+- **Aviso de erro em `shared`:** `useErrorNotice` (429 com contagem, erro genérico) e `ErrorNotice` saíram de `features/auth` para `shared/hooks` e `shared/ui/feedback`, porque `account` também usa e uma feature não importa outra.
+- **`requirePersonalUser(path)`** (`shared/auth/server`): `connection()` + `requireRole(["owner", "host"])` com o papel estreitado. Usado pela troca de conta (014), senha e pausar; a sessão vem do `cache()`, sem segundo `GET /users/me`.
+- **Grupo `(settings)`:** perfil, senha e pausar ficam em `app/(account)/users/(settings)/` com a navegação (`AccountSettingsLayout`); `/users/switch` fica fora, sem essa navegação. A guarda continua a do `RoleGate` do `(account)`.
+- **Botão de pausar na cor padrão:** pausar é reversível; vermelho fica para erro (vault: aviso nunca é vermelho).
+- **`memberSince` pode faltar:** no anfitrião ainda não aprovado o fallback `GET /users/me` não traz `createdAt`; o cartão omite "No PetHost desde".
 
 ## Rotas e renderização
 

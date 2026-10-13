@@ -166,3 +166,17 @@ O teste de `ForgotPasswordForm` achou um bug: o erro de `role` vindo da API fica
 | E2E real                                                                                              | não rodado: precisa da API de teste com a mesma pessoa nas duas contas                                                             |
 
 Detalhes por suíte na nota `development/resources/auth.md` do vault. O E2E local usou o mock atual numa porta temporária (5100), porque o da 5099 é um processo antigo sem as rotas novas.
+
+## 13/10/2026 · Minha conta (spec 015)
+
+| Verificação                                                                               | Resultado                                                                                                                                         |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                          | 151 arquivos, 926 testes verdes                                                                                                                   |
+| `npm run test:coverage`                                                                   | 96,83% statements, 93,88% branches, 97,19% funções, 97,91% linhas                                                                                 |
+| `npx playwright test e2e/mocked/account --project=mocked-desktop --project=mocked-mobile` | 22 de 22 (perfil do tutor e do anfitrião PF, PJ e não aprovado, trava do CPF, foto, troca de senha, pausar e voltar pelo login, navegação, admin) |
+| Storybook do `AvatarUploader` (a11y)                                                      | 6 stories sem violação                                                                                                                            |
+| Regressão do CPF travado (`LockedField`)                                                  | falhou antes da correção, passa depois (componente e navegador)                                                                                   |
+| `next build`, Storybook completo e E2E completo                                           | no CI do PR                                                                                                                                       |
+| E2E real                                                                                  | não rodado: precisa da API de teste                                                                                                               |
+
+Detalhes por suíte na nota `development/resources/account.md` do vault.

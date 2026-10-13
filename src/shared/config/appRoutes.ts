@@ -6,10 +6,15 @@ export const LOGIN_PATH = "/login";
 /** Rota do BFF que renova a sessão e volta para `next` (REQ-HTTP-016). */
 const SESSION_REFRESH_PATH = "/api/auth/sessions/refresh";
 
+/** Avisos que o login sabe mostrar. A URL leva só a chave; o texto vem da lista fixa do login. */
+const LOGIN_NOTICES = ["conta-pausada"] as const;
+export type LoginNotice = (typeof LOGIN_NOTICES)[number];
+
 /** Junta caminho e parâmetros, com `next` seguro e omitido quando é a raiz ou inseguro. */
-function withParams(path: string, params: { as?: AccountRole; next?: string | null }): string {
+function withParams(path: string, params: { as?: AccountRole; next?: string | null; aviso?: LoginNotice }): string {
   const search = new URLSearchParams();
   if (params.as) search.set("as", params.as);
+  if (params.aviso) search.set("aviso", params.aviso);
   const next = toSafeInternalPath(params.next, "/");
   if (next !== "/") search.set("next", next);
   const query = search.toString();
@@ -22,6 +27,22 @@ function withParams(path: string, params: { as?: AccountRole; next?: string | nu
  */
 export function loginRedirectPath(next: string | null | undefined, as?: PersonalRole): string {
   return withParams(LOGIN_PATH, { as, next });
+}
+
+/**
+ * Login com um aviso da lista fixa (REQ-ACC-024: conta pausada). Nunca leva texto livre na URL.
+ * @example loginNoticePath("conta-pausada", "host") // "/login?as=host&aviso=conta-pausada"
+ */
+export function loginNoticePath(aviso: LoginNotice, as?: PersonalRole): string {
+  return withParams(LOGIN_PATH, { as, aviso });
+}
+
+/**
+ * Valor de `?aviso=` que o login reconhece; qualquer outro é ignorado.
+ * @example isLoginNotice("conta-pausada") // true
+ */
+export function isLoginNotice(value: string | undefined): value is LoginNotice {
+  return LOGIN_NOTICES.some((notice) => notice === value);
 }
 
 /**

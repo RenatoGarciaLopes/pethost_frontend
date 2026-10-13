@@ -25,6 +25,13 @@ export const errorCopy: Record<string, CopyEntry> = {
     role ? `Esse e-mail já tem conta de ${roleLabel(role)}. Quer entrar?` : "Esse e-mail já tem conta. Quer entrar?",
   OWNER_CPF_ALREADY_REGISTERED:
     "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
+  OWNER_CPF_LOCKED: "Depois do primeiro pagamento, o CPF e o nascimento ficam travados. Pra mudar, fala com o suporte.",
+  OWNER_BIRTH_DATE_LOCKED:
+    "Depois do primeiro pagamento, o CPF e o nascimento ficam travados. Pra mudar, fala com o suporte.",
+  OWNER_NOT_FOUND: "Não achamos seu perfil de tutor. Fala com o suporte.",
+  HOST_NOT_FOUND: "Seus dados ficam editáveis depois da verificação.",
+  HOST_NOT_A_COMPANY: "Esses dados são só de conta de empresa.",
+  PAYLOAD_TOO_LARGE: "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.",
   HOST_CPF_ALREADY_REGISTERED: "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
   AUTH_LINKED_ACCOUNT_NOT_FOUND: "Não deu pra abrir a outra conta. Confere a senha dela.",
   AUTH_PASSWORD_RESET_TOKEN_INVALID: "Esse link já venceu. Pede outro, leva um minuto.",
@@ -39,7 +46,7 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_APPLICATION_ATTEMPTS_EXCEEDED: "Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.",
   HOST_APPLICATION_BLOCKED: "Não foi possível confirmar sua identidade. Fala com o suporte.",
   HOST_APPLICATION_DOCUMENT_ALREADY_EXISTS: "Essa foto já foi usada em outra vaga. Tira uma foto nova.",
-  HOST_IDENTITY_LOCKED: "Nome, nascimento e CPF ficam travados depois da verificação. Pra mudar, fala com o suporte.",
+  HOST_IDENTITY_LOCKED: "Esses dados foram conferidos na verificação. Pra mudar, fala com o suporte.",
 
   // Transversais da API
   VALIDATION_ERROR: "Alguns campos precisam de ajuste. Confere as mensagens embaixo de cada um.",

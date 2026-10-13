@@ -35,4 +35,12 @@ export const switchAccounts = [
     "senha-do-host",
   ),
   account("admin", "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b4c", "equipe@pethost.test", "admin", true, "senha-da-equipe"),
+  account(
+    "unverified",
+    "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b5d",
+    "sem-aprovacao@pethost.test",
+    "host",
+    true,
+    "senha-do-host",
+  ),
 ];

@@ -19,6 +19,7 @@ it("REQ-AUTH-016 compõe entrada pessoal com formulário, cena decorativa e gara
     "Foto todo dia",
     "Pagamento guardado",
   ]);
+  expect(screen.queryByText(/conta está pausada/)).not.toBeInTheDocument();
   expect(container.querySelector('svg[viewBox="0 0 360 300"]')!.parentElement).toHaveAttribute("aria-hidden", "true");
 });
 it("REQ-AUTH-015 entrada admin mostra marca, sem cena, garantias ou cadastro", () => {
@@ -31,4 +32,10 @@ it("REQ-AUTH-015 entrada admin mostra marca, sem cena, garantias ou cadastro", (
   expect(screen.queryByRole("link", { name: "Criar conta" })).not.toBeInTheDocument();
   expect(container.querySelector('svg[viewBox="0 0 360 300"]')).not.toBeInTheDocument();
   expect(screen.queryByText("Foto todo dia")).not.toBeInTheDocument();
+});
+it("REQ-ACC-024 aviso de conta pausada aparece junto do formulário", () => {
+  renderWithProviders(<LoginScreen variant="account" initialRole="owner" next={null} notice="conta-pausada" />, {
+    theme: quintalTheme,
+  });
+  expect(screen.getByText("Sua conta está pausada. Quando quiser voltar, é só entrar.")).toBeInTheDocument();
 });

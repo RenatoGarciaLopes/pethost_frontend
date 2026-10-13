@@ -12,7 +12,7 @@ export interface ErrorNoticeProps {
 }
 
 /**
- * Aviso de erro do topo das telas de senha (spec 013). Entra com a mola "assentar" e recebe o foco ao
+ * Aviso de erro do topo dos formulários de conta (specs 013 a 015), com a frase de `useErrorNotice`. Entra com a mola "assentar" e recebe o foco ao
  * aparecer, para o leitor de tela anunciar e o teclado continuar dali.
  *
  * @example <ErrorNotice message={notice.message} tone={notice.tone} />

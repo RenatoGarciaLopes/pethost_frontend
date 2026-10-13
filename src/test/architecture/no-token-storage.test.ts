@@ -50,20 +50,23 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("nenhum store Zustand com campo de token", () => {
+  it("REQ-ACC-026 nenhum store Zustand guarda token, CPF, currentPassword ou newPassword", () => {
     const offenders = files
       .filter(({ code }) => /from "zustand/.test(code))
-      .filter(({ code }) => /(accessToken|refreshToken|signedUrl)\s*[:?]/.test(code))
+      .filter(({ code }) =>
+        /["']?(accessToken|refreshToken|signedUrl|cpf|password|currentPassword|newPassword)["']?\s*[:?]/i.test(code),
+      )
       .map(({ file }) => file);
 
     expect(offenders).toEqual([]);
   });
 
-  it("REQ-PWD-013 REQ-OREG-014 REQ-HREG-008 token, senha e CPF nunca vão para URL nem query key", () => {
+  it("REQ-ACC-026 REQ-PWD-013 REQ-OREG-014 REQ-HREG-008 token, senha e CPF nunca vão para URL nem query key", () => {
     const PERSONAL = /(token|cpf|password|senha)/i;
     const offenders = files.flatMap(({ file, code }) =>
       [
         ...code.matchAll(/queryKey:\s*(\[[^\]]*\])/g),
+        ...code.matchAll(/accountQueryKey\(([^)]*)\)/g),
         ...code.matchAll(/(?:searchParams|URLSearchParams\([^)]*\))\.(?:set|append)\(([^)]*)\)/g),
         ...code.matchAll(/router\.(?:push|replace)\(([^;]*)\)/g),
       ]

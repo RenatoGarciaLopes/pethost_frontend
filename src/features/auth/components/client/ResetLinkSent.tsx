@@ -4,11 +4,11 @@ import { Button, Stack, Typography } from "@mui/material";
 import { useEffect, useState, type RefObject } from "react";
 import { useCountdown } from "@/shared/hooks/useCountdown";
 import { Notice } from "@/shared/ui/feedback/Notice";
-import { useErrorNotice } from "../../hooks/useErrorNotice";
+import { useErrorNotice } from "@/shared/hooks/useErrorNotice";
 import { useRequestPasswordResetMutation } from "../../hooks/usePasswordMutations";
 import { passwordCopy } from "../../lib/passwordCopy";
 import type { ForgotPasswordValues } from "../../schemas/forgotPasswordSchema";
-import { ErrorNotice } from "./ErrorNotice";
+import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { StepHeading } from "./StepHeading";
 
 /** Espera para mandar de novo (REQ-PWD-004). */

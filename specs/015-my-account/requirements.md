@@ -1,7 +1,7 @@
 ---
 spec: 015-my-account
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-13
 area: ACC
 ---
 

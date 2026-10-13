@@ -8,7 +8,7 @@ import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { isApiError } from "@/shared/api/errors/ApiError";
 import type { AccountRole } from "@/shared/auth/contracts/session";
 import { SegmentedControl } from "@/shared/ui/forms/SegmentedControl";
-import { useErrorNotice } from "../../hooks/useErrorNotice";
+import { useErrorNotice } from "@/shared/hooks/useErrorNotice";
 import { useRequestPasswordResetMutation } from "../../hooks/usePasswordMutations";
 import { passwordCopy } from "../../lib/passwordCopy";
 import {
@@ -16,7 +16,7 @@ import {
   type ForgotPasswordInput,
   type ForgotPasswordValues,
 } from "../../schemas/forgotPasswordSchema";
-import { ErrorNotice } from "./ErrorNotice";
+import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { StepHeading } from "./StepHeading";
 
 const { forgot } = passwordCopy;

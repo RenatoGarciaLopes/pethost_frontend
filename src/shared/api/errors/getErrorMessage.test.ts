@@ -7,6 +7,23 @@ const apiError = (code: string, extra: Partial<ConstructorParameters<typeof ApiE
   new ApiError({ status: 400, code, message: "english from the API", ...extra });
 
 describe("getErrorMessage", () => {
+  it.each([
+    [
+      "OWNER_CPF_LOCKED",
+      "Depois do primeiro pagamento, o CPF e o nascimento ficam travados. Pra mudar, fala com o suporte.",
+    ],
+    [
+      "OWNER_BIRTH_DATE_LOCKED",
+      "Depois do primeiro pagamento, o CPF e o nascimento ficam travados. Pra mudar, fala com o suporte.",
+    ],
+    ["HOST_IDENTITY_LOCKED", "Esses dados foram conferidos na verificação. Pra mudar, fala com o suporte."],
+    ["HOST_NOT_FOUND", "Seus dados ficam editáveis depois da verificação."],
+    ["OWNER_NOT_FOUND", "Não achamos seu perfil de tutor. Fala com o suporte."],
+    ["HOST_NOT_A_COMPANY", "Esses dados são só de conta de empresa."],
+    ["PAYLOAD_TOO_LARGE", "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB."],
+  ])("REQ-ACC-007/010/011/017 %s usa a frase da spec", (code, expected) => {
+    expect(getErrorMessage(apiError(code!))).toBe(expected);
+  });
   it.each(Object.keys(errorCopy))("REQ-HTTP-005 %s tem frase da PetHost e nunca a mensagem da API", (code) => {
     const message = getErrorMessage(apiError(code, { retryAfterSeconds: 5 }));
 
