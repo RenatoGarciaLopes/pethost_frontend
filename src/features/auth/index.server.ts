@@ -7,3 +7,4 @@ import "server-only";
  */
 export { LoginScreen } from "./components/LoginScreen";
 export type { LoginScreenProps } from "./components/LoginScreen";
+export { PasswordScreen } from "./components/PasswordScreen";

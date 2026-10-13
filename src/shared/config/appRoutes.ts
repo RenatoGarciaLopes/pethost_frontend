@@ -7,7 +7,7 @@ export const LOGIN_PATH = "/login";
 const SESSION_REFRESH_PATH = "/api/auth/sessions/refresh";
 
 /** Junta caminho e parâmetros, com `next` seguro e omitido quando é a raiz ou inseguro. */
-function withParams(path: string, params: { as?: PersonalRole; next?: string | null }): string {
+function withParams(path: string, params: { as?: AccountRole; next?: string | null }): string {
   const search = new URLSearchParams();
   if (params.as) search.set("as", params.as);
   const next = toSafeInternalPath(params.next, "/");
@@ -31,6 +31,14 @@ export function loginRedirectPath(next: string | null | undefined, as?: Personal
  */
 export function registerPath(role?: PersonalRole, next?: string | null): string {
   return withParams(role ? `/register/${role}` : "/register", { next });
+}
+
+/**
+ * Esqueci a senha, com a conta já marcada (`?as=host`; `admin` esconde a escolha, REQ-PWD-001).
+ * @example forgotPasswordPath("host") // "/forgot-password?as=host"
+ */
+export function forgotPasswordPath(as?: AccountRole): string {
+  return withParams("/forgot-password", { as });
 }
 
 /** Renovação da sessão pelo BFF, voltando para `next` (Server Components não gravam cookie). */

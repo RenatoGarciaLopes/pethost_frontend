@@ -59,8 +59,8 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("REQ-OREG-014 REQ-HREG-008 senha e CPF nunca vão para URL nem query key", () => {
-    const PERSONAL = /(cpf|password|senha)/i;
+  it("REQ-PWD-013 REQ-OREG-014 REQ-HREG-008 token, senha e CPF nunca vão para URL nem query key", () => {
+    const PERSONAL = /(token|cpf|password|senha)/i;
     const offenders = files.flatMap(({ file, code }) =>
       [
         ...code.matchAll(/queryKey:\s*(\[[^\]]*\])/g),

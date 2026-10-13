@@ -112,3 +112,9 @@ Todo comportamento desenvolvido exige testes unitários, funcionais, de integra�
 - [TanStack: Advanced Server Rendering](https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr)
 - [Zustand: Next.js](https://zustand.docs.pmnd.rs/learn/guides/nextjs)
 - [FSD: integração com Next](https://feature-sliced.design/docs/guides/tech/with-nextjs)
+
+## Recuperação de senha, base da spec 013
+
+`shared/lib/url/readSecretFromUrl.ts` lê o segredo do fragmento antes da query; `shared/hooks/useUrlSecret.ts` captura uma vez após montar e remove as ocorrências com `history.replaceState`, mantendo somente memória local. Configure o `ResetUrl` do emissor como `/reset-password#token=...` para que o segredo não chegue ao servidor em URLs e logs de acesso. O front mantém suporte a `?token=` para compatibilidade, mas só consegue removê-lo depois de receber a página; não apaga logs anteriores.
+
+Os clientes usam BFF e contratos gerados. Após reset confirmado, o hook tenta logout do BFF em melhor esforço e limpa queries e mutações antes de sinalizar sucesso. Falha de reset preserva o cache. Interfaces, limites e validação estão na nota `development/resources/auth.md` do vault.

@@ -6,3 +6,4 @@
 export { loginFormSchema } from "./schemas/loginFormSchema";
 export type { LoginFormInput, LoginFormValues } from "./schemas/loginFormSchema";
 export { authCopy } from "./lib/authCopy";
+export { passwordCopy } from "./lib/passwordCopy";

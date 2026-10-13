@@ -2,6 +2,7 @@ import express from "express";
 import { createMiddleware } from "@mswjs/http-middleware";
 import { http, HttpResponse } from "msw";
 import { ownersHandlers } from "./handlers/owners.mjs";
+import { passwordHandlers } from "./handlers/password.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 
@@ -16,6 +17,7 @@ const handlers = [
   ...sessionHandlers,
   ...ownersHandlers,
   ...usersHandlers,
+  ...passwordHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

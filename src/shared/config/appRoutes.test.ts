@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { homeOf, loginRedirectPath, refreshRedirectPath, registerPath, resolvePostLoginPath } from "./appRoutes";
+import {
+  forgotPasswordPath,
+  homeOf,
+  loginRedirectPath,
+  refreshRedirectPath,
+  registerPath,
+  resolvePostLoginPath,
+} from "./appRoutes";
 
 describe("appRoutes", () => {
   it("REQ-HTTP-016 refresh e login levam o next seguro", () => {
@@ -19,6 +26,14 @@ describe("appRoutes", () => {
     expect(registerPath(undefined, "/hosts/42")).toBe("/register?next=%2Fhosts%2F42");
     expect(registerPath("owner", "/hosts/42")).toBe("/register/owner?next=%2Fhosts%2F42");
     expect(registerPath("host", "//evil.example")).toBe("/register/host");
+  });
+});
+
+describe("forgotPasswordPath", () => {
+  it("REQ-PWD-001 marca a conta pelo as, inclusive admin", () => {
+    expect(forgotPasswordPath()).toBe("/forgot-password");
+    expect(forgotPasswordPath("host")).toBe("/forgot-password?as=host");
+    expect(forgotPasswordPath("admin")).toBe("/forgot-password?as=admin");
   });
 });
 

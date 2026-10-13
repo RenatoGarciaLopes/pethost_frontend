@@ -28,6 +28,7 @@ export const authCopy = {
     emailMissing: "Falta o e-mail.",
     emailInvalid: "Esse e-mail parece incompleto.",
     passwordMissing: "Falta a senha.",
+    passwordWeak: "A senha ainda não cumpre a régua.",
     passwordTooLong: "Essa senha passou do tamanho que a gente aceita.",
   },
   trust: ["Conversa antes de fechar", "Foto todo dia", "Pagamento guardado"],
