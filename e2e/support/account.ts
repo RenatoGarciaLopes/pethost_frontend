@@ -15,12 +15,13 @@ export async function loginAccount(page: Page, baseURL: string, scenario = "both
   });
   expect(response.status()).toBe(200);
 }
-/** Reinicia só o mock atual; a porta é obrigatória para não atingir a instância antiga.
+/**
+ * Reinicia os perfis do mock entre testes. O mock é o que o Playwright sobe na 5099 (CI e local);
+ * `E2E_ACCOUNT_MOCK_URL` só aponta para outra porta quando a 5099 está ocupada por outro processo.
  * @example await resetAccountMock(page);
  */
 export async function resetAccountMock(page: Page) {
-  const url = process.env.E2E_ACCOUNT_MOCK_URL;
-  if (!url) throw new Error("Defina E2E_ACCOUNT_MOCK_URL para o mock atual.");
+  const url = process.env.E2E_ACCOUNT_MOCK_URL ?? "http://localhost:5099";
   const response = await page.request.post(url + "/__e2e/account/reset");
   expect(response.ok()).toBe(true);
 }
