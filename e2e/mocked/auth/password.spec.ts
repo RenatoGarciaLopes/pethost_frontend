@@ -1,15 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { waitForHydration } from "../../support/hydration";
+
+const sendLinkButton = (page: Page) => page.getByRole("button", { name: "Mandar o link" });
 
 test("REQ-PWD-002, REQ-PWD-005 e REQ-PWD-011 pede link, limpa token e troca a senha até entrar", async ({ page }) => {
   test.setTimeout(60_000);
   await page.goto("/forgot-password?as=host");
   await expect(page).toHaveTitle("Esqueci a senha · PetHost");
   await expect(page.getByRole("radio", { name: "Anfitrião" })).toHaveAttribute("aria-checked", "true");
+  await waitForHydration(sendLinkButton(page));
   await page.getByLabel(/^E-mail da conta/).fill("PESSOA@EXEMPLO.TEST");
   const forgotResponse = page.waitForResponse(
     (response) => response.url().endsWith("/api/auth/password/forgot") && response.request().method() === "POST",
   );
-  await page.getByRole("button", { name: "Mandar o link" }).click();
+  await sendLinkButton(page).click();
   const requested = await forgotResponse;
   expect(requested.status()).toBe(200);
   expect(requested.request().postDataJSON()).toEqual({ email: "pessoa@exemplo.test", role: "host" });
@@ -64,9 +68,10 @@ for (const as of ["invalido", "owner", "host", "admin"]) {
     if (as === "admin") {
       await expect(page.getByRole("heading", { name: "Esqueceu a senha? Acontece." })).toBeVisible();
       await expect(page.getByRole("radiogroup")).toHaveCount(0);
+      await waitForHydration(sendLinkButton(page));
       await page.getByLabel(/^E-mail da conta/).fill("admin@exemplo.test");
       const request = page.waitForRequest((request) => request.url().endsWith("/api/auth/password/forgot"));
-      await page.getByRole("button", { name: "Mandar o link" }).click();
+      await sendLinkButton(page).click();
       expect((await request).postDataJSON()).toEqual({ email: "admin@exemplo.test", role: "admin" });
       await expect(page.getByRole("heading", { name: "Olha seu e-mail" })).toBeVisible();
     } else {

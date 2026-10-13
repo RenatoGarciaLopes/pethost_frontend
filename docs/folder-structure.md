@@ -212,6 +212,7 @@ Responsabilidades preservadas: `shared/lib/url` concentra funções puras de URL
 e2e/
   mocked/auth/password.spec.ts
   support/handlers/password.mjs
+  support/hydration.ts
 src/app/(auth)/
   forgot-password/page.tsx, page.test.ts
   reset-password/page.tsx, page.test.ts
