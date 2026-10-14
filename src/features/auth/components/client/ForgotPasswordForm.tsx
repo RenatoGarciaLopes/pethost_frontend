@@ -17,7 +17,7 @@ import {
   type ForgotPasswordValues,
 } from "../../schemas/forgotPasswordSchema";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
-import { StepHeading } from "./StepHeading";
+import { StepHeading } from "@/shared/ui/navigation/StepHeading";
 
 const { forgot } = passwordCopy;
 const ROLE_OPTIONS = (["owner", "host"] as const).map((role) => ({ value: role, label: forgot.roles[role] }));

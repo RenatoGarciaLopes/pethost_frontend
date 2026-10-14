@@ -8,7 +8,7 @@ import { useUrlSecret } from "@/shared/hooks/useUrlSecret";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { passwordCopy } from "../../lib/passwordCopy";
 import { ResetPasswordForm } from "./ResetPasswordForm";
-import { StepHeading } from "./StepHeading";
+import { StepHeading } from "@/shared/ui/navigation/StepHeading";
 
 const { reset, done } = passwordCopy;
 

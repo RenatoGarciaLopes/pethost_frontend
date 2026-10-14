@@ -9,7 +9,7 @@ import { useRequestPasswordResetMutation } from "../../hooks/usePasswordMutation
 import { passwordCopy } from "../../lib/passwordCopy";
 import type { ForgotPasswordValues } from "../../schemas/forgotPasswordSchema";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
-import { StepHeading } from "./StepHeading";
+import { StepHeading } from "@/shared/ui/navigation/StepHeading";
 
 /** Espera para mandar de novo (REQ-PWD-004). */
 const RESEND_AFTER_SECONDS = 60;

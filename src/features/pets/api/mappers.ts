@@ -1,5 +1,7 @@
 import type { Pet, PetList } from "../types";
 import type { MyPetsDto, PetDto } from "./contracts";
+import { PostApiV1PetsBody } from "@/shared/api/generated/pets/pets.zod";
+import { petProfileSchema, type PetProfileValues } from "../schemas/petProfileSchema";
 
 /**
  * DTO → pet da carteirinha: só o que a tela usa, com a primeira foto como capa.
@@ -28,4 +30,10 @@ export function toPet(dto: PetDto): Pet {
 export function toPetList(dto: MyPetsDto): PetList {
   const pets = dto.pets.map(toPet);
   return { active: pets.filter((pet) => pet.isActive), inactive: pets.filter((pet) => !pet.isActive) };
+}
+
+/** Corpo validado na ficha e no contrato gerado; valores ausentes não são enviados. @example toCreatePetRequest(values) */
+export function toCreatePetRequest(values: PetProfileValues) {
+  const parsed = PostApiV1PetsBody.parse(petProfileSchema.parse(values));
+  return PostApiV1PetsBody.parse(Object.fromEntries(Object.entries(parsed).filter(([, value]) => value !== undefined)));
 }

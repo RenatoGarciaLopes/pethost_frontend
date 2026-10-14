@@ -16,7 +16,7 @@ import { useLinkedAccounts } from "../../hooks/useLinkedAccounts";
 import { switchAvailability } from "../../lib/switchAvailability";
 import { switchCopy } from "../../lib/switchCopy";
 import { AccountPair } from "./AccountPair";
-import { StepHeading } from "./StepHeading";
+import { StepHeading } from "@/shared/ui/navigation/StepHeading";
 import { SwitchPasswordForm } from "./SwitchPasswordForm";
 
 export interface AccountSwitchPanelProps {

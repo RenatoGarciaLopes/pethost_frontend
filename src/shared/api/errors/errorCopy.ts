@@ -32,6 +32,7 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_NOT_FOUND: "Seus dados ficam editáveis depois da verificação.",
   HOST_NOT_A_COMPANY: "Esses dados são só de conta de empresa.",
   PAYLOAD_TOO_LARGE: "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.",
+  UNSUPPORTED_MEDIA_TYPE: "Esse arquivo não é uma foto: use JPG, PNG ou WebP.",
   HOST_CPF_ALREADY_REGISTERED: "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
   AUTH_LINKED_ACCOUNT_NOT_FOUND: "Não deu pra abrir a outra conta. Confere a senha dela.",
   AUTH_PASSWORD_RESET_TOKEN_INVALID: "Esse link já venceu. Pede outro, leva um minuto.",

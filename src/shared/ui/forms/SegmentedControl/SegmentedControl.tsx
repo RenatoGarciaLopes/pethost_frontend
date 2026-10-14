@@ -81,7 +81,9 @@ export function SegmentedControl({
             role="radio"
             aria-checked={value === option.value}
             aria-pressed={undefined}
-            tabIndex={value === option.value ? 0 : -1}
+            tabIndex={
+              value === option.value || (!value && index === options.findIndex((item) => !item.disabled)) ? 0 : -1
+            }
             disabled={disabled || option.disabled}
             onKeyDown={(event) => handleKeyDown(event, index)}
             sx={{ flex: fullWidth ? 1 : undefined }}

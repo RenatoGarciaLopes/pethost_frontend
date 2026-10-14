@@ -1,10 +1,23 @@
 ---
 spec: 021-pet-registration
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-14
 ---
 
 # 021 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-14)
+
+- **Gato sem pergunta de porte:** segue o design (`allowsSize` aceita o porte do gato só para poda e edição; o cadastro não pergunta). Porte obrigatório só no cachorro (`bodyStepSchema(species)`, fábrica que recebe a espécie do store).
+- **Store Zustand por instância** (`createPetWizardStore` + `PetWizardProvider`): passo, respostas aceitas, fotos (só memória), erros por vaga, `petId` depois de criado, erros de campo da API. Cada passo valida a sua parte com o próprio formulário e chama `acceptStep`.
+- **Erros da API por passo:** `VALIDATION_ERROR` e microchip repetido vão para o store (`showServerErrors`) com o passo do primeiro campo; o passo aplica ao montar (`useServerErrors`) e volta para a revisão ao aceitar.
+- **Foco no título só depois de navegar:** o store marca `navigated`; a primeira tela não puxa o foco.
+- **Carteirinha completa nasce aqui:** `PetProfileCard` (blocos com "Editar" na revisão; só leitura ao vivo). A ficha (022) reaproveita.
+- **Foto repetida:** `PhotoSlots` confere tipo e tamanho; a impressão do arquivo (`fileFingerprint`) é conferida no passo, porque é assíncrona.
+- **Reaproveitado da 015:** `validateImageFile` (em vez de um `validatePhotoFile` novo). `StepHeading` saiu da feature auth para `shared/ui/navigation`.
+- **Sair com dados preenchidos:** o rascunho por conta sobrevive a recarregar e a sair; não há confirmação extra ao sair. "Começar de novo" apaga o rascunho.
+- **"Procurar um cantinho pra {nome}"** entra com a busca (041); hoje a comemoração oferece "Ver meus pets" e "Apresentar outro pet".
+- **Rota:** `/pets/new` no grupo `(account)`, sem `loading.tsx` próprio (fallback do `Suspense`).
 
 ## Rota e renderização
 

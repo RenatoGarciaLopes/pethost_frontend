@@ -200,3 +200,15 @@ Detalhes na nota `development/resources/app-shell.md` do vault.
 | E2E real                                                                                         | não rodado: precisa da API de teste |
 
 Detalhes na nota `development/resources/pets.md` do vault.
+
+## 14/10/2026 · Apresentar o pet (spec 021)
+
+| Verificação                                                                 | Resultado                                                         |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                            | 193 arquivos, 1135 testes verdes                                  |
+| `npm run test:coverage`                                                     | 96,75% statements, 93,55% branches, 96,74% funções, 97,80% linhas |
+| E2E mocked `e2e/mocked/pets/new-pet.spec.ts` (desktop e celular, workers 1) | 10 de 10                                                          |
+| Storybook do `PetWizard` e `PhotoSlots` (a11y)                              | 11 stories sem violação                                           |
+| E2E real                                                                    | não rodado: precisa da API de teste                               |
+
+Detalhes na nota `development/resources/pets.md` do vault.
