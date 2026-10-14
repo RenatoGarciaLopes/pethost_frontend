@@ -43,7 +43,7 @@ test("REQ-SHELL-014 rota inexistente devolve 404 e oferece a casa da conta", asy
 test("REQ-SHELL-003/004 menu oferece perfil e troca para a outra conta ativa", async ({ page, baseURL }) => {
   await loginAccount(page, baseURL!);
   await page.goto("/users/password");
-  const menu = page.getByRole("button", { name: /^Menu da conta de/ });
+  const menu = page.getByRole("button", { name: /Menu da conta de/ });
   await waitForHydration(menu);
   await menu.click();
   await expect(page.getByText("Conta de tutor", { exact: true })).toBeVisible();
@@ -59,7 +59,7 @@ test("REQ-SHELL-003/004 menu oferece perfil e troca para a outra conta ativa", a
 test("REQ-SHELL-004 conta única não oferece troca", async ({ page, baseURL }) => {
   await loginAccount(page, baseURL!, "single");
   await page.goto("/users/profile");
-  const menu = page.getByRole("button", { name: /^Menu da conta de/ });
+  const menu = page.getByRole("button", { name: /Menu da conta de/ });
   await waitForHydration(menu);
   const accounts = page.waitForResponse((response) => response.url().endsWith("/api/users/me/accounts"));
   await menu.click();
@@ -71,7 +71,7 @@ test("REQ-SHELL-004 conta única não oferece troca", async ({ page, baseURL }) 
 test("REQ-SHELL-005 sair apaga os cookies e impede reabrir a área privada", async ({ page, baseURL }) => {
   await loginAccount(page, baseURL!);
   await page.goto("/users/profile");
-  const menu = page.getByRole("button", { name: /^Menu da conta de/ });
+  const menu = page.getByRole("button", { name: /Menu da conta de/ });
   await waitForHydration(menu);
   await menu.click();
   await page.getByRole("menuitem", { name: "Sair" }).click();
@@ -85,7 +85,7 @@ test("REQ-SHELL-005 sair apaga os cookies e impede reabrir a área privada", asy
 test("REQ-SHELL-007 pular para o conteúdo é o primeiro Tab e foca o único main", async ({ page, baseURL }) => {
   await loginAccount(page, baseURL!);
   await page.goto("/users/profile");
-  await waitForHydration(page.getByRole("button", { name: /^Menu da conta de/ }));
+  await waitForHydration(page.getByRole("button", { name: /Menu da conta de/ }));
   await page.keyboard.press("Tab");
   const skip = page.getByRole("link", { name: "Pular para o conteúdo" });
   await expect(skip).toBeFocused();

@@ -48,6 +48,8 @@ describe("casca do app", () => {
 
   it("REQ-SHELL-003 menu da conta com o nome", () => {
     setup("host");
-    expect(screen.getByRole("button", { name: `Menu da conta de ${sessionUserFixture.fullName}` })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: new RegExp(`Menu da conta de ${sessionUserFixture.fullName}$`) }),
+    ).toBeInTheDocument();
   });
 });

@@ -7,6 +7,7 @@ import { useLinkedAccounts } from "@/features/auth/index.client";
 import type { AccountRole } from "@/shared/auth/contracts/session";
 import { roleLabel } from "@/shared/config/roleLabels";
 import { initialsOf } from "@/shared/lib/text/initials";
+import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
 import { useLogout } from "../../hooks/useLogout";
 import { accountLabel } from "../../lib/accountLabel";
 import { shellCopy } from "../../lib/shellCopy";
@@ -35,7 +36,8 @@ export function AccountMenu({ user }: AccountMenuProps) {
   const personal = user.role !== "admin";
   const linked = useLinkedAccounts(user.id, { enabled: personal && opened });
   const { logout, isPending } = useLogout();
-  const other = linked.data?.find((account) => !account.isCurrent && account.isActive);
+  // Admin nunca troca, mesmo se o cache tiver contas (a consulta desligada ainda devolve o que já está nele).
+  const other = personal ? linked.data?.find((account) => !account.isCurrent && account.isActive) : undefined;
 
   function open(element: HTMLElement) {
     setAnchor(element);
@@ -46,15 +48,22 @@ export function AccountMenu({ user }: AccountMenuProps) {
     <>
       <IconButton
         onClick={(event) => open(event.currentTarget)}
-        aria-label={shellCopy.menu(user.fullName)}
         aria-haspopup="menu"
         aria-expanded={anchor ? "true" : undefined}
         aria-controls={anchor ? menuId : undefined}
         sx={{ p: 0.5 }}
       >
-        <Avatar src={user.avatarUrl ?? undefined} alt="" sx={{ bgcolor: "primary.main", width: 40, height: 40 }}>
+        {/* O nome do botão começa pelas iniciais visíveis e segue com o texto escondido (WCAG 2.5.3). */}
+        <Avatar
+          src={user.avatarUrl ?? undefined}
+          alt=""
+          sx={{ bgcolor: "primary.main", color: "primary.contrastText", width: 40, height: 40 }}
+        >
           {initialsOf(user.fullName)}
-        </Avatar>
+        </Avatar>{" "}
+        <Box component="span" sx={visuallyHidden}>
+          {shellCopy.menu(user.fullName)}
+        </Box>
       </IconButton>
       <Menu
         id={menuId}

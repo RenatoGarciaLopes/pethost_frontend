@@ -52,7 +52,7 @@ type Story = StoryObj<typeof meta>;
 export const Tutor: Story = {
   name: "REQ-SHELL-001/003/004 Tutor",
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "Menu da conta de Camila Souza" }));
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de tutor")).toBeVisible());
     await expect(body.getByRole("menuitem", { name: "Trocar pra conta de anfitrião" })).toHaveAttribute(
@@ -67,7 +67,7 @@ export const Anfitriao: Story = {
   name: "REQ-SHELL-001/003 Anfitrião",
   args: { role: "host" },
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "Menu da conta de Camila Souza" }));
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de anfitrião")).toBeVisible());
     await expect(body.getByRole("menuitem", { name: "Trocar pra conta de tutor" })).toBeVisible();
@@ -78,7 +78,7 @@ export const Admin: Story = {
   name: "REQ-SHELL-001/011 Admin",
   args: { role: "admin" },
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "Menu da conta de Camila Souza" }));
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de admin")).toBeVisible());
     await expect(body.queryByRole("menuitem", { name: "Minha conta" })).not.toBeInTheDocument();
@@ -93,8 +93,10 @@ export const Celular: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.tab();
-    await expect(canvas.getByRole("link", { name: "Pular para o conteúdo" })).toHaveFocus();
-    await userEvent.keyboard("{Enter}");
-    await expect(canvas.getByRole("main")).toHaveFocus();
+    const skip = canvas.getByRole("link", { name: "Pular para o conteúdo" });
+    await expect(skip).toHaveFocus();
+    // O mock de router do Storybook segura a navegação por âncora; o foco no main é provado no E2E (shell.spec.ts).
+    await expect(skip).toHaveAttribute("href", "#conteudo");
+    await expect(canvas.getByRole("main")).toHaveAttribute("id", "conteudo");
   },
 };

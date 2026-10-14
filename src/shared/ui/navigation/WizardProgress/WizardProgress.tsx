@@ -2,6 +2,7 @@
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { OkIcon } from "@/shared/ui/feedback/feedbackIcons";
+import { visuallyHidden } from "../../a11y/visuallyHidden";
 
 export interface WizardStep {
   /** Identificador estável do passo. */
@@ -169,16 +170,3 @@ export function WizardProgress({ steps, currentIndex, variant = "auto", label = 
     </Box>
   );
 }
-
-const visuallyHidden = {
-  position: "absolute",
-  // Em px: no `sx` do MUI, `1` significa 100%.
-  width: "1px",
-  height: "1px",
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;

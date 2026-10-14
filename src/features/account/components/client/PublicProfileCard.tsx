@@ -28,7 +28,7 @@ export function PublicProfileCard({ profile, photo }: PublicProfileCardProps) {
         <Avatar
           src={profile.avatarUrl ?? undefined}
           alt={profile.avatarUrl ? profile.fullName : undefined}
-          sx={{ width: 96, height: 96, fontSize: 32, bgcolor: "primary.main" }}
+          sx={{ width: 96, height: 96, fontSize: 32, bgcolor: "primary.main", color: "primary.contrastText" }}
         >
           {initialsOf(profile.fullName)}
         </Avatar>

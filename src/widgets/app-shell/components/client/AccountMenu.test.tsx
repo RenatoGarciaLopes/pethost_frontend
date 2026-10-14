@@ -18,7 +18,7 @@ function setup(role: AccountRole = "owner") {
   return renderWithProviders(<AccountMenu user={{ ...USER, role }} />, { theme: quintalTheme });
 }
 async function openMenu(user: ReturnType<typeof setup>["user"]) {
-  await user.click(screen.getByRole("button", { name: "Menu da conta de Camila Souza" }));
+  await user.click(screen.getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
   return screen.findByRole("menu");
 }
 function accounts(list: { role: "owner" | "host"; isActive: boolean; isCurrent: boolean }[]) {
@@ -36,7 +36,7 @@ describe("menu da conta", () => {
   it("REQ-SHELL-003 iniciais no botão; nome e conta no menu", async () => {
     accounts([{ role: "owner", isActive: true, isCurrent: true }]);
     const { user } = setup("owner");
-    expect(screen.getByRole("button", { name: "Menu da conta de Camila Souza" })).toHaveTextContent("CS");
+    expect(screen.getByRole("button", { name: "CS Menu da conta de Camila Souza" })).toHaveTextContent("CS");
     await openMenu(user);
     expect(screen.getByText("Camila Souza")).toBeInTheDocument();
     expect(screen.getByText("Conta de tutor")).toBeInTheDocument();
@@ -80,12 +80,17 @@ describe("menu da conta", () => {
     expect(screen.getByRole("menuitem", { name: "Sair" })).toBeInTheDocument();
   });
 
-  it("REQ-SHELL-003 admin: sem Minha conta, sem troca e sem buscar contas", async () => {
+  it("REQ-SHELL-003 admin: sem Minha conta, sem troca e sem buscar contas, mesmo com contas no cache", async () => {
     const reads = accounts([]);
-    const { user } = setup("admin");
+    const { user, queryClient } = setup("admin");
+    queryClient.setQueryData(
+      ["account", USER.id, "linked-accounts"],
+      [{ role: "owner", isActive: true, isCurrent: false }],
+    );
     await openMenu(user);
     expect(screen.getByText("Conta de admin")).toBeInTheDocument();
     expect(screen.queryByRole("menuitem", { name: "Minha conta" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: /Trocar/ })).not.toBeInTheDocument();
     expect(reads()).toBe(0);
   });
 
