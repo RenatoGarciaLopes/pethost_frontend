@@ -5,7 +5,7 @@ import { accountSwitchHandlers } from "./handlers/accountSwitch.mjs";
 import { accountProfileHandlers, resetAccountProfiles } from "./handlers/accountProfile.mjs";
 import { ownersHandlers } from "./handlers/owners.mjs";
 import { passwordHandlers } from "./handlers/password.mjs";
-import { petsHandlers } from "./handlers/pets.mjs";
+import { petsHandlers, resetPets } from "./handlers/pets.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 
@@ -19,6 +19,7 @@ const handlers = [
   http.post("http://localhost:5099/__e2e/refresh-token", () => HttpResponse.json({ refreshToken: seedRefreshToken() })),
   http.post("http://localhost:5099/__e2e/account/reset", () => {
     resetAccountProfiles();
+    resetPets();
     return HttpResponse.json({ ok: true });
   }),
   ...sessionHandlers,

@@ -1,4 +1,4 @@
-import { renderHook, screen } from "@testing-library/react";
+import { act, renderHook, screen } from "@testing-library/react";
 import { Button } from "@mui/material";
 import { describe, expect, it } from "vitest";
 import { renderWithProviders } from "@/test/render";
@@ -10,6 +10,13 @@ function AnnounceButton({ message }: { message: string }) {
 }
 
 describe("REQ-SWITCH-006 região viva do app", () => {
+  it("REQ-PNEW-020 anunciar preserva o callback usado pelo efeito da comemoração", () => {
+    const { result } = renderHook(() => useAnnounce(), { wrapper: AnnouncerProvider });
+    const announce = result.current;
+    act(() => announce("Ficha de Mel salva."));
+    expect(result.current).toBe(announce);
+    expect(screen.getByRole("status")).toHaveTextContent("Ficha de Mel salva.");
+  });
   it("anuncia a frase numa região polite, vazia antes do primeiro aviso", async () => {
     const { user } = renderWithProviders(
       <AnnouncerProvider>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { createContext, use, useState, type ReactNode } from "react";
+import { createContext, use, useCallback, useState, type ReactNode } from "react";
 import { visuallyHidden } from "../../a11y/visuallyHidden";
 
 type Announce = (message: string) => void;
@@ -18,9 +18,13 @@ const AnnounceContext = createContext<Announce | null>(null);
 export function AnnouncerProvider({ children }: { children: ReactNode }) {
   // A contagem muda a `key`: a mesma frase repetida vira um nó novo e é lida de novo.
   const [announcement, setAnnouncement] = useState({ message: "", count: 0 });
+  const announce = useCallback(
+    (message: string) => setAnnouncement(({ count }) => ({ message, count: count + 1 })),
+    [],
+  );
 
   return (
-    <AnnounceContext value={(message) => setAnnouncement(({ count }) => ({ message, count: count + 1 }))}>
+    <AnnounceContext value={announce}>
       {children}
       <Box role="status" aria-live="polite" sx={visuallyHidden}>
         <span key={announcement.count}>{announcement.message}</span>

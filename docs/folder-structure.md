@@ -1,5 +1,41 @@
 # Estrutura real do frontend
 
+## Ampliação da base de pets (spec 021, 14/10/2026)
+
+Recursos implementados sobre a feature da 020; componentes, stores e páginas da composição paralela têm inventário próprio. Detalhes e validação no vault `development/resources/pets.md`, seção "Apresentar o pet (spec 021): base".
+
+```text
+src/features/pets/
+  api/
+    mappers.ts                         toPet, toPetList e toCreatePetRequest
+    toCreatePetRequest.test.ts
+    client/
+      petMutations.client.ts
+      petMutations.client.int.test.ts
+  schemas/
+    petProfileSchema.ts
+    petProfileSchema.test.ts
+  lib/
+    species.ts, species.test.ts
+    ageBucketToBirthDate.ts, ageBucketToBirthDate.test.ts
+    gramsToKg.ts, gramsToKg.test.ts
+    normalizeMicrochip.ts, normalizeMicrochip.test.ts
+    petDraft.ts, petDraft.test.ts
+    petsCopy.ts                        ampliado com fieldErrors
+  hooks/
+    useCreatePet.ts, useCreatePet.int.test.tsx
+    useUploadPetPhoto.ts
+src/shared/
+  hooks/useSessionDraft.ts, useSessionDraft.test.tsx
+  lib/files/fileFingerprint.ts, fileFingerprint.test.ts
+  api/client/withSessionRetry.ts, withSessionRetry.int.test.ts
+src/test/msw/petsMock.int.test.ts
+e2e/support/handlers/pets.mjs           GET, criação e fotos; resetPets
+e2e/support/mock-backend.mjs            reset de conta inclui pets
+```
+
+Arquivos de teste ficam junto do recurso; o teste dos handlers utiliza MSW no runner de integração existente. Não há validatePhotoFile duplicado, export sem consumidor em index, pasta planejada apresentada como implementada ou jornada Playwright nova nesta camada.
+
 Conferida no disco em 11/10/2026. Excluídos node_modules, .next, storybook-static, .git, .maestri, coverage, playwright-report, test-results e tsconfig.tsbuildinfo (dependências, metadados, caches e relatérios).
 
 Pasta nasce com arquivo, via geradores: npm.cmd run gen:feature -- <nome> e npm.cmd run gen:component -- <camada> <Nome>. Anatomia nas [convenções, seção 2](conventions.md#2-anatomia).

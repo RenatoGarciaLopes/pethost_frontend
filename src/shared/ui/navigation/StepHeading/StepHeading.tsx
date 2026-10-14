@@ -8,7 +8,8 @@ export interface StepHeadingProps {
 }
 
 /**
- * Título (`h1`) de cada etapa das telas de senha (spec 013).
+ * Título (`h1`) de cada etapa de um fluxo em passos: telas de senha (013), troca de conta (014) e cadastro do
+ * pet (021). Recebe o foco quando a etapa troca, para o leitor de tela anunciar onde a pessoa está.
  * @example <StepHeading ref={headingRef}>{passwordCopy.sent.title}</StepHeading>
  */
 export function StepHeading({ ref, children }: StepHeadingProps) {

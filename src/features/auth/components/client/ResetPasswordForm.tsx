@@ -17,7 +17,7 @@ import {
   type ResetPasswordValues,
 } from "../../schemas/resetPasswordSchema";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
-import { StepHeading } from "./StepHeading";
+import { StepHeading } from "@/shared/ui/navigation/StepHeading";
 
 const { reset } = passwordCopy;
 

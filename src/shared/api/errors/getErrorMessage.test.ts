@@ -7,6 +7,11 @@ const apiError = (code: string, extra: Partial<ConstructorParameters<typeof ApiE
   new ApiError({ status: 400, code, message: "english from the API", ...extra });
 
 describe("getErrorMessage", () => {
+  it("REQ-PNEW-007 tipo de arquivo recusado tem frase em português", () => {
+    expect(getErrorMessage(apiError("UNSUPPORTED_MEDIA_TYPE"))).toBe(
+      "Esse arquivo não é uma foto: use JPG, PNG ou WebP.",
+    );
+  });
   it.each([
     [
       "OWNER_CPF_LOCKED",

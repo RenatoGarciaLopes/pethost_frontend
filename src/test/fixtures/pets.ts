@@ -7,6 +7,19 @@ export const petKeeperDto = {
   avatarUrl: null,
 };
 
+/** Ficha mínima concluída do assistente, sem fotos ou identificadores sensíveis (REQ-PNEW-023). */
+export const petProfileValuesFixture = {
+  species: "dog",
+  name: "Mel",
+  sex: "female",
+  size: "small",
+  isVaccinated: true,
+  isNeutered: false,
+  goodWithDogs: true,
+  goodWithCats: false,
+  goodWithKids: true,
+} as const;
+
 /** Pet como a API manda em `GET /pets/me` (sem ownerId, hostId e keeper). */
 export function petDto(overrides: Record<string, unknown> = {}) {
   return {
