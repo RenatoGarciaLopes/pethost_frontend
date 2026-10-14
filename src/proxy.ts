@@ -18,6 +18,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Fora do BFF (`/api`), dos arquivos do Next e dos estáticos com extensão.
-  matcher: ["/((?!api|_next/static|_next/image|brand|favicon.ico|.*\.[a-z0-9]+$).*)"],
+  // Fora do BFF (`/api`), dos arquivos do Next e dos estáticos com extensão. O ponto vai escapado duas vezes:
+  // com uma só, a string vira "." e o padrão casava com toda rota terminada em letra (o proxy não rodava).
+  matcher: ["/((?!api|_next/static|_next/image|brand|favicon.ico|.*\\.[a-z0-9]+$).*)"],
 };
