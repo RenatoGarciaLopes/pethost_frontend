@@ -10,3 +10,4 @@ export { useLoginMutation, useReactivateMutation } from "./hooks/useLoginMutatio
 export { useSessionStartMutation } from "./hooks/useSessionStartMutation";
 export { ForgotPasswordFlow } from "./components/client/ForgotPasswordFlow";
 export { ResetPasswordFlow } from "./components/client/ResetPasswordFlow";
+export { useLinkedAccounts } from "./hooks/useLinkedAccounts";

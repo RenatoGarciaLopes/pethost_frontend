@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { waitForHydration } from "../../support/hydration";
 import { expectHttpOnlySession, field, fillAddress, fillPerson, mockViaCep } from "../../support/registration";
 
 /**
@@ -13,7 +14,9 @@ test.beforeEach(async ({ page }) => mockViaCep(page));
 
 test("escolha → dois passos → conta criada, com cookies HttpOnly", async ({ page }) => {
   await page.goto("/register?next=%2Fhosts%2F42");
-  await page.getByRole("radio", { name: /Tenho pet e vou viajar/ }).check();
+  const role = page.getByRole("radio", { name: /Tenho pet e vou viajar/ });
+  await waitForHydration(role);
+  await role.check();
   await page.getByRole("link", { name: "Continuar como tutor" }).click();
   await expect(page).toHaveURL(/\/register\/owner\?next=%2Fhosts%2F42$/);
 

@@ -53,3 +53,15 @@ it("REQ-SWITCH-001 aguarda a requisição antes de consultar a guarda do layout"
   });
   await gateParts(["owner", "host"]).resolve();
 });
+
+it("REQ-SHELL-001 entrega a conta confirmada a quem monta a área (a casca), sem consultar de novo", async () => {
+  vi.mocked(requireRole)
+    .mockReset()
+    .mockResolvedValue({ ...sessionUserFixture, role: "host" });
+  const gate = RoleGate({ roles: "host", children: (user) => <p>{`Casca de ${user.role}`}</p> });
+  const props = gate.props as { children: ReactElement<RoleGateProps> };
+  const confirm = props.children.type as (props: RoleGateProps) => Promise<ReactNode>;
+  renderWithProviders(<>{await confirm(props.children.props)}</>, { theme: quintalTheme });
+  expect(screen.getByText("Casca de host")).toBeInTheDocument();
+  expect(requireRole).toHaveBeenCalledOnce();
+});

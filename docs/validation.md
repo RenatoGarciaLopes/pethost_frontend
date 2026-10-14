@@ -180,3 +180,13 @@ Detalhes por suíte na nota `development/resources/auth.md` do vault. O E2E loca
 | E2E real                                                                                  | não rodado: precisa da API de teste                                                                                                               |
 
 Detalhes por suíte na nota `development/resources/account.md` do vault.
+
+## 13/10/2026 · Casca do app (spec 004, T6 a T11)
+
+| Verificação                                                                               | Resultado                           |
+| ----------------------------------------------------------------------------------------- | ----------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                          | 160 arquivos, 963 testes verdes     |
+| Cobertura, `next build`, Storybook e E2E mocked completo (com `e2e/mocked/shell.spec.ts`) | no CI do PR                         |
+| E2E real                                                                                  | não rodado: precisa da API de teste |
+
+Detalhes na nota `development/resources/app-shell.md` do vault.

@@ -1,10 +1,21 @@
 ---
 spec: 004-app-shell-and-guards
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-13
 ---
 
 # 004 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-13)
+
+- **Atalhos só com a primeira tela que os tiver:** nenhuma tela de atalho de cabeçalho existe ainda (meus pets, verificação, fila do admin, busca). `NAV_ITEMS`, `HeaderNav` e a gaveta do celular (REQ-SHELL-002, 006, 008) nascem com o primeiro atalho real (spec 020), para não ficar tabela nem componente sem uso. Hoje o cabeçalho tem o logo e o menu da conta, iguais no computador e no celular.
+- **A casca é dona do `<main id="conteudo">`:** `AppShell` monta "Pular para o conteúdo", o cabeçalho e o `main`. Telas dentro da casca não criam outro: `AccountSettingsLayout` virou `div` e `PasswordScreen` ganhou `inShell` (a troca de conta usa). As telas de entrada (login, cadastro, senha) continuam com o próprio `main`, porque ficam fora da casca.
+- **`RoleGate` entrega a conta confirmada:** `children` pode ser função do usuário (`(user) => <AppShell user={user}>…`); os quatro layouts de área (`(account)`, `(owner)/owner`, `(host)/host`, `(admin)/admin/(panel)`) usam assim. Um só `requireRole` por requisição, sem segundo `GET /users/me`.
+- **Contas vinculadas só ao abrir o menu:** `AccountMenu` busca `/users/me/accounts` na primeira abertura (não a cada página); admin não busca. Falha esconde só o item de troca.
+- **Menu da conta:** "Minha conta" (`/users/profile`, spec 015), "Trocar pra conta de …" (`/users/switch?to=`, spec 014) e "Sair". Frase da conta neutra ("Conta de tutor"), sem campo de tratamento na API.
+- **Logo do cabeçalho:** `NextLink` direto com `aria-label="PetHost"` e símbolo decorativo (o nome não sai duplicado com o "pethost" escrito). Server Component não passa componente como prop para o MUI.
+- **Sem `(public)` ainda:** não há página pública além das de entrada; o grupo nasce com a home (spec 040).
+- **Cor do cabeçalho:** `theme.palette.account` (`accountTones`), por variável CSS do tema.
 
 ## Rotas e layouts
 

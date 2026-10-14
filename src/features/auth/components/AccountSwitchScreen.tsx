@@ -23,7 +23,7 @@ export async function AccountSwitchScreen({ userId, current, target }: AccountSw
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <PasswordScreen>
+      <PasswordScreen inShell>
         <AccountSwitchPanel userId={userId} current={current} target={target} />
       </PasswordScreen>
     </HydrationBoundary>

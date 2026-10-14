@@ -6,6 +6,7 @@ import { guardRoute } from "@/shared/auth/server/routeGuard";
  * Proxy do Next 16 (antigo middleware), spec 004:
  * - redirecionamento otimista das áreas logadas (regra em `shared/auth/server/routeGuard.ts`);
  * - repassa o caminho atual num cabeçalho da requisição, para os layouts montarem o `next`.
+ * @example proxy(request); // Sem sessão em /users/profile, redireciona com next.
  */
 export function proxy(request: NextRequest) {
   const redirect = guardRoute(request);
