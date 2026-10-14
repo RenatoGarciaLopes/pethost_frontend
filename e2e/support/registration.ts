@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { waitForHydration } from "./hydration";
 
 /**
  * Passos comuns dos E2E de cadastro (tutor, spec 011; anfitrião, spec 012) contra o backend simulado.
@@ -18,8 +19,13 @@ export const field = (page: Page, label: string) => page.getByLabel(new RegExp(`
 /** E-mail único por execução: o mock não guarda contas, mas o teste não depende disso. */
 const uniqueEmail = (prefix: string) => `${prefix}.${Date.now()}.${Math.floor(Math.random() * 1e6)}@pethost.test`;
 
-/** Passo 1 válido e "Continuar": com `cpf`, preenche o CPF (tutor); sem, o anfitrião. E-mail único se não vier. */
+/**
+ * Passo 1 válido e "Continuar": com `cpf`, preenche o CPF (tutor); sem, o anfitrião. E-mail único se não vier.
+ * Espera a hidratação antes de preencher, para o React não restaurar valores iniciais.
+ * @example await fillPerson(page, { cpf: "52998224725" });
+ */
 export async function fillPerson(page: Page, { cpf, email }: { cpf?: string; email?: string } = {}) {
+  await waitForHydration(field(page, "Seu nome completo"));
   await field(page, "Seu nome completo").fill("Camila Souza");
   await field(page, "E-mail").fill(email ?? uniqueEmail(cpf ? "tutor" : "anfitriao"));
   await field(page, "Crie uma senha").fill("Senha#forte1");

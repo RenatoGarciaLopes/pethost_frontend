@@ -49,7 +49,7 @@ export const fail = (status, code, details) =>
 export function issueSession(user = demoUser) {
   counter += 1;
   const expiresAt = Math.floor(Date.now() / 1000) + 900;
-  const accessToken = `${encode({ alg: "none" })}.${encode({ sub: user.id, exp: expiresAt, n: counter })}.e2e`;
+  const accessToken = `${encode({ alg: "none" })}.${encode({ sub: user.id, role: user.role, exp: expiresAt, n: counter })}.e2e`;
   const refreshToken = `rt-e2e-${counter}`;
   accessTokens.set(accessToken, user);
   refreshTokens.set(refreshToken, user);

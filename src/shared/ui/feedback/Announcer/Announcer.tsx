@@ -2,6 +2,7 @@
 
 import { Box } from "@mui/material";
 import { createContext, use, useState, type ReactNode } from "react";
+import { visuallyHidden } from "../../a11y/visuallyHidden";
 
 type Announce = (message: string) => void;
 
@@ -39,16 +40,3 @@ export function useAnnounce(): Announce {
   if (!announce) throw new Error("useAnnounce precisa do AnnouncerProvider");
   return announce;
 }
-
-const visuallyHidden = {
-  position: "absolute",
-  // Em px: no `sx` do MUI, `1` significa 100%.
-  width: "1px",
-  height: "1px",
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;

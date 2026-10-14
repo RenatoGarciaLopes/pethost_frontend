@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectHttpOnlySession, field, fillAddress, fillPerson, mockViaCep } from "../../support/registration";
+import { waitForHydration } from "../../support/hydration";
 
 /**
  * Cadastro de anfitrião de ponta a ponta no Next real contra o backend simulado (spec 012).
@@ -12,7 +13,9 @@ test.beforeEach(async ({ page }) => mockViaCep(page));
 
 test("escolha → dois passos sem CPF → conta criada e convite para a verificação", async ({ page }) => {
   await page.goto("/register");
-  await page.getByRole("radio", { name: /Quero receber pets em casa/ }).check();
+  const role = page.getByRole("radio", { name: /Quero receber pets em casa/ });
+  await waitForHydration(role);
+  await role.check();
   await page.getByRole("link", { name: "Continuar como anfitrião" }).click();
   await expect(page).toHaveURL(/\/register\/host$/);
   await expect(page).toHaveTitle("Criar conta de anfitrião · PetHost");

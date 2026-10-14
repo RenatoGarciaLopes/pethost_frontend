@@ -32,7 +32,8 @@ it.each(["owner", "host"] as const)(
       theme: quintalTheme,
     });
     expect(await screen.findByRole("heading", { level: 1, name: "Seu perfil" })).toBeInTheDocument();
-    expect(screen.getByRole("main")).toHaveAttribute("id", "conteudo");
+    // O `<main>` é da casca (spec 004); o layout de Minha conta fica dentro dele.
+    expect(screen.queryByRole("main")).not.toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Minha conta" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: dto.user.fullName })).toBeInTheDocument();
     expect(queryClient.getQueryData(accountQueryKey(userId, "profile"))).toMatchObject({
