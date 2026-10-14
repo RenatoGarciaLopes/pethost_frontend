@@ -1,9 +1,7 @@
 import "server-only";
 import type { QueryClient } from "@tanstack/react-query";
-import { cookies, headers } from "next/headers";
 import { accountQueryKey } from "@/shared/api/query/queryClient";
-import { createBackendClient, forwardedForOf } from "@/shared/api/server/backendClient";
-import { readSessionTokens } from "@/shared/auth/server/sessionCookies";
+import { backendForRequest } from "@/shared/api/server/backendForRequest";
 import { linkedAccountsSchema, LINKED_ACCOUNTS_STALE_TIME } from "../contracts/linkedAccounts";
 
 /**
@@ -12,8 +10,7 @@ import { linkedAccountsSchema, LINKED_ACCOUNTS_STALE_TIME } from "../contracts/l
  * @example await prefetchLinkedAccounts(queryClient, user.id);
  */
 export async function prefetchLinkedAccounts(queryClient: QueryClient, userId: string): Promise<void> {
-  const { accessToken } = readSessionTokens(await cookies());
-  const backend = createBackendClient({ accessToken, forwardedFor: forwardedForOf(await headers()) });
+  const backend = await backendForRequest();
   await queryClient.prefetchQuery({
     queryKey: accountQueryKey(userId, "linked-accounts"),
     staleTime: LINKED_ACCOUNTS_STALE_TIME,

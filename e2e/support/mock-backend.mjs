@@ -5,6 +5,7 @@ import { accountSwitchHandlers } from "./handlers/accountSwitch.mjs";
 import { accountProfileHandlers, resetAccountProfiles } from "./handlers/accountProfile.mjs";
 import { ownersHandlers } from "./handlers/owners.mjs";
 import { passwordHandlers } from "./handlers/password.mjs";
+import { petsHandlers } from "./handlers/pets.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 
@@ -26,6 +27,7 @@ const handlers = [
   ...ownersHandlers,
   ...usersHandlers,
   ...passwordHandlers,
+  ...petsHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

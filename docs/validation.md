@@ -190,3 +190,13 @@ Detalhes por suíte na nota `development/resources/account.md` do vault.
 | E2E real                                                                                  | não rodado: precisa da API de teste |
 
 Detalhes na nota `development/resources/app-shell.md` do vault.
+
+## 13/10/2026 · Meus pets (spec 020)
+
+| Verificação                                                                                      | Resultado                           |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                                 | 171 arquivos, 1016 testes verdes    |
+| Cobertura, `next build`, Storybook e E2E mocked completo (com `e2e/mocked/pets/my-pets.spec.ts`) | no CI do PR                         |
+| E2E real                                                                                         | não rodado: precisa da API de teste |
+
+Detalhes na nota `development/resources/pets.md` do vault.
