@@ -7,7 +7,7 @@ import { sessionUserFixture } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/render";
 import { AppShell } from "./AppShell";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }), usePathname: () => "/pets" }));
 
 function setup(role: AccountRole) {
   return renderWithProviders(
@@ -51,5 +51,15 @@ describe("casca do app", () => {
     expect(
       screen.getByRole("button", { name: new RegExp(`Menu da conta de ${sessionUserFixture.fullName}$`) }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("atalhos na casca", () => {
+  it("REQ-SHELL-002 tutor tem 'Meus pets'; anfitrião e admin ainda não têm atalhos", () => {
+    const { unmount } = setup("owner");
+    expect(screen.getByRole("navigation", { name: "Navegação principal" })).toBeInTheDocument();
+    unmount();
+    setup("host");
+    expect(screen.queryByRole("navigation", { name: "Navegação principal" })).not.toBeInTheDocument();
   });
 });

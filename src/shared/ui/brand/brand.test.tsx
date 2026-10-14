@@ -4,6 +4,7 @@ import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { renderWithProviders } from "@/test/render";
 import { DoorMark } from "./DoorMark";
 import { GroundLine } from "./GroundLine";
+import { PawMark } from "./PawMark";
 import { Daisy } from "./Daisy";
 import { SniffLoader } from "./SniffLoader";
 import { Celebration } from "./Celebration";
@@ -91,4 +92,12 @@ it("REQ-DS-016 Celebration preserva interação e informa término uma vez", asy
   expect(screen.getByText("Concluído")).toBeVisible();
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
   expect(container.querySelector('[aria-hidden="true"]')).not.toBe(sparks);
+});
+
+it("REQ-PETS-001 PawMark é decorativa e segue o tamanho pedido", () => {
+  const { container } = renderWithProviders(<PawMark size={40} />);
+  const svg = container.querySelector("svg")!;
+  expect(svg).toHaveAttribute("aria-hidden", "true");
+  expect(svg).toHaveAttribute("width", "40");
+  expect(svg).toHaveAttribute("fill", "currentColor");
 });

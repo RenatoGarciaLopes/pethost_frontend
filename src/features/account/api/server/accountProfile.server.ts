@@ -1,10 +1,8 @@
 import "server-only";
 import type { QueryClient } from "@tanstack/react-query";
-import { cookies, headers } from "next/headers";
 import { accountQueryKey } from "@/shared/api/query/queryClient";
-import { createBackendClient, forwardedForOf } from "@/shared/api/server/backendClient";
+import { backendForRequest } from "@/shared/api/server/backendForRequest";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
-import { readSessionTokens } from "@/shared/auth/server/sessionCookies";
 import { gatewayFor } from "../client/profileGateway";
 import { ACCOUNT_PROFILE_STALE_TIME } from "../contracts/profile";
 /**
@@ -17,8 +15,7 @@ export async function prefetchAccountProfile(
   userId: string,
   role: PersonalRole,
 ): Promise<void> {
-  const { accessToken } = readSessionTokens(await cookies());
-  const transport = createBackendClient({ accessToken, forwardedFor: forwardedForOf(await headers()) });
+  const transport = await backendForRequest();
   await queryClient.prefetchQuery({
     queryKey: accountQueryKey(userId, "profile"),
     staleTime: ACCOUNT_PROFILE_STALE_TIME,
