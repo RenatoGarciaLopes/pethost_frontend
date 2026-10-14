@@ -20,7 +20,8 @@ function isCurrent(pathname: string, href: string) {
  * @example <HeaderNav items={navItemsFor(user.role)} />
  */
 export function HeaderNav({ items }: { items: readonly NavItem[] }) {
-  const pathname = usePathname();
+  // Fora do App Router (ex.: Storybook) o caminho pode vir nulo: nenhum atalho fica marcado.
+  const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
 
   const links = (onNavigate?: () => void) =>
