@@ -154,3 +154,37 @@ it("REQ-PEDIT-002 mock oculta pets alheios em todas as mutações e mantém esta
   expect((await (await owner(path)).json()).data.name).toBe("Mel");
   expect((await (await owner(path)).json()).data.species).toBe("dog");
 });
+it("REQ-HPETS-002/003 mock recusa lista e cadastro de anfitrião pendente", async () => {
+  const call = caller("host", "unverified");
+  for (const [method, path, body] of [
+    ["GET", "/pets/me", undefined],
+    ["POST", "/pets", values],
+  ] as const) {
+    const response = await call(path, method, body);
+    expect(response.status).toBe(404);
+    expect((await response.json()).error.code).toBe("PET_KEEPER_NOT_FOUND");
+  }
+});
+it("REQ-HPETS-005/006 mock vitrine usa perfil separado da conta, só ativos e acompanha mudanças", async () => {
+  const host = caller("host", "both");
+  const owner = caller("owner", "both");
+  const list = (await (await host("/pets/me")).json()).data;
+  const account = switchAccounts.find((item) => item.user.role === "host" && item.scenario === "both")!;
+  expect(list.keeper.type).toBe("host");
+  expect(list.keeper.id).not.toBe(account.user.id);
+  const path = `/hosts/${list.keeper.id}/pets`;
+  expect((await (await owner(path)).json()).data.pets).toEqual([]);
+  const created = (await (await host("/pets", "POST", { ...values, name: "Bóris" })).json()).data;
+  expect((await (await owner(path)).json()).data.pets.map((pet: { name: string }) => pet.name)).toEqual(["Bóris"]);
+  expect((await (await owner("/pets/me")).json()).data.pets.some((pet: { name: string }) => pet.name === "Bóris")).toBe(
+    false,
+  );
+  await host(`/pets/${created.id}`, "PATCH", { name: "Bóris da casa" });
+  expect((await (await owner(path)).json()).data.pets[0].name).toBe("Bóris da casa");
+  await host(`/pets/${created.id}/deactivation`, "POST");
+  expect((await (await owner(path)).json()).data.pets).toEqual([]);
+  await host(`/pets/${created.id}/deactivation`, "DELETE");
+  expect((await (await owner(path)).json()).data.pets).toHaveLength(1);
+  expect((await owner(`/hosts/${account.user.id}/pets`)).status).toBe(404);
+  expect((await fetch(`${API}${path}`)).status).toBe(401);
+});

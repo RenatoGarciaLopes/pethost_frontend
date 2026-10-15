@@ -1,4 +1,4 @@
-﻿import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { adminApplicationFixture } from "@/test/fixtures/adminApplications";
 import { ApplicationQueueView } from "./ApplicationQueue";
 const meta = {
@@ -7,7 +7,7 @@ const meta = {
   parameters: { design: { board: "Fluxo-Admin", label: "Fila" } },
   args: { rows: [adminApplicationFixture()], status: "submitted", page: 1, onChange: () => {} },
 } satisfies Meta<typeof ApplicationQueueView>;
-export { meta as default };
+export default meta;
 type Story = StoryObj<typeof meta>;
 export const EmAnalise: Story = {};
 export const Vazia: Story = { args: { rows: [] } };

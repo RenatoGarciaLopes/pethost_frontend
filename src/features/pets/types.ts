@@ -26,8 +26,23 @@ export interface Pet {
 
 /** "Meus pets": ativos na grade; inativos em "Fora da lista" (REQ-PETS-005). Ordem da API. */
 export interface PetList {
+  /** Id do perfil, obtido do keeper da API; não é o id da conta. */
+  hostId?: string;
   active: Pet[];
   inactive: Pet[];
+}
+
+/** Dados permitidos na vitrine, sem saúde nem identificadores privados. @example const residents: HouseResident[] = []; */
+export interface HouseResident {
+  id: string;
+  name: string;
+  species: PetSpecies;
+  speciesDescription: string | null;
+  size: PetSize | null;
+  coverUrl: string | null;
+  goodWithDogs: boolean;
+  goodWithCats: boolean;
+  goodWithKids: boolean;
 }
 
 /** Uma foto da ficha (spec 022): o id serve para trocar (`PATCH`) e tirar (`DELETE`). */

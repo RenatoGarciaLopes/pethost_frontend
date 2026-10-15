@@ -1,4 +1,4 @@
-﻿import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";

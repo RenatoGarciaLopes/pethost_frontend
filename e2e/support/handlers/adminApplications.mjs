@@ -1,4 +1,4 @@
-﻿import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 import { ok, fail, sessionUserOf } from "./session.mjs";
 import { z } from "zod";
 import { unwrapData } from "../../../src/shared/api/contracts/unwrapData.ts";

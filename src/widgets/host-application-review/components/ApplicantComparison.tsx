@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { maskCpf, maskCnpj } from "@/shared/lib/masks";

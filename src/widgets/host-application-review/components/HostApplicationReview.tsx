@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { Box, Stack, Typography, useMediaQuery } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";

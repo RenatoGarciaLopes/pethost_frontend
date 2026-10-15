@@ -8,7 +8,7 @@ const meta = {
 } satisfies Meta<typeof {{name}}>;
 
 // O formato CSF do Storybook exige o meta como export default.
-export { meta as default };
+export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Padrao: Story = {};

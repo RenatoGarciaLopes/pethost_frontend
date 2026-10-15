@@ -1,4 +1,4 @@
-﻿import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { ReasonField } from "./ReasonField";
 const meta = {
@@ -11,7 +11,7 @@ const meta = {
     return <ReasonField {...args} value={value} onChange={setValue} />;
   },
 } satisfies Meta<typeof ReasonField>;
-export { meta as default };
+export default meta;
 type Story = StoryObj<typeof meta>;
 export const Padrao: Story = {};
 export const Erro: Story = { args: { error: "Escreva o motivo da decisão." } };

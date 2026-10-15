@@ -11,11 +11,13 @@ import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { Hint } from "@/shared/ui/feedback/Hint";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { WizardProgress } from "@/shared/ui/navigation/WizardProgress";
-import { petQueries } from "../../api/queries";
+import { invalidatePetLists } from "../../api/invalidatePetLists";
 import { useCreatePet } from "../../hooks/useCreatePet";
 import { useUploadPetPhoto } from "../../hooks/useUploadPetPhoto";
 import { petDraftKey, petDraftSchema, toPetDraft } from "../../lib/petDraft";
 import { petWizardCopy as copy } from "../../lib/petWizardCopy";
+import { petsCopy } from "../../lib/petsCopy";
+import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { petProfileSchema } from "../../schemas/petProfileSchema";
 import { PET_WIZARD_STEPS } from "../../stores/petWizardStore";
 import { usePetWizard, usePetWizardStore } from "../../stores/PetWizardProvider";
@@ -69,7 +71,7 @@ type SaveState =
  *
  * @example <PetWizardProvider initialSpecies="dog"><PetWizard accountId={user.id} /></PetWizardProvider>
  */
-export function PetWizard({ accountId }: { accountId: string }) {
+export function PetWizard({ accountId, role = "owner" }: { accountId: string; role?: PersonalRole }) {
   const store = usePetWizardStore();
   const step = usePetWizard((state) => state.step);
   const removed = usePetWizard((state) => state.removedBySpecies);
@@ -125,7 +127,7 @@ export function PetWizard({ accountId }: { accountId: string }) {
   }
 
   function finish() {
-    void queryClient.invalidateQueries({ queryKey: petQueries.all(accountId) });
+    void invalidatePetLists(queryClient, accountId);
     draft.clear();
     setSave({ phase: "done", name: store.getState().values.name ?? copy.fallbackName });
   }
@@ -173,7 +175,7 @@ export function PetWizard({ accountId }: { accountId: string }) {
     setSave({ phase: "editing" });
   }
 
-  if (save.phase === "done") return <PetWelcome name={save.name} onAnother={startOver} />;
+  if (save.phase === "done") return <PetWelcome name={save.name} role={role} onAnother={startOver} />;
 
   const progress =
     save.phase === "creating"
@@ -200,7 +202,7 @@ export function PetWizard({ accountId }: { accountId: string }) {
       {removed.length > 0 && <Hint>{removed.map((field) => copy.species.removed[field]).join(" ")}</Hint>}
       <ErrorNotice message={notice.message} tone={notice.tone} />
       <WizardStepHost>
-        {step === 1 && <SpeciesStep />}
+        {step === 1 && <SpeciesStep title={petsCopy[role].opening} />}
         {step === 2 && <IdentityStep />}
         {step === 3 && <BodyStep />}
         {step === 4 && <HealthStep />}

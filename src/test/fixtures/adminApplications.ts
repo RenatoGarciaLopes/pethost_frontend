@@ -1,4 +1,4 @@
-﻿import { adminApplicationSchema } from "@/features/admin-host-applications";
+import { adminApplicationSchema } from "@/features/admin-host-applications";
 /** Dados fictícios para testes/stories do admin. Sem fotos ou documentos reais.
  * @example adminApplicationFixture({ status: "approved" })
  */

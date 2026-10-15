@@ -1,4 +1,4 @@
-﻿import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AdminDataTable } from "./AdminDataTable";
 const meta = {
   title: "shared/ui/data-display/AdminDataTable",
@@ -23,7 +23,7 @@ const meta = {
     empty: "Ninguém esperando agora",
   },
 } satisfies Meta<typeof AdminDataTable<string>>;
-export { meta as default };
+export default meta;
 type Story = StoryObj<typeof meta>;
 export const Padrao: Story = {};
 export const Vazia: Story = { args: { rows: [] } };
