@@ -23,13 +23,18 @@ async function saveSection(page: Page, name: string) {
   await expect(region.getByRole("status")).toHaveText("Pronto.");
 }
 
-/** Foto fictícia gerada no teste: PNG de 2×2 com um byte diferente por foto. */
-function fakePhoto(seed: number) {
-  const png = Buffer.from(
-    "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP4z8DAwMDAxMDAwMDAAAANHQEDasKb6QAAAABJRU5ErkJggg==",
-    "base64",
-  );
-  return { name: `casa-${seed}.png`, mimeType: "image/png", buffer: Buffer.concat([png, Buffer.from([seed])]) };
+/** Foto fictícia gerada no próprio navegador (canvas → PNG de verdade): nada de foto real. */
+async function fakePhoto(page: Page, seed: number) {
+  const dataUrl = await page.evaluate((hue) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 48;
+    const context = canvas.getContext("2d")!;
+    context.fillStyle = `hsl(${hue}, 60%, 60%)`;
+    context.fillRect(0, 0, 64, 48);
+    return canvas.toDataURL("image/png");
+  }, seed * 90);
+  return { name: `casa-${seed}.png`, mimeType: "image/png", buffer: Buffer.from(dataUrl.split(",")[1]!, "base64") };
 }
 
 // Os projetos mocked-desktop e mocked-mobile executam a mesma jornada, com estado isolado.
@@ -102,7 +107,7 @@ test("REQ-LIST-001 a REQ-LIST-015 monta o cantinho por seções, abre, põe foto
   await expect(page.getByRole("heading", { level: 1, name: /^Casa da/ })).toBeVisible();
   const photos = page.getByRole("group", { name: "Fotos da casa" });
   await waitForHydration(page.getByLabel("Adicionar foto 1"));
-  await page.getByLabel("Adicionar foto 1").setInputFiles(fakePhoto(1));
+  await page.getByLabel("Adicionar foto 1").setInputFiles(await fakePhoto(page, 1));
   await expect(photos.getByRole("img", { name: "Foto 1" })).toBeVisible();
 
   await page.getByRole("button", { name: "Pausar meu cantinho" }).click();

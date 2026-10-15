@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { isListingId, listingCopy } from "@/features/host-listings";
 import { ListingEditorScreen } from "@/features/host-listings/index.server";
@@ -24,6 +25,8 @@ export default function ListingPage(props: ListingPageProps) {
 async function ListingContent({ params }: ListingPageProps) {
   const { listingId } = await params;
   if (!isListingId(listingId)) notFound();
+  // Espera a requisição antes de ler a sessão: o prerender não pode tocar o relógio dela.
+  await connection();
   const user = await requireRole("host", `/host/listings/${listingId}`);
   return <ListingEditorScreen accountId={user.id} listingId={listingId} />;
 }

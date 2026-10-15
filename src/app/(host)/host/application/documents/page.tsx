@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { verificationCopy } from "@/features/host-applications";
 import { ApplicationWizardScreen } from "@/features/host-applications/index.server";
@@ -20,6 +21,8 @@ export default function ApplicationDocumentsPage() {
 }
 
 async function ApplicationDocumentsContent() {
+  // Espera a requisição antes de ler a sessão: o prerender não pode tocar o relógio dela.
+  await connection();
   const user = await requireRole("host", "/host/application/documents");
   return <ApplicationWizardScreen accountId={user.id} entry="documents" />;
 }

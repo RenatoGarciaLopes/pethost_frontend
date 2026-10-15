@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { listingCopy } from "@/features/host-listings";
 import { ListingDraftScreen } from "@/features/host-listings/index.server";
@@ -17,6 +18,8 @@ export default function NewListingPage() {
 }
 
 async function NewListingContent() {
+  // Espera a requisição antes de ler a sessão: o prerender não pode tocar o relógio dela.
+  await connection();
   const user = await requireRole("host", "/host/listings/new");
   return <ListingDraftScreen accountId={user.id} />;
 }

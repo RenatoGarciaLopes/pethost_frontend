@@ -1,0 +1,50 @@
+/** Textos de pedidos e estadias (specs 053 e 054, lado do anfitrião), na voz da PetHost. Sem gênero presumido. */
+export const bookingCopy = {
+  pageTitles: {
+    hostList: "Pedidos e estadias · PetHost",
+    hostDetail: "Pedido · PetHost",
+  },
+  loading: "Buscando os pedidos",
+  loadError: "Não deu pra abrir os pedidos.",
+  detailLoadError: "Não deu pra abrir esse pedido.",
+
+  species: {
+    dog: "cachorro",
+    cat: "gato",
+    cockatiel: "calopsita",
+    parrot: "papagaio",
+    parakeet: "periquito",
+    canary: "canário",
+    rabbit: "coelho",
+    hamster: "hamster",
+    guinea_pig: "porquinho-da-índia",
+    fish: "peixe",
+    turtle: "tartaruga ou jabuti",
+    exotic: "outro bicho",
+  } as Readonly<Record<string, string>>,
+  sizes: { small: "porte pequeno", medium: "porte médio", large: "porte grande" } as Readonly<Record<string, string>>,
+  unknownPet: "Pet sem ficha",
+
+  host: {
+    heading: "Pedidos e estadias",
+    tabsLabel: "Situação das estadias",
+    tabCount: (count: number) => (count === 1 ? "1 esperando" : `${count} esperando`),
+    empty: {
+      pedidos: "Nenhum pedido esperando resposta agora.",
+      proximas: "Nenhuma estadia marcada por enquanto.",
+      acontecendo: "Nenhum pet hospedado agora.",
+      anteriores: "As estadias que já acabaram aparecem aqui.",
+    } as Readonly<Record<string, string>>,
+    deadline: (when: string) => `Responda até ${when}`,
+    deadlineNear: "Falta pouco pro prazo.",
+    total: (value: string) => `Total ${value}`,
+    nights: (count: number) => (count === 1 ? "1 noite" : `${count} noites`),
+    open: "Ver pedido",
+    openLabel: (owner: string) => `Ver pedido de ${owner}`,
+    previous: "Página anterior",
+    next: "Próxima página",
+    pageLabel: "Páginas",
+    waiting: (count: number) => (count === 1 ? "1 pedido esperando resposta" : `${count} pedidos esperando resposta`),
+    seeRequests: "Ver pedidos",
+  },
+} as const;
