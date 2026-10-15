@@ -29,7 +29,7 @@ Pré-requisito: 002, 003, 004 e as máscaras e o CEP da 011. Cada tarefa: teste 
 - [x] **T8 · Vistas por status e painel** (2026-10-15) (REQ-HVER-001, 011 a 017)
   - Teste primeiro: `ApplicationStatusView.test.tsx`, `HostOnboardingPanel.test.tsx`
   - Implementar: `StatusTimeline` (`shared/ui/data-display`), `widgets/host-onboarding`, rota `/host/application`; ligar `host-application` em `NAV_ITEMS`
-- [ ] **T9 · Privacidade** (REQ-HVER-009)
+- [x] **T9 · Privacidade** (2026-10-15) (REQ-HVER-009)
   - Ampliar `src/test/architecture/no-token-storage.test.ts`
 - [ ] **T10 · E2E** (REQ-HVER-002 a 012)
   - `e2e/mocked/host/verification.spec.ts` (handlers do mock para `/hosts/me/application*`); `e2e/real/host/verification.spec.ts` com documentos fictícios
