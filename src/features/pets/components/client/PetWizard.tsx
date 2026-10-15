@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Stack } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
@@ -20,6 +20,7 @@ import { petProfileSchema } from "../../schemas/petProfileSchema";
 import { PET_WIZARD_STEPS } from "../../stores/petWizardStore";
 import { usePetWizard, usePetWizardStore } from "../../stores/PetWizardProvider";
 import { PetWelcome } from "./PetWelcome";
+import { WizardStepHost } from "./steps/PetStepHost";
 import { BodyStep } from "./steps/BodyStep";
 import { HealthStep } from "./steps/HealthStep";
 import { IdentityStep } from "./steps/IdentityStep";
@@ -198,7 +199,7 @@ export function PetWizard({ accountId }: { accountId: string }) {
       )}
       {removed.length > 0 && <Hint>{removed.map((field) => copy.species.removed[field]).join(" ")}</Hint>}
       <ErrorNotice message={notice.message} tone={notice.tone} />
-      <Box>
+      <WizardStepHost>
         {step === 1 && <SpeciesStep />}
         {step === 2 && <IdentityStep />}
         {step === 3 && <BodyStep />}
@@ -218,7 +219,7 @@ export function PetWizard({ accountId }: { accountId: string }) {
             onSkipPhotos={finish}
           />
         )}
-      </Box>
+      </WizardStepHost>
     </Stack>
   );
 }

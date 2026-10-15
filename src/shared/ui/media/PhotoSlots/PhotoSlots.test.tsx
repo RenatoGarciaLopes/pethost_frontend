@@ -68,6 +68,98 @@ describe("vagas de foto", () => {
     expect(screen.getByLabelText("Adicionar foto 1")).not.toHaveAttribute("aria-invalid");
   });
 
+  it("REQ-PEDIT-008 foto já salva (URL) aparece direto, sem object URL", () => {
+    vi.mocked(URL.createObjectURL).mockClear();
+    renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={["https://fotos.test/thor-1.jpg", null, null]}
+        onPick={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.getByRole("img", { name: "Foto 1" })).toHaveAttribute("src", "https://fotos.test/thor-1.jpg");
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Tirar foto 1" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Adicionar foto 2")).toBeInTheDocument();
+  });
+
+  it("REQ-PEDIT-008 sem onReplace, vaga preenchida não oferece troca", () => {
+    renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={["https://fotos.test/thor-1.jpg", null, null]}
+        onPick={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.queryByLabelText("Trocar foto 1")).not.toBeInTheDocument();
+  });
+
+  it("REQ-PEDIT-008 'Trocar foto' entrega o arquivo conferido para a mesma vaga", async () => {
+    const onPick = vi.fn();
+    const onReplace = vi.fn();
+    const { user } = renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={["https://fotos.test/thor-1.jpg", "https://fotos.test/thor-2.jpg", null]}
+        onPick={onPick}
+        onReplace={onReplace}
+        onRemove={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    const input = screen.getByLabelText("Trocar foto 2");
+    expect(input).toHaveAttribute("type", "file");
+    expect(screen.queryByLabelText("Trocar foto 3")).not.toBeInTheDocument();
+
+    const file = photo("thor-nova.jpg");
+    await user.upload(input, file);
+
+    expect(onReplace).toHaveBeenCalledWith(1, file);
+    expect(onPick).not.toHaveBeenCalled();
+  });
+
+  it("REQ-PEDIT-010 troca com arquivo inválido é recusada na própria vaga", () => {
+    const onReplace = vi.fn();
+    renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={["https://fotos.test/thor-1.jpg", null, null]}
+        onPick={vi.fn()}
+        onReplace={onReplace}
+        onRemove={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    const input = screen.getByLabelText("Trocar foto 1");
+    fireEvent.change(input, { target: { files: [photo("doc.pdf", "application/pdf")] } });
+    expect(onReplace).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent("Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAccessibleDescription("Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.");
+  });
+
+  it("REQ-PEDIT-008 vaga trocando mostra o indicador e trava as outras ações", () => {
+    renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={[photo(), "https://fotos.test/thor-2.jpg", null]}
+        uploadingIndex={0}
+        onPick={vi.fn()}
+        onReplace={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.getByRole("progressbar", { name: "Enviando…" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Trocar foto 1")).toBeDisabled();
+    expect(screen.getByLabelText("Trocar foto 2")).toBeDisabled();
+    expect(screen.getByLabelText("Adicionar foto 3")).toBeDisabled();
+  });
+
   it("REQ-PNEW-016 vaga enviando trava as outras e mostra o indicador", () => {
     renderWithProviders(
       <PhotoSlots label="Fotos" files={[photo(), null, null]} uploadingIndex={0} onPick={vi.fn()} onRemove={vi.fn()} />,

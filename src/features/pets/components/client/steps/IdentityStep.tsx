@@ -10,6 +10,7 @@ import { PhotoSlots } from "@/shared/ui/media/PhotoSlots";
 import { petWizardCopy } from "../../../lib/petWizardCopy";
 import { petStepSchemas } from "../../../schemas/petProfileSchema";
 import { usePetWizard, usePetWizardStore } from "../../../stores/PetWizardProvider";
+import { usePetStep } from "./PetStepHost";
 import { StepForm } from "./StepForm";
 import { useServerErrors } from "./useServerErrors";
 
@@ -19,33 +20,21 @@ type Accepted = z.output<typeof petStepSchemas.identity>;
 const SEX_OPTIONS = (["male", "female", "unknown"] as const).map((value) => ({ value, label: copy.sexes[value] }));
 
 /**
- * Passo 2, nome, fotos e sexo (REQ-PNEW-007, 008). As fotos vão direto para o store (só memória, nunca no
- * rascunho); a mesma foto em duas vagas é recusada pela impressão do arquivo.
+ * Passo 2, nome, fotos e sexo (REQ-PNEW-007, 008). No assistente, as fotos vão direto para o store (só memória,
+ * nunca no rascunho). Na edição (022) a seção só tem nome e sexo: as fotos têm seção própria, ligada à API.
  *
  * @example <IdentityStep />
  */
 export function IdentityStep() {
-  const store = usePetWizardStore();
-  const values = usePetWizard((state) => state.values);
-  const photos = usePetWizard((state) => state.photos);
-  const photoErrors = usePetWizard((state) => state.photoErrors);
-  const acceptStep = usePetWizard((state) => state.acceptStep);
-  const { control, handleSubmit, setError } = useForm<Values, unknown, Accepted>({
+  const { values, accept, mode } = usePetStep();
+  const { control, handleSubmit, setError, formState } = useForm<Values, unknown, Accepted>({
     resolver: zodResolver(petStepSchemas.identity),
     defaultValues: { name: values.name ?? "", sex: values.sex },
   });
   useServerErrors(setError, ["name", "sex"]);
 
-  async function pickPhoto(index: number, file: File) {
-    const fingerprint = await fileFingerprint(file);
-    const others = store.getState().photos.filter((photo, slot): photo is File => slot !== index && photo !== null);
-    const repeated = (await Promise.all(others.map(fileFingerprint))).includes(fingerprint);
-    if (repeated) return store.getState().setPhotoError(index, copy.duplicatePhoto);
-    store.getState().setPhoto(index, file);
-  }
-
   return (
-    <StepForm title={copy.title} onSubmit={handleSubmit((accepted) => acceptStep(accepted))}>
+    <StepForm dirty={formState.isDirty} title={copy.title} onSubmit={handleSubmit((accepted) => accept(accepted))}>
       <Controller
         control={control}
         name="name"
@@ -64,19 +53,7 @@ export function IdentityStep() {
           />
         )}
       />
-      <Stack spacing={1}>
-        <Typography sx={{ fontWeight: 700 }}>{copy.photos(values.name || petWizardCopy.fallbackName)}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {copy.photosHelp}
-        </Typography>
-        <PhotoSlots
-          label={copy.photos(values.name || petWizardCopy.fallbackName)}
-          files={photos}
-          errors={photoErrors}
-          onPick={(index, file) => void pickPhoto(index, file)}
-          onRemove={(index) => store.getState().setPhoto(index, null)}
-        />
-      </Stack>
+      {mode === "wizard" && <WizardPhotos name={values.name || petWizardCopy.fallbackName} />}
       <Controller
         control={control}
         name="sex"
@@ -100,5 +77,36 @@ export function IdentityStep() {
         )}
       />
     </StepForm>
+  );
+}
+
+/** As fotos do assistente: a mesma foto em duas vagas é recusada pela impressão do arquivo. */
+function WizardPhotos({ name }: { name: string }) {
+  const store = usePetWizardStore();
+  const photos = usePetWizard((state) => state.photos);
+  const photoErrors = usePetWizard((state) => state.photoErrors);
+
+  async function pickPhoto(index: number, file: File) {
+    const fingerprint = await fileFingerprint(file);
+    const others = store.getState().photos.filter((photo, slot): photo is File => slot !== index && photo !== null);
+    const repeated = (await Promise.all(others.map(fileFingerprint))).includes(fingerprint);
+    if (repeated) return store.getState().setPhotoError(index, copy.duplicatePhoto);
+    store.getState().setPhoto(index, file);
+  }
+
+  return (
+    <Stack spacing={1}>
+      <Typography sx={{ fontWeight: 700 }}>{copy.photos(name)}</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {copy.photosHelp}
+      </Typography>
+      <PhotoSlots
+        label={copy.photos(name)}
+        files={photos}
+        errors={photoErrors}
+        onPick={(index, file) => void pickPhoto(index, file)}
+        onRemove={(index) => store.getState().setPhoto(index, null)}
+      />
+    </Stack>
   );
 }

@@ -24,6 +24,7 @@ export const petsCopy = {
     max2000: "Use até 2000 caracteres.",
     birthDate: "Use uma data válida, sem ser no futuro.",
     weight: "O peso precisa ser maior que zero, até 150 kg, com até 3 casas decimais.",
+    weightRequired: "Dá pra trocar o peso, mas não deixar em branco.",
     microchip: "O microchip tem 15 números.",
   },
 } as const;

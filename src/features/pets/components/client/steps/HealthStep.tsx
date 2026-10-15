@@ -8,7 +8,7 @@ import type { z } from "zod";
 import { ToggleRow } from "@/shared/ui/forms/ToggleRow";
 import { petWizardCopy } from "../../../lib/petWizardCopy";
 import { petStepSchemas } from "../../../schemas/petProfileSchema";
-import { usePetWizard } from "../../../stores/PetWizardProvider";
+import { usePetStep } from "./PetStepHost";
 import { StepForm } from "./StepForm";
 import { useServerErrors } from "./useServerErrors";
 import { YesNoField } from "./YesNoField";
@@ -57,11 +57,10 @@ function NotesField({ control, name, label, help, max }: NotesFieldProps) {
  * @example <HealthStep />
  */
 export function HealthStep() {
-  const values = usePetWizard((state) => state.values);
-  const acceptStep = usePetWizard((state) => state.acceptStep);
+  const { values, accept: acceptStep } = usePetStep();
   const [medication, setMedication] = useState(Boolean(values.medicationNotes));
   const [allergy, setAllergy] = useState(Boolean(values.allergies));
-  const { control, handleSubmit, setValue, setError } = useForm<Values, unknown, Accepted>({
+  const { control, handleSubmit, setValue, setError, formState } = useForm<Values, unknown, Accepted>({
     resolver: zodResolver(petStepSchemas.health),
     defaultValues: {
       isVaccinated: values.isVaccinated,
@@ -75,7 +74,7 @@ export function HealthStep() {
   useServerErrors(setError, ["isVaccinated", "isNeutered", "medicationNotes", "allergies", "vetContact", "microchip"]);
 
   return (
-    <StepForm title={copy.title} onSubmit={handleSubmit((accepted) => acceptStep(accepted))}>
+    <StepForm dirty={formState.isDirty} title={copy.title} onSubmit={handleSubmit((accepted) => acceptStep(accepted))}>
       <YesNoField control={control} name="isVaccinated" label={copy.vaccinated} />
       <YesNoField control={control} name="isNeutered" label={copy.neutered} />
       <ToggleRow
@@ -83,7 +82,7 @@ export function HealthStep() {
         checked={medication}
         onChange={(checked) => {
           setMedication(checked);
-          if (!checked) setValue("medicationNotes", "");
+          if (!checked) setValue("medicationNotes", "", { shouldDirty: true });
         }}
       >
         <NotesField control={control} name="medicationNotes" label={copy.medicationNotes} max={1000} />
@@ -93,7 +92,7 @@ export function HealthStep() {
         checked={allergy}
         onChange={(checked) => {
           setAllergy(checked);
-          if (!checked) setValue("allergies", "");
+          if (!checked) setValue("allergies", "", { shouldDirty: true });
         }}
       >
         <NotesField control={control} name="allergies" label={copy.allergies} max={1000} />

@@ -92,6 +92,8 @@ export interface PetProfileCardProps {
   now: Date;
   /** Na revisão: "Editar" por bloco leva ao passo (REQ-PNEW-015). Sem ele, a carteirinha é só leitura. */
   onEdit?: (step: number) => void;
+  /** A ficha (022) mostra todos os blocos, mesmo sem resposta (REQ-PEDIT-001); a prévia ao vivo só os preenchidos. */
+  showEmptyBlocks?: boolean;
 }
 
 /**
@@ -101,7 +103,7 @@ export interface PetProfileCardProps {
  *
  * @example <PetProfileCard values={values} coverUrl={cover} now={now} onEdit={(step) => goTo(step)} />
  */
-export function PetProfileCard({ values, coverUrl, now, onEdit }: PetProfileCardProps) {
+export function PetProfileCard({ values, coverUrl, now, onEdit, showEmptyBlocks = false }: PetProfileCardProps) {
   const pet = previewPet(values, coverUrl);
   const name = values.name || petWizardCopy.fallbackName;
   const blocks = blocksOf(values).map((block) => ({
@@ -146,7 +148,7 @@ export function PetProfileCard({ values, coverUrl, now, onEdit }: PetProfileCard
         )}
       </Stack>
       {blocks
-        .filter((block) => onEdit || block.lines.length > 0)
+        .filter((block) => onEdit || showEmptyBlocks || block.lines.length > 0)
         .map((block) => (
           <Box key={block.step}>
             <Divider sx={{ mb: 1.5 }} />
@@ -164,6 +166,11 @@ export function PetProfileCard({ values, coverUrl, now, onEdit }: PetProfileCard
                 </Button>
               )}
             </Stack>
+            {block.lines.length === 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {petWizardCopy.review.emptyBlock}
+              </Typography>
+            )}
             <Box component="dl" sx={{ m: 0, mt: 1, display: "grid", gap: 0.5 }}>
               {block.lines.map(([label, value]) => (
                 <Box key={label} sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>

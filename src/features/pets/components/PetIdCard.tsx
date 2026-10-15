@@ -2,11 +2,9 @@ import { Avatar, Box, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { PawMark } from "@/shared/ui/brand/PawMark";
 import { describePet } from "../lib/describePet";
+import { petPath } from "../lib/petPaths";
 import { petsCopy } from "../lib/petsCopy";
 import type { Pet } from "../types";
-
-/** Ficha do pet (spec 022). */
-export const petPath = (petId: string) => `/pets/${petId}`;
 
 export interface PetIdCardProps {
   pet: Pet;

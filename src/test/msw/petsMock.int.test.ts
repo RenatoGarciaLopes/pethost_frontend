@@ -89,3 +89,68 @@ it("REQ-PNEW-016 mock impede acesso de outra conta e anfitrião sem aprovação"
   expect((await caller("host", "unverified")("/pets", "POST", values)).status).toBe(404);
   expect((await fetch(`${API}/pets`, { method: "POST", body: JSON.stringify(values) })).status).toBe(401);
 });
+it("REQ-PEDIT-002/005/012/013 mock compartilha detalhe/lista e oculta outra conta", async () => {
+  const call = caller();
+  const created = (await (await call("/pets", "POST", { ...values, microchip: "123456789012345" })).json()).data;
+  const path = `/pets/${created.id}`;
+  expect((await caller("host", "both")(path)).status).toBe(404);
+  expect((await (await call(path)).json()).data.name).toBe("Mel");
+  expect((await call(path, "PATCH", { name: "Lua", breed: "", notes: null })).status).toBe(200);
+  expect((await (await call("/pets/me")).json()).data.pets[0].name).toBe("Lua");
+  expect((await call(path, "PATCH", { species: "exotic", speciesDescription: "Iguana" })).status).toBe(200);
+  const exotic = (await (await call(path)).json()).data;
+  expect(exotic.size).toBeNull();
+  expect(exotic.speciesDescription).toBe("Iguana");
+  expect((await call(path, "PATCH", { species: "dog" })).status).toBe(400);
+  expect((await call(`${path}/deactivation`, "POST")).status).toBe(200);
+  expect((await call(`${path}/deactivation`, "POST")).status).toBe(200);
+  expect((await call(path, "PATCH", { name: "Luna" })).status).toBe(200);
+  expect((await (await call(path)).json()).data.isActive).toBe(false);
+  expect((await call("/pets", "POST", { ...values, microchip: "123456789012345" })).status).toBe(201);
+  expect((await call(`${path}/deactivation`, "DELETE")).status).toBe(409);
+  await call(path, "PATCH", { microchip: "" });
+  expect((await call(`${path}/deactivation`, "DELETE")).status).toBe(200);
+});
+it("REQ-PEDIT-008/010 mock substitui mantendo id e ordem, remove e libera fingerprint", async () => {
+  const call = caller();
+  const created = (await (await call("/pets", "POST", values)).json()).data;
+  const path = `/pets/${created.id}/photos`;
+  const photo = (data: string) => {
+    const form = new FormData();
+    form.append("file", new File([data], "foto.jpg", { type: "image/jpeg" }));
+    return form;
+  };
+  const first = (await (await call(path, "POST", photo("um"))).json()).data.photos[0];
+  const second = (await (await call(path, "POST", photo("dois"))).json()).data.photos[1];
+  expect((await call(`${path}/${first.id}`, "PATCH", photo("dois"))).status).toBe(409);
+  const replaced = (await (await call(`${path}/${first.id}`, "PATCH", photo("tres"))).json()).data;
+  expect(replaced.photos.map((item: { id: string }) => item.id)).toEqual([first.id, second.id]);
+  expect(replaced.photos[0].url).not.toBe(first.url);
+  expect((await call(path, "POST", photo("um"))).status).toBe(200);
+  expect((await call(`${path}/${first.id}`, "DELETE")).status).toBe(200);
+  expect((await call(`${path}/${first.id}`, "DELETE")).status).toBe(404);
+  expect((await call(`${path}/${first.id}`, "PATCH", photo("x"))).status).toBe(404);
+  expect((await call(path, "POST", photo("tres"))).status).toBe(200);
+  expect((await caller("host", "both")(`${path}/${second.id}`, "DELETE")).status).toBe(404);
+});
+it("REQ-PEDIT-002 mock oculta pets alheios em todas as mutações e mantém estado após validação recusada", async () => {
+  const owner = caller();
+  const pet = (await (await owner("/pets", "POST", values)).json()).data;
+  const path = `/pets/${pet.id}`;
+  const other = caller("host", "both");
+  for (const [suffix, method, body] of [
+    ["", "PATCH", { name: "Outro" }],
+    ["/deactivation", "POST", undefined],
+    ["/deactivation", "DELETE", undefined],
+    ["/photos/missing", "PATCH", undefined],
+    ["/photos/missing", "DELETE", undefined],
+  ] as const) {
+    const response = await other(`${path}${suffix}`, method, body);
+    expect(response.status).toBe(404);
+    expect((await response.json()).error.code).toBe("PET_NOT_FOUND");
+  }
+  for (const patch of [{ name: "" }, { weightKg: 151 }, { species: "exotic" }, { microchip: "123" }])
+    expect((await owner(path, "PATCH", patch)).status).toBe(400);
+  expect((await (await owner(path)).json()).data.name).toBe("Mel");
+  expect((await (await owner(path)).json()).data.species).toBe("dog");
+});

@@ -1,19 +1,20 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Autocomplete, FormHelperText, Stack, TextField } from "@mui/material";
+import { Autocomplete, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
-import { ChoiceCardGroup } from "@/shared/ui/forms/ChoiceCardGroup";
 import { SegmentedControl } from "@/shared/ui/forms/SegmentedControl";
 import { ageBucketToBirthDate } from "../../../lib/ageBucketToBirthDate";
 import { gramsToKg } from "../../../lib/gramsToKg";
+import { petsCopy } from "../../../lib/petsCopy";
 import { petWizardCopy } from "../../../lib/petWizardCopy";
 import { requiresSize, usesGrams } from "../../../lib/species";
 import { bodyStepSchema } from "../../../schemas/petProfileSchema";
-import { usePetWizard } from "../../../stores/PetWizardProvider";
+import { usePetStep } from "./PetStepHost";
 import type { PetSpecies } from "../../../types";
+import { SizeField } from "./SizeField";
 import { StepForm } from "./StepForm";
 import { useServerErrors } from "./useServerErrors";
 
@@ -22,7 +23,6 @@ type Schema = ReturnType<typeof bodyStepSchema>;
 type Values = z.input<Schema>;
 type Accepted = z.output<Schema>;
 
-const SIZE_OPTIONS = (["small", "medium", "large"] as const).map((value) => ({ value, label: copy.sizes[value] }));
 const AGE_MODES = ["puppy", "young", "adult", "senior", "exact"] as const;
 type AgeMode = (typeof AGE_MODES)[number];
 const AGE_OPTIONS = AGE_MODES.map((value) => ({
@@ -44,8 +44,9 @@ function parseDecimal(text: string): number | undefined {
  * @example <BodyStep />
  */
 export function BodyStep() {
-  const values = usePetWizard((state) => state.values);
-  const acceptStep = usePetWizard((state) => state.acceptStep);
+  const { values, accept: acceptStep, mode } = usePetStep();
+  // Na edição, peso já salvo só troca (REQ-PEDIT-006).
+  const keepWeight = mode === "section" && values.weightKg !== undefined;
   const species = values.species as PetSpecies;
   const pet = values.name || petWizardCopy.fallbackName;
   const grams = usesGrams(species);
@@ -53,8 +54,8 @@ export function BodyStep() {
   const [weightText, setWeightText] = useState(() =>
     values.weightKg === undefined ? "" : String(grams ? Math.round(values.weightKg * 1000) : values.weightKg),
   );
-  const { control, handleSubmit, setValue, setError } = useForm<Values, unknown, Accepted>({
-    resolver: zodResolver(bodyStepSchema(species)),
+  const { control, handleSubmit, setValue, setError, formState } = useForm<Values, unknown, Accepted>({
+    resolver: zodResolver(bodyStepSchema(species, { keepWeight })),
     defaultValues: {
       breed: values.breed ?? "",
       size: values.size,
@@ -66,11 +67,15 @@ export function BodyStep() {
 
   function chooseAge(mode: AgeMode) {
     setAgeMode(mode);
-    if (mode !== "exact") setValue("birthDate", ageBucketToBirthDate(mode, new Date()));
+    if (mode !== "exact") setValue("birthDate", ageBucketToBirthDate(mode, new Date()), { shouldDirty: true });
   }
 
   return (
-    <StepForm title={copy.title(pet)} onSubmit={handleSubmit((accepted) => acceptStep(accepted))}>
+    <StepForm
+      dirty={formState.isDirty}
+      title={copy.title(pet)}
+      onSubmit={handleSubmit((accepted) => acceptStep(accepted))}
+    >
       <Controller
         control={control}
         name="breed"
@@ -94,26 +99,7 @@ export function BodyStep() {
         )}
       />
       {requiresSize(species) && (
-        <Controller
-          control={control}
-          name="size"
-          render={({ field, fieldState }) => (
-            <Stack
-              spacing={0.5}
-              ref={(node: HTMLDivElement | null) => field.ref(node?.querySelector("input[type=radio]") ?? null)}
-            >
-              <ChoiceCardGroup
-                label={copy.size}
-                options={SIZE_OPTIONS}
-                value={typeof field.value === "string" ? field.value : ""}
-                onChange={field.onChange}
-              />
-              <FormHelperText error={Boolean(fieldState.error)} role={fieldState.error ? "alert" : undefined}>
-                {fieldState.error?.message ?? copy.sizeHelp}
-              </FormHelperText>
-            </Stack>
-          )}
-        />
+        <Controller control={control} name="size" render={(props) => <SizeField {...props} />} />
       )}
       <Stack spacing={1.5} sx={{ "& .MuiToggleButton-root": { minWidth: 0, px: { xs: 1, sm: 2 } } }}>
         <SegmentedControl
@@ -159,7 +145,7 @@ export function BodyStep() {
             }}
             label={grams ? copy.weightGrams : copy.weightKg}
             error={Boolean(fieldState.error)}
-            helperText={fieldState.error?.message}
+            helperText={fieldState.error?.message ?? (keepWeight ? petsCopy.fieldErrors.weightRequired : undefined)}
             slotProps={{ htmlInput: { inputMode: "decimal" } }}
             // Sem porte, o peso é a pista de tamanho: borda mais grossa (REQ-PNEW-009).
             sx={requiresSize(species) ? undefined : { "& .MuiOutlinedInput-notchedOutline": { borderWidth: 2 } }}

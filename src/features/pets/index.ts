@@ -5,4 +5,6 @@
  */
 export { petsCopy } from "./lib/petsCopy";
 export { petWizardCopy } from "./lib/petWizardCopy";
+export { petEditCopy } from "./lib/petEditCopy";
+export { isPetId } from "./lib/petId";
 export { petSpeciesSchema } from "./api/contracts";

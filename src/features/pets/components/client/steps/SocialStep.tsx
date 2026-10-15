@@ -6,7 +6,7 @@ import type { z } from "zod";
 import { Hint } from "@/shared/ui/feedback/Hint";
 import { petWizardCopy } from "../../../lib/petWizardCopy";
 import { petStepSchemas } from "../../../schemas/petProfileSchema";
-import { usePetWizard } from "../../../stores/PetWizardProvider";
+import { usePetStep } from "./PetStepHost";
 import { StepForm } from "./StepForm";
 import { useServerErrors } from "./useServerErrors";
 import { YesNoField } from "./YesNoField";
@@ -22,9 +22,8 @@ type Accepted = z.output<typeof petStepSchemas.social>;
  * @example <SocialStep />
  */
 export function SocialStep() {
-  const values = usePetWizard((state) => state.values);
-  const acceptStep = usePetWizard((state) => state.acceptStep);
-  const { control, handleSubmit, setError } = useForm<Values, unknown, Accepted>({
+  const { values, accept: acceptStep } = usePetStep();
+  const { control, handleSubmit, setError, formState } = useForm<Values, unknown, Accepted>({
     resolver: zodResolver(petStepSchemas.social),
     defaultValues: {
       goodWithDogs: values.goodWithDogs,
@@ -36,6 +35,7 @@ export function SocialStep() {
 
   return (
     <StepForm
+      dirty={formState.isDirty}
       title={copy.title(values.name || petWizardCopy.fallbackName)}
       onSubmit={handleSubmit((accepted) => acceptStep(accepted))}
     >

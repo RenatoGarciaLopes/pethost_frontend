@@ -5,3 +5,4 @@
  * Não exporte recursos server-only.
  */
 export { PetListSkeleton } from "./components/client/PetList";
+export { PetProfileSkeleton } from "./components/client/PetProfile";

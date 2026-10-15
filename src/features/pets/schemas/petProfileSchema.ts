@@ -83,11 +83,20 @@ export const petStepSchemas = {
   routine: z.object(routine),
   social: z.object(social),
 };
-/** Corpo recebe espécie do store, nunca como campo do formulário. Gato aceita porte existente, sem exigi-lo. @example bodyStepSchema("dog").safeParse({ size: "small" }) */
-export function bodyStepSchema(species: PetSpecies) {
+/**
+ * Corpo recebe espécie do store, nunca como campo do formulário. Gato aceita porte existente, sem exigi-lo. Na
+ * edição, peso já informado não pode ficar em branco (`keepWeight`, REQ-PEDIT-006: a API troca, não apaga).
+ * @example bodyStepSchema("dog").safeParse({ size: "small" })
+ * @example bodyStepSchema("cat", { keepWeight: true }).safeParse({}) // falha: falta o peso
+ */
+export function bodyStepSchema(species: PetSpecies, { keepWeight = false }: { keepWeight?: boolean } = {}) {
   return z
     .object(body)
-    .superRefine((value, context) => refineSize(species, value.size, context))
+    .superRefine((value, context) => {
+      refineSize(species, value.size, context);
+      if (keepWeight && value.weightKg === undefined)
+        context.addIssue({ code: "custom", path: ["weightKg"], message: copy.weightRequired });
+    })
     .transform((value) => {
       if (allowsSize(species)) return value;
       const pruned = { ...value };
@@ -97,3 +106,15 @@ export function bodyStepSchema(species: PetSpecies) {
 }
 /** Parcial de rascunho: mesmas regras de campos, sem exigir conclusão. @example petProfileDraftValuesSchema.parse({ species: "dog" }) */
 export const petProfileDraftValuesSchema = profileObject.omit({ microchip: true }).partial();
+/**
+ * Seção "Bicho" da edição (REQ-PEDIT-007): virar cachorro pede o porte na mesma seção; virar exótico, a
+ * descrição. Gato mantém o porte que tiver.
+ * @example speciesSectionSchema.safeParse({ species: "dog" }) // falha: falta o porte
+ */
+export const speciesSectionSchema = z
+  .object({ ...species, size: body.size })
+  .superRefine((value, context) => {
+    refineSpecies(value, context);
+    refineSize(value.species, value.size, context);
+  })
+  .transform(pruneForSpecies);

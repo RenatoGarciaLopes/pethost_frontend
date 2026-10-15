@@ -212,3 +212,17 @@ Detalhes na nota `development/resources/pets.md` do vault.
 | E2E real                                                                    | não rodado: precisa da API de teste                               |
 
 Detalhes na nota `development/resources/pets.md` do vault.
+
+## 14/10/2026 · Ficha, edição e fotos do pet (spec 022)
+
+| Verificação                                                                                    | Resultado                                                                         |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `npm run verify -- -- --maxWorkers=2` (Prettier, ESLint, tsc, Vitest)                          | 206 arquivos, 1238 testes verdes                                                  |
+| E2E mocked `e2e/mocked/pets/pet-profile.spec.ts` (desktop e celular, workers 1, servidor frio) | 16 de 16                                                                          |
+| E2E mocked de pets inteiro (020, 021 e 022)                                                    | 34 de 34 antes das correções da revisão; a suíte da 022 repetida depois, 16 de 16 |
+| Storybook de `PetProfile`, `PetEditor`, `ConfirmDialog` e `PhotoSlots` (a11y)                  | 17 testes sem violação                                                            |
+| E2E real                                                                                       | não rodado: precisa da API de teste                                               |
+
+Sem `--maxWorkers=2`, nesta máquina o verify estoura o timeout de 5 s em testes longos de outras specs e no `Max-Age` dos cookies da 003, que depende do relógio. Os mesmos testes passam isolados. O E2E local roda com `next dev --webpack -p 3100`, porque o Turbopack recusa a junction de `node_modules` da worktree.
+
+Detalhes na nota `development/resources/pets.md` do vault.

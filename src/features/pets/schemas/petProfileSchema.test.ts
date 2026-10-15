@@ -1,5 +1,5 @@
 import { expect, it, vi, afterEach } from "vitest";
-import { petProfileSchema, petStepSchemas, bodyStepSchema } from "./petProfileSchema";
+import { petProfileSchema, petStepSchemas, bodyStepSchema, speciesSectionSchema } from "./petProfileSchema";
 const minimum = {
   species: "dog",
   name: " Mel ",
@@ -71,4 +71,24 @@ it("REQ-PNEW-014 recortes não exigem campos de outros passos e corpo usa fábri
   expect(
     petStepSchemas.social.safeParse({ goodWithDogs: false, goodWithCats: true, goodWithKids: false }).success,
   ).toBe(true);
+});
+
+it("REQ-PEDIT-006 na edição o peso já informado pode trocar, mas não ficar em branco", () => {
+  const keep = bodyStepSchema("cat", { keepWeight: true });
+  expect(keep.safeParse({}).error?.issues[0]).toMatchObject({
+    path: ["weightKg"],
+    message: "Dá pra trocar o peso, mas não deixar em branco.",
+  });
+  expect(keep.parse({ weightKg: 4.2 })).toEqual({ weightKg: 4.2 });
+  expect(bodyStepSchema("cat").parse({})).toEqual({});
+});
+
+it("REQ-PEDIT-007 a seção Bicho pede o porte ao virar cachorro e a descrição ao virar exótico", () => {
+  expect(speciesSectionSchema.safeParse({ species: "dog" }).error?.issues[0].path).toEqual(["size"]);
+  expect(speciesSectionSchema.parse({ species: "dog", size: "large" })).toEqual({ species: "dog", size: "large" });
+  expect(speciesSectionSchema.safeParse({ species: "exotic" }).error?.issues[0].path).toEqual(["speciesDescription"]);
+  expect(speciesSectionSchema.parse({ species: "cat", size: "small" })).toEqual({ species: "cat", size: "small" });
+  expect(speciesSectionSchema.parse({ species: "rabbit", size: "small", speciesDescription: "x" })).toEqual({
+    species: "rabbit",
+  });
 });

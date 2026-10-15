@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import type { petSexSchema, petSizeSchema, petSpeciesSchema } from "./api/contracts";
+import type { PetProfileValues } from "./schemas/petProfileSchema";
 
 export type PetSpecies = z.output<typeof petSpeciesSchema>;
 export type PetSize = z.output<typeof petSizeSchema>;
@@ -27,4 +28,21 @@ export interface Pet {
 export interface PetList {
   active: Pet[];
   inactive: Pet[];
+}
+
+/** Uma foto da ficha (spec 022): o id serve para trocar (`PATCH`) e tirar (`DELETE`). */
+export interface PetPhoto {
+  id: string;
+  url: string;
+}
+
+/**
+ * A ficha inteira (spec 022), como `petQueries.detail` guarda: os valores no mesmo formato do formulário da
+ * 021 (o que a API manda `null` vira ausente) e as fotos na ordem das vagas, a primeira é a capa.
+ */
+export interface PetDetail {
+  id: string;
+  isActive: boolean;
+  values: PetProfileValues;
+  photos: PetPhoto[];
 }

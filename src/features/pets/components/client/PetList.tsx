@@ -4,9 +4,11 @@ import { Box, Button, Container, Skeleton, Stack, Typography } from "@mui/materi
 import NextLink from "next/link";
 import { useState } from "react";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { useFlashMessageOnce } from "@/shared/hooks/useFlashMessage";
 import { PawMark } from "@/shared/ui/brand/PawMark";
 import { EmptyState } from "@/shared/ui/feedback/EmptyState";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
+import { Notice } from "@/shared/ui/feedback/Notice";
 import { useMyPets } from "../../hooks/useMyPets";
 import { petsCopy } from "../../lib/petsCopy";
 import { NEW_PET_PATH, NewPetTile } from "../NewPetTile";
@@ -23,6 +25,8 @@ import { InactivePetsSection } from "./InactivePetsSection";
  */
 export function PetList({ accountId }: { accountId: string }) {
   const pets = useMyPets(accountId);
+  // "A ficha de {nome} saiu da lista." vindo da ficha (REQ-PEDIT-012), uma vez.
+  const flash = useFlashMessageOnce();
   // Uma data só para todas as carteirinhas, fixa durante a visita.
   const [now] = useState(() => new Date());
 
@@ -52,6 +56,7 @@ export function PetList({ accountId }: { accountId: string }) {
 
   return (
     <Stack spacing={4}>
+      {flash && <Notice tone="ok" title={flash} />}
       <PetGrid>
         {active.map((pet) => (
           <li key={pet.id}>

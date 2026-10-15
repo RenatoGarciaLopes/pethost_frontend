@@ -70,6 +70,7 @@ export const petWizardCopy = {
     cardLabel: (pet: string) => `Carteirinha de ${pet}`,
     edit: "Editar",
     editBlock: (block: string) => `Editar ${block}`,
+    emptyBlock: "Nada contado ainda.",
     save: (pet: string) => `Salvar a ficha de ${pet}`,
     saving: "Salvando a ficha…",
     uploading: (current: number, total: number) => `Enviando fotos (${current} de ${total})…`,

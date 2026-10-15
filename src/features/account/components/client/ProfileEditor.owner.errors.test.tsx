@@ -41,6 +41,8 @@ it.each([
     await screen.findByText("Pronto, guardado.");
     expect(bodies[1]).toEqual({ fullName: "Camila Teste" });
   },
+  // Muita digitação: com a suíte inteira em paralelo, 5 s não bastam.
+  15_000,
 );
 it.each([
   ["fullName", "Seu nome completo"],
