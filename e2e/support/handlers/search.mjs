@@ -30,6 +30,12 @@ const listings = Array.from({ length: 13 }, (_, index) => ({
   badges: index % 2 ? [] : ["yard", "neighbor"],
 }));
 
+/** Um cantinho da busca pelo id, para a página do cantinho abrir o que a busca mostrou. @example searchListing(id) */
+export function searchListing(listingId) {
+  const found = listings.find((item) => item.id === listingId);
+  return found ? structuredClone(found) : null;
+}
+
 /** Busca sintética determinística, filtros observáveis e paginação; não simula geocodificação real. @example server.use(...searchHandlers); */
 export const searchHandlers = [
   http.get(`${API}/listings`, ({ request }) => {

@@ -1,4 +1,5 @@
 import { http } from "msw";
+import { searchListing } from "./search.mjs";
 import { fail, ok, sessionUserOf } from "./session.mjs";
 
 const API = "http://localhost:5099/api/v1";
@@ -38,12 +39,27 @@ const detail = {
 export const listingPageHandlers = [
   http.get(`${API}/listings/:listingId`, ({ request, params }) => {
     if (!sessionUserOf(request)) return fail(401, "UNAUTHORIZED");
-    if (params.listingId !== LISTING_ID) return fail(404, "LISTING_NOT_FOUND");
-    return ok(structuredClone(detail));
+    const listing = publicListing(params.listingId);
+    return listing ? ok(listing) : fail(404, "LISTING_NOT_FOUND");
   }),
 ];
 
-/** O cantinho público do mock, para o pedido de estadia (spec 050) conferir regras e diária. @example publicListing(id) */
+/**
+ * O cantinho público do mock: o da página (042) ou, se o id vier da busca (041), o detalhe montado do cartão dela, para
+ * a jornada busca → cantinho → pedido (spec 050). Também serve ao pedido conferir regras e diária.
+ * @example publicListing(id)
+ */
 export function publicListing(listingId) {
-  return listingId === LISTING_ID ? structuredClone(detail) : null;
+  if (listingId === LISTING_ID) return structuredClone(detail);
+  const summary = searchListing(listingId);
+  if (!summary) return null;
+  const { neighborhood, city, state, distanceKm: _distance, ...rest } = summary;
+  void _distance;
+  return {
+    ...structuredClone(detail),
+    ...rest,
+    description: "Um cantinho da busca.",
+    address: { neighborhood, city, state },
+    photos: [],
+  };
 }

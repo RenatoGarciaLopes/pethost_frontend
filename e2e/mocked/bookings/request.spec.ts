@@ -62,6 +62,50 @@ test("REQ-REQST-002 a REQ-REQST-006 pede a estadia com o que veio da URL e acomp
   await expect(page.getByRole("link", { name: /^Quintal da Cida/ })).toContainText("Esperando resposta", NAVIGATION);
 });
 
+// Pendente da 042: /listings/[listingId] lê a sessão fora de <Suspense> e, com cacheComponents, a navegação no cliente
+// a partir da busca falha ("uncached data during prerendering or a navigation"). Tirar o fixme quando a página
+// envolver o conteúdo em <Suspense> e esperar connection() antes da sessão.
+test.fixme("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas e o pet da busca", async ({
+  page,
+  baseURL,
+}) => {
+  test.setTimeout(60_000);
+  await loginAccount(page, baseURL!, "both", "owner");
+  const from = nextMonday();
+  const to = plus(from, 2);
+  await page.goto("/search");
+  const pill = page.getByRole("button", { name: "Onde, datas e pet" });
+  if (await pill.isVisible()) await pill.click();
+  await page.getByLabel("Chegada", { exact: true }).filter({ visible: true }).fill(from);
+  await page.getByLabel("Saída", { exact: true }).filter({ visible: true }).fill(to);
+  await page.getByLabel("Luna", { exact: true }).filter({ visible: true }).check();
+  await page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cantinhos que recebem Luna", NAVIGATION);
+
+  const card = page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first();
+  const title = (await card.getByRole("heading").first().textContent())?.trim() ?? "";
+  await waitForHydration(card);
+  await card.click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible(NAVIGATION);
+
+  const ask = page.getByRole("link", { name: "Pedir estadia" });
+  await waitForHydration(ask);
+  await ask.click();
+  await expect(page).toHaveURL(/\/listings\/[0-9a-f-]+\/request\?/, NAVIGATION);
+  await expect(page.getByRole("heading", { name: "Pedir estadia", level: 1 })).toBeVisible(NAVIGATION);
+  await expect(page.getByLabel("Chegada")).toHaveValue(from);
+  await expect(page.getByLabel("Saída")).toHaveValue(to);
+  await expect(page.getByRole("group", { name: "Quem vai?" }).getByRole("checkbox", { name: /Luna/ })).toBeChecked();
+  const summary = page.getByRole("region", { name: "Resumo do pedido" });
+  await expect(summary).toContainText(title);
+  await expect(summary).toContainText(/R\$\s60,00 × 2 noites × 1 pet = R\$\s120,00/);
+
+  const send = page.getByRole("button", { name: "Pedir estadia" });
+  await waitForHydration(send);
+  await send.click();
+  await expect(page.getByRole("heading", { name: "Pedido enviado!" })).toBeFocused();
+});
+
 test("REQ-REQST-007 dia em que o cantinho não recebe vira frase no topo, com o dia", async ({ page, baseURL }) => {
   await loginAccount(page, baseURL!, "both", "owner");
   const saturday = plus(nextMonday(), 5);
