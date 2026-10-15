@@ -7,7 +7,7 @@ import { visuallyHidden } from "../../a11y/visuallyHidden";
 import { documentSlotCopy as copy } from "./documentSlotCopy";
 
 export interface DocumentSlotProps {
-  /** Nome da vaga ("Foto da frente do documento"). Vira o nome do botão, com o estado. */
+  /** Nome da vaga ("Foto da frente do documento"). Abre o nome do botão, seguido da ação visível. */
   label: string;
   /** O que se espera na foto; descreve o botão. */
   hint: string;
@@ -30,8 +30,8 @@ export interface DocumentSlotProps {
 
 /**
  * Uma vaga grande de foto de documento (spec 030, REQ-HVER-006/018): o desenho do que se espera, a dica, a
- * miniatura da foto escolhida e "Tirar de novo". A vaga é um botão com nome e estado ("Foto da frente do documento,
- * vazia") que abre a câmera certa; "Escolher da galeria" aceita foto já tirada. Controlada e sem HTTP; a foto fica só
+ * miniatura da foto escolhida e "Tirar de novo". A vaga é um botão que abre a câmera certa, com o nome
+ * igual ao texto que se vê ("Foto da frente do documento Tirar foto"), para quem usa comando de voz; "Escolher da galeria" aceita foto já tirada. Controlada e sem HTTP; a foto fica só
  * em memória.
  *
  * Quando usar: foto única com orientação do que tirar (documento, selfie, comprovante). Quando não usar: várias
@@ -58,7 +58,6 @@ export function DocumentSlot({
   const galleryRef = useRef<HTMLInputElement>(null);
   const preview = useObjectUrl(file);
   const blocked = disabled || busy;
-  const state = file ? copy.states.chosen : uploaded ? copy.states.uploaded : copy.states.empty;
   const hintId = `${id}-dica`;
   const errorId = `${id}-erro`;
 
@@ -87,7 +86,6 @@ export function DocumentSlot({
   return (
     <Stack spacing={1} sx={{ minWidth: 0 }}>
       <ButtonBase
-        aria-label={`${label}, ${state}`}
         aria-describedby={error ? `${hintId} ${errorId}` : hintId}
         aria-busy={busy || undefined}
         disabled={blocked}
@@ -123,7 +121,8 @@ export function DocumentSlot({
             <Box
               component="img"
               src={preview}
-              alt={copy.preview(label)}
+              // Decorativa: a ação ao lado ("Tirar de novo") já diz que há foto, e o nome do botão fica limpo.
+              alt=""
               sx={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
@@ -134,7 +133,7 @@ export function DocumentSlot({
         </Box>
         <Typography component="span" sx={{ fontWeight: 700 }}>
           {label}
-        </Typography>
+        </Typography>{" "}
         <Typography component="span" sx={{ fontWeight: 700, color: "text.secondary" }}>
           {busy ? copy.preparing : file ? copy.retake : uploaded ? copy.uploaded : copy.take}
         </Typography>

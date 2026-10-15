@@ -26,7 +26,7 @@ async function fakePhoto(page: Page, seed: number) {
 
 async function choosePhoto(page: Page, label: string, seed: number) {
   await page.locator(`input[aria-label="${label}: galeria"]`).setInputFiles(await fakePhoto(page, seed));
-  await expect(page.getByRole("button", { name: `${label}, foto escolhida` })).toBeVisible();
+  await expect(page.getByRole("button", { name: `${label} Tirar de novo` })).toBeVisible();
 }
 
 // Os projetos mocked-desktop e mocked-mobile executam a mesma jornada, com estado isolado.
