@@ -13,6 +13,11 @@ vi.mock("next/headers", async () => {
     headers: async () => new Headers(),
   };
 });
+// O requireRole espera a requisição (connection()) antes de ler a sessão; fora do Next, a espera é imediata.
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  connection: async () => {},
+}));
 vi.mock("next/navigation", () => ({
   redirect: (path: string) => {
     throw new Error(`redirect:${path}`);
