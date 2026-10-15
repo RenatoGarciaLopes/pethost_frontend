@@ -3,7 +3,7 @@
 import { Box, Button, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import { useUnsavedChangesGuard } from "@/shared/hooks/useUnsavedChangesGuard";
@@ -19,6 +19,7 @@ import { HOST_HOME_PATH } from "../../lib/listingPaths";
 import { mergeSection, sectionOfField } from "../../lib/listingSections";
 import { createListingSchemas, type ListingFormValues, type ListingSectionId } from "../../schemas/listingSchema";
 import type { HostKind, Listing } from "../../types";
+import { ListingPhotosSection } from "./ListingPhotosSection";
 import { ListingSections } from "./ListingSections";
 import type { ListingSectionHostValue, SectionSaveOutcome } from "./sections/ListingSectionHost";
 
@@ -27,8 +28,6 @@ export interface ListingEditorProps {
   listingId: string;
   kind: HostKind;
   firstName: string;
-  /** Seção das fotos, ligada à API (T7); fica entre o cabeçalho e as seções. */
-  photos?: (listing: Listing) => ReactNode;
 }
 
 /**
@@ -38,7 +37,7 @@ export interface ListingEditorProps {
  *
  * @example <ListingEditor accountId={user.id} listingId={id} kind="person" firstName="Cida" />
  */
-export function ListingEditor({ accountId, listingId, kind, firstName, photos }: ListingEditorProps) {
+export function ListingEditor({ accountId, listingId, kind, firstName }: ListingEditorProps) {
   const query = useQuery(listingQueries.detail(accountId, listingId));
   if (query.isPending) return <ListingEditorSkeleton />;
   if (query.isError)
@@ -49,9 +48,7 @@ export function ListingEditor({ accountId, listingId, kind, firstName, photos }:
         onRetry={() => void query.refetch()}
       />
     );
-  return (
-    <ListingEditorView accountId={accountId} listing={query.data} kind={kind} firstName={firstName} photos={photos} />
-  );
+  return <ListingEditorView accountId={accountId} listing={query.data} kind={kind} firstName={firstName} />;
 }
 
 /** Esqueleto do cantinho enquanto busca. */
@@ -69,7 +66,6 @@ function ListingEditorView({
   listing,
   kind,
   firstName,
-  photos,
 }: Omit<ListingEditorProps, "listingId"> & { listing: Listing }) {
   const schemas = useMemo(() => createListingSchemas(kind), [kind]);
   const update = useUpdateListing(accountId, listing.id);
@@ -148,7 +144,7 @@ function ListingEditorView({
         />
       </Stack>
       <PauseControls accountId={accountId} listing={listing} />
-      {photos?.(listing)}
+      <ListingPhotosSection accountId={accountId} listing={listing} />
       <ListingSections host={host} />
       {dialog}
     </Stack>

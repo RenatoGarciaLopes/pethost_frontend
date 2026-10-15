@@ -114,6 +114,13 @@ export const listingCopy = {
     body: "Agora ele já aparece pros tutores. Com fotos, fica muito mais fácil de escolher.",
     photos: "Pôr as fotos da casa",
   },
+  photos: {
+    heading: "Fotos da casa",
+    label: "Fotos da casa",
+    help: "Até 5 fotos. A primeira é a capa.",
+    suggestionsTitle: "Boas fotos pra pôr",
+    suggestions: ["Onde os pets dormem", "Onde comem", "O quintal", "O portão", "A sala"],
+  },
   editor: {
     back: "Meu painel",
     active: "Aberto",
