@@ -1,4 +1,4 @@
-import type { HomeType, ListingSpecies, Weekday } from "../types";
+import type { HomeType, ListingSpecies } from "../types";
 
 /** Textos de "Montar meu cantinho" (spec 044), na voz da PetHost. Sem gênero presumido de quem lê. */
 export const listingCopy = {
@@ -24,15 +24,6 @@ export const listingCopy = {
     turtle: "Tartaruga ou jabuti",
     exotic: "Outro bicho (aceito conversar)",
   } satisfies Record<ListingSpecies, string>,
-  weekdays: {
-    monday: "Segunda",
-    tuesday: "Terça",
-    wednesday: "Quarta",
-    thursday: "Quinta",
-    friday: "Sexta",
-    saturday: "Sábado",
-    sunday: "Domingo",
-  } satisfies Record<Weekday, string>,
   homeTypes: { house: "Casa", apartment: "Apartamento" } satisfies Record<HomeType, string>,
 
   errors: {

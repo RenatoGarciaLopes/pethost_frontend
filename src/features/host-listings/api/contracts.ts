@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { unwrapData } from "@/shared/api/contracts/unwrapData";
+import { WEEKDAY_VALUES } from "@/shared/ui/forms/WeekdayPicker";
 import { GetApiV1HostsMeResponse } from "@/shared/api/generated/hosts/hosts.zod";
 import {
   GetApiV1ListingsListingIdResponse,
@@ -21,8 +22,8 @@ export const LISTING_SPECIES = [
   "turtle",
   "exotic",
 ] as const;
-/** Dias em que recebe, de segunda a domingo. */
-export const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
+/** Dias em que recebe, de segunda a domingo (os mesmos do `WeekdayPicker`). */
+export const WEEKDAYS = WEEKDAY_VALUES;
 export const HOME_TYPES = ["house", "apartment"] as const;
 
 /** A API aceita maiúsculas na entrada; a leitura normaliza antes de estreitar. */
