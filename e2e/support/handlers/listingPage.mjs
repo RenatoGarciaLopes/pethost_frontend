@@ -3,7 +3,7 @@ import { fail, ok, sessionUserOf } from "./session.mjs";
 
 const API = "http://localhost:5099/api/v1";
 export const LISTING_ID = "0199d2a0-0000-7000-8000-000000000042";
-const HOST_ID = "0199d2a0-0000-7000-8000-000000000042";
+const HOST_ID = "0199d2a0-0000-7000-8000-0000000000b1";
 
 const detail = {
   id: LISTING_ID,

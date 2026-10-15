@@ -8,6 +8,7 @@ test("REQ-LPAGE-001/003/004/008/009 abre o cantinho com privacidade, total e met
   await expect(page).toHaveTitle("Quintal da Cida · PetHost");
   await expect(page.getByRole("heading", { level: 1, name: "Quintal da Cida" })).toBeVisible();
   await expect(page.getByText("Centro, Maringá · PR")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Quem mora aqui" })).toHaveCount(0);
   await expect(page.getByText("O endereço chega quando a estadia for confirmada.")).toBeVisible();
   await expect(page.getByText(/300,00/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Pedir estadia" })).toHaveAttribute(
