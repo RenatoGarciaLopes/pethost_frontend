@@ -1,14 +1,28 @@
 import { getMyApplication } from "@/features/host-applications/index.server";
+import { getHostListingProfile, getMyListings } from "@/features/host-listings/index.server";
 import { HostOnboardingStages } from "./HostOnboardingStages";
 
 /**
- * O painel das três etapas no servidor (REQ-HVER-001): lê a verificação da conta (a mesma busca da tela, por
- * `cache()`) e libera a etapa 2 só com a verificação aprovada. Se a leitura falhar, mostra as etapas como antes da
- * aprovação (nunca libera por engano); a tela ao lado mostra o erro.
+ * O painel das três etapas no servidor (REQ-HVER-001, REQ-LIST-001), com a situação real: a verificação (030), o
+ * recebimento lido do perfil do anfitrião (`stripePayoutsEnabled`/`stripeStatus` de `GET /hosts/me`, sem depender da
+ * 043) e se já há cantinho. As leituras usam `cache()`, então a tela ao lado não busca de novo. Se alguma falhar, a
+ * etapa fica como antes (nunca libera por engano).
  *
  * @example <HostOnboardingPanel accountId={user.id} />
  */
 export async function HostOnboardingPanel({ accountId }: { accountId: string }) {
-  const mine = await getMyApplication(accountId).catch(() => null);
-  return <HostOnboardingStages verificationApproved={mine?.application?.status === "approved"} />;
+  const [application, profile] = await Promise.all([
+    getMyApplication(accountId).catch(() => null),
+    getHostListingProfile(accountId).catch(() => null),
+  ]);
+  const mine = profile?.payoutsEnabled ? await getMyListings(accountId).catch(() => null) : null;
+  return (
+    <HostOnboardingStages
+      progress={{
+        verified: profile !== null || application?.application?.status === "approved",
+        payouts: profile ? { enabled: profile.payoutsEnabled, status: profile.stripeStatus } : null,
+        hasListing: (mine?.listings.length ?? 0) > 0,
+      }}
+    />
+  );
 }

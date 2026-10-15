@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
@@ -97,5 +97,49 @@ describe("ConfirmDialog", () => {
     await user.click(await screen.findByRole("button", { name: texts.cancelLabel }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(opener).toHaveFocus();
+  });
+});
+
+describe("ConfirmDialog com campos", () => {
+  it("REQ-HREQ-005 o conteúdo extra (ex.: motivo opcional) fica dentro do diálogo, abaixo do texto", () => {
+    renderDialog({
+      children: (
+        <label>
+          Motivo (opcional)
+          <input />
+        </label>
+      ),
+    });
+    const dialog = screen.getByRole("dialog", { name: texts.title });
+    expect(within(dialog).getByRole("textbox", { name: "Motivo (opcional)" })).toBeInTheDocument();
+    expect(dialog).toHaveAccessibleDescription(texts.message);
+  });
+
+  it("REQ-STAYS-006 quem já foi ao campo antes do diálogo terminar de abrir continua digitando nele", async () => {
+    function WithReason() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            Cancelar estadia
+          </button>
+          <ConfirmDialog open={open} {...texts} onConfirm={vi.fn()} onCancel={() => setOpen(false)}>
+            <label>
+              Motivo (opcional)
+              <input />
+            </label>
+          </ConfirmDialog>
+        </>
+      );
+    }
+    const { user } = renderWithProviders(<WithReason />, { theme: quintalTheme });
+    await user.click(screen.getByRole("button", { name: "Cancelar estadia" }));
+    const field = await screen.findByRole("textbox", { name: "Motivo (opcional)" });
+    await user.type(field, "Mudança de planos");
+    // Passa do fim da transição de entrada, quando o diálogo devolveria o foco à ação segura.
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await user.type(field, "!");
+    expect(field).toHaveFocus();
+    expect(field).toHaveValue("Mudança de planos!");
   });
 });

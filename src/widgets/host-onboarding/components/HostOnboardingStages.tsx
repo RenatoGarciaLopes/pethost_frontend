@@ -1,52 +1,25 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { useId } from "react";
 import { StatusPill, type StatusPillTone } from "@/shared/ui/feedback/StatusPill";
 import { hostOnboardingCopy as copy } from "../lib/hostOnboardingCopy";
+import { hostStages, type HostProgress, type StageState } from "../lib/hostStages";
 
-type StageState = keyof typeof copy.states;
-
-interface Stage {
-  title: string;
-  state: StageState;
-  text: string;
-}
-
-const TONE: Readonly<Record<StageState, StatusPillTone>> = {
-  current: "info",
-  done: "ok",
-  unlocked: "info",
-  locked: "neutro",
-};
-
-function stagesFor(verificationApproved: boolean): Stage[] {
-  const { verification, payout, listing } = copy.stages;
-  return [
-    verificationApproved
-      ? { title: verification.title, state: "done", text: verification.done }
-      : { title: verification.title, state: "current", text: verification.current },
-    verificationApproved
-      ? { title: payout.title, state: "unlocked", text: payout.unlocked }
-      : { title: payout.title, state: "locked", text: payout.locked },
-    { title: listing.title, state: "locked", text: listing.locked },
-  ];
-}
+const TONE: Readonly<Record<StageState, StatusPillTone>> = { current: "info", done: "ok", locked: "neutro" };
 
 export interface HostOnboardingStagesProps {
-  /** A verificação (etapa 1) foi aprovada: libera a etapa 2. */
-  verificationApproved: boolean;
+  /** Onde o anfitrião está: verificação, recebimento e cantinho. */
+  progress: HostProgress;
 }
 
 /**
- * As três etapas para virar anfitrião, em ordem (REQ-HVER-001): 1. Mostrar quem eu sou → 2. Como eu recebo → 3.
- * Montar meu cantinho. Cada etapa só abre quando a anterior termina; a travada diz o que falta, e o estado vem em
- * texto (o selo só reforça). A etapa de agora leva `aria-current="step"`. Apresentação pura; 043 e 044 ligam as
- * etapas 2 e 3.
+ * As três etapas para virar anfitrião, em ordem (REQ-HVER-001, REQ-LIST-001): 1. Mostrar quem eu sou → 2. Como eu
+ * recebo → 3. Montar meu cantinho. Cada etapa só abre quando a anterior termina; a da vez traz o caminho
+ * (`aria-current="step"`) e a travada diz o que falta. O estado vem em texto; o selo só reforça. Apresentação pura.
  *
- * @example <HostOnboardingStages verificationApproved={false} />
+ * @example <HostOnboardingStages progress={{ verified: true, payouts: { enabled: false, status: "in_progress" }, hasListing: false }} />
  */
-export function HostOnboardingStages({ verificationApproved }: HostOnboardingStagesProps) {
+export function HostOnboardingStages({ progress }: HostOnboardingStagesProps) {
   const headingId = useId();
-  const stages = stagesFor(verificationApproved);
   return (
     <Box component="section" aria-labelledby={headingId}>
       <Typography id={headingId} variant="h2" sx={{ fontSize: { xs: 22, md: 24 }, mb: 2 }}>
@@ -63,12 +36,12 @@ export function HostOnboardingStages({ verificationApproved }: HostOnboardingSta
           gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
         }}
       >
-        {stages.map((stage, index) => (
+        {hostStages(progress).map((stage, index) => (
           <Stack
             component="li"
             key={stage.title}
             spacing={1}
-            aria-current={stage.state === "current" || stage.state === "unlocked" ? "step" : undefined}
+            aria-current={stage.state === "current" ? "step" : undefined}
             sx={{
               p: 2,
               borderRadius: 3,
@@ -99,6 +72,13 @@ export function HostOnboardingStages({ verificationApproved }: HostOnboardingSta
               <StatusPill label={copy.states[stage.state]} tone={TONE[stage.state]} size="sm" />
             </Stack>
             <Typography variant="body2">{stage.text}</Typography>
+            {stage.action && (
+              <Box>
+                <Button href={stage.action.href} variant="outlined" size="small">
+                  {stage.action.label}
+                </Button>
+              </Box>
+            )}
           </Stack>
         ))}
       </Box>

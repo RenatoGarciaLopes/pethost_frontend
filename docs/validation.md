@@ -293,3 +293,55 @@ Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verif
 | E2E mocked (Claude Code, 15/10)                                                                                             | host 6 de 6, casca e admin juntos 26 de 27 e, com a espera de 15 s no detalhe do admin, 7 de 7            |
 | Storybook com a11y (Claude Code)                                                                                            | verde depois de o nome da `DocumentSlot` passar a ser o texto visível (axe `label-content-name-mismatch`) |
 | E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                           |
+
+| Verificação                                                                                                                 | Resultado                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Vitest da 030 (`--maxWorkers=2`): feature, `DocumentSlot`, `StatusTimeline`, imagem, CNPJ, widget, rotas, mock              | 132 testes verdes: 58 unitários, 49 de componente, 16 de integração (Node), 9 de integração (jsdom) |
+| Vitest das áreas tocadas (inclui `shared/ui/forms`, `shared/api/errors`, `shared/config`, arquitetura e `features/account`) | 74 arquivos, 482 testes verdes                                                                      |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                                    | sem erros                                                                                           |
+| E2E mocked `e2e/mocked/host/verification.spec.ts`                                                                           | escrito; não rodado pelo agente da spec (regra da máquina compartilhada)                            |
+| Storybook (a11y) de `ApplicationWizard`, `ApplicationStatusView`, `DocumentSlot`, `StatusTimeline`, `HostOnboardingStages`  | escritas; não rodadas pelo agente da spec                                                           |
+| E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                     |
+
+## 15/10/2026 · Montar meu cantinho (spec 044)
+
+| Verificação                                                                                                   | Resultado                                                                                            |
+| ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Vitest da 044 (`--maxWorkers=2`): feature, dinheiro, `WeekdayPicker`, `PhotoSlots`, widget, rotas, mock       | 105 testes verdes: 46 unitários, 22 de componente, 14 de integração (Node), 23 de integração (jsdom) |
+| Vitest das áreas tocadas (inclui 030, `shared/ui/forms`, `shared/ui/media`, `shared/api/errors`, arquitetura) | 69 arquivos, 433 testes verdes                                                                       |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                      | sem erros                                                                                            |
+| E2E mocked `e2e/mocked/host/listing.spec.ts` e Storybook                                                      | escritos; não rodados pelo agente da spec (regra da máquina compartilhada)                           |
+
+## 15/10/2026 · Pedidos e estadias do anfitrião (spec 053)
+
+| Verificação                                                                                                                 | Resultado                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Vitest da 053 (`--maxWorkers=2`): base de `bookings`, lista, detalhe, decisões, widget das fichas, `stayRules`, rotas, mock | 60 testes verdes: 22 unitários, 13 de componente, 10 de integração (Node), 15 de integração (jsdom) |
+| ESLint, `tsc --noEmit`, Prettier                                                                                            | sem erros                                                                                           |
+| E2E mocked `e2e/mocked/bookings/host-requests.spec.ts` e Storybook                                                          | escritos; não rodados pelo agente da spec                                                           |
+
+## 15/10/2026 · Chegou e voltou pra casa (spec 054)
+
+| Verificação                                                                            | Resultado                                 |
+| -------------------------------------------------------------------------------------- | ----------------------------------------- |
+| Vitest: `stayMilestones` (3), `StayMilestones` (9), trilha do tutor em `bookingStatus` | verdes                                    |
+| Vitest de `features/bookings` inteira (053 + 054)                                      | 54 testes verdes                          |
+| ESLint, `tsc --noEmit`, Prettier                                                       | sem erros                                 |
+| E2E mocked `e2e/mocked/bookings/stay-day.spec.ts` e Storybook                          | escritos; não rodados pelo agente da spec |
+
+## 15/10/2026 · Minhas estadias (spec 052)
+
+| Verificação                                                                                                                                                       | Resultado                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Vitest (`--maxWorkers=2`): `features/bookings`, `host-listings`, widgets, tema, `WeekdayPicker`, `ConfirmDialog`, rotas do tutor e do anfitrião, mock de reservas | 57 arquivos, 225 testes verdes                                                    |
+| Por projeto (bookings, rotas do tutor, mock, `ConfirmDialog`)                                                                                                     | 25 unitários, 22 de componente, 12 de integração (Node), 33 de integração (jsdom) |
+| ESLint, `tsc --noEmit`, Prettier                                                                                                                                  | sem erros                                                                         |
+| E2E mocked `e2e/mocked/bookings` (my-stays, host-requests, stay-day), desktop e celular                                                                           | 20/20 na última execução                                                          |
+| Storybook (`StayList`, `StayDetail`, `HostBookingList`, `HostBookingDetail`, `StayMilestones`, `ConfirmDialog`, `WeekdayPicker`)                                  | 31/31                                                                             |
+
+Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da 053):
+
+- `/host` quebrava no servidor: `WEEKDAY_VALUES` saía de um módulo `"use client"` (chegava ao servidor como referência) e quatro componentes de servidor passavam `component={NextLink}` ao `Button`. A constante foi para `WeekdayPicker/weekdays.ts` e o tema define `MuiButtonBase.defaultProps.LinkComponent = NextLink`; no servidor basta `href`.
+- "voltou pra casa" sumia: a `StayMilestones` desmontava quando a estadia virava `completed`. Agora fica montada.
+- Avatar com iniciais sem contraste (axe) na lista e no detalhe do anfitrião: coral com o texto de contraste do tema, como no shell.
+- `host-requests.spec.ts`: espera a hidratação antes de abrir o pedido e dá 60 s à primeira jornada, que compila as rotas a frio no `next dev`.

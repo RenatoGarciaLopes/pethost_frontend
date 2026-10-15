@@ -206,3 +206,34 @@ export const accountProfileHandlers = [
     return ok(issueSession(user));
   }),
 ];
+
+/**
+ * Liga ou desliga o recebimento (Stripe) de um anfitrião verificado no mock, para as jornadas do cantinho (spec 044).
+ * @example setHostPayouts(user.id, true);
+ */
+export function setHostPayouts(userId, enabled) {
+  const account = switchAccounts.find((item) => item.user.id === userId);
+  const profile = account && profileOf(account.user);
+  if (profile)
+    Object.assign(profile, {
+      stripeConnected: enabled,
+      stripePayoutsEnabled: enabled,
+      stripeStatus: enabled ? "enabled" : "not_started",
+    });
+}
+
+/**
+ * O anfitrião da sessão tem o recebimento liberado? (o cadastro do cantinho exige, como na API)
+ * @example if (!hostPayoutsEnabled(user)) return fail(422, "LISTING_HOST_PAYOUTS_NOT_ENABLED");
+ */
+export function hostPayoutsEnabled(user) {
+  return Boolean(profileOf(user)?.stripePayoutsEnabled);
+}
+
+/**
+ * Pessoa física ou empresa, como o perfil do anfitrião diz.
+ * @example const isCompany = hostIsCompany(user);
+ */
+export function hostIsCompany(user) {
+  return ["pj", "company"].includes(String(profileOf(user)?.personType ?? "").toLowerCase());
+}

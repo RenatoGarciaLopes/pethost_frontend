@@ -1,2 +1,2 @@
 export { StatusTimeline } from "./StatusTimeline";
-export type { StatusTimelineProps } from "./StatusTimeline";
+export type { StatusTimelineProps, TimelineStep } from "./StatusTimeline";
