@@ -17,7 +17,7 @@ import type { Booking } from "../../types";
 
 const copy = bookingCopy.owner;
 
-/** Uma estadia na lista: o item inteiro é o link para o detalhe (REQ-STAYS-002). */
+/** Uma estadia na lista: o item inteiro é o link para o detalhe (REQ-STAYS-002); o nome é o próprio texto visível. */
 function StayListItem({ booking }: { booking: Booking }) {
   const period = formatPeriod(booking.checkIn, booking.checkOut);
   const title = booking.listing?.title ?? copy.listingGone;
@@ -26,7 +26,6 @@ function StayListItem({ booking }: { booking: Booking }) {
       <Link
         component={NextLink}
         href={ownerBookingPath(booking.id)}
-        aria-label={copy.itemLabel(title, period)}
         sx={{
           display: "grid",
           gap: 0.5,

@@ -11,12 +11,13 @@ import { server } from "./server";
 
 const API = "http://localhost:5099/api/v1";
 const host = switchAccounts.find((item) => item.scenario === "both" && item.user.role === "host")!;
+const owner = switchAccounts.find((item) => item.scenario === "both" && item.user.role === "owner")!;
 
 afterEach(resetBookings);
 
-function caller() {
+function caller(account = host) {
   server.use(...bookingsHandlers);
-  const { accessToken } = issueSession(host.user);
+  const { accessToken } = issueSession(account.user);
   return async (path: string, method = "GET", body?: object) => {
     const response = await fetch(`${API}${path}`, {
       method,
@@ -60,5 +61,34 @@ describe("mock de reservas do anfitrião", () => {
     expect((await call(`/bookings/${now.id}/check-out`, "POST")).body.error.code).toBe("BOOKING_NOT_IN_PROGRESS");
     expect((await call(`/bookings/${now.id}/check-in`, "POST")).body.data.status).toBe("in_progress");
     expect((await call(`/bookings/${now.id}/check-out`, "POST")).body.data.status).toBe("completed");
+  });
+});
+
+describe("mock de reservas do tutor", () => {
+  const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+
+  it("REQ-STAYS-001 REQ-STAYS-009 o tutor vê só as próprias estadias; a de outra pessoa é 404", async () => {
+    const mine = seedBooking(null, {}, owner.user.id);
+    const other = seedBooking(host.user.id);
+    const call = caller(owner);
+    const list = GetApiV1BookingsMeResponse.parse((await call("/bookings/me?status=requested")).body);
+    expect(list.data?.items.map((item) => item.id)).toEqual([mine.id]);
+    expect((await call(`/bookings/${other.id}`)).status).toBe(404);
+    expect((await call(`/bookings/${mine.id}/acceptance`, "POST")).status).toBe(404);
+  });
+
+  it("REQ-STAYS-006 REQ-STAYS-007 cancelar: reembolso total com 48 horas ou mais, metade com menos", async () => {
+    const call = caller(owner);
+    const far = seedBooking(null, { status: "confirmed", checkIn: inDays(5), checkOut: inDays(8) }, owner.user.id);
+    const near = seedBooking(null, { status: "confirmed", checkIn: inDays(1), checkOut: inDays(3) }, owner.user.id);
+    const cancelled = await call(`/bookings/${far.id}/cancellation`, "POST", { reason: "Mudança de planos" });
+    expect(GetApiV1BookingsBookingIdResponse.parse(cancelled.body).data).toMatchObject({
+      status: "cancelled",
+      cancelledBy: "owner",
+      cancellationReason: "Mudança de planos",
+      refundPercentage: 100,
+    });
+    expect((await call(`/bookings/${near.id}/cancellation`, "POST")).body.data.refundPercentage).toBe(50);
+    expect((await call(`/bookings/${far.id}/cancellation`, "POST")).body.error.code).toBe("BOOKING_ALREADY_CANCELLED");
   });
 });

@@ -114,4 +114,32 @@ describe("ConfirmDialog com campos", () => {
     expect(within(dialog).getByRole("textbox", { name: "Motivo (opcional)" })).toBeInTheDocument();
     expect(dialog).toHaveAccessibleDescription(texts.message);
   });
+
+  it("REQ-STAYS-006 quem já foi ao campo antes do diálogo terminar de abrir continua digitando nele", async () => {
+    function WithReason() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            Cancelar estadia
+          </button>
+          <ConfirmDialog open={open} {...texts} onConfirm={vi.fn()} onCancel={() => setOpen(false)}>
+            <label>
+              Motivo (opcional)
+              <input />
+            </label>
+          </ConfirmDialog>
+        </>
+      );
+    }
+    const { user } = renderWithProviders(<WithReason />, { theme: quintalTheme });
+    await user.click(screen.getByRole("button", { name: "Cancelar estadia" }));
+    const field = await screen.findByRole("textbox", { name: "Motivo (opcional)" });
+    await user.type(field, "Mudança de planos");
+    // Passa do fim da transição de entrada, quando o diálogo devolveria o foco à ação segura.
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await user.type(field, "!");
+    expect(field).toHaveFocus();
+    expect(field).toHaveValue("Mudança de planos!");
+  });
 });

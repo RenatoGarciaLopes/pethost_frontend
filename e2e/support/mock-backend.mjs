@@ -28,10 +28,10 @@ const handlers = [
     resetBookings();
     return HttpResponse.json({ ok: true });
   }),
-  // Só no mock: semeia uma reserva para o anfitrião de uma conta (a 050, que cria pedidos, ainda não existe).
+  // Só no mock: semeia uma reserva entre um anfitrião e, se vier, um tutor (a 050, que cria pedidos, ainda não existe).
   http.post("http://localhost:5099/__e2e/bookings", async ({ request }) => {
-    const { hostUserId, booking } = await request.json();
-    return HttpResponse.json(seedBooking(hostUserId, booking));
+    const { hostUserId = null, ownerUserId = null, booking } = await request.json();
+    return HttpResponse.json(seedBooking(hostUserId, booking, ownerUserId));
   }),
   // Só no mock: libera (ou não) o recebimento de um anfitrião, para a jornada do cantinho (spec 044).
   http.post("http://localhost:5099/__e2e/host-payouts", async ({ request }) => {

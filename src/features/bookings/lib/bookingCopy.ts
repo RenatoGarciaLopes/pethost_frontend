@@ -124,7 +124,6 @@ export const bookingCopy = {
     more: "Mostrar mais",
     listLabel: "Estadias",
     listingGone: "Cantinho fora do ar",
-    itemLabel: (title: string, period: string) => `${title}, ${period}`,
   },
   stay: {
     back: "Minhas estadias",

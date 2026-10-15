@@ -263,3 +263,13 @@ Detalhes na nota `development/resources/pets.md` do vault.
 | Vitest de `features/bookings` inteira (053 + 054)                                      | 54 testes verdes                          |
 | ESLint, `tsc --noEmit`, Prettier                                                       | sem erros                                 |
 | E2E mocked `e2e/mocked/bookings/stay-day.spec.ts` e Storybook                          | escritos; não rodados pelo agente da spec |
+
+## 15/10/2026 · Minhas estadias (spec 052)
+
+| Verificação                                                                                                                                            | Resultado                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Vitest (`--maxWorkers=2`): `features/bookings`, rotas do tutor e do anfitrião, mock de reservas, widget das fichas, `ConfirmDialog`, `PetWizardScreen` | 24 arquivos, 97 testes verdes                                                     |
+| Por projeto (bookings, rotas do tutor, mock, `ConfirmDialog`)                                                                                          | 25 unitários, 22 de componente, 12 de integração (Node), 33 de integração (jsdom) |
+| ESLint, `tsc --noEmit`, Prettier                                                                                                                       | sem erros                                                                         |
+| E2E mocked `e2e/mocked/bookings/my-stays.spec.ts`                                                                                                      | pendente: as portas do E2E estão em uso por outra spec                            |
+| Storybook (`StayList`, `StayDetail`)                                                                                                                   | escritas; não rodadas pelo agente da spec                                         |

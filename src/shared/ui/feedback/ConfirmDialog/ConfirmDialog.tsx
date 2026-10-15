@@ -63,6 +63,7 @@ export function ConfirmDialog({
   const titleId = `${id}-titulo`;
   const messageId = `${id}-corpo`;
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   return (
     <Dialog
@@ -73,11 +74,18 @@ export function ConfirmDialog({
         if (!busy) onCancel();
       }}
       // No navegador o FocusTrap do MUI pode tomar o foco depois do `autoFocus`; ao terminar de abrir, a ação
-      // segura recebe o foco de novo (REQ-PEDIT-011).
-      slotProps={{ transition: { onEntered: () => cancelRef.current?.focus() } }}
+      // segura recebe o foco de novo (REQ-PEDIT-011). Se a pessoa já foi a um campo do corpo, o foco fica lá:
+      // roubá-lo no meio da digitação perderia letras.
+      slotProps={{
+        transition: {
+          onEntered: () => {
+            if (!contentRef.current?.contains(document.activeElement)) cancelRef.current?.focus();
+          },
+        },
+      }}
     >
       <DialogTitle id={titleId}>{title}</DialogTitle>
-      <DialogContent>
+      <DialogContent ref={contentRef}>
         <DialogContentText id={messageId} sx={{ color: "text.primary" }}>
           {message}
         </DialogContentText>

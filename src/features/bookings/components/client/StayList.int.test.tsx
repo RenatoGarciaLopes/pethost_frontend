@@ -44,8 +44,11 @@ describe("StayList", { timeout: 15000 }, () => {
       "/owner/bookings?aba=anteriores",
     );
 
-    const item = await screen.findByRole("link", { name: /Casa da Cida, 20 a 25 de dez\./ });
+    // Sem aria-label: o nome do link é o próprio texto que se vê (comando de voz).
+    const item = await screen.findByRole("link", { name: /^Casa da Cida/ });
     expect(item).toHaveAttribute("href", `/owner/bookings/${bookingDto().id}`);
+    expect(item).toHaveTextContent("20 a 25 de dez.");
+    expect(item).toHaveTextContent("20 a 25 de dez.");
     expect(item).toHaveTextContent("Zona 01, Maringá");
     expect(item).toHaveTextContent("Pipoca");
     expect(item.textContent).toMatch(/R\$\s300,00/);
