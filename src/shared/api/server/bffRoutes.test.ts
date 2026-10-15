@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import openApi from "../../../../openapi/pethost.v1.json";
-import { bffRoutes, matchBffRoute, sessionOnlyRoutes } from "./bffRoutes";
+import { apiOnlyRoutes, bffRoutes, matchBffRoute, sessionOnlyRoutes } from "./bffRoutes";
 
 const API_PREFIX = "/api/v1";
 const operations = Object.entries(openApi.paths as Record<string, Record<string, unknown>>).flatMap(([path, methods]) =>
@@ -44,9 +44,14 @@ describe("lista permitida × OpenAPI (teste de contrato)", () => {
   });
 
   it("REQ-HTTP-009 toda operação da API é proxy ou handler de sessão (nada esquecido)", () => {
-    const covered = new Set([...bffRoutes, ...sessionOnlyRoutes].map(key));
+    const covered = new Set([...bffRoutes, ...sessionOnlyRoutes, ...apiOnlyRoutes].map(key));
 
     expect(operations.filter((operation) => !covered.has(operation))).toEqual([]);
+  });
+
+  it("REQ-HTTP-009 o webhook do Stripe nunca passa pelo proxy do navegador", () => {
+    expect(apiOnlyRoutes.map(key)).toEqual(["POST /stripe/webhooks"]);
+    expect(matchBffRoute("POST", "/stripe/webhooks")).toBeUndefined();
   });
 
   it("REQ-HTTP-009 sem duplicatas", () => {

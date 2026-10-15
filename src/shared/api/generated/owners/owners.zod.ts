@@ -285,7 +285,9 @@ export const DeleteApiV1OwnersMeAvatarResponse = zod.object({
 
 /**
  * Todas as sessões da conta caem na hora. A conta de anfitrião da mesma pessoa não é
- * afetada. Para voltar, use `POST /api/v1/owners/reactivate`.
+ * afetada. Para voltar, use `POST /api/v1/owners/reactivate`. Com reserva em aberto
+ * (solicitada, confirmada ou em andamento): 422 `OWNER_HAS_OPEN_BOOKING` — cancele ou
+ * conclua antes.
  * @summary Inativa o tutor logado: o perfil de tutor e a conta, juntos.
  */
 export const PostApiV1OwnersMeDeactivateResponse = zod.object({

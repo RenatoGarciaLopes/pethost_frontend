@@ -39,6 +39,7 @@ export const GetApiV1HostsMeResponse = zod.object({
   "identityReleasedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin liberou o CPF/CNPJ (disputa). Esse perfil não volta mais.'),
   "stripeConnected": zod.boolean().describe('Já existe conta conectada no Stripe (onboarding começou).'),
   "stripePayoutsEnabled": zod.boolean().describe('O Stripe liberou os repasses: o cantinho pode aparecer na busca.'),
+  "stripeStatus": zod.string().describe('Cadastro de recebimento: `not_started`, `in_progress`, `under_review`, `restricted` ou `enabled`.'),
   "createdAt": zod.string().datetime({"offset":true}),
   "user": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),

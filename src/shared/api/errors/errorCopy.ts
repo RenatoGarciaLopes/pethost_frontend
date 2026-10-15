@@ -29,7 +29,10 @@ export const errorCopy: Record<string, CopyEntry> = {
   OWNER_BIRTH_DATE_LOCKED:
     "Depois do primeiro pagamento, o CPF e o nascimento ficam travados. Pra mudar, fala com o suporte.",
   OWNER_NOT_FOUND: "Não achamos seu perfil de tutor. Fala com o suporte.",
+  OWNER_HAS_OPEN_BOOKING: "Tem estadia pedida, marcada ou acontecendo. Cancela ou espera terminar pra pausar a conta.",
   HOST_NOT_FOUND: "Seus dados ficam editáveis depois da verificação.",
+  HOST_HAS_OPEN_BOOKING:
+    "Tem estadia pedida, marcada ou acontecendo no seu cantinho. Resolve ela antes de pausar a conta.",
   HOST_NOT_A_COMPANY: "Esses dados são só de conta de empresa.",
   PAYLOAD_TOO_LARGE: "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.",
   UNSUPPORTED_MEDIA_TYPE: "Esse arquivo não é uma foto: use JPG, PNG ou WebP.",
