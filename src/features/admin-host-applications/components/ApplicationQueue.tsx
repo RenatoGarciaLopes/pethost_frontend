@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Typography } from "@mui/material";
+import { useId } from "react";
 import { AdminDataTable } from "@/shared/ui/data-display/AdminDataTable";
 import { EmptyState } from "@/shared/ui/feedback/EmptyState";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
@@ -23,16 +24,21 @@ interface QueueViewProps {
  * @example <ApplicationQueueView rows={items} status="submitted" page={1} onChange={setFilters} />
  */
 export function ApplicationQueueView({ rows, status, page, onChange }: QueueViewProps) {
+  // Rótulo ligado por id: envolvendo o select, o texto do rótulo levaria junto o de todas as opções.
+  const filterId = useId();
   const ordered = [...rows].sort((a, b) => (a.submittedAt ?? a.createdAt).localeCompare(b.submittedAt ?? b.createdAt));
   return (
     <Box sx={{ py: 3 }}>
       <Typography component="h1" variant="h4" gutterBottom>
         {copy.title}
       </Typography>
-      <Box component="label" sx={{ display: "block", mb: 3 }}>
-        {copy.filter}{" "}
+      <Box sx={{ mb: 3 }}>
+        <Box component="label" htmlFor={filterId} sx={{ mr: 1 }}>
+          {copy.filter}
+        </Box>
         <Box
           component="select"
+          id={filterId}
           value={status}
           onChange={(event) => onChange({ status: applicationStatusSchema.parse(event.target.value), page: 1 })}
           sx={{ minHeight: 44, p: 1, font: "inherit", maxWidth: "100%" }}
