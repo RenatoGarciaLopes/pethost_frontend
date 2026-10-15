@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
@@ -97,5 +97,21 @@ describe("ConfirmDialog", () => {
     await user.click(await screen.findByRole("button", { name: texts.cancelLabel }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(opener).toHaveFocus();
+  });
+});
+
+describe("ConfirmDialog com campos", () => {
+  it("REQ-HREQ-005 o conteúdo extra (ex.: motivo opcional) fica dentro do diálogo, abaixo do texto", () => {
+    renderDialog({
+      children: (
+        <label>
+          Motivo (opcional)
+          <input />
+        </label>
+      ),
+    });
+    const dialog = screen.getByRole("dialog", { name: texts.title });
+    expect(within(dialog).getByRole("textbox", { name: "Motivo (opcional)" })).toBeInTheDocument();
+    expect(dialog).toHaveAccessibleDescription(texts.message);
   });
 });

@@ -4,3 +4,4 @@
  * Não exporte hooks, componentes client ou recursos exclusivos do servidor.
  */
 export { bookingCopy } from "./lib/bookingCopy";
+export { isBookingId } from "./lib/bookingId";

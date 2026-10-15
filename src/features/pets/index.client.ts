@@ -6,3 +6,5 @@
  */
 export { PetListSkeleton } from "./components/client/PetList";
 export { PetProfileSkeleton } from "./components/client/PetProfile";
+export { PetProfileCard } from "./components/PetProfileCard";
+export type { PetProfileCardProps } from "./components/PetProfileCard";

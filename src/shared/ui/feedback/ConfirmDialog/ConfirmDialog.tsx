@@ -21,6 +21,8 @@ export interface ConfirmDialogProps {
   busy?: boolean;
   /** Erro da confirmação, já em português (ex.: 409), mostrado dentro do diálogo. */
   error?: string | null;
+  /** Campos da confirmação (ex.: motivo opcional), abaixo do texto; não entram na descrição do diálogo. */
+  children?: ReactNode;
 }
 
 /**
@@ -55,6 +57,7 @@ export function ConfirmDialog({
   onCancel,
   busy = false,
   error = null,
+  children,
 }: ConfirmDialogProps) {
   const id = useId();
   const titleId = `${id}-titulo`;
@@ -78,6 +81,7 @@ export function ConfirmDialog({
         <DialogContentText id={messageId} sx={{ color: "text.primary" }}>
           {message}
         </DialogContentText>
+        {children}
         {error && (
           <Notice tone="erro" id={`${id}-erro`}>
             {error}

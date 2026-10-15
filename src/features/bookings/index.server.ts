@@ -5,5 +5,7 @@ import "server-only";
  * Exporte aqui RSC, chamadas ao backend e recursos exclusivos do servidor.
  * Não importe este índice em componentes client.
  */
+export { HostBookingDetailScreen } from "./components/HostBookingDetailScreen";
 export { HostBookingsScreen } from "./components/HostBookingsScreen";
+export { getBookingDetail } from "./api/server/bookings.server";
 export { WaitingRequestsSummary } from "./components/WaitingRequestsSummary";
