@@ -9,6 +9,9 @@ import { apiOk, apiFail } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
 import { adminApplicationQueries, adminReviewCopy as copy } from "@/features/admin-host-applications";
 import { HostApplicationReview } from "./HostApplicationReview";
+
+// Decisão inteira (checklist, motivo e próxima solicitação): com a suíte em paralelo, 5 s não bastam.
+vi.setConfig({ testTimeout: 20_000 });
 afterEach(() => vi.unstubAllGlobals());
 function setup(overrides: Record<string, unknown> = {}, wide = true) {
   vi.stubGlobal(
