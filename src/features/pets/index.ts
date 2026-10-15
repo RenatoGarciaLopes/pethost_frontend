@@ -7,6 +7,6 @@ export { petsCopy } from "./lib/petsCopy";
 export { petWizardCopy } from "./lib/petWizardCopy";
 export { petEditCopy } from "./lib/petEditCopy";
 export { isPetId } from "./lib/petId";
-export { petSpeciesSchema } from "./api/contracts";
+export { petSpeciesSchema, myPetsSchema } from "./api/contracts";
 // Composição de /search busca os pets sem acoplar duas features.
 export { petQueries } from "./api/queries";
