@@ -6,7 +6,7 @@ import { AccountsDirectoryView } from "./AccountsDirectory";
 const owner = toAccountRow({ kind: "owners", value: adminOwnerFixture() });
 const company = toAccountRow({
   kind: "hosts",
-  value: adminHostFixture({ personType: "company", stripeStatus: "rejected" }),
+  value: adminHostFixture({ personType: "pj", stripeStatus: "rejected" }),
 });
 const meta = {
   title: "Admin/Accounts/Directory",

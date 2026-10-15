@@ -108,7 +108,8 @@ export function ReasonActionDialog({
               label={confirmationLabel ?? confirmationWord}
               value={confirmation}
               onChange={(event) => setConfirmation(event.target.value)}
-              disabled={busy}
+              // Só leitura durante o envio, não desabilitado: o texto continua legível.
+              slotProps={{ htmlInput: { readOnly: busy } }}
               autoComplete="off"
             />
           )}
