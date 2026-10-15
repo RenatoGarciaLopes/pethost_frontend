@@ -65,6 +65,7 @@ function profileOf(user) {
         verifiedAt: "2026-10-12T12:00:00Z",
         stripeConnected: false,
         stripePayoutsEnabled: false,
+        stripeStatus: "not_started",
       });
     profiles.set(user.id, profile);
   } else {

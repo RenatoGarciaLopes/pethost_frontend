@@ -33,6 +33,7 @@ export const hostProfileDtoFixture = {
   verifiedAt: "2026-10-12T12:00:00Z",
   stripeConnected: false,
   stripePayoutsEnabled: false,
+  stripeStatus: "not_started",
   user: { ...ownerProfileDtoFixture.user, role: "host" },
 };
 /** Modelo da UI sem credenciais. @example toProfileFormValues(accountProfileFixture) */

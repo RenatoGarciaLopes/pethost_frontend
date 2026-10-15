@@ -25,6 +25,12 @@ export const sessionOnlyRoutes: readonly BffRoute[] = [
 ];
 
 /**
+ * Rotas que o navegador nunca chama: quem chama é outro serviço direto na API (o Stripe manda os eventos para o
+ * webhook). Ficam fora do proxy de propósito; o teste de contrato confere que nada foi esquecido.
+ */
+export const apiOnlyRoutes: readonly BffRoute[] = [route("POST", "/stripe/webhooks")];
+
+/**
  * Lista permitida do proxy `app/api/[...path]` (REQ-HTTP-009). O que não está aqui responde 404.
  * Papéis não são conferidos no BFF: a API é a autoridade de autorização (evita duas regras divergentes).
  * O teste `bffRoutes.test.ts` confere a lista contra o OpenAPI versionado.
@@ -56,6 +62,33 @@ export const bffRoutes: readonly BffRoute[] = [
   route("PUT", "/hosts/me/application/documents"),
   route("POST", "/hosts/me/application/submission"),
   route("GET", "/hosts/{hostId}/pets"),
+  route("GET", "/hosts/me/stripe-account"),
+  route("POST", "/hosts/me/stripe-account/onboarding-session"),
+  route("POST", "/hosts/me/stripe-account/onboarding-link"),
+  route("POST", "/hosts/me/stripe-account/synchronization"),
+
+  // Cantinhos (listings)
+  route("POST", "/listings"),
+  route("GET", "/listings"),
+  route("GET", "/listings/me"),
+  route("GET", "/listings/{listingId}"),
+  route("PATCH", "/listings/{listingId}"),
+  route("POST", "/listings/{listingId}/deactivation"),
+  route("DELETE", "/listings/{listingId}/deactivation"),
+  route("POST", "/listings/{listingId}/photos"),
+  route("PUT", "/listings/{listingId}/photos/order"),
+  route("PATCH", "/listings/{listingId}/photos/{photoId}"),
+  route("DELETE", "/listings/{listingId}/photos/{photoId}"),
+
+  // Estadias (bookings)
+  route("POST", "/bookings"),
+  route("GET", "/bookings/me"),
+  route("GET", "/bookings/{bookingId}"),
+  route("POST", "/bookings/{bookingId}/acceptance"),
+  route("POST", "/bookings/{bookingId}/refusal"),
+  route("POST", "/bookings/{bookingId}/cancellation"),
+  route("POST", "/bookings/{bookingId}/check-in"),
+  route("POST", "/bookings/{bookingId}/check-out"),
 
   // Pets
   route("POST", "/pets"),
@@ -75,6 +108,7 @@ export const bffRoutes: readonly BffRoute[] = [
   route("POST", "/hosts/{hostId}/suspension"),
   route("DELETE", "/hosts/{hostId}/suspension"),
   route("POST", "/hosts/{hostId}/identity-release"),
+  route("POST", "/hosts/{hostId}/stripe-account-reset"),
   route("GET", "/host-applications"),
   route("GET", "/host-applications/{applicationId}"),
   route("GET", "/host-applications/{applicationId}/documents/{kind}"),
