@@ -21,7 +21,7 @@ Pré-requisito: 002, 003, 004 e as máscaras e o CEP da 011. Cada tarefa: teste 
   - Implementar: `api/client/myApplication.client.ts`, `api/server/myApplication.server.ts`, `hooks/*`
 - [x] **T5 · prepareImageForUpload** (2026-10-14) (REQ-HVER-007)
   - Teste primeiro: `shared/lib/image/prepareImageForUpload.test.ts`
-- [ ] **T6 · DocumentSlot** (REQ-HVER-006, 008, 009, 018)
+- [x] **T6 · DocumentSlot** (2026-10-14) (REQ-HVER-006, 008, 009, 018)
   - Gerar: `npm run gen:component -- shared/ui/media DocumentSlot`; teste, story
 - [ ] **T7 · Assistente** (REQ-HVER-002 a 010, 018)
   - Teste primeiro: `NoticeStep.test.tsx`, `DocumentsStep.test.tsx`, `ReviewStep.test.tsx`
