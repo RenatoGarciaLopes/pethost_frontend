@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { ListingPageScreen, getListingPageContext, getListingPageDetail } from "@/features/listing-page/index.server";
 import { queryToSearchParams, searchParamsToQuery } from "@/features/search";
 import { isPetId, petQueries } from "@/features/pets";
+import { HouseResidents } from "@/features/pets/index.client";
+import { prefetchHouseResidents } from "@/features/pets/index.server";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { requirePersonalUser } from "@/shared/auth/server/requirePersonalUser";
 import { backendForRequest } from "@/shared/api/server/backendForRequest";
@@ -35,6 +38,8 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
     getListingPageContext(user.id, user.role, listingId),
     user.role === "owner" ? getQueryClient().fetchQuery(petQueries.mine(user.id, await backendForRequest())) : null,
   ]);
+  const residentsClient = getQueryClient();
+  await prefetchHouseResidents(residentsClient, listing.hostId);
   const selectedPets =
     ownerPets?.active
       .filter((pet) => query.pets.includes(pet.id))
@@ -42,19 +47,22 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
   const activePets =
     ownerPets?.active.map(({ id, name, species, size }) => ({ id, name, species, size: size ?? null })) ?? [];
   return (
-    <ListingPageScreen
-      listing={listing}
-      query={query}
-      requestSearch={queryToSearchParams(query).toString()}
-      selectedPets={selectedPets}
-      selectionControl={
-        user.role === "owner" && !isOwner ? (
-          <ListingSearchControls listingId={listingId} query={query} pets={activePets} today={brasiliaToday()} />
-        ) : undefined
-      }
-      isOwner={isOwner}
-      accountRole={user.role}
-    />
+    <HydrationBoundary state={dehydrate(residentsClient)}>
+      <ListingPageScreen
+        listing={listing}
+        query={query}
+        requestSearch={queryToSearchParams(query).toString()}
+        selectedPets={selectedPets}
+        selectionControl={
+          user.role === "owner" && !isOwner ? (
+            <ListingSearchControls listingId={listingId} query={query} pets={activePets} today={brasiliaToday()} />
+          ) : undefined
+        }
+        residents={<HouseResidents hostId={listing.hostId} />}
+        isOwner={isOwner}
+        accountRole={user.role}
+      />
+    </HydrationBoundary>
   );
 }
 

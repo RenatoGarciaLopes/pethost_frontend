@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { Avatar, Box, Button, Chip, Container, Divider, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Chip, Container, Divider, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { formatBRL } from "@/shared/lib/money";
 import type { ListingDetail } from "../api/contracts";
+import { ListingPageActions } from "./client/ListingPageActions";
 import { petFitsListing } from "../lib/petFitsListing";
 import { stayTotal } from "../lib/stayTotal";
 import { listingPageCopy as copy } from "../lib/listingPageCopy";
@@ -39,12 +39,14 @@ export function ListingPageScreen({
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
       {ownerNotice && (
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 3, alignItems: { sm: "center" } }}>
-          <Typography role="status">{copy.ownListing}</Typography>
-          <Button component={Link} href={`/host/listings/${listing.id}/edit`} variant="outlined">
-            {copy.edit}
-          </Button>
-        </Stack>
+        <ListingPageActions
+          listingId={listing.id}
+          requestHref=""
+          isOwnerView
+          accountRole="host"
+          hasTotal={false}
+          placement="notice"
+        />
       )}
       <ListingGallery title={listing.title} photos={photos} />
       <Stack spacing={3} sx={{ mt: 4 }}>
@@ -160,30 +162,22 @@ export function ListingPageScreen({
             spacing={1.5}
             sx={{ width: { md: 320 }, flexShrink: 0, alignSelf: "flex-start", position: { md: "sticky" }, top: 24 }}
           >
-            <Typography variant="h5">{copy.nightlyRate(formatBRL(listing.nightlyRate))}</Typography>
+            <Typography component="h2" variant="h5">
+              {copy.nightlyRate(formatBRL(listing.nightlyRate))}
+            </Typography>
             {total && (
               <Typography aria-live="polite">
                 Total para {petCount} pets: {total}
               </Typography>
             )}
-            {ownerNotice ? null : accountRole === "host" ? (
-              <>
-                <Typography>{copy.hostAccount}</Typography>
-                <Button component={Link} href="/users/switch" variant="outlined">
-                  {copy.switchAccount}
-                </Button>
-              </>
-            ) : total ? (
-              <Button component={Link} href={requestHref} variant="contained">
-                {copy.request}
-              </Button>
-            ) : (
-              (selectionControl ?? (
-                <Button component={Link} href={requestHref} variant="contained">
-                  {copy.choose}
-                </Button>
-              ))
-            )}
+            <ListingPageActions
+              listingId={listing.id}
+              requestHref={requestHref}
+              isOwnerView={ownerNotice}
+              accountRole={accountRole}
+              hasTotal={Boolean(total)}
+              selectionControl={selectionControl}
+            />
           </Stack>
         </Stack>
       </Stack>

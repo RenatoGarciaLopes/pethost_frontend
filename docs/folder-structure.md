@@ -33,6 +33,24 @@ e2e/mocked/search/search.spec.ts     jornadas desktop e celular
 
 Testes/stories ao lado dos componentes; funções e regras ficam em lib, E/S na API, coordenação no hook. `pets/index.ts` apenas expõe `petQueries` existente para a página compor os pets ativos, sem import entre features. `shared` não conhece os contratos da busca.
 
+## Página do cantinho (spec 042)
+
+`src/app/(account)/listings/[listingId]/` contém a rota autenticada e os controles que reutilizam a busca 041. `features/listing-page/components/ListingPageScreen.tsx` é a composição server; os links do MUI ficam no `components/client/ListingPageActions.tsx`, que mantém `next/link` dentro do limite client. A rota hidrata `HouseResidents` pela API pública `features/pets/index.client` e prefetch `index.server`, sem duplicar a vitrine.
+
+```text
+src/app/(account)/listings/[listingId]/
+  page.tsx                              auth, metadata, prefetch/hydration
+  page.test.tsx                         metadata e preservação da busca no login
+  ListingSearchControls.tsx              adaptação client da SearchBar 041
+  ListingSearchControls.stories.tsx      controles com router simulado
+src/features/listing-page/
+  api/                                   contrato, query e carregamento server
+  lib/                                   compatibilidade, total e copy
+  components/ListingPageScreen.tsx        detalhe RSC com slot de residentes
+  components/client/ListingPageActions.tsx links Next em MUI Button
+e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
+```
+
 ## Ampliação da base de pets (spec 021, 14/10/2026)
 
 Recursos implementados sobre a feature da 020; componentes, stores e páginas da composição paralela têm inventário próprio. Detalhes e validação no vault `development/resources/pets.md`, seção "Apresentar o pet (spec 021): base".
