@@ -9,7 +9,7 @@ updated: 2026-10-15
 Depende da 030 (painel) e da 043 (`payoutsEnabled`).
 
 - [x] **T1 · Dinheiro** (2026-10-15) (REQ-LIST-009): `shared/lib/money` (`formatBRL`, centavos) e `netEarnings`
-- [ ] **T2 · Contratos, mappers e schemas** (REQ-LIST-005, 007, 010, 013): `listingDtoSchema`, `toListing`, `toListingValues`, `toCreateListingRequest`, `toUpdateListingRequest`, `listingSchema` por seção
+- [x] **T2 · Contratos, mappers e schemas** (2026-10-15) (REQ-LIST-005, 007, 010, 013): `listingDtoSchema`, `toListing`, `toListingValues`, `toCreateListingRequest`, `toUpdateListingRequest`, `listingSchema` por seção
 - [ ] **T3 · Queries, prefetch e mutations** (REQ-LIST-016): `listingQueries`, server, client, hooks
 - [ ] **T4 · Peças de formulário** : `NumberStepper`, `WeekdayPicker` em `shared/ui/forms`
 - [ ] **T5 · Rascunho e painel** (REQ-LIST-002, 003, 004, 011, 012): `ListingSectionsPanel`, seções, `ListingDraftScreen`, `/host/listings/new`
