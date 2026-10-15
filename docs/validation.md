@@ -285,11 +285,11 @@ Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verif
 
 ## 15/10/2026 · Minha verificação do anfitrião (spec 030)
 
-| Verificação                                                                                                                 | Resultado                                                                                           |
-| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Vitest da 030 (`--maxWorkers=2`): feature, `DocumentSlot`, `StatusTimeline`, imagem, CNPJ, widget, rotas, mock              | 132 testes verdes: 58 unitários, 49 de componente, 16 de integração (Node), 9 de integração (jsdom) |
-| Vitest das áreas tocadas (inclui `shared/ui/forms`, `shared/api/errors`, `shared/config`, arquitetura e `features/account`) | 74 arquivos, 482 testes verdes                                                                      |
-| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                                    | sem erros                                                                                           |
-| E2E mocked `e2e/mocked/host/verification.spec.ts`                                                                           | escrito; não rodado pelo agente da spec (regra da máquina compartilhada)                            |
-| Storybook (a11y) de `ApplicationWizard`, `ApplicationStatusView`, `DocumentSlot`, `StatusTimeline`, `HostOnboardingStages`  | escritas; não rodadas pelo agente da spec                                                           |
-| E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                     |
+| Verificação                                                                                                                 | Resultado                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Vitest da 030 (`--maxWorkers=2`): feature, `DocumentSlot`, `StatusTimeline`, imagem, CNPJ, widget, rotas, mock              | 132 testes verdes: 58 unitários, 49 de componente, 16 de integração (Node), 9 de integração (jsdom)       |
+| Vitest das áreas tocadas (inclui `shared/ui/forms`, `shared/api/errors`, `shared/config`, arquitetura e `features/account`) | 74 arquivos, 482 testes verdes                                                                            |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                                    | sem erros                                                                                                 |
+| E2E mocked (Claude Code, 15/10)                                                                                             | host 6 de 6, casca e admin juntos 26 de 27 e, com a espera de 15 s no detalhe do admin, 7 de 7            |
+| Storybook com a11y (Claude Code)                                                                                            | verde depois de o nome da `DocumentSlot` passar a ser o texto visível (axe `label-content-name-mismatch`) |
+| E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                           |
