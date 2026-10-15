@@ -3,10 +3,7 @@
 import { Box, Button, Checkbox, FormControlLabel, FormHelperText, Typography } from "@mui/material";
 import { useId, type Ref } from "react";
 import { formCopy } from "../formCopy";
-
-/** Os dias como a API escreve, de segunda a domingo. */
-export const WEEKDAY_VALUES = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
-export type Weekday = (typeof WEEKDAY_VALUES)[number];
+import { WEEKDAY_VALUES, type Weekday } from "./weekdays";
 
 export interface WeekdayPickerProps {
   /** Nome visível do grupo ("Dias que recebe"). */

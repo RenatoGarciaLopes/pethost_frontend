@@ -3,7 +3,8 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { renderWithProviders } from "@/test/render";
-import { WeekdayPicker, type Weekday } from "./WeekdayPicker";
+import type { Weekday } from "./weekdays";
+import { WeekdayPicker } from "./WeekdayPicker";
 
 function Harness({ initial = [] as Weekday[], onChange = vi.fn() }) {
   const [value, setValue] = useState<readonly Weekday[]>(initial);

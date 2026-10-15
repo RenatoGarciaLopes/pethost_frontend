@@ -83,7 +83,11 @@ export function HostBookingDetail({ accountId, bookingId, petProfiles, now }: Ho
         {copy.back}
       </Link>
       <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
-        <Avatar src={booking.owner?.avatarUrl ?? undefined} alt="" sx={{ width: 56, height: 56 }}>
+        <Avatar
+          src={booking.owner?.avatarUrl ?? undefined}
+          alt=""
+          sx={{ width: 56, height: 56, bgcolor: "primary.main", color: "primary.contrastText" }}
+        >
           {initialsOf(owner)}
         </Avatar>
         <Typography variant="h1" sx={{ fontSize: { xs: 28, md: 36 } }}>
@@ -108,7 +112,8 @@ export function HostBookingDetail({ accountId, bookingId, petProfiles, now }: Ho
       {steps && <StatusTimeline label={copy.trail} steps={steps} />}
       {closed && <Notice tone="info" title={closed} />}
       {booking.status !== "in_progress" && <OwnerContact booking={booking} />}
-      {(booking.status === "confirmed" || booking.status === "in_progress") && (
+      {/* Continua montado em `completed`: senão "voltou pra casa" some junto com a mudança de status. */}
+      {(booking.status === "confirmed" || booking.status === "in_progress" || booking.status === "completed") && (
         <StayMilestones accountId={accountId} booking={booking} now={moment} />
       )}
       {booking.status === "requested" && (

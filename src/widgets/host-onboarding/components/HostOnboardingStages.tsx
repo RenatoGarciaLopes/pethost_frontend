@@ -1,5 +1,4 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import NextLink from "next/link";
 import { useId } from "react";
 import { StatusPill, type StatusPillTone } from "@/shared/ui/feedback/StatusPill";
 import { hostOnboardingCopy as copy } from "../lib/hostOnboardingCopy";
@@ -75,7 +74,7 @@ export function HostOnboardingStages({ progress }: HostOnboardingStagesProps) {
             <Typography variant="body2">{stage.text}</Typography>
             {stage.action && (
               <Box>
-                <Button component={NextLink} href={stage.action.href} variant="outlined" size="small">
+                <Button href={stage.action.href} variant="outlined" size="small">
                   {stage.action.label}
                 </Button>
               </Box>

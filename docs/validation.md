@@ -266,10 +266,17 @@ Detalhes na nota `development/resources/pets.md` do vault.
 
 ## 15/10/2026 · Minhas estadias (spec 052)
 
-| Verificação                                                                                                                                            | Resultado                                                                         |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Vitest (`--maxWorkers=2`): `features/bookings`, rotas do tutor e do anfitrião, mock de reservas, widget das fichas, `ConfirmDialog`, `PetWizardScreen` | 24 arquivos, 97 testes verdes                                                     |
-| Por projeto (bookings, rotas do tutor, mock, `ConfirmDialog`)                                                                                          | 25 unitários, 22 de componente, 12 de integração (Node), 33 de integração (jsdom) |
-| ESLint, `tsc --noEmit`, Prettier                                                                                                                       | sem erros                                                                         |
-| E2E mocked `e2e/mocked/bookings/my-stays.spec.ts`                                                                                                      | pendente: as portas do E2E estão em uso por outra spec                            |
-| Storybook (`StayList`, `StayDetail`)                                                                                                                   | escritas; não rodadas pelo agente da spec                                         |
+| Verificação                                                                                                                                                       | Resultado                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Vitest (`--maxWorkers=2`): `features/bookings`, `host-listings`, widgets, tema, `WeekdayPicker`, `ConfirmDialog`, rotas do tutor e do anfitrião, mock de reservas | ver a linha da execução final abaixo                                              |
+| Por projeto (bookings, rotas do tutor, mock, `ConfirmDialog`)                                                                                                     | 25 unitários, 22 de componente, 12 de integração (Node), 33 de integração (jsdom) |
+| ESLint, `tsc --noEmit`, Prettier                                                                                                                                  | sem erros                                                                         |
+| E2E mocked `e2e/mocked/bookings` (my-stays, host-requests, stay-day), desktop e celular                                                                           | 20/20 na última execução                                                          |
+| Storybook (`StayList`, `StayDetail`, `HostBookingList`, `HostBookingDetail`, `StayMilestones`, `ConfirmDialog`, `WeekdayPicker`)                                  | 31/31                                                                             |
+
+Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da 053):
+
+- `/host` quebrava no servidor: `WEEKDAY_VALUES` saía de um módulo `"use client"` (chegava ao servidor como referência) e quatro componentes de servidor passavam `component={NextLink}` ao `Button`. A constante foi para `WeekdayPicker/weekdays.ts` e o tema define `MuiButtonBase.defaultProps.LinkComponent = NextLink`; no servidor basta `href`.
+- "voltou pra casa" sumia: a `StayMilestones` desmontava quando a estadia virava `completed`. Agora fica montada.
+- Avatar com iniciais sem contraste (axe) na lista e no detalhe do anfitrião: coral com o texto de contraste do tema, como no shell.
+- `host-requests.spec.ts`: espera a hidratação antes de abrir o pedido e dá 60 s à primeira jornada, que compila as rotas a frio no `next dev`.

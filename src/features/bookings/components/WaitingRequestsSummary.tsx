@@ -1,5 +1,4 @@
 import { Button } from "@mui/material";
-import NextLink from "next/link";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { countWaitingRequests } from "../api/server/bookings.server";
 import { bookingCopy } from "../lib/bookingCopy";
@@ -18,7 +17,7 @@ export function WaitingRequestsNotice({ count }: { count: number }) {
       tone="info"
       title={copy.waiting(count)}
       action={
-        <Button component={NextLink} href={hostBookingsPath("pedidos")} size="small" variant="outlined">
+        <Button href={hostBookingsPath("pedidos")} size="small" variant="outlined">
           {copy.seeRequests}
         </Button>
       }

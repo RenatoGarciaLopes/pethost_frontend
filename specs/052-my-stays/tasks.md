@@ -10,4 +10,4 @@ updated: 2026-10-15
 - [x] **T2 · Lista** (2026-10-15) (REQ-STAYS-001 a 003)
 - [x] **T3 · Detalhe, trilha e contato** (2026-10-15) (REQ-STAYS-004, 005, 008, 009)
 - [x] **T4 · Cancelar** (2026-10-15) (REQ-STAYS-006, 007)
-- [x] **T5 · Rotas, stories, E2E e documentação** (2026-10-15; E2E escrito, execução pendente)
+- [x] **T5 · Rotas, stories, E2E e documentação** (2026-10-15)

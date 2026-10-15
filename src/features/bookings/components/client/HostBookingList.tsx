@@ -32,7 +32,11 @@ function BookingCard({ booking, now }: { booking: Booking; now: Date }) {
       sx={{ p: 2, border: "2px solid", borderRadius: 3, bgcolor: "background.paper" }}
     >
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-        <Avatar src={booking.owner?.avatarUrl ?? undefined} alt="" sx={{ width: 48, height: 48 }}>
+        <Avatar
+          src={booking.owner?.avatarUrl ?? undefined}
+          alt=""
+          sx={{ width: 48, height: 48, bgcolor: "primary.main", color: "primary.contrastText" }}
+        >
           {initialsOf(owner)}
         </Avatar>
         <Typography component="h3" sx={{ fontWeight: 800, fontSize: "1.1rem" }}>

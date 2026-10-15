@@ -1,5 +1,4 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import NextLink from "next/link";
 import { formatBRL, fromCents } from "@/shared/lib/money";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { listingCopy } from "../lib/listingCopy";
@@ -50,12 +49,7 @@ function ListingCard({ listing }: { listing: Listing }) {
       </Stack>
       <Typography>{copy.perNight(formatBRL(fromCents(listing.nightlyRateCents)))}</Typography>
       <Box>
-        <Button
-          component={NextLink}
-          href={listingPath(listing.id)}
-          variant="outlined"
-          aria-label={copy.editLabel(listing.title)}
-        >
+        <Button href={listingPath(listing.id)} variant="outlined" aria-label={copy.editLabel(listing.title)}>
           {copy.edit}
         </Button>
       </Box>
@@ -85,7 +79,7 @@ export function ListingSummaryList({ mine }: { mine: MyListings }) {
       </Box>
       {mine.isCompany && (
         <Box>
-          <Button component={NextLink} href={NEW_LISTING_PATH} variant="quiet">
+          <Button href={NEW_LISTING_PATH} variant="quiet">
             {copy.another}
           </Button>
         </Box>

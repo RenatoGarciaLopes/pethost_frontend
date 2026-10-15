@@ -68,7 +68,7 @@ test("REQ-STAYS-001 a REQ-STAYS-005 da lista à estadia confirmada, com a trilha
   await stay.click();
   await expect(page).toHaveURL(/\/owner\/bookings\/[0-9a-f-]+$/, NAVIGATION);
 
-  await expect(page.getByRole("list", { name: "Andamento da estadia" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Andamento da estadia" })).toBeVisible(NAVIGATION);
   const contact = page.getByRole("region", { name: "Contato do anfitrião" });
   await expect(contact.getByRole("link", { name: "(44) 98888-7777" })).toHaveAttribute("href", "tel:44988887777");
   await expect(contact).toContainText("Avenida Brasil, 120, Casa 2");

@@ -1,5 +1,4 @@
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
-import NextLink from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { getHostListingProfile, getMyListings } from "../api/server/listings.server";
@@ -31,7 +30,7 @@ export async function ListingDraftScreen({ accountId }: { accountId: string }) {
           </Typography>
           <Notice tone="info" title={copy.gate.noPayouts} />
           <Box>
-            <Button component={NextLink} href={PAYMENTS_PATH} variant="contained">
+            <Button href={PAYMENTS_PATH} variant="contained">
               {copy.gate.seePayouts}
             </Button>
           </Box>

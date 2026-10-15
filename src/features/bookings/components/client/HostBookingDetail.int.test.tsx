@@ -136,4 +136,18 @@ describe("HostBookingDetail", { timeout: 15000 }, () => {
     expect(await screen.findByText(bookingCopy.detail.closed.cancelled!)).toBeInTheDocument();
     expect(cancelled).toBe(true);
   });
+
+  it("REQ-STDAY-004 marcar a volta mostra o agradecimento mesmo com a estadia já concluída", async () => {
+    server.use(
+      http.post(`${path}/check-out`, () =>
+        HttpResponse.json(apiOk(bookingDto({ status: "completed", responseDeadline: null, contact: ownerContactDto }))),
+      ),
+    );
+    const { user } = setup({ status: "in_progress", responseDeadline: null, contact: ownerContactDto });
+    await user.click(screen.getByRole("button", { name: "Pipoca voltou pra casa" }));
+    const dialog = await screen.findByRole("dialog", { name: "Confirmar que Pipoca voltou pra casa?" });
+    await user.click(within(dialog).getByRole("button", { name: "Confirmar" }));
+    expect(await screen.findByText("Pipoca voltou pra casa. Obrigado por cuidar!")).toBeInTheDocument();
+    expect(screen.getByText("Concluída")).toBeInTheDocument();
+  });
 });

@@ -4,6 +4,8 @@ import { waitForHydration } from "../../support/hydration";
 
 // Navegação no cliente: no `next dev` a primeira visita compila a rota (como em `new-pet.spec.ts`).
 const NAVIGATION = { timeout: 15_000 };
+// A ficha do pet vem do BFF no cliente; no `next dev` a primeira chamada ainda compila a rota dele.
+const FIRST_BFF_CALL = { timeout: 30_000 };
 const MOCK = process.env.E2E_ACCOUNT_MOCK_URL ?? "http://localhost:5099";
 const host = accountFixture("both", "host");
 
@@ -26,6 +28,8 @@ test.afterEach(async ({ page }) => {
 test("REQ-HREQ-001 a REQ-HREQ-004 do painel ao pedido: lê a ficha do pet, aceita e vê o telefone do tutor", async ({
   page,
 }) => {
+  // Primeira jornada do arquivo: no `next dev` compila painel, lista, detalhe e as rotas do BFF a frio.
+  test.setTimeout(60_000);
   await seedRequest(page);
   await page.goto("/host");
   await expect(page.getByText("1 pedido esperando resposta")).toBeVisible();
@@ -37,10 +41,12 @@ test("REQ-HREQ-001 a REQ-HREQ-004 do painel ao pedido: lê a ficha do pet, aceit
   const card = page.getByRole("article", { name: "Pedido de Bruno Lima" });
   await expect(card).toContainText("Pipoca (cachorro, porte pequeno)");
   await expect(card).toContainText(/Responda até/);
-  await card.getByRole("link", { name: "Ver pedido de Bruno Lima" }).click();
+  const open = card.getByRole("link", { name: "Ver pedido de Bruno Lima" });
+  await waitForHydration(open);
+  await open.click();
   await expect(page).toHaveURL(/\/host\/bookings\/[0-9a-f-]+$/, NAVIGATION);
 
-  await expect(page.getByRole("article", { name: "Carteirinha de Pipoca" })).toBeVisible();
+  await expect(page.getByRole("article", { name: "Carteirinha de Pipoca" })).toBeVisible(FIRST_BFF_CALL);
   await page.getByRole("button", { name: "Aceitar" }).click();
   const dialog = page.getByRole("dialog", { name: "Aceitar o pedido?" });
   await expect(dialog).toContainText("O tutor recebe seu endereço e seu telefone.");
