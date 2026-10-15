@@ -11,7 +11,10 @@ export interface NavItem {
  * Atalhos do cabeçalho (spec 004, REQ-SHELL-002): tabela única. Só entram telas que existem; cada spec que
  * cria uma tela de atalho acrescenta a linha dela (020: Meus pets).
  */
-export const NAV_ITEMS: readonly NavItem[] = [{ id: "pets", label: "Meus pets", href: "/pets", roles: ["owner"] }];
+export const NAV_ITEMS: readonly NavItem[] = [
+  { id: "pets", label: "Meus pets", href: "/pets", roles: ["owner"] },
+  { id: "admin-queue", label: "Fila de verificação", href: "/admin/host-applications", roles: ["admin"] },
+];
 
 /**
  * Atalhos do papel, na ordem da tabela.

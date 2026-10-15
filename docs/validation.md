@@ -1,4 +1,4 @@
-# Validação da base
+﻿# Validação da base
 
 Em 11/10/2026, o projeto foi gerado pelo CLI `create-next-app@latest`, com TypeScript, ESLint, App Router, src-dir, npm e sem Tailwind. Next 16.4.0, React 19.3.0, MUI 9.5.0; versões completas no lockfile.
 
@@ -226,3 +226,18 @@ Detalhes na nota `development/resources/pets.md` do vault.
 Sem `--maxWorkers=2`, nesta máquina o verify estoura o timeout de 5 s em testes longos de outras specs e no `Max-Age` dos cookies da 003, que depende do relógio. Os mesmos testes passam isolados. O E2E local roda com `next dev --webpack -p 3100`, porque o Turbopack recusa a junction de `node_modules` da worktree.
 
 Detalhes na nota `development/resources/pets.md` do vault.
+
+## Spec 031: fila e decisão administrativa (15/10/2026)
+
+Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verification-queue`. Status da spec permanece `in-progress` porque a execução de navegador, o verify completo e a integração do vault estão centralizados no Claude Code.
+
+- Vitest direcionado ao domínio, widgets, recursos shared alterados, mock administrativo, erros, privacidade e consumidores de navegação: **20 arquivos, 109 testes aprovados**, com `--maxWorkers=2`. Por nível do runner: 67 unitários/arquitetura, 27 funcionais de componente, 8 integrações Node e 7 integrações DOM. TDD com falhas iniciais de módulos ausentes/implementação gerada e regressão de filtros repetidos reproduzida antes da correção.
+- Comando: `npx.cmd vitest run src/features/admin-host-applications src/widgets/host-application-review src/shared/lib/pagination src/shared/hooks/useSearchParamsState.test.tsx src/shared/ui/data-display/AdminDataTable src/shared/ui/forms/ReasonField src/test/msw/adminApplicationsMock.int.test.ts src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/architecture/no-token-storage.test.ts src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2`.
+- `npx.cmd tsc --noEmit -p .`: aprovado, sem erros. ESLint direcionado a todos os arquivos TypeScript/TSX/MJS alterados: aprovado. Prettier no escopo e git diff --check: aprovados.
+- A execução inicial com muitos workers teve timeout em um teste funcional com várias interações. A execução final limita a dois workers na máquina compartilhada. Um teste de prazo futuro revelou overflow de setTimeout; o prazo é limitado ao máximo da plataforma sem expirar a foto antes do expiresAt.
+- Playwright simulado: **escrito, não executado**, por instrução explícita. Quatro casos compartilhados por desktop/celular, incluindo paginação, filtro, foto, decisão, próxima da fila, fraude e UUID inválido. A decisão por fraude é pulada no celular, pois a regra aprovada exige largura >=900px.
+- Playwright real: **escrito, não executado**, condicionado a conta host de teste descartável com cadastro completo/verificado, CPF sintético e admin de teste. Cria a própria solicitação, envia front/back/selfie fictícios e recusa, sem decidir solicitações preexistentes. Variáveis exigidas estão descritas no design da spec. A execução real não usa o mock.
+- Stories: 7 arquivos, cobrindo fila, tabela, motivo, comparação, decisão, foto e detalhe; execução Storybook/a11y e conferência visual desktop/celular **pendentes**. Build, next dev e verify completo não foram executados por instrução explícita de coordenação.
+- MSW estrito cobre contratos reais na borda HTTP, autenticação do prefetch, erro 400 de campo, conflito 409/422, invalidação, próximos itens, autorização do mock e imagens no-store. Isso não equivale a integração com a API .NET.
+- Funções puras não têm E2E isolado: paginação e schemas têm unitários e são exercitados pelas composições/jornadas. O hook de URL é testado com a borda Next simulada, incluindo voltar/avançar e parâmetros repetidos. O viewer tem relógio falso, descarte, cancelamento, foco preso, Esc e nenhuma entrada no Query.
+- O vault foi somente leitura. Conforme orientação recebida, conteúdo e linhas de catálogo seguem no resumo para integração; não foi criada `docs/admin-verification.md`. A integração no vault não está concluída nesta worktree.
