@@ -1,4 +1,4 @@
-﻿import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { adminApplicationFixture } from "@/test/fixtures/adminApplications";
@@ -24,7 +24,7 @@ const meta = {
   parameters: { design: { board: "Fluxo-Admin", label: "Conferir e decidir" } },
   args: { application: adminApplicationFixture() },
 } satisfies Meta<typeof ReviewStory>;
-export { meta as default };
+export default meta;
 type Story = StoryObj<typeof meta>;
 export const EmAnalise: Story = {};
 export const Decidida: Story = {

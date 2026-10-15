@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { Box, Stack, Typography, useMediaQuery } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { adminHostQueries, type AdminHost } from "@/features/hosts";
 import {
   adminApplicationQueries,
   adminReviewCopy as copy,
@@ -26,6 +27,10 @@ export function HostApplicationReview({ accountId, applicationId }: { accountId:
   const detail = useQuery(adminApplicationQueries.detail(accountId, applicationId));
   const decision = useDecision(accountId, applicationId);
   const next = useQuery({ ...adminApplicationQueries.queue(accountId, "submitted"), enabled: decision.isSuccess });
+  const duplicateDocument =
+    hasErrorCode(decision.error, "HOST_CPF_ALREADY_REGISTERED") ||
+    hasErrorCode(decision.error, "HOST_CNPJ_ALREADY_REGISTERED");
+  const existingHosts = useQuery({ ...adminHostQueries.list(accountId), enabled: duplicateDocument });
   const wide = useMediaQuery("(min-width:900px)");
   if (detail.isPending) return <SniffLoader />;
   if (detail.isError) return <ErrorState title={getErrorMessage(detail.error)} onRetry={() => void detail.refetch()} />;
@@ -61,7 +66,21 @@ export function HostApplicationReview({ accountId, applicationId }: { accountId:
       {conflict ? (
         <Notice tone="info" title={copy.conflict} />
       ) : (
-        decision.isError && <Notice tone="erro" title={getErrorMessage(decision.error, { adminReview: true })} />
+        decision.isError && (
+          <Notice
+            tone="erro"
+            title={getErrorMessage(decision.error, { adminReview: true })}
+            action={
+              duplicateDocument && (
+                <ExistingHostLinks
+                  application={app}
+                  hosts={existingHosts.data ?? []}
+                  loading={existingHosts.isPending}
+                />
+              )
+            }
+          />
+        )
       )}
       <ApplicantComparison key={app.id} application={app} />
       <Box component="section">
@@ -104,6 +123,43 @@ export function HostApplicationReview({ accountId, applicationId }: { accountId:
         )
       ) : (
         <DecisionSummary application={app} />
+      )}
+    </Stack>
+  );
+}
+
+function ExistingHostLinks({
+  application,
+  hosts,
+  loading,
+}: {
+  application: AdminApplication;
+  hosts: readonly AdminHost[];
+  loading: boolean;
+}) {
+  const cpf = application.cpf.replace(/\D/g, "");
+  const cnpj = application.company?.cnpj.replace(/\D/g, "");
+  const matches = hosts.filter(
+    (host) =>
+      !host.identityReleasedAt &&
+      (host.cpf.replace(/\D/g, "") === cpf || Boolean(cnpj && host.company?.cnpj.replace(/\D/g, "") === cnpj)),
+  );
+  if (loading) return <Typography>{copy.loading}</Typography>;
+  return (
+    <Stack spacing={0.5}>
+      <Typography>{copy.duplicateHostAccounts}</Typography>
+      {matches.length ? (
+        <Stack component="ul" spacing={0.5} sx={{ m: 0, pl: 2 }}>
+          {matches.map((host) => (
+            <li key={host.id}>
+              <Link href={`/admin/users/hosts/${host.id}`}>
+                {copy.openDuplicateHost(host.user?.fullName ?? copy.unavailable)}
+              </Link>
+            </li>
+          ))}
+        </Stack>
+      ) : (
+        <Typography>{copy.noDuplicateHost}</Typography>
       )}
     </Stack>
   );

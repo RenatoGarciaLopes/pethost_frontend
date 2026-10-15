@@ -4,6 +4,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { renderWithProviders, createTestQueryClient } from "@/test/render";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { adminApplicationFixture } from "@/test/fixtures/adminApplications";
+import { adminHostFixture } from "@/test/fixtures/adminAccounts";
 import { apiOk, apiFail } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
 import { adminApplicationQueries, adminReviewCopy as copy } from "@/features/admin-host-applications";
@@ -103,4 +104,20 @@ it("REQ-AQUEUE-010 erro de validação mantém nota e associa mensagem ao campo"
   expect(reason).toHaveAttribute("aria-invalid", "true");
   expect(reason).toHaveValue("Nota de teste");
   expect(screen.getByRole("button", { name: "Recusar" })).toBeEnabled();
+});
+it("REQ-AACC-012 conflito de CPF/CNPJ oferece atalho para anfitrião listado sem expor documento", async () => {
+  const { app, user } = setup({ personType: "pf" });
+  const host = adminHostFixture({ cpf: app.cpf });
+  server.use(
+    http.post("*/api/host-applications/:id/rejection", () =>
+      HttpResponse.json(apiFail("HOST_CPF_ALREADY_REGISTERED"), { status: 409 }),
+    ),
+    http.get("*/api/hosts", () => HttpResponse.json(apiOk([host]))),
+  );
+  await user.type(screen.getByRole("textbox", { name: copy.reason }), "Documento conferido");
+  await user.click(screen.getByRole("button", { name: copy.rejection.data_mismatch }));
+  await user.click(screen.getByRole("button", { name: copy.reject }));
+  const link = await screen.findByRole("link", { name: `Ver conta de ${host.user?.fullName}` });
+  expect(link).toHaveAttribute("href", `/admin/users/hosts/${host.id}`);
+  expect(link.getAttribute("href")).not.toContain(app.cpf);
 });

@@ -7,5 +7,5 @@ const meta = {
   parameters: { design: { board: "Fluxo-Admin" } },
   args: { application: adminApplicationFixture() },
 } satisfies Meta<typeof ApplicantComparison>;
-export { meta as default };
+export default meta;
 export const Padrao: StoryObj<typeof meta> = {};

@@ -13,6 +13,23 @@ describe("getErrorMessage", () => {
     expect(getErrorMessage(apiError("HOST_CPF_ALREADY_REGISTERED"), { adminReview: true })).toContain("Recuse com");
     expect(getErrorMessage(apiError("HOST_CPF_ALREADY_REGISTERED"))).not.toContain("Recuse com");
   });
+  it("REQ-AACC-011 usa orientação de admin sem trocar a copy da conta pessoal", () => {
+    expect(getErrorMessage(apiError("HOST_NOT_FOUND"), { adminAccounts: true })).toBe(
+      "Esse perfil de anfitrião não existe mais.",
+    );
+    expect(getErrorMessage(apiError("OWNER_NOT_FOUND"))).toBe("Não achamos seu perfil de tutor. Fala com o suporte.");
+    expect(getErrorMessage(apiError("OWNER_SUSPENSION_REQUIRED"), { adminAccounts: true })).toContain(
+      "não está suspensa",
+    );
+    expect(getErrorMessage(apiError("OWNER_CPF_RELEASED"), { adminAccounts: true })).toContain("já foi liberado");
+    expect(getErrorMessage(apiError("HOST_IDENTITY_RELEASED"), { adminAccounts: true })).toContain("já foi liberada");
+    expect(getErrorMessage(apiError("AUTH_ADMIN_SUSPENSION_FORBIDDEN"), { adminAccounts: true })).toContain(
+      "não pode ser suspensa",
+    );
+    expect(getErrorMessage(apiError("HOST_STRIPE_ACCOUNT_NOT_REJECTED"), { adminAccounts: true })).toContain(
+      "não está recusado",
+    );
+  });
   it("REQ-PNEW-007 tipo de arquivo recusado tem frase em português", () => {
     expect(getErrorMessage(apiError("UNSUPPORTED_MEDIA_TYPE"))).toBe(
       "Esse arquivo não é uma foto: use JPG, PNG ou WebP.",

@@ -12,7 +12,7 @@ const meta = {
     load: async () => ({ url: image, expiresAt: Math.floor(Date.now() / 1000) + 300 }),
   },
 } satisfies Meta<typeof SignedDocumentViewer>;
-export { meta as default };
+export default meta;
 type Story = StoryObj<typeof meta>;
 export const Padrao: Story = {};
 export const Vencida: Story = { args: { load: async () => ({ url: image, expiresAt: 1 }) } };

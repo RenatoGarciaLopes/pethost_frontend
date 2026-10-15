@@ -14,6 +14,7 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { id: "pets", label: "Meus pets", href: "/pets", roles: ["owner"] },
   { id: "admin-queue", label: "Fila de verificação", href: "/admin/host-applications", roles: ["admin"] },
+  { id: "admin-users", label: "Contas", href: "/admin/users", roles: ["admin"] },
 ];
 
 /**

@@ -6,7 +6,7 @@ const meta = {
   parameters: { design: { board: "Fluxo-Admin" } },
   args: { personType: "pf", busy: false, onDecide: () => {} },
 } satisfies Meta<typeof DecisionPanel>;
-export { meta as default };
+export default meta;
 type Story = StoryObj<typeof meta>;
 export const PessoaFisica: Story = {};
 export const Empresa: Story = { args: { personType: "pj" } };
