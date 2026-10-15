@@ -121,6 +121,17 @@ export const listingCopy = {
     suggestionsTitle: "Boas fotos pra pôr",
     suggestions: ["Onde os pets dormem", "Onde comem", "O quintal", "O portão", "A sala"],
   },
+  summary: {
+    heading: "Meu cantinho",
+    headingMany: "Meus cantinhos",
+    perNight: (value: string) => `${value} por noite, por pet`,
+    noCover: "Sem foto de capa ainda",
+    cover: (title: string) => `Capa de ${title}`,
+    edit: "Ver e editar",
+    editLabel: (title: string) => `Ver e editar ${title}`,
+    another: "Abrir outro cantinho",
+  },
+  panelHeading: "Meu painel",
   editor: {
     back: "Meu painel",
     active: "Aberto",
