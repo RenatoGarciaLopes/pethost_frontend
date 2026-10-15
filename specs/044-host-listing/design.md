@@ -70,3 +70,13 @@ As seções seguem o padrão da 022: recebem `values` e `accept` de um anfitriã
 | 014                         | Integração (jsdom) | `useListingPhotoMutations.int.test.tsx` (ordem, capa, limite)                                                        |
 | todos                       | Storybook          | painel, cada seção, comemoração, celular                                                                             |
 | 001/002/003/011/013/014/015 | E2E simulado       | `e2e/mocked/host/listing.spec.ts`                                                                                    |
+
+## Como ficou na implementação (15/10/2026)
+
+- **Recebimento sem a 043:** o perfil do anfitrião (`GET /hosts/me`) dá o tipo de pessoa, o primeiro nome, o endereço da conta e `stripePayoutsEnabled`/`stripeStatus`. É lido por `listingQueries.host` e `getHostListingProfile` (`cache()`, `null` antes da verificação). Nada importa a feature do Stripe.
+- **Painel:** o widget `host-onboarding` (030) ganhou `hostStages`, com a situação real das três etapas e o caminho da etapa da vez. A etapa 2 mostra a situação do Stripe em texto e leva a `/host/payments`; a etapa 3 leva a `/host/listings/new`.
+- **Seções:** `ListingSectionHost` (contexto) liga as sete seções ao rascunho (sessão do navegador) ou à edição (`PATCH` com `toUpdateListingRequest`). Cada seção é um formulário próprio, validado pelo schema da seção. Uma seção só conta como pronta depois de salva e válida: assim "Regras da casa", que é opcional, também entra no "Faltam 7".
+- **Peças de shared:** `Counter` (já existia) no lugar do `NumberStepper`; `WeekdayPicker` novo; `PhotoSlots` ganhou `onMove` ("Usar como capa" e mover por botão) e até 5 colunas; `formatBRL`/`toCents`/`fromCents` em `shared/lib/money`, com a assinatura combinada com a 041.
+- **Erros:** além dos da spec, `LISTING_ADDRESS_NOT_LOCATED` (422) volta à seção Endereço. As frases dos códigos `LISTING_*` estão no `errorCopy`.
+- **Layout:** as sete seções ficam empilhadas na mesma página, com o painel de seções ao lado (fixo no computador). Não é "uma seção por tela" no celular.
+- **Pets da casa:** a 023 ainda não chegou ao `dev`, então "Apresentar quem mora aqui" leva a `/pets`. O rascunho fica na sessão do navegador.

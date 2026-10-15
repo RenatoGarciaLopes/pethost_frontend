@@ -2,9 +2,10 @@ import express from "express";
 import { createMiddleware } from "@mswjs/http-middleware";
 import { http, HttpResponse } from "msw";
 import { accountSwitchHandlers } from "./handlers/accountSwitch.mjs";
-import { accountProfileHandlers, resetAccountProfiles } from "./handlers/accountProfile.mjs";
+import { accountProfileHandlers, resetAccountProfiles, setHostPayouts } from "./handlers/accountProfile.mjs";
 import { ownersHandlers } from "./handlers/owners.mjs";
 import { hostApplicationsHandlers, resetHostApplications, seedHostApplication } from "./handlers/hostApplications.mjs";
+import { listingsHandlers, resetListings } from "./handlers/listings.mjs";
 import { passwordHandlers } from "./handlers/password.mjs";
 import { petsHandlers, resetPets } from "./handlers/pets.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
@@ -22,6 +23,13 @@ const handlers = [
     resetAccountProfiles();
     resetPets();
     resetHostApplications();
+    resetListings();
+    return HttpResponse.json({ ok: true });
+  }),
+  // Só no mock: libera (ou não) o recebimento de um anfitrião, para a jornada do cantinho (spec 044).
+  http.post("http://localhost:5099/__e2e/host-payouts", async ({ request }) => {
+    const { userId, enabled } = await request.json();
+    setHostPayouts(userId, enabled);
     return HttpResponse.json({ ok: true });
   }),
   // Só no mock: semeia a verificação de uma conta (ex.: recusa com tentativas) para a jornada da spec 030.
@@ -38,6 +46,7 @@ const handlers = [
   ...passwordHandlers,
   ...petsHandlers,
   ...hostApplicationsHandlers,
+  ...listingsHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

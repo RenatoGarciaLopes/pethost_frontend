@@ -237,3 +237,12 @@ Detalhes na nota `development/resources/pets.md` do vault.
 | E2E mocked `e2e/mocked/host/verification.spec.ts`                                                                           | escrito; não rodado pelo agente da spec (regra da máquina compartilhada)                            |
 | Storybook (a11y) de `ApplicationWizard`, `ApplicationStatusView`, `DocumentSlot`, `StatusTimeline`, `HostOnboardingStages`  | escritas; não rodadas pelo agente da spec                                                           |
 | E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                     |
+
+## 15/10/2026 · Montar meu cantinho (spec 044)
+
+| Verificação                                                                                                   | Resultado                                                                                            |
+| ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Vitest da 044 (`--maxWorkers=2`): feature, dinheiro, `WeekdayPicker`, `PhotoSlots`, widget, rotas, mock       | 105 testes verdes: 46 unitários, 22 de componente, 14 de integração (Node), 23 de integração (jsdom) |
+| Vitest das áreas tocadas (inclui 030, `shared/ui/forms`, `shared/ui/media`, `shared/api/errors`, arquitetura) | 69 arquivos, 433 testes verdes                                                                       |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                      | sem erros                                                                                            |
+| E2E mocked `e2e/mocked/host/listing.spec.ts` e Storybook                                                      | escritos; não rodados pelo agente da spec (regra da máquina compartilhada)                           |
