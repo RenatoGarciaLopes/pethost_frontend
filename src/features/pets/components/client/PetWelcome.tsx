@@ -7,6 +7,8 @@ import { Celebration } from "@/shared/ui/brand/Celebration";
 import { useAnnounce } from "@/shared/ui/feedback/Announcer";
 import { StepHeading } from "@/shared/ui/navigation/StepHeading";
 import { petWizardCopy } from "../../lib/petWizardCopy";
+import { petsCopy } from "../../lib/petsCopy";
+import type { PersonalRole } from "@/shared/auth/contracts/session";
 
 const copy = petWizardCopy.welcome;
 /** "Meus pets" (spec 020). */
@@ -18,7 +20,15 @@ const MY_PETS_PATH = "/pets";
  *
  * @example <PetWelcome name="Pipoca" onAnother={reset} />
  */
-export function PetWelcome({ name, onAnother }: { name: string; onAnother: () => void }) {
+export function PetWelcome({
+  name,
+  onAnother,
+  role = "owner",
+}: {
+  name: string;
+  onAnother: () => void;
+  role?: PersonalRole;
+}) {
   const announce = useAnnounce();
   useEffect(() => announce(copy.announce(name)), [announce, name]);
 
@@ -29,10 +39,10 @@ export function PetWelcome({ name, onAnother }: { name: string; onAnother: () =>
         <Typography color="text.secondary">{copy.announce(name)}</Typography>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
           <Button variant="contained" component={NextLink} href={MY_PETS_PATH}>
-            {copy.myPets}
+            {petsCopy[role].myPets}
           </Button>
           <Button variant="outlined" onClick={onAnother}>
-            {copy.another}
+            {petsCopy[role].another}
           </Button>
         </Stack>
       </Stack>

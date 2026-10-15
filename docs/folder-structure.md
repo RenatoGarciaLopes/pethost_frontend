@@ -1,5 +1,38 @@
 # Estrutura real do frontend
 
+## Busca de cantinhos (spec 041, worktree pethost_frontend-041)
+
+Inventário e interfaces: [design da 041](../specs/041-search/design.md). Implementado nesta branch; mapa T8 fora do escopo. O vault é somente leitura nesta entrega e recebe nota/linhas de catálogo pelo relatório de coordenação.
+
+```text
+src/app/(account)/search/             rota privada e teste de auth
+src/features/search/
+  index.ts, index.client.ts, index.server.ts
+  types.ts                           URL e pets de composição
+  api/                               schemas e query infinite
+    server/                          prefetch exclusivo do servidor
+  lib/                               parser, tradução API, copy, selos e erros
+  hooks/                             URL, histórico e query
+  components/
+    SearchScreen.tsx                 RSC + HydrationBoundary
+    client/
+      SearchExperience.tsx            composição interativa
+      SearchBar/                     formulário e painel móvel
+      FilterChips/                   filtros na URL
+      ListingCard/                   link público e preço
+      SearchResults/                 lista, feedback e paginação
+src/shared/lib/money/                reais/centavos e formatação
+src/shared/lib/date/stayRules.ts     datas de estadia de calendário
+src/shared/ui/forms/DateRangeField/  chegada e saída controladas
+src/shared/ui/feedback/SniffingBanner/ atualização não bloqueante
+src/test/fixtures/search.ts          fixtures sintéticas
+src/test/msw/searchMock.int.test.ts  contrato do mock E2E
+e2e/support/handlers/search.mjs      busca simulada
+e2e/mocked/search/search.spec.ts     jornadas desktop e celular
+```
+
+Testes/stories ao lado dos componentes; funções e regras ficam em lib, E/S na API, coordenação no hook. `pets/index.ts` apenas expõe `petQueries` existente para a página compor os pets ativos, sem import entre features. `shared` não conhece os contratos da busca.
+
 ## Ampliação da base de pets (spec 021, 14/10/2026)
 
 Recursos implementados sobre a feature da 020; componentes, stores e páginas da composição paralela têm inventário próprio. Detalhes e validação no vault `development/resources/pets.md`, seção "Apresentar o pet (spec 021): base".
@@ -274,3 +307,76 @@ src/shared/
 ```
 
 Recursos, uso e cobertura de cada peça na nota `development/resources/auth.md` do vault.
+
+## Ampliação de pets da casa (spec 023, 14/10/2026)
+
+A slice existente pets atende owner/host. Não há nova rota ou widget de onboarding: `(account)` já aceita os dois papéis. O bloqueio é resposta do módulo Pets. Recursos e responsabilidades na nota `development/resources/pets.md` do vault (seção "Pets da casa e vitrine de residentes").
+
+```text
+src/features/pets/
+  api/invalidatePetLists.ts                 invalidação de mine e vitrine pelo id do perfil
+  api/petQueries.int.test.ts                isolamento e projeção pública do cache
+  api/toHouseResidents.test.ts              mapper público sem campos privados
+  api/server/houseResidents.server.ts       prefetch autenticado, não bloqueante
+  components/MyPetsScreen.stories.tsx       composição host/vazio/pendente
+  components/client/HouseResidents/         vitrine client, tests, integração, story, index
+  components/client/KeeperPendingNotice/    aviso server-safe, tests, story, index
+  components/client/PetWelcome.stories.tsx  boas-vindas por papel
+  lib/isKeeperPending.ts                    reconhecimento do erro de perfil ausente
+  lib/coexistenceSummary.ts                 frase de convivências positivas
+  lib/petsCopy.test.ts                      paridade do copy owner/host
+  api/contracts.ts                         hostPetsSchema e HostPetsResponse
+  api/mappers.ts                           toHouseResidents e hostId de toPetList
+  api/queries.ts                           petQueries.house
+  types.ts                                 HouseResident e PetList.hostId
+  index{,.client,.server}.ts                APIs públicas por ambiente
+src/app/(account)/pets/{page,new/page}.tsx  papel, metadata e preflight host
+src/shared/config/navigation.ts            host-pets disponível
+src/shared/api/errors/errorCopy.ts          PET_HOST_NOT_FOUND
+src/test/msw/petsMock.int.test.ts           mock host aprovado/pendente e vitrine
+
+e2e/mocked/pets/host-pets.spec.ts           duas jornadas, desktop/celular pelo runner
+
+e2e/real/pets/host-pets.spec.ts             jornada do seed aprovado, condicional
+```
+
+Queries/DTOs ficam em api; strings e funções puras em lib; acesso/prefetch em api/server; efeitos de cache nos hooks e no helper api/invalidatePetLists; apresentação nos componentes existentes e nas duas pastas novas geradas pelo Plop. Não há diretório planejado apresentado como implementado.
+
+## Spec 031: fila administrativa (15/10/2026)
+
+Implementada na worktree `pethost_frontend-031`, branch `feat/031-admin-verification-queue`. A API continua como fonte do contrato. O vault permanece somente leitura nesta entrega; o conteúdo para catálogo e notas será enviado ao responsável pela integração.
+
+```text
+src/app/(admin)/admin/(panel)/host-applications/
+  page.tsx                         autorização, filtros e prefetch da fila
+  [applicationId]/page.tsx         autorização, UUID e prefetch do detalhe
+src/features/admin-host-applications/
+  api/contracts.ts                 schemas derivados do gerado, tipos locais do admin
+  api/client/adminApplications.client.ts
+  api/server/adminApplications.server.ts
+  api/queries.ts                   cache por conta; não inclui links de fotos
+  schemas/reviewSchemas.ts          filtros, aprovação, recusa e confirmação de fraude
+  hooks/useDecision.ts             decisão, invalidação e recuperação de conflito
+  components/ApplicationQueue.tsx  lista, filtro e paginação
+  lib/adminReviewCopy.ts            rótulos do admin e prévia do e-mail real
+  index.ts, index.client.ts, index.server.ts
+src/widgets/host-application-review/
+  components/ApplicantComparison.tsx
+  components/DecisionPanel.tsx      inclui checklist local PF/PJ
+  components/HostApplicationReview.tsx
+  components/SignedDocumentViewer.tsx
+  index.client.ts
+src/shared/lib/pagination/paginate.ts
+src/shared/hooks/useSearchParamsState.ts
+src/shared/ui/data-display/AdminDataTable/
+  AdminDataTable.tsx, AdminDataTable.test.tsx, AdminDataTable.stories.tsx, index.ts
+src/shared/ui/forms/ReasonField/
+  ReasonField.tsx, ReasonField.test.tsx, ReasonField.stories.tsx, index.ts
+src/test/fixtures/adminApplications.ts
+src/test/msw/adminApplicationsMock.int.test.ts
+e2e/support/handlers/adminApplications.mjs
+e2e/mocked/admin/verification-queue.spec.ts
+e2e/real/admin/verification-queue.spec.ts
+```
+
+Os testes unitários, funcionais e de integração ficam junto dos recursos. Cada componente novo tem story, incluindo estados de empresa, decisão, fotos apagadas, conflito e celular. O checklist não tem export separado: sua cobertura pertence a `DecisionPanel.test.tsx`. `DecisionSummary` é interno e coberto pela composição e story de solicitação decidida. Não há dependência da feature da spec 030. `shared` não conhece o domínio de verificação; o widget compõe o domínio usando as APIs públicas da feature. Links assinados não entram no prefetch, no Query ou na URL da página.

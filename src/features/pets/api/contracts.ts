@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { unwrapData } from "@/shared/api/contracts/unwrapData";
 import { GetApiV1PetsMeResponse, GetApiV1PetsPetIdResponse } from "@/shared/api/generated/pets/pets.zod";
+import { GetApiV1HostsHostIdPetsResponse } from "@/shared/api/generated/host-pets/host-pets.zod";
 
 /** Espécies que a API aceita (`modulo-pets.md`); o resto é `exotic` com descrição. */
 export const PET_SPECIES = [
@@ -39,6 +40,11 @@ export const petDtoSchema = unwrapData(GetApiV1PetsPetIdResponse).extend({
  * @example myPetsSchema.parse({ keeper, pets: [] })
  */
 export const myPetsSchema = unwrapData(GetApiV1PetsMeResponse).extend({ pets: z.array(petDtoSchema) });
+
+/** Contrato gerado da vitrine, com enums estreitados. Nunca cachear o DTO privado. @example hostPetsSchema.parse(dto) */
+export const hostPetsSchema = unwrapData(GetApiV1HostsHostIdPetsResponse).extend({ pets: z.array(petDtoSchema) });
+/** DTO da API, anterior ao descarte dos campos privados. @example const dto: HostPetsResponse = hostPetsSchema.parse(data); */
+export type HostPetsResponse = z.output<typeof hostPetsSchema>;
 
 export type PetDto = z.output<typeof petDtoSchema>;
 export type MyPetsDto = z.output<typeof myPetsSchema>;

@@ -1,6 +1,6 @@
 ---
 spec: 050-request-stay
-status: draft
+status: in-progress
 updated: 2026-10-15
 ---
 

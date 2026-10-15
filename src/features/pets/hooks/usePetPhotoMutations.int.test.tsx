@@ -28,7 +28,8 @@ const file = () => new File(["imagem"], "foto.jpg", { type: "image/jpeg" });
 function setup() {
   const client = createTestQueryClient();
   client.setQueryData(petQueries.detail("a", id).queryKey, toPetDetail(petDtoSchema.parse(petDto())));
-  client.setQueryData(petQueries.mine("a").queryKey, { active: [], inactive: [] });
+  client.setQueryData(petQueries.mine("a").queryKey, { active: [], inactive: [], hostId: "profile-host" });
+  client.setQueryData(petQueries.house("profile-host").queryKey, []);
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>{children}</QueryClientProvider>
   );
@@ -68,6 +69,7 @@ it("REQ-PEDIT-008/014 ignora concorrência até resposta e atualiza só lista e 
   expect(result.current.photos.busySlot).toBeNull();
   expect(result.current.detail.data?.values.name).toBe("Mel");
   expect(client.getQueryState(petQueries.mine("a").queryKey)?.isInvalidated).toBe(true);
+  expect(client.getQueryState(petQueries.house("profile-host").queryKey)?.isInvalidated).toBe(true);
   client.clear();
 });
 it("REQ-PEDIT-009 substituição renova após 401 e reenvia mesmo arquivo uma vez", async () => {

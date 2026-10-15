@@ -10,7 +10,10 @@ import { listingsHandlers, resetListings } from "./handlers/listings.mjs";
 import { passwordHandlers } from "./handlers/password.mjs";
 import { petsHandlers, resetPets } from "./handlers/pets.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
+import { searchHandlers } from "./handlers/search.mjs";
+import { listingPageHandlers } from "./handlers/listingPage.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
+import { adminApplicationsHandlers, resetAdminApplications } from "./handlers/adminApplications.mjs";
 
 /**
  * Backend HTTP mínimo para E2E simulado; não representa a API .NET.
@@ -26,6 +29,7 @@ const handlers = [
     resetHostApplications();
     resetListings();
     resetBookings();
+    resetAdminApplications();
     return HttpResponse.json({ ok: true });
   }),
   // Só no mock: semeia uma reserva entre um anfitrião e, se vier, um tutor (a 050, que cria pedidos, ainda não existe).
@@ -56,6 +60,9 @@ const handlers = [
   ...petsHandlers,
   ...hostApplicationsHandlers,
   ...listingsHandlers,
+  ...searchHandlers,
+  ...listingPageHandlers,
+  ...adminApplicationsHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

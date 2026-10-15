@@ -4,6 +4,8 @@ import { roleLabel } from "@/shared/config/roleLabels";
 /** Contexto opcional que muda a frase (ex.: o tipo de conta da tela). */
 export interface ErrorCopyContext {
   role?: "owner" | "host";
+  /** Orientação para a equipe ao decidir verificação; preserva a copy pessoal fora do admin. */
+  adminReview?: boolean;
 }
 
 type CopyEntry = string | ((error: ApiError, context: ErrorCopyContext) => string);
@@ -36,15 +38,29 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_NOT_A_COMPANY: "Esses dados são só de conta de empresa.",
   PAYLOAD_TOO_LARGE: "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.",
   UNSUPPORTED_MEDIA_TYPE: "Esse arquivo não é uma foto: use JPG, PNG ou WebP.",
-  HOST_CPF_ALREADY_REGISTERED: "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
+  HOST_CPF_ALREADY_REGISTERED: (_error, context) =>
+    context.adminReview
+      ? "Esse CPF/CNPJ já pertence a outro anfitrião. Recuse com 'Os dados não batem' ou abra a conta indevida em Contas."
+      : "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
+  HOST_CNPJ_ALREADY_REGISTERED: (_error, context) =>
+    context.adminReview
+      ? "Esse CPF/CNPJ já pertence a outro anfitrião. Recuse com 'Os dados não batem' ou abra a conta indevida em Contas."
+      : "Esse CNPJ já está em outra conta. Se a empresa é sua, fala com o suporte.",
+  HOST_APPLICATION_CONFLICT: "Outra pessoa da equipe já decidiu essa verificação.",
+  HOST_APPLICATION_NOT_UNDER_REVIEW: "Outra pessoa da equipe já decidiu essa verificação.",
+  HOST_APPLICATION_NOT_FOUND: "Não encontramos essa verificação. Volte para a fila.",
+  HOST_APPLICATION_DOCUMENT_NOT_FOUND: "Essa foto não está mais disponível. Recarregue a verificação.",
   AUTH_LINKED_ACCOUNT_NOT_FOUND: "Não deu pra abrir a outra conta. Confere a senha dela.",
   AUTH_PASSWORD_RESET_TOKEN_INVALID: "Esse link já venceu. Pede outro, leva um minuto.",
 
   // Pets
+  LISTING_SEARCH_ADDRESS_REQUIRED: "Pra procurar perto de casa, a gente precisa do seu endereço.",
+  LISTING_SEARCH_ADDRESS_NOT_LOCATED: "Não achamos seu endereço no mapa. Confere ele ou procura por cidade.",
   PET_PHOTO_LIMIT_REACHED: "Já tem 3 fotos. Tira uma pra colocar outra.",
   PET_PHOTO_ALREADY_EXISTS: "Essa foto já está na ficha.",
   PET_MICROCHIP_ALREADY_REGISTERED: "Esse microchip já está em outro pet. Se é o seu, fala com o suporte.",
   PET_KEEPER_NOT_FOUND: "Os pets da casa entram depois que sua verificação for aprovada.",
+  PET_HOST_NOT_FOUND: "Não achamos os pets dessa casa agora.",
 
   // Verificação de anfitrião
   HOST_APPLICATION_ATTEMPTS_EXCEEDED: "Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.",
@@ -55,7 +71,6 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_APPLICATION_NOT_EDITABLE: "Essa verificação já foi enviada e não dá mais pra mudar.",
   HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED: "Dados de empresa só valem pra verificação de empresa.",
   HOST_ALREADY_VERIFIED: "Sua verificação já foi aprovada.",
-  HOST_CNPJ_ALREADY_REGISTERED: "Esse CNPJ já está em outra conta. Se a empresa é sua, fala com o suporte.",
   HOST_IDENTITY_LOCKED: "Esses dados foram conferidos na verificação. Pra mudar, fala com o suporte.",
 
   // Cantinho

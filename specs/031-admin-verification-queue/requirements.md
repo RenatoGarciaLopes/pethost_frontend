@@ -1,7 +1,7 @@
 ---
 spec: 031-admin-verification-queue
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-15
 area: AQUEUE
 ---
 
@@ -23,7 +23,7 @@ As fotos são dado sensível: o admin só as vê por um link que vence em 5 minu
   - ✅ `POST .../approval` `{ reason }` e `POST .../rejection` `{ rejectionReason, reason }` (`reason` obrigatório, até 500);
   - Erros: `VALIDATION_ERROR` 400, `HOST_APPLICATION_NOT_FOUND` 404, `HOST_APPLICATION_CONFLICT` 409, `HOST_CPF_ALREADY_REGISTERED` 409, `HOST_CNPJ_ALREADY_REGISTERED` 409, `HOST_APPLICATION_NOT_UNDER_REVIEW` 422.
 - **Vault:** `produto/contrato-api.md` (Admin e motivos de recusa).
-- **Depende de:** 003 (`bffClient`, `getErrorMessage`, `REQ-HTTP-019`), 004 (casca de admin, `requireRole("admin")`), 030 (`rejectionCopy`, `applicationStatusLabel`, tipos), 002 (`StatusPill`, `Notice`, `EmptyState`, `ErrorState`, `ChipPicker`).
+- **Depende de:** 003 (`bffClient`, `getErrorMessage`, `REQ-HTTP-019`), 004 (casca de admin, `requireRole("admin")`), 002 (`StatusPill`, `Notice`, `EmptyState`, `ErrorState`, `ChipPicker`). A 031 deriva seus contratos do gerado e mantém copy administrativa própria, sem importar a 030 (decisão de 14/10/2026).
 
 ## Histórias
 
@@ -80,5 +80,5 @@ As fotos são dado sensível: o admin só as vê por um link que vence em 5 minu
 ## Perguntas em aberto
 
 1. **Volume da fila:** sem paginação na API, a lista inteira vem a cada carga. Pedir paginação ao backend quando passar de algumas centenas.
-2. **Celular:** o board é só computador. Proposta: no celular o admin vê a fila e o detalhe, mas a decisão pede tela larga ("Decida pelo computador"). Confirmar.
-3. **Checklist guardado?** O checklist é só da tela (não vai para a API). Se for preciso provar o que foi conferido, o texto entra no `reason`. Confirmar com o produto.
+2. **Celular (resolvido em 14/10/2026):** fila e detalhe continuam legíveis; decisão disponível somente em tela com largura de pelo menos 900px. Abaixo disso aparece "Pra decidir, abre num computador".
+3. **Checklist (resolvido em 14/10/2026):** somente memória da tela, sem envio à API. O registro do que foi conferido fica no `reason`.

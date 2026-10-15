@@ -3,6 +3,8 @@ import type { PetSpecies } from "../types";
 import { PetWizardProvider } from "../stores/PetWizardProvider";
 import { LivePetCard } from "./client/LivePetCard";
 import { PetWizard } from "./client/PetWizard";
+import type { PersonalRole } from "@/shared/auth/contracts/session";
+import { KeeperPendingNotice } from "./client/KeeperPendingNotice";
 
 /**
  * `/pets/new` no servidor (spec 021): o assistente à esquerda e, no computador, a carteirinha montando ao vivo
@@ -10,7 +12,23 @@ import { PetWizard } from "./client/PetWizard";
  *
  * @example <PetWizardScreen accountId={user.id} initialSpecies="dog" />
  */
-export function PetWizardScreen({ accountId, initialSpecies }: { accountId: string; initialSpecies?: PetSpecies }) {
+export function PetWizardScreen({
+  accountId,
+  initialSpecies,
+  role = "owner",
+  keeperPending = false,
+}: {
+  accountId: string;
+  initialSpecies?: PetSpecies;
+  role?: PersonalRole;
+  keeperPending?: boolean;
+}) {
+  if (role === "host" && keeperPending)
+    return (
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
+        <KeeperPendingNotice />
+      </Container>
+    );
   return (
     <PetWizardProvider initialSpecies={initialSpecies}>
       <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
@@ -22,7 +40,7 @@ export function PetWizardScreen({ accountId, initialSpecies }: { accountId: stri
             alignItems: "start",
           }}
         >
-          <PetWizard accountId={accountId} />
+          <PetWizard accountId={accountId} role={role} />
           <Box sx={{ display: { xs: "none", md: "block" }, position: "sticky", top: 24 }}>
             <LivePetCard />
           </Box>
