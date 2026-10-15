@@ -4,13 +4,14 @@ import { updatePet, deactivatePet, reactivatePet } from "../api/client/petMutati
 import { petQueries } from "../api/queries";
 import { toPetDetail } from "../api/toPetDetail";
 import type { PetDto } from "../api/contracts";
+import { invalidatePetLists } from "../api/invalidatePetLists";
 
 function usePetSuccess(accountId: string, petId: string) {
   const client = useQueryClient();
   return async (dto: PetDto) => {
     client.setQueryData(petQueries.detail(accountId, petId).queryKey, toPetDetail(dto));
     // A lista precisa atualizar; o detalhe já veio inteiro na resposta da mutation.
-    await client.invalidateQueries({ queryKey: petQueries.mine(accountId).queryKey });
+    await invalidatePetLists(client, accountId, dto);
   };
 }
 /** Salva edição e atualiza cache da conta. @example useUpdatePet(accountId, petId).mutate(body) */

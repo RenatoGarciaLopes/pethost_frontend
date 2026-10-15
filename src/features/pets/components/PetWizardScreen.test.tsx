@@ -22,3 +22,15 @@ it("REQ-PNEW-013 carteirinha ao vivo acompanha respostas aceitas sem botões de 
   expect(card).toHaveTextContent("fêmea");
   expect(within(card).queryByRole("button")).not.toBeInTheDocument();
 });
+it("REQ-HPETS-003 bloqueia antes de montar o formulário e os providers do wizard", () => {
+  renderWithProviders(<PetWizardScreen accountId="pending-host" role="host" keeperPending />);
+  expect(screen.getByText("Os pets da casa entram depois que sua verificação for aprovada.")).toBeVisible();
+  expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Continuar" })).not.toBeInTheDocument();
+});
+it("REQ-HPETS-004 abertura própria do anfitrião mantém os passos existentes", () => {
+  sessionStorage.clear();
+  renderWithProviders(<PetWizardScreen accountId="host-start" role="host" />, { theme: quintalTheme });
+  expect(screen.getByRole("heading", { name: "Quem mora com você?" })).toBeVisible();
+  expect(screen.getByRole("radio", { name: "Cachorro" })).toBeInTheDocument();
+});

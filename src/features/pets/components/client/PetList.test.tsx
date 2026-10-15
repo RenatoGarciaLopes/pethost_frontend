@@ -33,7 +33,10 @@ describe("meus pets", () => {
     setup();
 
     const cards = await screen.findAllByRole("link", { name: /^Ficha de / });
-    expect(cards.map((card) => card.getAttribute("aria-label"))).toEqual(["Ficha de Luna", "Ficha de Thor"]);
+    expect(cards.map((card) => within(card).getByRole("heading").textContent)).toEqual([
+      "Ficha de Luna",
+      "Ficha de Thor",
+    ]);
     expect(cards[1]).toHaveAttribute("href", `/pets/${THOR}`);
     expect(within(cards[1]).getByText(/^Vira-lata · porte médio · \d+ anos · macho · castrado$/)).toBeInTheDocument();
     expect(within(cards[0]).getByText(/^Gato/)).toBeInTheDocument();
@@ -47,11 +50,11 @@ describe("meus pets", () => {
   it("REQ-PETS-001 sem foto mostra a patinha; com foto, a capa decorativa", async () => {
     respond([petDto({ id: THOR }), petDto({ id: LUNA, name: "Luna", photos: [] })]);
     const { container } = setup();
-    const thor = await screen.findByRole("link", { name: "Ficha de Thor" });
+    const thor = await screen.findByRole("link", { name: /^Ficha de Thor/ });
     // alt vazio: a foto é decorativa (o nome já está no texto), então não tem papel de imagem.
     expect(thor.querySelector("img")).toHaveAttribute("src", "https://cdn.pethost.test/thor.jpg");
     expect(thor.querySelector("img")).toHaveAttribute("alt", "");
-    const luna = screen.getByRole("link", { name: "Ficha de Luna" });
+    const luna = screen.getByRole("link", { name: /^Ficha de Luna/ });
     expect(luna.querySelector('svg[aria-hidden="true"]')).toBeInTheDocument();
     expect(container.querySelector('img:not([alt=""])')).toBeNull();
   });
@@ -75,12 +78,12 @@ describe("meus pets", () => {
     const { user } = setup();
     const toggle = await screen.findByRole("button", { name: "Fora da lista (1)" });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("link", { name: "Ficha de Mel" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Ficha de Mel/ })).not.toBeInTheDocument();
 
     await user.click(toggle);
 
     expect(toggle).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("link", { name: "Ficha de Mel" })).toBeVisible();
+    expect(screen.getByRole("link", { name: /^Ficha de Mel/ })).toBeVisible();
     expect(screen.getByText("As fichas continuam aqui. As estadias antigas também.")).toBeInTheDocument();
   });
 
@@ -107,7 +110,20 @@ describe("meus pets", () => {
 
     await user.click(screen.getByRole("button", { name: "Tentar de novo" }));
 
-    expect(await screen.findByRole("link", { name: "Ficha de Thor" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: /^Ficha de Thor/ })).toBeInTheDocument();
     expect(calls).toBe(2);
   });
+});
+it("REQ-HPETS-001 lista de anfitrião usa convite e tile de pets da casa", async () => {
+  respond([]);
+  renderWithProviders(<PetList accountId="host" role="host" />, { theme: quintalTheme });
+  expect(await screen.findByText("Tem bicho morando com você? Apresenta pra quem vai se hospedar aí.")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Apresentar um pet da casa" })).toHaveAttribute("href", "/pets/new");
+});
+it("REQ-HPETS-002 404 de keeper no cliente é bloqueio normal, sem tentar de novo", async () => {
+  server.use(http.get("*/api/pets/me", () => HttpResponse.json(apiFail("PET_KEEPER_NOT_FOUND"), { status: 404 })));
+  renderWithProviders(<PetList accountId="host" role="host" />, { theme: quintalTheme });
+  expect(await screen.findByText("Os pets da casa entram depois que sua verificação for aprovada.")).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Tentar de novo" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Apresentar um pet da casa" })).not.toBeInTheDocument();
 });

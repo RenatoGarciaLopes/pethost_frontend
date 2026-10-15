@@ -17,7 +17,8 @@ test("REQ-SHELL-009/010 visitante entra e volta ao perfil que tentou abrir", asy
   await email.fill("tutora@pethost.test");
   await page.getByLabel(/^Senha/).fill("senha-de-teste");
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page).toHaveURL(/\/users\/profile$/);
+  // Entrar e abrir o perfil compilam rotas na primeira visita do `next dev` ("Entrando…" ainda na tela aos 5 s).
+  await expect(page).toHaveURL(/\/users\/profile$/, { timeout: 15_000 });
   await expect(page.getByRole("main")).toHaveCount(1);
   await expect(page.getByLabel(/^Seu nome completo/)).toBeVisible();
   await expect(page.getByRole("banner")).toBeVisible();
