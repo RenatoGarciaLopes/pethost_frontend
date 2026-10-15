@@ -35,3 +35,16 @@ it("REQ-AQUEUE-002 parâmetros repetidos e navegação voltar usam a mesma leitu
     navigation.search = "status=wrong&page=2&keep=yes";
   }
 });
+
+it("REQ-AUDIT-002 limpar filtro opcional remove só os parâmetros pedidos", () => {
+  const id = "77b9c00c-fdc0-4422-b4c7-7e237741a4a7";
+  navigation.search = `targetId=${id}&keep=yes`;
+  const schema = z.object({ targetId: z.string().uuid().optional() });
+  try {
+    const { result } = renderHook(() => useSearchParamsState(schema));
+    act(() => result.current[1]({ targetId: undefined }));
+    expect(push).toHaveBeenLastCalledWith("/queue?keep=yes", { scroll: false });
+  } finally {
+    navigation.search = "status=wrong&page=2&keep=yes";
+  }
+});
