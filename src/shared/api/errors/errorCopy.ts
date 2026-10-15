@@ -45,7 +45,7 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_CNPJ_ALREADY_REGISTERED: (_error, context) =>
     context.adminReview
       ? "Esse CPF/CNPJ já pertence a outro anfitrião. Recuse com 'Os dados não batem' ou abra a conta indevida em Contas."
-      : "Esse CNPJ já está em outra conta. Fala com o suporte para conferir.",
+      : "Esse CNPJ já está em outra conta. Se a empresa é sua, fala com o suporte.",
   HOST_APPLICATION_CONFLICT: "Outra pessoa da equipe já decidiu essa verificação.",
   HOST_APPLICATION_NOT_UNDER_REVIEW: "Outra pessoa da equipe já decidiu essa verificação.",
   HOST_APPLICATION_NOT_FOUND: "Não encontramos essa verificação. Volte para a fila.",
@@ -69,7 +69,6 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_APPLICATION_NOT_EDITABLE: "Essa verificação já foi enviada e não dá mais pra mudar.",
   HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED: "Dados de empresa só valem pra verificação de empresa.",
   HOST_ALREADY_VERIFIED: "Sua verificação já foi aprovada.",
-  HOST_CNPJ_ALREADY_REGISTERED: "Esse CNPJ já está em outra conta. Se a empresa é sua, fala com o suporte.",
   HOST_IDENTITY_LOCKED: "Esses dados foram conferidos na verificação. Pra mudar, fala com o suporte.",
 
   // Transversais da API
