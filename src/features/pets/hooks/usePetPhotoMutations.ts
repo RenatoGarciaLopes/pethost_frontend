@@ -7,6 +7,7 @@ import { uploadPetPhoto, replacePetPhoto, removePetPhoto } from "../api/client/p
 import { petQueries } from "../api/queries";
 import { toPetDetail } from "../api/toPetDetail";
 import type { PetDto } from "../api/contracts";
+import { invalidatePetLists } from "../api/invalidatePetLists";
 
 /** Uma operação por vez; erros traduzidos por vaga e cache atualizado pela resposta. @example const photos = usePetPhotoMutations(accountId, petId); await photos.add(0, file); */
 export function usePetPhotoMutations(accountId: string, petId: string) {
@@ -25,7 +26,7 @@ export function usePetPhotoMutations(accountId: string, petId: string) {
       const dto = await send();
       client.setQueryData(petQueries.detail(accountId, petId).queryKey, toPetDetail(dto));
       // Só a lista está desatualizada: a resposta já contém o detalhe inteiro.
-      await client.invalidateQueries({ queryKey: petQueries.mine(accountId).queryKey });
+      await invalidatePetLists(client, accountId, dto);
     } catch (error) {
       if (hasErrorCode(error, "PET_PHOTO_NOT_FOUND")) {
         await client.invalidateQueries({ queryKey: petQueries.detail(accountId, petId).queryKey });

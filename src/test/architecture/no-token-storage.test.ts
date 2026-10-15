@@ -23,7 +23,7 @@ const files = sourceFiles(SRC).map((file) => ({
   code: readFileSync(file, "utf8"),
 }));
 
-const SENSITIVE = /(token|refresh|authorization|bearer|signed.?url|document|cpf|password|senha)/i;
+const SENSITIVE = /(token|refresh|authorization|bearer|signed.?url|document|cpf|password|senha|\burl\b)/i;
 
 describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
   it("varre arquivos de verdade", () => {
@@ -62,7 +62,7 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
   });
 
   it("REQ-ACC-026 REQ-PWD-013 REQ-OREG-014 REQ-HREG-008 token, senha e CPF nunca vão para URL nem query key", () => {
-    const PERSONAL = /(token|cpf|password|senha)/i;
+    const PERSONAL = /(token|cpf|password|senha|signed.?url|photo\.url)/i;
     const offenders = files.flatMap(({ file, code }) =>
       [
         ...code.matchAll(/queryKey:\s*(\[[^\]]*\])/g),

@@ -9,6 +9,7 @@ import { petsHandlers, resetPets } from "./handlers/pets.mjs";
 import { stripeAccountHandlers, resetStripeAccounts } from "./handlers/stripeAccount.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
+import { adminApplicationsHandlers, resetAdminApplications } from "./handlers/adminApplications.mjs";
 
 /**
  * Backend HTTP mínimo para E2E simulado; não representa a API .NET.
@@ -22,6 +23,7 @@ const handlers = [
     resetAccountProfiles();
     resetPets();
     resetStripeAccounts();
+    resetAdminApplications();
     return HttpResponse.json({ ok: true });
   }),
   ...sessionHandlers,
@@ -32,6 +34,7 @@ const handlers = [
   ...passwordHandlers,
   ...petsHandlers,
   ...stripeAccountHandlers,
+  ...adminApplicationsHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

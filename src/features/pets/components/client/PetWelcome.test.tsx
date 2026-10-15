@@ -19,3 +19,17 @@ it("REQ-PNEW-020 anúncio único, lista de pets e apresentar outro; busca fica p
   await user.click(screen.getByRole("button", { name: "Apresentar outro pet" }));
   expect(another).toHaveBeenCalledTimes(1);
 });
+it("REQ-HPETS-004 anfitrião volta à lista enquanto o cantinho não existe e apresenta outro pet da casa", async () => {
+  const another = vi.fn();
+  const { user } = renderWithProviders(
+    <AnnouncerProvider>
+      <PetWelcome name="Bóris" role="host" onAnother={another} />
+    </AnnouncerProvider>,
+    { theme: quintalTheme },
+  );
+  expect(screen.getByRole("heading", { name: "Prazer, Bóris!" })).toBeVisible();
+  expect(screen.getByRole("link", { name: "Ver pets da casa" })).toHaveAttribute("href", "/pets");
+  expect(screen.queryByRole("link", { name: "Voltar pro meu cantinho" })).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Apresentar outro pet da casa" }));
+  expect(another).toHaveBeenCalledOnce();
+});
