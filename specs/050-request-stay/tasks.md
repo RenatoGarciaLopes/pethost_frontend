@@ -10,5 +10,5 @@ updated: 2026-10-15
 - [x] **T2 · Schema e mutation** (2026-10-15) (REQ-REQST-002, 005, 009)
 - [x] **T3 · Formulário e resumo** (2026-10-15) (REQ-REQST-002, 003, 004, 007, 008)
 - [x] **T4 · Pedido enviado** (2026-10-15) (REQ-REQST-006)
-- [ ] **T5 · Rota e guarda** (REQ-REQST-001)
+- [x] **T5 · Rota e guarda** (2026-10-15) (REQ-REQST-001)
 - [ ] **T6 · Stories, E2E e documentação**
