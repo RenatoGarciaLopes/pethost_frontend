@@ -5,23 +5,25 @@ import { switchAccounts } from "./switchAccounts.mjs";
 const API = "http://localhost:5099/api/v1/hosts/me/stripe-account";
 const accounts = new Map();
 const noStore = { headers: { "cache-control": "no-store" } };
+function initialState() {
+  return {
+    status: "not_started",
+    detailsSubmitted: false,
+    chargesEnabled: false,
+    payoutsEnabled: false,
+    disabledReason: null,
+    listingsVisible: false,
+    onboardedAt: null,
+    syncedAt: null,
+  };
+}
 function access(request) {
   const user = sessionUserOf(request);
   if (!user) return { error: fail(401, "UNAUTHORIZED") };
   if (user.role !== "host") return { error: fail(403, "FORBIDDEN") };
   const account = switchAccounts.find((item) => item.user.id === user.id);
   if (!account || account.scenario === "unverified") return { error: fail(404, "HOST_NOT_FOUND") };
-  if (!accounts.has(user.id))
-    accounts.set(user.id, {
-      status: "not_started",
-      detailsSubmitted: false,
-      chargesEnabled: false,
-      payoutsEnabled: false,
-      disabledReason: null,
-      listingsVisible: false,
-      onboardedAt: null,
-      syncedAt: null,
-    });
+  if (!accounts.has(user.id)) accounts.set(user.id, initialState());
   return { user, state: accounts.get(user.id) };
 }
 function start(result) {
@@ -33,6 +35,24 @@ function start(result) {
 /** Restaura apenas dados sintéticos do Stripe entre jornadas. @example resetStripeAccounts(); */
 export function resetStripeAccounts() {
   accounts.clear();
+}
+/** Semeia os dois estados persistidos necessários à jornada; nunca representa uma conta Stripe real. @example seedStripeAccount(hostId, "restricted") */
+export function seedStripeAccount(userId, status) {
+  const account = switchAccounts.find((item) => item.user.id === userId && item.user.role === "host");
+  if (!account || account.scenario === "unverified" || !["restricted", "enabled"].includes(status)) return false;
+  const now = new Date().toISOString();
+  accounts.set(userId, {
+    ...initialState(),
+    status,
+    detailsSubmitted: true,
+    chargesEnabled: status === "enabled",
+    payoutsEnabled: status === "enabled",
+    disabledReason: status === "restricted" ? "requirements.pending_verification" : null,
+    listingsVisible: status === "enabled" && account.user.isActive,
+    onboardedAt: now,
+    syncedAt: now,
+  });
+  return true;
 }
 /** API simulada por conta: sessão/link efêmeros, só espelho persistido. A sincronização representa aprovação do cadastro fake. @example server.use(...stripeAccountHandlers); */
 export const stripeAccountHandlers = [

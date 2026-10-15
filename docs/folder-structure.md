@@ -19,9 +19,11 @@ src/app/(host)/host/payments/  rota privada /host/payments
 src/test/fixtures/payouts.ts   fixture sintética do DTO
 src/test/msw/stripeAccountMock.int.test.ts
 e2e/support/handlers/stripeAccount.mjs
+e2e/mocked/host/payouts.spec.ts
+e2e/support/devIndicator.ts       selo do next dev oculto em jornadas mobile
 ```
 
-O painel 030 não foi criado nem alterado; `payoutStageOf` está exportado como contrato para a integração paralela. A suíte Playwright da jornada será escrita e executada depois de o Renato informar as portas de teste.
+O painel 030 nao foi criado nem alterado; `payoutStageOf` esta exportado como contrato para a integracao paralela. A jornada Playwright cobre desktop e celular. `stripeAccount.mjs` semeia `restricted`/`enabled`; o teste intercepta `connect-js.stripe.com/v1.0/connect.js` com um elemento Connect sintetico, sem rede externa. A execucao aguarda o Renato informar quando as portas estiverem livres.
 
 ## Ampliação da base de pets (spec 021, 14/10/2026)
 

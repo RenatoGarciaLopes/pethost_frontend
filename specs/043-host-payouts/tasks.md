@@ -14,5 +14,6 @@ Cada tarefa: vermelho → verde → refatorar → documentar. Depende da 030 (`H
 - [x] **T4 · Dependência**: `@stripe/connect-js` e `@stripe/react-connect-js` instalados pelo Renato; `EmbeddedOnboarding` sob `next/dynamic`.
 - [x] **T5 · Tela** (REQ-PAYOUT-003, 004, 008, 009, 010, 011): estados, retorno `?stripe=`, alternativa hospedada e rota protegida.
 - [ ] **T6 · Painel** (REQ-PAYOUT-013): pulada conforme divisão com Lynx/030. `payoutStageOf(account)` exporta o contrato da etapa 2; falta integrar no painel.
-- [ ] **T7 · Stories e E2E**: stories e handlers simulados implementados. Jornada Playwright e execução aguardam o Renato informar as portas; nenhum E2E foi iniciado.
+- [x] **T7 · Stories e E2E**: jornada Playwright escrita para desktop/celular com Connect.js fake local e estados sem verificação, retorno sincronizado, `restricted` e `enabled`.
+- [ ] **Execução E2E**: aguarda o Renato liberar as portas; nenhum Playwright foi iniciado nesta entrega.
 - [ ] **T8 · Documentação**: TSDoc e registro provisório em `design.md`, `docs/folder-structure.md` e `docs/validation.md` concluídos. Nota e catálogo do vault ficam com Renato; fechar após revisão das stories e E2E.

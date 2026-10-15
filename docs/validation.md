@@ -1,5 +1,9 @@
 # Validação da base
 
+## 15/10/2026 · Spec 043 · T7 escrita
+
+Na worktree `feat/043-host-payouts`, `npx.cmd vitest run src/features/host-payouts src/test/msw/stripeAccountMock.int.test.ts 'src/app/(host)/host/payments'` passou: **13 arquivos, 57 testes**. `npx.cmd tsc --noEmit -p .` e ESLint nos arquivos da jornada e mock passaram. Prettier foi aplicado aos novos arquivos e checked em seguida. O E2E `e2e/mocked/host/payouts.spec.ts` foi escrito para desktop/celular; Playwright não foi iniciado porque esta entrega deve solicitar e aguardar a liberação das portas.
+
 ## 15/10/2026 · Spec 043 (parcial)
 
 Na worktree `feat/043-host-payouts`, `npx.cmd vitest run src/features/host-payouts src/test/msw/stripeAccountMock.int.test.ts 'src/app/(host)/host/payments' src/shared/api/errors/getErrorMessage.test.ts --maxWorkers=2` passou: **14 arquivos, 114 testes**. `npx.cmd tsc --noEmit -p .` passou após corrigir o cache tipado da story. As stories usam `export default meta` e os arquivos da entrega foram verificados sem BOM.
