@@ -4,3 +4,4 @@
  * Não exporte hooks, componentes client ou recursos exclusivos do servidor.
  */
 export { listingCopy } from "./lib/listingCopy";
+export { isListingId } from "./lib/listingId";

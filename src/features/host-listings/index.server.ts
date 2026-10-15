@@ -6,3 +6,4 @@ import "server-only";
  * Não importe este índice em componentes client.
  */
 export { ListingDraftScreen } from "./components/ListingDraftScreen";
+export { ListingEditorScreen } from "./components/ListingEditorScreen";

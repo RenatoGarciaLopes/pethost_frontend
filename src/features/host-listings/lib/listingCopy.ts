@@ -114,6 +114,18 @@ export const listingCopy = {
     body: "Agora ele já aparece pros tutores. Com fotos, fica muito mais fácil de escolher.",
     photos: "Pôr as fotos da casa",
   },
+  editor: {
+    back: "Meu painel",
+    active: "Aberto",
+    paused: "Pausado",
+    pausedNotice: "Seu cantinho está pausado: não aparece na busca. Dá pra editar tudo.",
+    pause: "Pausar meu cantinho",
+    pauseTitle: "Pausar o cantinho?",
+    pauseMessage: "O cantinho sai da busca até você reabrir. Pedidos já aceitos continuam.",
+    pauseConfirm: "Pausar",
+    keepOpen: "Deixar aberto",
+    reopen: "Reabrir",
+  },
   gate: {
     noPayouts: "Seu cantinho abre depois que o recebimento estiver conectado.",
     seePayouts: "Ver como eu recebo",
