@@ -6,6 +6,7 @@ import { accountProfileHandlers, resetAccountProfiles } from "./handlers/account
 import { ownersHandlers } from "./handlers/owners.mjs";
 import { passwordHandlers } from "./handlers/password.mjs";
 import { petsHandlers, resetPets } from "./handlers/pets.mjs";
+import { stripeAccountHandlers, resetStripeAccounts } from "./handlers/stripeAccount.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 
@@ -20,6 +21,7 @@ const handlers = [
   http.post("http://localhost:5099/__e2e/account/reset", () => {
     resetAccountProfiles();
     resetPets();
+    resetStripeAccounts();
     return HttpResponse.json({ ok: true });
   }),
   ...sessionHandlers,
@@ -29,6 +31,7 @@ const handlers = [
   ...usersHandlers,
   ...passwordHandlers,
   ...petsHandlers,
+  ...stripeAccountHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

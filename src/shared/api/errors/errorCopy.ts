@@ -52,6 +52,16 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_APPLICATION_DOCUMENT_ALREADY_EXISTS: "Essa foto já foi usada em outra vaga. Tira uma foto nova.",
   HOST_IDENTITY_LOCKED: "Esses dados foram conferidos na verificação. Pra mudar, fala com o suporte.",
 
+  // Recebimento Stripe Connect (043)
+  HOST_STRIPE_UNAVAILABLE: "O Stripe não respondeu agora. Tenta de novo em alguns minutos.",
+  HOST_STRIPE_REQUEST_REJECTED: "O Stripe não aceitou esses dados. Fala com o suporte pra gente conferir.",
+  HOST_STRIPE_ONBOARDING_NOT_ALLOWED:
+    "O cadastro de recebimento não está disponível pra essa conta agora. Fala com o suporte.",
+  HOST_STRIPE_ACCOUNT_REJECTED:
+    "O Stripe não aprovou o recebimento dessa conta. Fala com a gente pra entender o que aconteceu.",
+  HOST_STRIPE_ACCOUNT_ALREADY_EXISTS: "Essa conta já tem recebimento conectado. Pra trocar, fala com o suporte.",
+  HOST_STRIPE_ACCOUNT_NOT_FOUND: "Você ainda não começou seu cadastro de recebimento. Começa por aqui.",
+
   // Transversais da API
   VALIDATION_ERROR: "Alguns campos precisam de ajuste. Confere as mensagens embaixo de cada um.",
   UNAUTHORIZED: "Sua sessão terminou. Entra de novo pra continuar.",
