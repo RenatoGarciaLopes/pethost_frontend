@@ -7,12 +7,12 @@ import type { BookingStatus } from "../types";
  */
 export const statusLabel: Readonly<Record<BookingStatus, string>> = {
   requested: "Esperando resposta",
-  accepted: "Aceito",
+  accepted: "Aceita",
   confirmed: "Confirmada",
   in_progress: "Acontecendo",
   completed: "Concluída",
-  declined: "Recusado",
-  expired: "Expirado",
+  declined: "Não aceita",
+  expired: "Expirou",
   cancelled: "Cancelada",
 };
 
@@ -33,6 +33,24 @@ export const HOST_TABS: readonly BookingTab[] = [
   { id: "acontecendo", label: "Acontecendo", statuses: ["in_progress"] },
   { id: "anteriores", label: "Anteriores", statuses: ["completed", "declined", "expired", "cancelled"] },
 ];
+
+/**
+ * Abas de "Minhas estadias" do tutor (REQ-STAYS-001): cada situação cai numa aba só.
+ * @example OWNER_TABS.map((tab) => tab.label)
+ */
+export const OWNER_TABS: readonly BookingTab[] = [
+  { id: "proximas", label: "Próximas", statuses: ["requested", "accepted", "confirmed"] },
+  { id: "acontecendo", label: "Acontecendo", statuses: ["in_progress"] },
+  { id: "anteriores", label: "Anteriores", statuses: ["completed", "declined", "expired", "cancelled"] },
+];
+
+/**
+ * A aba do tutor pelo valor da URL; desconhecido cai em "Próximas".
+ * @example ownerTabOf(searchParams.aba)
+ */
+export function ownerTabOf(id: string | undefined): BookingTab {
+  return OWNER_TABS.find((tab) => tab.id === id) ?? OWNER_TABS[0]!;
+}
 
 /**
  * A aba pelo valor da URL; desconhecido cai em "Pedidos".
