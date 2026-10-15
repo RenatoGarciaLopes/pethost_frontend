@@ -1,5 +1,25 @@
 # Estrutura real do frontend
 
+## Início público (spec 040, 15/10/2026)
+
+```text
+src/app/page.tsx                                  rota pública `/`, sessão e prefetch opcional
+src/app/page.int.test.tsx                         sessão, prefetch e falha recuperável
+src/widgets/home/
+  components/HomeScreen/
+    HomeScreen.tsx                                 estados por papel, busca e hero
+    HomeScreen.test.tsx                            cobertura funcional
+    HomeScreen.stories.tsx                         estados de visitante, conta e celular
+    index.ts
+  lib/
+    homeCopy.ts                                    textos da home
+    homeSearchPath.ts, homeSearchPath.test.ts       handoff da busca
+  index.ts
+e2e/mocked/home/home.spec.ts                       jornadas de navegador escritas, não executadas
+```
+
+`HomeScreen` usa componentes de marca e confiança de `shared`, recebe do servidor apenas sessão reduzida e pets ativos reduzidos, e não chama a API de anúncios. A nota canônica e o catálogo de recursos do Obsidian permanecem pendentes de integração pelo responsável do vault.
+
 ## Ampliação da base de pets (spec 021, 14/10/2026)
 
 Recursos implementados sobre a feature da 020; componentes, stores e páginas da composição paralela têm inventário próprio. Detalhes e validação no vault `development/resources/pets.md`, seção "Apresentar o pet (spec 021): base".
