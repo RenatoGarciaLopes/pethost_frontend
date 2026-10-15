@@ -19,6 +19,7 @@ import { describeBookingPet } from "../../lib/describeBookingPet";
 import { formatDeadline, formatPeriod, isDeadlineNear } from "../../lib/formatStay";
 import type { Booking } from "../../types";
 import { AcceptDialog, CancelBookingDialog, DeclineDialog } from "./BookingDecisions";
+import { StayMilestones } from "./StayMilestones";
 
 const copy = bookingCopy.detail;
 
@@ -52,7 +53,7 @@ export interface HostBookingDetailProps {
 /**
  * O pedido do anfitrião (spec 053, REQ-HREQ-002 a 008): tutor, período, pets, total, prazo e a trilha; a ficha dos pets
  * (composta pela página); e, conforme a situação, "Aceitar" e "Não posso receber" (pedido), o contato e "Cancelar
- * estadia" (confirmada), ou o que houve (recusada, expirada, cancelada). Toda decisão grava a resposta e atualiza as abas.
+ * estadia" (confirmada), os marcos "chegou" e "voltou pra casa" (054), ou o que houve (recusada, expirada, cancelada). Toda decisão grava a resposta e atualiza as abas.
  *
  * @example <HostBookingDetail accountId={user.id} bookingId={id} petProfiles={<BookingPetProfiles … />} />
  */
@@ -106,7 +107,10 @@ export function HostBookingDetail({ accountId, bookingId, petProfiles, now }: Ho
       </Stack>
       {steps && <StatusTimeline label={copy.trail} steps={steps} />}
       {closed && <Notice tone="info" title={closed} />}
-      <OwnerContact booking={booking} />
+      {booking.status !== "in_progress" && <OwnerContact booking={booking} />}
+      {(booking.status === "confirmed" || booking.status === "in_progress") && (
+        <StayMilestones accountId={accountId} booking={booking} now={moment} />
+      )}
       {booking.status === "requested" && (
         <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }} useFlexGap>
           <AcceptDialog accountId={accountId} booking={booking} onAccepted={() => setJustConfirmed(true)} />

@@ -92,4 +92,22 @@ export const bookingCopy = {
     confirm: "Cancelar estadia",
     keep: "Manter estadia",
   },
+  milestones: {
+    arrive: (subject: string, many: boolean) => (many ? "Os pets chegaram" : `${subject} chegou`),
+    arriveTitle: (subject: string, many: boolean) =>
+      many ? "Confirmar que os pets chegaram?" : `Confirmar que ${subject} chegou?`,
+    arrived: (subject: string, many: boolean) =>
+      many ? "Os pets chegaram! Boa estadia." : `${subject} chegou! Boa estadia.`,
+    arrivalDay: (day: string) => `A chegada é ${day}.`,
+    windowClosed: "O período dessa estadia já passou.",
+    return: (subject: string, many: boolean) => (many ? "Os pets voltaram pra casa" : `${subject} voltou pra casa`),
+    returnTitle: (subject: string, many: boolean) =>
+      many ? "Confirmar que os pets voltaram pra casa?" : `Confirmar que ${subject} voltou pra casa?`,
+    returned: (subject: string, many: boolean) =>
+      many ? "Os pets voltaram pra casa. Obrigado por cuidar!" : `${subject} voltou pra casa. Obrigado por cuidar!`,
+    irreversible: "Depois de confirmar, não dá pra desfazer.",
+    confirm: "Confirmar",
+    keep: "Ainda não",
+    emergency: "Contato do tutor para emergências",
+  },
 } as const;
