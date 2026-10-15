@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { bffClient } from "@/shared/api/client/bffClient";
 import { accountQueryKey } from "@/shared/api/query/queryClient";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
@@ -24,6 +24,7 @@ const PAGE_SIZE = 20;
  *
  * @example useQuery(bookingQueries.mine(user.id, { statuses: ["requested"] }))
  * @example useQuery(bookingQueries.detail(user.id, bookingId))
+ * @example useInfiniteQuery(bookingQueries.infinite(user.id, ["completed"]))
  */
 export const bookingQueries = {
   all: (accountId: string) => accountQueryKey(accountId, "bookings"),
@@ -38,6 +39,25 @@ export const bookingQueries = {
             bookingPageSchema,
           ),
         ),
+    }),
+  /** A mesma lista, página a página ("Mostrar mais", REQ-STAYS-003). */
+  infinite: (
+    accountId: string,
+    statuses: readonly BookingStatus[],
+    pageSize: number = PAGE_SIZE,
+    transport: Transport = bffClient,
+  ) =>
+    infiniteQueryOptions({
+      queryKey: [...bookingQueries.lists(accountId), "infinite", [...statuses], pageSize] as const,
+      queryFn: async ({ pageParam }) =>
+        toBookingPage(
+          await transport.request(
+            { method: "GET", path: "/bookings/me", query: { status: [...statuses], page: pageParam, pageSize } },
+            bookingPageSchema,
+          ),
+        ),
+      initialPageParam: 1,
+      getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     }),
   detail: (accountId: string, bookingId: string, transport: Transport = bffClient) =>
     queryOptions({
