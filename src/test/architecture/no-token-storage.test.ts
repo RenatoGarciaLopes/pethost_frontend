@@ -24,7 +24,7 @@ const files = sourceFiles(SRC).map((file) => ({
 }));
 
 const SENSITIVE =
-  /(token|refresh|authorization|bearer|signed.?url|document|selfie|photo|foto|cpf|cnpj|password|senha)/i;
+  /(token|refresh|authorization|bearer|signed.?url|document|selfie|photo|foto|cpf|cnpj|password|senha|url)/i;
 
 describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
   it("varre arquivos de verdade", () => {
@@ -65,7 +65,7 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
   });
 
   it("REQ-ACC-026 REQ-PWD-013 REQ-OREG-014 REQ-HREG-008 token, senha e CPF nunca vão para URL nem query key", () => {
-    const PERSONAL = /(token|cpf|cnpj|selfie|photo|password|senha)/i;
+    const PERSONAL = /(token|cpf|cnpj|selfie|photo|password|senha|signed.?url)/i;
     const offenders = files.flatMap(({ file, code }) =>
       [
         ...code.matchAll(/queryKey:\s*(\[[^\]]*\])/g),

@@ -7,6 +7,12 @@ const apiError = (code: string, extra: Partial<ConstructorParameters<typeof ApiE
   new ApiError({ status: 400, code, message: "english from the API", ...extra });
 
 describe("getErrorMessage", () => {
+  it("REQ-AQUEUE-013 conflitos e identidades duplicadas têm orientação administrativa", () => {
+    for (const code of ["HOST_APPLICATION_CONFLICT", "HOST_APPLICATION_NOT_UNDER_REVIEW"])
+      expect(getErrorMessage(apiError(code))).toBe("Outra pessoa da equipe já decidiu essa verificação.");
+    expect(getErrorMessage(apiError("HOST_CPF_ALREADY_REGISTERED"), { adminReview: true })).toContain("Recuse com");
+    expect(getErrorMessage(apiError("HOST_CPF_ALREADY_REGISTERED"))).not.toContain("Recuse com");
+  });
   it("REQ-PNEW-007 tipo de arquivo recusado tem frase em português", () => {
     expect(getErrorMessage(apiError("UNSUPPORTED_MEDIA_TYPE"))).toBe(
       "Esse arquivo não é uma foto: use JPG, PNG ou WebP.",

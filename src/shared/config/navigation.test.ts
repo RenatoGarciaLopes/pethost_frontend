@@ -5,7 +5,7 @@ describe("REQ-SHELL-002 tabela única de atalhos", () => {
   it("cada papel vê só os seus atalhos", () => {
     expect(navItemsFor("owner").map((item) => item.href)).toEqual(["/pets"]);
     expect(navItemsFor("host").map((item) => item.href)).toEqual(["/host/application", "/pets"]);
-    expect(navItemsFor("admin")).toEqual([]);
+    expect(navItemsFor("admin").map((item) => item.href)).toEqual(["/admin/host-applications"]);
   });
 
   it("REQ-HVER-001 anfitrião tem o atalho Minha verificação", () => {

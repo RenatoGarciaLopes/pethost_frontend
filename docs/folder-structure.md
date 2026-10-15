@@ -308,3 +308,42 @@ e2e/real/pets/host-pets.spec.ts             jornada do seed aprovado, condiciona
 ```
 
 Queries/DTOs ficam em api; strings e funções puras em lib; acesso/prefetch em api/server; efeitos de cache nos hooks e no helper api/invalidatePetLists; apresentação nos componentes existentes e nas duas pastas novas geradas pelo Plop. Não há diretório planejado apresentado como implementado.
+
+## Spec 031: fila administrativa (15/10/2026)
+
+Implementada na worktree `pethost_frontend-031`, branch `feat/031-admin-verification-queue`. A API continua como fonte do contrato. O vault permanece somente leitura nesta entrega; o conteúdo para catálogo e notas será enviado ao responsável pela integração.
+
+```text
+src/app/(admin)/admin/(panel)/host-applications/
+  page.tsx                         autorização, filtros e prefetch da fila
+  [applicationId]/page.tsx         autorização, UUID e prefetch do detalhe
+src/features/admin-host-applications/
+  api/contracts.ts                 schemas derivados do gerado, tipos locais do admin
+  api/client/adminApplications.client.ts
+  api/server/adminApplications.server.ts
+  api/queries.ts                   cache por conta; não inclui links de fotos
+  schemas/reviewSchemas.ts          filtros, aprovação, recusa e confirmação de fraude
+  hooks/useDecision.ts             decisão, invalidação e recuperação de conflito
+  components/ApplicationQueue.tsx  lista, filtro e paginação
+  lib/adminReviewCopy.ts            rótulos do admin e prévia do e-mail real
+  index.ts, index.client.ts, index.server.ts
+src/widgets/host-application-review/
+  components/ApplicantComparison.tsx
+  components/DecisionPanel.tsx      inclui checklist local PF/PJ
+  components/HostApplicationReview.tsx
+  components/SignedDocumentViewer.tsx
+  index.client.ts
+src/shared/lib/pagination/paginate.ts
+src/shared/hooks/useSearchParamsState.ts
+src/shared/ui/data-display/AdminDataTable/
+  AdminDataTable.tsx, AdminDataTable.test.tsx, AdminDataTable.stories.tsx, index.ts
+src/shared/ui/forms/ReasonField/
+  ReasonField.tsx, ReasonField.test.tsx, ReasonField.stories.tsx, index.ts
+src/test/fixtures/adminApplications.ts
+src/test/msw/adminApplicationsMock.int.test.ts
+e2e/support/handlers/adminApplications.mjs
+e2e/mocked/admin/verification-queue.spec.ts
+e2e/real/admin/verification-queue.spec.ts
+```
+
+Os testes unitários, funcionais e de integração ficam junto dos recursos. Cada componente novo tem story, incluindo estados de empresa, decisão, fotos apagadas, conflito e celular. O checklist não tem export separado: sua cobertura pertence a `DecisionPanel.test.tsx`. `DecisionSummary` é interno e coberto pela composição e story de solicitação decidida. Não há dependência da feature da spec 030. `shared` não conhece o domínio de verificação; o widget compõe o domínio usando as APIs públicas da feature. Links assinados não entram no prefetch, no Query ou na URL da página.

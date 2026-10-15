@@ -4,6 +4,8 @@ import { roleLabel } from "@/shared/config/roleLabels";
 /** Contexto opcional que muda a frase (ex.: o tipo de conta da tela). */
 export interface ErrorCopyContext {
   role?: "owner" | "host";
+  /** Orientação para a equipe ao decidir verificação; preserva a copy pessoal fora do admin. */
+  adminReview?: boolean;
 }
 
 type CopyEntry = string | ((error: ApiError, context: ErrorCopyContext) => string);
@@ -36,7 +38,18 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_NOT_A_COMPANY: "Esses dados são só de conta de empresa.",
   PAYLOAD_TOO_LARGE: "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.",
   UNSUPPORTED_MEDIA_TYPE: "Esse arquivo não é uma foto: use JPG, PNG ou WebP.",
-  HOST_CPF_ALREADY_REGISTERED: "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
+  HOST_CPF_ALREADY_REGISTERED: (_error, context) =>
+    context.adminReview
+      ? "Esse CPF/CNPJ já pertence a outro anfitrião. Recuse com 'Os dados não batem' ou abra a conta indevida em Contas."
+      : "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
+  HOST_CNPJ_ALREADY_REGISTERED: (_error, context) =>
+    context.adminReview
+      ? "Esse CPF/CNPJ já pertence a outro anfitrião. Recuse com 'Os dados não batem' ou abra a conta indevida em Contas."
+      : "Esse CNPJ já está em outra conta. Fala com o suporte para conferir.",
+  HOST_APPLICATION_CONFLICT: "Outra pessoa da equipe já decidiu essa verificação.",
+  HOST_APPLICATION_NOT_UNDER_REVIEW: "Outra pessoa da equipe já decidiu essa verificação.",
+  HOST_APPLICATION_NOT_FOUND: "Não encontramos essa verificação. Volte para a fila.",
+  HOST_APPLICATION_DOCUMENT_NOT_FOUND: "Essa foto não está mais disponível. Recarregue a verificação.",
   AUTH_LINKED_ACCOUNT_NOT_FOUND: "Não deu pra abrir a outra conta. Confere a senha dela.",
   AUTH_PASSWORD_RESET_TOKEN_INVALID: "Esse link já venceu. Pede outro, leva um minuto.",
 
