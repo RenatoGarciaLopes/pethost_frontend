@@ -274,3 +274,37 @@ src/shared/
 ```
 
 Recursos, uso e cobertura de cada peça na nota `development/resources/auth.md` do vault.
+
+## Ampliação de pets da casa (spec 023, 14/10/2026)
+
+A slice existente pets atende owner/host. Não há nova rota ou widget de onboarding: `(account)` já aceita os dois papéis. O bloqueio é resposta do módulo Pets. Recursos e responsabilidades na nota `development/resources/pets.md` do vault (seção "Pets da casa e vitrine de residentes").
+
+```text
+src/features/pets/
+  api/invalidatePetLists.ts                 invalidação de mine e vitrine pelo id do perfil
+  api/petQueries.int.test.ts                isolamento e projeção pública do cache
+  api/toHouseResidents.test.ts              mapper público sem campos privados
+  api/server/houseResidents.server.ts       prefetch autenticado, não bloqueante
+  components/MyPetsScreen.stories.tsx       composição host/vazio/pendente
+  components/client/HouseResidents/         vitrine client, tests, integração, story, index
+  components/client/KeeperPendingNotice/    aviso server-safe, tests, story, index
+  components/client/PetWelcome.stories.tsx  boas-vindas por papel
+  lib/isKeeperPending.ts                    reconhecimento do erro de perfil ausente
+  lib/coexistenceSummary.ts                 frase de convivências positivas
+  lib/petsCopy.test.ts                      paridade do copy owner/host
+  api/contracts.ts                         hostPetsSchema e HostPetsResponse
+  api/mappers.ts                           toHouseResidents e hostId de toPetList
+  api/queries.ts                           petQueries.house
+  types.ts                                 HouseResident e PetList.hostId
+  index{,.client,.server}.ts                APIs públicas por ambiente
+src/app/(account)/pets/{page,new/page}.tsx  papel, metadata e preflight host
+src/shared/config/navigation.ts            host-pets disponível
+src/shared/api/errors/errorCopy.ts          PET_HOST_NOT_FOUND
+src/test/msw/petsMock.int.test.ts           mock host aprovado/pendente e vitrine
+
+e2e/mocked/pets/host-pets.spec.ts           duas jornadas, desktop/celular pelo runner
+
+e2e/real/pets/host-pets.spec.ts             jornada do seed aprovado, condicional
+```
+
+Queries/DTOs ficam em api; strings e funções puras em lib; acesso/prefetch em api/server; efeitos de cache nos hooks e no helper api/invalidatePetLists; apresentação nos componentes existentes e nas duas pastas novas geradas pelo Plop. Não há diretório planejado apresentado como implementado.

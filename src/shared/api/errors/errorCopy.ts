@@ -45,6 +45,7 @@ export const errorCopy: Record<string, CopyEntry> = {
   PET_PHOTO_ALREADY_EXISTS: "Essa foto já está na ficha.",
   PET_MICROCHIP_ALREADY_REGISTERED: "Esse microchip já está em outro pet. Se é o seu, fala com o suporte.",
   PET_KEEPER_NOT_FOUND: "Os pets da casa entram depois que sua verificação for aprovada.",
+  PET_HOST_NOT_FOUND: "Não achamos os pets dessa casa agora.",
 
   // Verificação de anfitrião
   HOST_APPLICATION_ATTEMPTS_EXCEEDED: "Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.",

@@ -15,6 +15,9 @@ import { NEW_PET_PATH, NewPetTile } from "../NewPetTile";
 import { PetGrid } from "../PetGrid";
 import { PetIdCard } from "../PetIdCard";
 import { InactivePetsSection } from "./InactivePetsSection";
+import type { PersonalRole } from "@/shared/auth/contracts/session";
+import { isKeeperPending } from "../../lib/isKeeperPending";
+import { KeeperPendingNotice } from "./KeeperPendingNotice";
 
 /**
  * Carteirinhas da conta (REQ-PETS-001 a 008). Chega hidratada do servidor; sem dados (navegação no cliente
@@ -23,7 +26,8 @@ import { InactivePetsSection } from "./InactivePetsSection";
  *
  * @example <PetList accountId={user.id} />
  */
-export function PetList({ accountId }: { accountId: string }) {
+export function PetList({ accountId, role = "owner" }: { accountId: string; role?: PersonalRole }) {
+  const roleCopy = petsCopy[role];
   const pets = useMyPets(accountId);
   // "A ficha de {nome} saiu da lista." vindo da ficha (REQ-PEDIT-012), uma vez.
   const flash = useFlashMessageOnce();
@@ -31,6 +35,7 @@ export function PetList({ accountId }: { accountId: string }) {
   const [now] = useState(() => new Date());
 
   if (pets.isPending) return <SkeletonGrid />;
+  if (role === "host" && isKeeperPending(pets.error)) return <KeeperPendingNotice />;
   if (pets.isError)
     return (
       <ErrorState
@@ -45,10 +50,10 @@ export function PetList({ accountId }: { accountId: string }) {
     return (
       <EmptyState
         illustration={<PawMark size={56} />}
-        title={petsCopy.empty.title}
+        title={roleCopy.empty.title}
         action={
           <Button component={NextLink} href={NEW_PET_PATH} variant="contained">
-            {petsCopy.empty.action}
+            {roleCopy.empty.action}
           </Button>
         }
       />
@@ -64,7 +69,7 @@ export function PetList({ accountId }: { accountId: string }) {
           </li>
         ))}
         <Box component="li" sx={{ order: { xs: -1, md: 0 } }}>
-          <NewPetTile />
+          <NewPetTile role={role} />
         </Box>
       </PetGrid>
       {inactive.length > 0 && <InactivePetsSection pets={inactive} now={now} />}
@@ -95,9 +100,7 @@ export function PetListSkeleton() {
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
       <Stack spacing={3}>
-        <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
-          {petsCopy.title}
-        </Typography>
+        <Typography>{petsCopy.loading}</Typography>
         <SkeletonGrid />
       </Stack>
     </Container>

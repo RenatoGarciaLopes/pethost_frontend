@@ -33,7 +33,7 @@ const OPTIONS = PET_SPECIES.map((species) => ({ value: species, label: speciesLa
  *
  * @example <SpeciesStep />
  */
-export function SpeciesStep() {
+export function SpeciesStep({ title = copy.title }: { title?: string }) {
   const { values, accept, mode } = usePetStep();
   const { control, handleSubmit, setError, formState } = useForm<Values, unknown, Accepted>({
     // No assistente o porte é do passo do corpo; na edição, virar cachorro pede o porte aqui.
@@ -53,7 +53,7 @@ export function SpeciesStep() {
   }
 
   return (
-    <StepForm dirty={formState.isDirty} title={copy.title} onSubmit={handleSubmit(submit)}>
+    <StepForm dirty={formState.isDirty} title={title} onSubmit={handleSubmit(submit)}>
       <Stack spacing={2}>
         <Controller
           control={control}
