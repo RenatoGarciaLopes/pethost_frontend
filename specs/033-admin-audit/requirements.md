@@ -1,7 +1,7 @@
 ---
 spec: 033-admin-audit
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-15
 area: AUDIT
 ---
 
@@ -34,7 +34,7 @@ A trilha responde "quem fez o quê, quando e por quê": ações do admin com mot
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | REQ-AUDIT-001 | O SISTEMA DEVE listar em `/admin/audit-entries` os registros do mais novo para o mais antigo, com data e hora (fuso de Brasília), ação em português, alvo, quem fez (papel) e motivo                             |
 | REQ-AUDIT-002 | Os filtros `action`, `targetType`, `targetId`, `actorId`, `from`, `to`, `page` e `pageSize` DEVEM ficar na URL e ser validados antes da chamada; valor inválido é descartado com aviso, sem chamar a API com ele |
-| REQ-AUDIT-003 | O filtro de ação DEVE oferecer as ações conhecidas agrupadas (conta, sessão, senha, tutor, anfitrião, verificação, auditoria) e aceitar um código digitado                                                       |
+| REQ-AUDIT-003 | O filtro de ação DEVE oferecer as ações conhecidas agrupadas (conta, sessão, senha, tutor, pet, anfitrião, verificação, cantinho, reserva, auditoria) e aceitar um código digitado                               |
 | REQ-AUDIT-004 | O período DEVE ser escolhido em datas locais e enviado em ISO 8601 com fuso; SE `from` vier depois de `to`, O SISTEMA DEVE avisar no campo e não buscar                                                          |
 | REQ-AUDIT-005 | O SISTEMA DEVE paginar pela API (`page`, `pageSize` 20, 50 ou 100), mostrando "N de M registros" a partir de `totalCount`                                                                                        |
 | REQ-AUDIT-006 | QUANDO o admin abrir um registro, O SISTEMA DEVE mostrar os detalhes (`details` como lista chave e valor), o IP, o `traceId` (copiável) e os ids de alvo e autor                                                 |
@@ -61,7 +61,21 @@ A trilha responde "quem fez o quê, quando e por quê": ações do admin com mot
 ## Divergências
 
 - O `modulo-audit.md` seção 2 lista só ações de conta, sessão, senha e tutor; as de anfitrião e verificação estão no `modulo-hosts.md`. A tabela de rótulos do front junta as duas fontes.
-- O OpenAPI descreve `details` sem formato; a doc mostra objeto. O front aceita objeto de texto, número ou booleano e mostra o resto como JSON compacto.
+- O OpenAPI gerado especifica `details` como `Record<string, string>`; a interface valida e exibe somente pares de texto.
+
+## Contrato conferido no OpenAPI de 15/10/2026
+
+- Os parâmetros são `page`, `pageSize`, `action`, `targetType`, `targetId`, `actorId`, `from` e `to`; esses nomes da spec coincidem com `GET /api/v1/audit-entries`.
+- `targetId` e `actorId` são UUID opcionais e podem ser nulos na resposta; `actorRole` também pode ser nulo e permanece texto livre.
+- `details` é `Record<string, string>`, não um objeto de valores JSON heterogêneos. `totalPages` é opcional na resposta gerada.
+- `from` e `to` aceitam data/hora ISO 8601 com offset. A interface recebe datas locais e envia os limites do dia no fuso de Brasília.
+- O OpenAPI deixa `targetType` e `action` como strings abertas. A interface lista valores documentados pelo backend e aceita códigos futuros digitados.
+- A lista atual inclui também `pet.*`, `listing.*` e `booking.*`; esses grupos serão exibidos junto aos grupos já previstos.
+
+## Decisões desta entrega
+
+- IP aparece somente após abrir o detalhe, conforme REQ-AUDIT-006; autor e alvo permanecem identificados por papel e UUID, sem chamadas auxiliares por nome.
+- Os rótulos cobrem `account`, `session`, `password`, `owner`, `pet`, `host`, `host_application`, `listing`, `booking` e `audit`; ações desconhecidas continuam pesquisáveis e não interrompem a tela.
 
 ## Perguntas em aberto
 

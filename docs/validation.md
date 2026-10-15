@@ -282,3 +282,14 @@ Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verif
 - MSW estrito cobre contratos reais na borda HTTP, autenticação do prefetch, erro 400 de campo, conflito 409/422, invalidação, próximos itens, autorização do mock e imagens no-store. Isso não equivale a integração com a API .NET.
 - Funções puras não têm E2E isolado: paginação e schemas têm unitários e são exercitados pelas composições/jornadas. O hook de URL é testado com a borda Next simulada, incluindo voltar/avançar e parâmetros repetidos. O viewer tem relógio falso, descarte, cancelamento, foco preso, Esc e nenhuma entrada no Query.
 - O vault foi somente leitura. Conforme orientação recebida, conteúdo e linhas de catálogo seguem no resumo para integração; não foi criada `docs/admin-verification.md`. A integração no vault não está concluída nesta worktree.
+
+## Spec 033: auditoria administrativa (15/10/2026)
+
+Validação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`.
+
+- Vitest direcionado: **16 arquivos, 43 testes aprovados**, com `--maxWorkers=2`. Inclui unitários de schema/mapper/contratos/datas/copy/links, testes funcionais de filtros/tabela/detalhe/explorer e integrações MSW no cliente BFF e prefetch server-side, mais regressão de navegação e consumers do hook 031.
+- Comando: `npx.cmd vitest run src/features/admin-audit src/shared/lib/date/formatDateTime.test.ts src/shared/lib/clipboard/writeClipboard.test.ts src/shared/ui/data-display/CopyButton/CopyButton.test.tsx src/shared/hooks/useSearchParamsState.test.tsx src/shared/config/navigation.test.ts --maxWorkers=2`.
+- `npx.cmd tsc --noEmit -p .`: aprovado, sem erros. ESLint direcionado: aprovado. Prettier check: aprovado. `git diff --check` e inspeção de BOM UTF-8 em 64 arquivos: aprovados.
+- Playwright mockado e real: jornadas escritas; não executadas enquanto aguardamos as portas reservadas.
+- Storybook/a11y, build e verify global: não executados conforme `spec-owner-common.md`; as stories usam `export default meta`.
+- Vault e catálogo: somente leitura e fora desta worktree. Recursos e respectivas linhas estão incluídos no resumo a Claude Code; não declarar integração do vault concluída.

@@ -13,6 +13,7 @@ import {
   TableSortLabel,
 } from "@mui/material";
 import { paginate } from "../../../lib/pagination/paginate";
+import { visuallyHidden } from "../../a11y/visuallyHidden";
 const tableCopy = {
   pages: "Páginas",
   first: "Primeira página",
@@ -45,8 +46,11 @@ export interface AdminDataTableProps<T> {
   rowKey: (row: T) => string;
   /** Caminho interno autorizado pelo consumidor. */
   rowHref: (row: T) => string;
-  /** Nome acessível do link de detalhe. */
-  rowLabel: (row: T) => string;
+  /**
+   * Contexto extra do link de detalhe, lido depois do texto visível da primeira coluna (só para leitor de
+   * tela). O nome do link começa sempre pelo texto visível: quem usa comando de voz fala o que vê.
+   */
+  rowLabel?: (row: T) => string;
   /** Página de base 1; valores fora da lista são limitados para apresentação. */
   page: number;
   /** Quantidade por página, padrão 25; deve ser inteiro positivo. */
@@ -121,12 +125,13 @@ export function AdminDataTable<T>({
                 {columns.map((col, index) => (
                   <TableCell key={col.key}>
                     {index === 0 ? (
-                      <Link
-                        href={rowHref(row)}
-                        aria-label={rowLabel(row)}
-                        style={{ display: "block", minHeight: 44, alignContent: "center" }}
-                      >
+                      <Link href={rowHref(row)} style={{ display: "block", minHeight: 44, alignContent: "center" }}>
                         {col.render(row)}
+                        {rowLabel && (
+                          <Box component="span" sx={visuallyHidden}>
+                            {`, ${rowLabel(row)}`}
+                          </Box>
+                        )}
                       </Link>
                     ) : (
                       col.render(row)
