@@ -33,4 +33,4 @@ Pré-requisito: 002, 003, 004 e as máscaras e o CEP da 011. Cada tarefa: teste 
   - Ampliar `src/test/architecture/no-token-storage.test.ts`
 - [x] **T10 · E2E** (2026-10-15) (REQ-HVER-002 a 012)
   - `e2e/mocked/host/verification.spec.ts` (handlers do mock para `/hosts/me/application*`); `e2e/real/host/verification.spec.ts` com documentos fictícios
-- [ ] **T11 · Documentação:** TSDoc; catálogo do vault (`DocumentSlot`, `prepareImageForUpload`, `StatusTimeline`, `HostOnboardingPanel`, `rejectionCopy`); nota `development/resources/host-verification.md`; resultados reais em `docs/validation.md`
+- [ ] **T11 · Documentação:** (2026-10-15: TSDoc, stories, `design.md` e `docs/validation.md` feitos; catálogo e nota do vault com o Claude Code) TSDoc; catálogo do vault (`DocumentSlot`, `prepareImageForUpload`, `StatusTimeline`, `HostOnboardingPanel`, `rejectionCopy`); nota `development/resources/host-verification.md`; resultados reais em `docs/validation.md`
