@@ -1,7 +1,7 @@
 ---
 spec: 030-host-verification
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-14
 area: HVER
 ---
 
@@ -23,7 +23,7 @@ A selfie com o documento é dado pessoal sensível (LGPD art. 5º, II; base art.
   - ✅ `PUT /api/v1/hosts/me/application/documents` (multipart `front`, `back`, `selfie`; tudo ou nada; 5 MB cada; corpo até 24 MB);
   - ✅ `POST /api/v1/hosts/me/application/submission` (exige as 3 fotos);
   - ✅ `DELETE /api/v1/hosts/me/application` (desiste no rascunho ou em análise; fotos apagadas).
-  - Erros: `HOST_APPLICATION_ALREADY_EXISTS` 409, `HOST_CPF_ALREADY_REGISTERED` 409, `HOST_CNPJ_ALREADY_REGISTERED` 409, `HOST_ALREADY_VERIFIED` 422, `HOST_APPLICATION_BLOCKED` 422, `HOST_APPLICATION_ATTEMPTS_EXCEEDED` 422, `HOST_APPLICATION_NOT_EDITABLE` 422, `HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED` 422, `HOST_APPLICATION_DOCUMENT_ALREADY_EXISTS` 409, `VALIDATION_ERROR` 400 (campo da parte: `front`, `back`, `selfie`, `documents`), 413.
+  - Erros: `HOST_APPLICATION_ALREADY_EXISTS` 409, `HOST_CPF_ALREADY_REGISTERED` 409, `HOST_CNPJ_ALREADY_REGISTERED` 409, `HOST_ALREADY_VERIFIED` 422, `HOST_APPLICATION_BLOCKED` 422, `HOST_APPLICATION_ATTEMPTS_EXCEEDED` 422, `HOST_APPLICATION_NOT_EDITABLE` 422, `HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED` 422, `HOST_APPLICATION_DOCUMENT_ALREADY_EXISTS` 409, `HOST_APPLICATION_DOCUMENTS_MISSING` 422 (no envio, faltando foto), `VALIDATION_ERROR` 400 (campo da parte: `front`, `back`, `selfie`, `documents`), 413.
 - **Vault:** `produto/contrato-api.md` (verificação e motivos de recusa), `produto/escopo-oficial.md`.
 - **Depende de:** 002 (`WizardProgress`, `ChoiceCardGroup`, `SegmentedControl`, `MaskedTextField`, `Notice`, `Hint`, `StatusPill`, `Celebration`), 003 (`bffClient`, `getErrorMessage`, `applyFieldErrors`, `accountQueryKey`), 004 (`requireRole("host")`, `NAV_ITEMS`), 011 (máscaras de CPF/CNPJ e preenchimento por CEP), 022 (`PhotoSlots`, se entregue antes; senão esta spec cria a base de `DocumentSlot`).
 
@@ -87,7 +87,7 @@ A selfie com o documento é dado pessoal sensível (LGPD art. 5º, II; base art.
 
 ## Perguntas em aberto
 
-1. **Validade do rascunho:** a API não devolve `expiresAt`. O front calcula `createdAt + 7 dias`; confirmar com o backend se a contagem é a partir do `createdAt` ou do `updatedAt` (`DraftLifetimeDays` no `HostApplicationsPurgeService`). Melhor: o backend expor `expiresAt`.
+1. **Validade do rascunho:** respondida em 14/10 pelo código do backend: a limpeza expira rascunhos criados há mais de `DraftLifetimeDays` (7) dias (`ListDraftsCreatedBeforeAsync`), então a conta é `createdAt + 7 dias`, como o front já calcula. Continua melhor o backend expor `expiresAt`.
 2. **Prazo de resposta:** manter "em até 2 dias úteis"?
-3. **Texto do aviso por versão:** o texto do aviso fica no front, indexado por `noticeVersion`. Se a API mudar a versão sem o front ter o texto, mostrar o texto mais recente e avisar no log de erro (sem dado pessoal)? Proposta: o backend expor o texto do aviso.
+3. **Texto do aviso por versão:** o texto fica no front, indexado por `noticeVersion` (vigente na API: `2026-10-10`). Versão sem texto no front: mostra o texto mais recente, sem log (decidido em 14/10 para não travar a pessoa). Proposta mantida: o backend expor o texto do aviso.
 4. **Foto acima de 5 MB:** a compressão no navegador resolve a maioria das fotos de celular; confirmar se o backend aceita HEIC (iPhone). Hoje não aceita: o front converte para JPEG quando o navegador consegue decodificar e, se não, pede outra foto.

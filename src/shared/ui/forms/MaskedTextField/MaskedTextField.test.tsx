@@ -117,3 +117,14 @@ it("REQ-OREG-016 telefone abre o teclado de telefone", () => {
   renderWithProviders(<MaskedTextField label="Celular com DDD" mask="phone" value="" onValueChange={() => {}} />);
   expect(screen.getByRole("textbox", { name: "Celular com DDD" })).toHaveAttribute("inputmode", "tel");
 });
+it("REQ-HVER-004 CNPJ abre o teclado de texto (aceita letras) e digita em maiúsculas", async () => {
+  function Example() {
+    const [value, setValue] = useState("");
+    return <MaskedTextField label="CNPJ" mask="cnpj" value={value} onValueChange={setValue} />;
+  }
+  const { user } = renderWithProviders(<Example />);
+  const input = screen.getByRole("textbox", { name: "CNPJ" });
+  expect(input).toHaveAttribute("inputmode", "text");
+  await user.type(input, "12abc");
+  expect(input).toHaveValue("12.ABC");
+});

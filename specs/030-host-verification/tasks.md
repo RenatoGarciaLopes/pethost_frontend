@@ -1,19 +1,19 @@
 ---
 spec: 030-host-verification
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-14
 ---
 
 # 030 · Tarefas
 
 Pré-requisito: 002, 003, 004 e as máscaras e o CEP da 011. Cada tarefa: teste vermelho → código → verde → `npm run verify`, um commit.
 
-- [ ] **T1 · Contratos e modelo** (REQ-HVER-011, 014, 016)
+- [x] **T1 · Contratos e modelo** (2026-10-14) (REQ-HVER-011, 014, 016)
   - Teste primeiro: `toMyApplication.test.ts`, `rejectionCopy.test.ts`
   - Implementar: `features/host-applications/{api/contracts,api/mappers,types,lib/rejectionCopy.ts,lib/applicationStatusLabel.ts,index.ts}`
-- [ ] **T2 · Schemas e mappers de envio** (REQ-HVER-004, 005)
+- [x] **T2 · Schemas e mappers de envio** (2026-10-14) (REQ-HVER-004, 005)
   - Teste primeiro: `startApplicationSchema.test.ts`, `toPatchApplicationRequest.test.ts`
-- [ ] **T3 · Microcopy de erros** (REQ-HVER-019)
+- [x] **T3 · Microcopy de erros** (2026-10-14) (REQ-HVER-019)
   - Teste primeiro: ampliar `getErrorMessage.test.ts` (os códigos novos entram no `it.each`)
   - Implementar: frases novas em `shared/api/errors/errorCopy.ts`
 - [ ] **T4 · Cliente e hooks** (REQ-HVER-005, 008, 013)

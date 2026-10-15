@@ -29,6 +29,16 @@ describe("getErrorMessage", () => {
   ])("REQ-ACC-007/010/011/017 %s usa a frase da spec", (code, expected) => {
     expect(getErrorMessage(apiError(code!))).toBe(expected);
   });
+  it.each([
+    ["HOST_CNPJ_ALREADY_REGISTERED", "Esse CNPJ já está em outra conta. Se a empresa é sua, fala com o suporte."],
+    ["HOST_APPLICATION_ALREADY_EXISTS", "Você já tem uma verificação aberta. Vamos continuar de onde parou."],
+    ["HOST_ALREADY_VERIFIED", "Sua verificação já foi aprovada."],
+    ["HOST_APPLICATION_NOT_EDITABLE", "Essa verificação já foi enviada e não dá mais pra mudar."],
+    ["HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED", "Dados de empresa só valem pra verificação de empresa."],
+    ["HOST_APPLICATION_DOCUMENTS_MISSING", "Ainda falta foto. Confere as três vagas antes de enviar."],
+  ])("REQ-HVER-019 %s usa a frase da spec", (code, expected) => {
+    expect(getErrorMessage(apiError(code!))).toBe(expected);
+  });
   it.each(Object.keys(errorCopy))("REQ-HTTP-005 %s tem frase da PetHost e nunca a mensagem da API", (code) => {
     const message = getErrorMessage(apiError(code, { retryAfterSeconds: 5 }));
 
