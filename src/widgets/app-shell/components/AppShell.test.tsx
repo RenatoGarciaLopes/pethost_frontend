@@ -55,7 +55,7 @@ describe("casca do app", () => {
 });
 
 describe("atalhos na casca", () => {
-  it("REQ-HPETS-010 tutor tem Meus pets e anfitrião tem Pets da casa", () => {
+  it("REQ-SHELL-002 REQ-HPETS-010 tutor tem Meus pets e anfitrião tem Pets da casa; admin tem a fila de verificação", () => {
     const { unmount } = setup("owner");
     expect(screen.getByRole("navigation", { name: "Navegação principal" })).toBeInTheDocument();
     unmount();
@@ -67,6 +67,17 @@ describe("atalhos na casca", () => {
     ).toHaveAttribute("href", "/pets");
     host.unmount();
     setup("admin");
-    expect(screen.queryByRole("navigation", { name: "Navegação principal" })).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole("navigation", { name: "Navegação principal" })).getByRole("link", {
+        name: "Fila de verificação",
+      }),
+    ).toHaveAttribute("href", "/admin/host-applications");
+  });
+  it("REQ-AQUEUE-001 admin tem atalho para a fila de verificação", () => {
+    setup("admin");
+    expect(screen.getByRole("link", { name: "Fila de verificação" })).toHaveAttribute(
+      "href",
+      "/admin/host-applications",
+    );
   });
 });
