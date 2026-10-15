@@ -7,6 +7,7 @@ import { ownersHandlers } from "./handlers/owners.mjs";
 import { passwordHandlers } from "./handlers/password.mjs";
 import { petsHandlers, resetPets } from "./handlers/pets.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
+import { searchHandlers } from "./handlers/search.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 
 /**
@@ -29,6 +30,7 @@ const handlers = [
   ...usersHandlers,
   ...passwordHandlers,
   ...petsHandlers,
+  ...searchHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));

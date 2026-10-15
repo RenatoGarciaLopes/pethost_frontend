@@ -1,5 +1,38 @@
 # Estrutura real do frontend
 
+## Busca de cantinhos (spec 041, worktree pethost_frontend-041)
+
+Inventário e interfaces: [design da 041](../specs/041-search/design.md). Implementado nesta branch; mapa T8 fora do escopo. O vault é somente leitura nesta entrega e recebe nota/linhas de catálogo pelo relatório de coordenação.
+
+```text
+src/app/(account)/search/             rota privada e teste de auth
+src/features/search/
+  index.ts, index.client.ts, index.server.ts
+  types.ts                           URL e pets de composição
+  api/                               schemas e query infinite
+    server/                          prefetch exclusivo do servidor
+  lib/                               parser, tradução API, copy, selos e erros
+  hooks/                             URL, histórico e query
+  components/
+    SearchScreen.tsx                 RSC + HydrationBoundary
+    client/
+      SearchExperience.tsx            composição interativa
+      SearchBar/                     formulário e painel móvel
+      FilterChips/                   filtros na URL
+      ListingCard/                   link público e preço
+      SearchResults/                 lista, feedback e paginação
+src/shared/lib/money/                reais/centavos e formatação
+src/shared/lib/date/stayRules.ts     datas de estadia de calendário
+src/shared/ui/forms/DateRangeField/  chegada e saída controladas
+src/shared/ui/feedback/SniffingBanner/ atualização não bloqueante
+src/test/fixtures/search.ts          fixtures sintéticas
+src/test/msw/searchMock.int.test.ts  contrato do mock E2E
+e2e/support/handlers/search.mjs      busca simulada
+e2e/mocked/search/search.spec.ts     jornadas desktop e celular
+```
+
+Testes/stories ao lado dos componentes; funções e regras ficam em lib, E/S na API, coordenação no hook. `pets/index.ts` apenas expõe `petQueries` existente para a página compor os pets ativos, sem import entre features. `shared` não conhece os contratos da busca.
+
 ## Ampliação da base de pets (spec 021, 14/10/2026)
 
 Recursos implementados sobre a feature da 020; componentes, stores e páginas da composição paralela têm inventário próprio. Detalhes e validação no vault `development/resources/pets.md`, seção "Apresentar o pet (spec 021): base".
