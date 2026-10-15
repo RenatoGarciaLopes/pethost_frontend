@@ -10,4 +10,4 @@ updated: 2026-10-15
 - [x] **T2 · Lista e painel** (2026-10-15) (REQ-HREQ-001, 002)
 - [x] **T3 · Detalhe com fichas** (2026-10-15) (REQ-HREQ-003)
 - [x] **T4 · Aceitar, recusar e cancelar** (2026-10-15) (REQ-HREQ-004 a 008)
-- [ ] **T5 · Rotas, stories, E2E e documentação**
+- [x] **T5 · Rotas, stories, E2E e documentação** (2026-10-15; catálogo do vault com o Claude Code)

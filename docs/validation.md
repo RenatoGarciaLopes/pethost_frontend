@@ -246,3 +246,11 @@ Detalhes na nota `development/resources/pets.md` do vault.
 | Vitest das áreas tocadas (inclui 030, `shared/ui/forms`, `shared/ui/media`, `shared/api/errors`, arquitetura) | 69 arquivos, 433 testes verdes                                                                       |
 | ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                      | sem erros                                                                                            |
 | E2E mocked `e2e/mocked/host/listing.spec.ts` e Storybook                                                      | escritos; não rodados pelo agente da spec (regra da máquina compartilhada)                           |
+
+## 15/10/2026 · Pedidos e estadias do anfitrião (spec 053)
+
+| Verificação                                                                                                                 | Resultado                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Vitest da 053 (`--maxWorkers=2`): base de `bookings`, lista, detalhe, decisões, widget das fichas, `stayRules`, rotas, mock | 60 testes verdes: 22 unitários, 13 de componente, 10 de integração (Node), 15 de integração (jsdom) |
+| ESLint, `tsc --noEmit`, Prettier                                                                                            | sem erros                                                                                           |
+| E2E mocked `e2e/mocked/bookings/host-requests.spec.ts` e Storybook                                                          | escritos; não rodados pelo agente da spec                                                           |

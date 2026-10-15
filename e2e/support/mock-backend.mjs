@@ -1,6 +1,7 @@
 import express from "express";
 import { createMiddleware } from "@mswjs/http-middleware";
 import { http, HttpResponse } from "msw";
+import { bookingsHandlers, resetBookings, seedBooking } from "./handlers/bookings.mjs";
 import { accountSwitchHandlers } from "./handlers/accountSwitch.mjs";
 import { accountProfileHandlers, resetAccountProfiles, setHostPayouts } from "./handlers/accountProfile.mjs";
 import { ownersHandlers } from "./handlers/owners.mjs";
@@ -24,7 +25,13 @@ const handlers = [
     resetPets();
     resetHostApplications();
     resetListings();
+    resetBookings();
     return HttpResponse.json({ ok: true });
+  }),
+  // Só no mock: semeia uma reserva para o anfitrião de uma conta (a 050, que cria pedidos, ainda não existe).
+  http.post("http://localhost:5099/__e2e/bookings", async ({ request }) => {
+    const { hostUserId, booking } = await request.json();
+    return HttpResponse.json(seedBooking(hostUserId, booking));
   }),
   // Só no mock: libera (ou não) o recebimento de um anfitrião, para a jornada do cantinho (spec 044).
   http.post("http://localhost:5099/__e2e/host-payouts", async ({ request }) => {
@@ -44,6 +51,8 @@ const handlers = [
   ...ownersHandlers,
   ...usersHandlers,
   ...passwordHandlers,
+  // Antes dos pets: o anfitrião lê a ficha dos pets dos pedidos dele.
+  ...bookingsHandlers,
   ...petsHandlers,
   ...hostApplicationsHandlers,
   ...listingsHandlers,
