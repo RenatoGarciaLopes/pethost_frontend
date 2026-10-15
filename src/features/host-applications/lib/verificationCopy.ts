@@ -115,6 +115,56 @@ export const verificationCopy = {
     submitting: "Enviando…",
     sent: "Pronto, enviada! Agora é com a gente.",
   },
+
+  status: {
+    heading: "Minha verificação",
+    empty: {
+      title: "Mostrar quem você é",
+      body: "É o primeiro passo pra receber pets: a gente confere seu documento e uma selfie. Leva uns 5 minutos.",
+      start: "Começar",
+    },
+    draft: {
+      expires: (weekday: string, date: string) =>
+        `Sua verificação ficou pela metade. Ela vale até ${weekday} (${date}).`,
+      continue: "Continuar de onde parei",
+    },
+    submitted: {
+      timeline: "Andamento da verificação",
+      steps: ["Enviado", "Em análise", "Aprovado"],
+      wait: "A gente responde em até 2 dias úteis.",
+      meanwhile: "Enquanto isso, já dá pra ir pensando nas fotos da sua casa.",
+    },
+    cancel: {
+      open: "Desistir",
+      title: "Desistir da verificação?",
+      message:
+        "As fotos que você mandou são apagadas. Desistir não gasta tentativa: dá pra começar de novo quando quiser.",
+      confirm: "Desistir",
+      keep: "Continuar a verificação",
+    },
+    rejected: {
+      title: "Dessa vez não deu",
+      todo: "Tira as fotos de novo com calma, que a gente confere outra vez.",
+      attempts: (count: number) =>
+        count === 1 ? "Você ainda tem 1 tentativa." : `Você ainda tem ${count} tentativas.`,
+      retry: "Tentar de novo",
+    },
+    support: {
+      title: "Agora é pelo suporte",
+      blocked: "Não foi possível confirmar sua identidade. Fala com o suporte.",
+      noAttempts: "Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.",
+    },
+    approved: {
+      title: "Verificação aprovada!",
+      body: "Agora é só dizer como você quer receber.",
+    },
+    closed: {
+      expired: { title: "Sua verificação venceu", body: "Ela ficou 7 dias pela metade, e as fotos foram apagadas." },
+      cancelled: { title: "Você desistiu da verificação", body: "As fotos foram apagadas." },
+      free: "Isso não gasta tentativa.",
+      restart: "Começar de novo",
+    },
+  },
 } as const;
 
 /** Nome de cada vaga de foto, para rótulos e miniaturas. */

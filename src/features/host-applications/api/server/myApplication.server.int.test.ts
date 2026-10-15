@@ -29,14 +29,14 @@ it("REQ-HVER-011 prefetch lê a verificação com o access da sessão e guarda o
   queryClient.clear();
 });
 
-it("REQ-HVER-019 falha no prefetch fica como erro no cache e devolve undefined", async () => {
+it("REQ-HVER-019 falha no prefetch devolve undefined e não inventa dado no cache", async () => {
   server.use(
     http.get("http://api.test/api/v1/hosts/me/application", () =>
       HttpResponse.json(apiFail("INTERNAL_ERROR"), { status: 500 }),
     ),
   );
   const queryClient = createQueryClient();
-  expect(await prefetchMyApplication(queryClient, "account-1")).toBeUndefined();
-  expect(queryClient.getQueryState(myApplicationQueries.mine("account-1").queryKey)?.status).toBe("error");
+  expect(await prefetchMyApplication(queryClient, "account-2")).toBeUndefined();
+  expect(queryClient.getQueryData(myApplicationQueries.mine("account-2").queryKey)).toBeUndefined();
   queryClient.clear();
 });

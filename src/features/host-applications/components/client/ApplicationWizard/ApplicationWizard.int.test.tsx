@@ -77,7 +77,8 @@ function renderWizard(entry: "start" | "documents") {
 
 const photo = (name: string) => new File([name], name, { type: "image/jpeg" });
 
-describe("ApplicationWizard", () => {
+// Jornadas inteiras, digitando campo a campo: folga para a máquina de CI e a local compartilhada.
+describe("ApplicationWizard", { timeout: 20000 }, () => {
   it("REQ-HVER-002 a REQ-HVER-010 do aviso ao envio: aceite, dados (POST), fotos (PUT) e análise", async () => {
     const requests = fakeApi({ application: null });
     const { user } = renderWizard("start");

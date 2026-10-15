@@ -26,7 +26,7 @@ Pré-requisito: 002, 003, 004 e as máscaras e o CEP da 011. Cada tarefa: teste 
 - [x] **T7 · Assistente** (2026-10-15) (REQ-HVER-002 a 010, 018)
   - Teste primeiro: `NoticeStep.test.tsx`, `DocumentsStep.test.tsx`, `ReviewStep.test.tsx`
   - Implementar: `components/client/ApplicationWizard/*`, rotas `new` e `documents`
-- [ ] **T8 · Vistas por status e painel** (REQ-HVER-001, 011 a 017)
+- [x] **T8 · Vistas por status e painel** (2026-10-15) (REQ-HVER-001, 011 a 017)
   - Teste primeiro: `ApplicationStatusView.test.tsx`, `HostOnboardingPanel.test.tsx`
   - Implementar: `StatusTimeline` (`shared/ui/data-display`), `widgets/host-onboarding`, rota `/host/application`; ligar `host-application` em `NAV_ITEMS`
 - [ ] **T9 · Privacidade** (REQ-HVER-009)
