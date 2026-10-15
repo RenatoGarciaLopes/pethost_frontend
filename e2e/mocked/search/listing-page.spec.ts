@@ -11,10 +11,15 @@ test("REQ-LPAGE-001/003/004/008/009 abre o cantinho com privacidade, total e met
   await expect(page.getByRole("heading", { name: "Quem mora aqui" })).toHaveCount(0);
   await expect(page.getByText("O endereço chega quando a estadia for confirmada.")).toBeVisible();
   await expect(page.getByText(/300,00/)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Pedir estadia" })).toHaveAttribute(
-    "href",
-    new RegExp(`/listings/${LISTING_ID}/request\\?from=2026-10-15&to=2026-10-20&pets=`),
+  // A ordem dos parâmetros não importa: confere o caminho e cada parâmetro preservado da busca.
+  const request = new URL(
+    (await page.getByRole("link", { name: "Pedir estadia" }).getAttribute("href")) ?? "",
+    "http://localhost",
   );
+  expect(request.pathname).toBe(`/listings/${LISTING_ID}/request`);
+  expect(request.searchParams.get("from")).toBe("2026-10-15");
+  expect(request.searchParams.get("to")).toBe("2026-10-20");
+  expect(request.searchParams.getAll("pets")).not.toHaveLength(0);
   await expect(page.locator("meta[name=robots]")).toHaveAttribute("content", /noindex/);
   await page.goto("/listings/0199d2a0-0000-7000-8000-000000000099");
   await expect(page.getByRole("heading", { name: "Esse cantinho não existe" })).toBeVisible();
