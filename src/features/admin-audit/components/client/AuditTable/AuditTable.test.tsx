@@ -32,7 +32,7 @@ describe("REQ-AUDIT-001/005/010/011 AuditTable", () => {
     expect(screen.getByRole("status")).toHaveTextContent("1 de 33 registros");
     expect(screen.getByRole("columnheader", { name: "Data e hora (Brasília)" })).toBeVisible();
     expect(screen.queryByText("203.0.113.17")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Abrir detalhes: Tutor suspenso" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /, Abrir detalhes: Tutor suspenso$/ })).toHaveAttribute(
       "href",
       expect.stringContaining("entryId="),
     );

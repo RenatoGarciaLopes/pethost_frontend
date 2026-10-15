@@ -17,7 +17,6 @@ const meta = {
     ],
     rowKey: (row: string) => row,
     rowHref: () => "/admin/host-applications",
-    rowLabel: (row: string) => row,
     page: 1,
     onPageChange: () => {},
     empty: "Ninguém esperando agora",
