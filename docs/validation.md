@@ -254,3 +254,12 @@ Detalhes na nota `development/resources/pets.md` do vault.
 | Vitest da 053 (`--maxWorkers=2`): base de `bookings`, lista, detalhe, decisões, widget das fichas, `stayRules`, rotas, mock | 60 testes verdes: 22 unitários, 13 de componente, 10 de integração (Node), 15 de integração (jsdom) |
 | ESLint, `tsc --noEmit`, Prettier                                                                                            | sem erros                                                                                           |
 | E2E mocked `e2e/mocked/bookings/host-requests.spec.ts` e Storybook                                                          | escritos; não rodados pelo agente da spec                                                           |
+
+## 15/10/2026 · Chegou e voltou pra casa (spec 054)
+
+| Verificação                                                                            | Resultado                                 |
+| -------------------------------------------------------------------------------------- | ----------------------------------------- |
+| Vitest: `stayMilestones` (3), `StayMilestones` (9), trilha do tutor em `bookingStatus` | verdes                                    |
+| Vitest de `features/bookings` inteira (053 + 054)                                      | 54 testes verdes                          |
+| ESLint, `tsc --noEmit`, Prettier                                                       | sem erros                                 |
+| E2E mocked `e2e/mocked/bookings/stay-day.spec.ts` e Storybook                          | escritos; não rodados pelo agente da spec |
