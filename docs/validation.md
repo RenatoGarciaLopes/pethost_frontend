@@ -231,24 +231,24 @@ Detalhes na nota `development/resources/pets.md` do vault.
 
 Implementação dos REQ-HPETS-001 a 010 na branch `feat/023-host-house-pets`, worktree `pethost_frontend-023`. Detalhes por recurso na nota `development/resources/pets.md` do vault.
 
-| Verificação                                                                           | Resultado real                                                                                                                 |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Rodada ampla Vitest de pets e consumidores afetados                                   | 47 arquivos, 300 testes aprovados, 157,91 s com maxWorkers=2                                                                   |
-| Regressão final de abertura direta/invalidação                                        | 4 arquivos, 20 testes aprovados (3 novos), 30,05 s                                                                             |
-| Conjunto distinto das duas rodadas, substituindo os resultados repetidos pelos finais | 47 arquivos, 303 testes aprovados, sem falhas; 46 nomes com REQ-HPETS                                                          |
-| Unitário (inclui contratos/copy/navegação/metadata)                                   | 22 arquivos, 177 testes aprovados                                                                                              |
-| Componente (comportamento observável)                                                 | 10 arquivos, 51 testes aprovados                                                                                               |
-| Integração Node/MSW                                                                   | 6 arquivos, 33 testes aprovados                                                                                                |
-| Integração DOM/MSW/providers/cache                                                    | 9 arquivos, 42 testes aprovados                                                                                                |
-| ESLint dos arquivos criados/alterados                                                 | aprovado                                                                                                                       |
-| `npx.cmd tsc --noEmit -p .`                                                           | aprovado, incluindo E2E e stories escritos                                                                                     |
-| Prettier dos arquivos criados/alterados                                               | aplicado e conferido                                                                                                           |
-| `git diff --check`                                                                    | aprovado                                                                                                                       |
-| E2E simulado                                                                          | 2 jornadas escritas, configuradas para desktop/celular; execução reservada ao Claude Code                                      |
-| E2E real                                                                              | 1 jornada escrita; requer API real e seed aprovado via E2E_HOST_EMAIL/E2E_HOST_PASSWORD; não executada                         |
-| Stories/a11y                                                                          | 13 stories novas/variante host entre HouseResidents, KeeperPendingNotice, MyPetsScreen, PetWelcome e PetWizard; não executadas |
-| Next build, verify global, inspeção visual no navegador                               | não executados por spec-owner-common.md; aceite posterior com Claude Code                                                      |
-| Cobertura v8                                                                          | não executada nesta entrega; não foi inferido percentual                                                                       |
+| Verificação                                                                           | Resultado real                                                                                                         |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Rodada ampla Vitest de pets e consumidores afetados                                   | 47 arquivos, 300 testes aprovados, 157,91 s com maxWorkers=2                                                           |
+| Regressão final de abertura direta/invalidação                                        | 4 arquivos, 20 testes aprovados (3 novos), 30,05 s                                                                     |
+| Conjunto distinto das duas rodadas, substituindo os resultados repetidos pelos finais | 47 arquivos, 303 testes aprovados, sem falhas; 46 nomes com REQ-HPETS                                                  |
+| Unitário (inclui contratos/copy/navegação/metadata)                                   | 22 arquivos, 177 testes aprovados                                                                                      |
+| Componente (comportamento observável)                                                 | 10 arquivos, 51 testes aprovados                                                                                       |
+| Integração Node/MSW                                                                   | 6 arquivos, 33 testes aprovados                                                                                        |
+| Integração DOM/MSW/providers/cache                                                    | 9 arquivos, 42 testes aprovados                                                                                        |
+| ESLint dos arquivos criados/alterados                                                 | aprovado                                                                                                               |
+| `npx.cmd tsc --noEmit -p .`                                                           | aprovado, incluindo E2E e stories escritos                                                                             |
+| Prettier dos arquivos criados/alterados                                               | aplicado e conferido                                                                                                   |
+| `git diff --check`                                                                    | aprovado                                                                                                               |
+| E2E simulado (Claude Code)                                                            | pets 020 a 023: 38 de 38; casca: 14 de 14 (desktop e celular, workers 1)                                               |
+| E2E real                                                                              | 1 jornada escrita; requer API real e seed aprovado via E2E_HOST_EMAIL/E2E_HOST_PASSWORD; não executada                 |
+| Stories/a11y (Claude Code)                                                            | 7 arquivos de pets, 32 testes, sem violação, depois de corrigir o export das stories e o nome acessível da carteirinha |
+| `npm run verify -- -- --maxWorkers=2` (Claude Code)                                   | 217 arquivos, 1287 testes verdes                                                                                       |
+| Cobertura v8                                                                          | não executada nesta entrega; não foi inferido percentual                                                               |
 
 Comando amplo executado:
 
@@ -282,3 +282,14 @@ Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verif
 - MSW estrito cobre contratos reais na borda HTTP, autenticação do prefetch, erro 400 de campo, conflito 409/422, invalidação, próximos itens, autorização do mock e imagens no-store. Isso não equivale a integração com a API .NET.
 - Funções puras não têm E2E isolado: paginação e schemas têm unitários e são exercitados pelas composições/jornadas. O hook de URL é testado com a borda Next simulada, incluindo voltar/avançar e parâmetros repetidos. O viewer tem relógio falso, descarte, cancelamento, foco preso, Esc e nenhuma entrada no Query.
 - O vault foi somente leitura. Conforme orientação recebida, conteúdo e linhas de catálogo seguem no resumo para integração; não foi criada `docs/admin-verification.md`. A integração no vault não está concluída nesta worktree.
+
+## 15/10/2026 · Minha verificação do anfitrião (spec 030)
+
+| Verificação                                                                                                                 | Resultado                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Vitest da 030 (`--maxWorkers=2`): feature, `DocumentSlot`, `StatusTimeline`, imagem, CNPJ, widget, rotas, mock              | 132 testes verdes: 58 unitários, 49 de componente, 16 de integração (Node), 9 de integração (jsdom)       |
+| Vitest das áreas tocadas (inclui `shared/ui/forms`, `shared/api/errors`, `shared/config`, arquitetura e `features/account`) | 74 arquivos, 482 testes verdes                                                                            |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                                    | sem erros                                                                                                 |
+| E2E mocked (Claude Code, 15/10)                                                                                             | host 6 de 6, casca e admin juntos 26 de 27 e, com a espera de 15 s no detalhe do admin, 7 de 7            |
+| Storybook com a11y (Claude Code)                                                                                            | verde depois de o nome da `DocumentSlot` passar a ser o texto visível (axe `label-content-name-mismatch`) |
+| E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                           |

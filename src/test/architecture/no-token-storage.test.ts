@@ -23,7 +23,8 @@ const files = sourceFiles(SRC).map((file) => ({
   code: readFileSync(file, "utf8"),
 }));
 
-const SENSITIVE = /(token|refresh|authorization|bearer|signed.?url|document|cpf|password|senha|\burl\b)/i;
+const SENSITIVE =
+  /(token|refresh|authorization|bearer|signed.?url|document|selfie|photo|foto|cpf|cnpj|password|senha|url)/i;
 
 describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
   it("varre arquivos de verdade", () => {
@@ -50,11 +51,13 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("REQ-ACC-026 nenhum store Zustand guarda token, CPF, currentPassword ou newPassword", () => {
+  it("REQ-ACC-026 REQ-HVER-009 nenhum store Zustand guarda token, CPF, CNPJ, foto de documento, currentPassword ou newPassword", () => {
     const offenders = files
       .filter(({ code }) => /from "zustand/.test(code))
       .filter(({ code }) =>
-        /["']?(accessToken|refreshToken|signedUrl|cpf|password|currentPassword|newPassword)["']?\s*[:?]/i.test(code),
+        /["']?(accessToken|refreshToken|signedUrl|cpf|cnpj|selfie|documentPhoto|password|currentPassword|newPassword)["']?\s*[:?]/i.test(
+          code,
+        ),
       )
       .map(({ file }) => file);
 
@@ -62,7 +65,7 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
   });
 
   it("REQ-ACC-026 REQ-PWD-013 REQ-OREG-014 REQ-HREG-008 token, senha e CPF nunca vão para URL nem query key", () => {
-    const PERSONAL = /(token|cpf|password|senha|signed.?url|photo\.url)/i;
+    const PERSONAL = /(token|cpf|cnpj|selfie|photo|password|senha|signed.?url)/i;
     const offenders = files.flatMap(({ file, code }) =>
       [
         ...code.matchAll(/queryKey:\s*(\[[^\]]*\])/g),
@@ -82,6 +85,23 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
       .filter(({ code }) => /(cpf|password)/i.test(code))
       .filter(({ code }) => /\bpersist\(|createJSONStorage|indexedDB/.test(code))
       .map(({ file }) => file);
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("REQ-HVER-009 fotos da verificação só em memória: nada de storage, cache do Query ou store na feature", () => {
+    const verification = files.filter(({ file }) => file.startsWith("features/host-applications/"));
+    expect(verification.length).toBeGreaterThan(5);
+    const offenders = verification.flatMap(({ file, code }) => [
+      // Único storage da feature: o id da solicitação já comemorada (não é dado pessoal).
+      ...(/(localStorage|sessionStorage|indexedDB)/.test(code) && !file.endsWith("hooks/useCelebrateOnce.ts")
+        ? [`${file}: storage`]
+        : []),
+      ...(/from "zustand/.test(code) ? [`${file}: zustand`] : []),
+      ...[...code.matchAll(/setQueryData(([^;]*))/g)]
+        .filter((match) => /(file|photo|selfie|FormData)/i.test(match[1]!))
+        .map((match) => `${file}: ${match[0]}`),
+    ]);
 
     expect(offenders).toEqual([]);
   });

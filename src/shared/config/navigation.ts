@@ -9,10 +9,11 @@ export interface NavItem {
 
 /**
  * Atalhos do cabeçalho (spec 004, REQ-SHELL-002): tabela única. Só entram telas que existem; cada spec que
- * cria uma tela de atalho acrescenta a linha dela (020: Meus pets).
+ * cria uma tela de atalho acrescenta a linha dela (020: Meus pets; 030: Minha verificação).
  */
 export const NAV_ITEMS: readonly NavItem[] = [
   { id: "pets", label: "Meus pets", href: "/pets", roles: ["owner"] },
+  { id: "host-application", label: "Minha verificação", href: "/host/application", roles: ["host"] },
   { id: "host-pets", label: "Pets da casa", href: "/pets", roles: ["host"] },
   { id: "admin-queue", label: "Fila de verificação", href: "/admin/host-applications", roles: ["admin"] },
 ];

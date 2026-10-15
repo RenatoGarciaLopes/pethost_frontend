@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw";
 import { accountSwitchHandlers } from "./handlers/accountSwitch.mjs";
 import { accountProfileHandlers, resetAccountProfiles } from "./handlers/accountProfile.mjs";
 import { ownersHandlers } from "./handlers/owners.mjs";
+import { hostApplicationsHandlers, resetHostApplications, seedHostApplication } from "./handlers/hostApplications.mjs";
 import { passwordHandlers } from "./handlers/password.mjs";
 import { petsHandlers, resetPets } from "./handlers/pets.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
@@ -22,6 +23,13 @@ const handlers = [
     resetAccountProfiles();
     resetPets();
     resetAdminApplications();
+    resetHostApplications();
+    return HttpResponse.json({ ok: true });
+  }),
+  // Só no mock: semeia a verificação de uma conta (ex.: recusa com tentativas) para a jornada da spec 030.
+  http.post("http://localhost:5099/__e2e/host-application", async ({ request }) => {
+    const { userId, application, remainingAttempts } = await request.json();
+    seedHostApplication(userId, application, remainingAttempts);
     return HttpResponse.json({ ok: true });
   }),
   ...sessionHandlers,
@@ -31,6 +39,7 @@ const handlers = [
   ...usersHandlers,
   ...passwordHandlers,
   ...petsHandlers,
+  ...hostApplicationsHandlers,
   ...adminApplicationsHandlers,
 ];
 const app = express();

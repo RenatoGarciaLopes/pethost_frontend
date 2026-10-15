@@ -17,9 +17,21 @@ function group(value: string, lengths: readonly number[], separators: readonly s
 export function unmaskCpf(value: string): string {
   return digits(value, 11);
 }
-/** Unmask numeric CNPJ (up to 14 digits); future alphanumeric CNPJ is outside this spec. */
+/** Posições do CNPJ: as 12 primeiras aceitam letra ou dígito (CNPJ alfanumérico); as 2 últimas, só dígito. */
+const CNPJ_BASE_LENGTH = 12;
+const CNPJ_LENGTH = 14;
+/**
+ * Unmask CNPJ, numeric or alphanumeric (spec 030): uppercase letters and digits in the first 12 positions, digits
+ * in the 2 check positions; anything else is dropped. Presentation only, never validation.
+ */
 export function unmaskCnpj(value: string): string {
-  return digits(value, 14);
+  let result = "";
+  for (const char of value.toUpperCase()) {
+    if (result.length === CNPJ_LENGTH) break;
+    const allowed = result.length < CNPJ_BASE_LENGTH ? /[0-9A-Z]/ : /\d/;
+    if (allowed.test(char)) result += char;
+  }
+  return result;
 }
 /** Unmask Brazilian CEP (up to 8 digits). */
 export function unmaskCep(value: string): string {
@@ -37,7 +49,7 @@ export function unmaskDate(value: string): string {
 export function maskCpf(value: string): string {
   return group(unmaskCpf(value), [3, 3, 3, 2], [".", ".", "-"]);
 }
-/** Progressive numeric CNPJ formatting. @example maskCnpj("12345678000190") */
+/** Progressive CNPJ formatting, numeric or alphanumeric. @example maskCnpj("12abc34501de35") // "12.ABC.345/01DE-35" */
 export function maskCnpj(value: string): string {
   return group(unmaskCnpj(value), [2, 3, 3, 4, 2], [".", ".", "/", "-"]);
 }

@@ -1,7 +1,7 @@
 ---
 spec: 030-host-verification
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-14
 ---
 
 # 030 · Design técnico
@@ -75,6 +75,7 @@ Chamadas (todas pelo `bffClient`, caminhos da lista `bffRoutes`): `getMyApplicat
 | `HOST_APPLICATION_NOT_EDITABLE`                                        | Notice                        | **nova:** "Essa verificação já foi enviada e não dá mais pra mudar."                  |
 | `HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED`                            | Notice                        | **nova:** "Dados de empresa só valem pra verificação de empresa."                     |
 | `HOST_APPLICATION_BLOCKED`, `HOST_APPLICATION_ATTEMPTS_EXCEEDED`       | `SupportOnlyNotice`           | frases existentes                                                                     |
+| `HOST_APPLICATION_DOCUMENTS_MISSING` (no envio)                        | Notice no passo Confere       | **nova:** "Ainda falta foto. Confere as três vagas antes de enviar."                  |
 | 413 / `PAYLOAD_TOO_LARGE`                                              | Notice no passo               | **nova:** "As fotos ficaram grandes demais juntas. Tira de novo com menos zoom."      |
 
 Motivos de recusa (`rejectionCopy` em `features/host-applications/lib`, tabela de `produto/contrato-api.md`): `document_illegible`, `document_expired`, `selfie_mismatch`, `data_mismatch`, `missing_document`, `other`; desconhecido → frase de `other`. `suspected_fraud` nunca chega como `rejected` (vira `rejected_final`).
@@ -118,3 +119,14 @@ Motivos de recusa (`rejectionCopy` em `features/host-applications/lib`, tabela d
 | 002 a 010       | E2E simulado            | `e2e/mocked/host/verification.spec.ts` (desktop e celular)                                       | começar, dados, 3 fotos (arquivos fictícios gerados no teste), enviar, ver "Em análise"; recusa com tentativas       |
 | 002 a 012       | E2E real                | `e2e/real/host/verification.spec.ts`                                                             | conta de anfitrião de demonstração, documentos **fictícios**, até "Em análise"; desistir no fim para limpar          |
 | 019             | Unitário                | `shared/api/errors/getErrorMessage.test.ts`                                                      | todo código novo da verificação tem frase em `errorCopy`                                                             |
+
+## Como ficou na implementação (15/10/2026)
+
+- **Schemas:** `startApplicationSchema` virou dois, um por passo: `applicationNoticeSchema` (aceite e tipo de pessoa) e `applicationDataSchema` (CPF, documento e, na empresa, `company`). Mappers em `api/toApplicationRequest.ts` (`toStartApplicationRequest`, `toPatchApplicationRequest` com `diffPatch`, endereço campo a campo).
+- **Query e hooks:** `myApplicationQueries.mine` (`api/queries.ts`); mutações em `hooks/useApplicationMutations.ts` (`useSaveApplicationData` decide POST, PATCH ou nada; `useUploadDocuments`, `useSubmitApplication`, `useCancelApplication`). Toda mutação grava a resposta e relê a verificação.
+- **Servidor:** `getMyApplication` com `cache()` (painel, tela e prefetch dividem a mesma busca); `prefetchMyApplication` devolve `undefined` na falha e o navegador mostra o erro.
+- **Painel:** `FlowSectionList` não existia; o widget `host-onboarding` tem `HostOnboardingStages` (apresentação) e `HostOnboardingPanel` (servidor). A etapa 2 aparece "Liberada" quando aprovada, sem link até a 043.
+- **DocumentSlot:** feito do zero em `shared/ui/media` (o `PhotoSlots` é de várias fotos com capa). A vaga é um botão que abre a câmera (`capture`), e "Escolher da galeria" aceita foto já tirada.
+- **413:** a frase do passo de fotos fica na feature (`PAYLOAD_TOO_LARGE` no `errorCopy` continua a frase genérica de foto, usada por outras specs).
+- **CNPJ alfanumérico:** `isValidCnpj` novo em `shared/lib/documents`; `maskCnpj`/`unmaskCnpj` e o `MaskedTextField` (teclado de texto) passaram a aceitar letras.
+- **Desistir:** também no rascunho, como a API permite.
