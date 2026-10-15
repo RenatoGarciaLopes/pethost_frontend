@@ -19,7 +19,7 @@ Pré-requisito: 002, 003, 004 e as máscaras e o CEP da 011. Cada tarefa: teste 
 - [x] **T4 · Cliente e hooks** (2026-10-14) (REQ-HVER-005, 008, 013)
   - Teste primeiro: `myApplication.client.int.test.ts`, `useUploadDocuments.int.test.tsx` (MSW no BFF)
   - Implementar: `api/client/myApplication.client.ts`, `api/server/myApplication.server.ts`, `hooks/*`
-- [ ] **T5 · prepareImageForUpload** (REQ-HVER-007)
+- [x] **T5 · prepareImageForUpload** (2026-10-14) (REQ-HVER-007)
   - Teste primeiro: `shared/lib/image/prepareImageForUpload.test.ts`
 - [ ] **T6 · DocumentSlot** (REQ-HVER-006, 008, 009, 018)
   - Gerar: `npm run gen:component -- shared/ui/media DocumentSlot`; teste, story
