@@ -1,5 +1,6 @@
 import { Container, Stack, Typography } from "@mui/material";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { verificationCopy } from "@/features/host-applications";
 import { ApplicationStatusScreen } from "@/features/host-applications/index.server";
@@ -29,6 +30,8 @@ export default function ApplicationStatusPage() {
 }
 
 async function ApplicationStatusContent() {
+  // Espera a requisição antes de ler a sessão: o prerender não pode tocar o relógio dela.
+  await connection();
   const user = await requireRole("host", "/host/application");
   return (
     <Stack spacing={4}>

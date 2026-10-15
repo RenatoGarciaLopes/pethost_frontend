@@ -7,17 +7,25 @@ const NAVIGATION = { timeout: 15_000 };
 const MOCK = process.env.E2E_ACCOUNT_MOCK_URL ?? "http://localhost:5099";
 const host = accountFixture("unverified", "host");
 
-/** Fotos fictícias geradas no teste: um PNG de 2×2 por vaga, diferente em cada uma (nenhum documento real). */
-function fakePhoto(seed: number) {
-  const png = Buffer.from(
-    "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP4z8DAwMDAxMDAwMDAAAANHQEDasKb6QAAAABJRU5ErkJggg==",
-    "base64",
-  );
-  return { name: `foto-${seed}.png`, mimeType: "image/png", buffer: Buffer.concat([png, Buffer.from([seed])]) };
+/**
+ * Foto fictícia gerada no próprio navegador (canvas → PNG de verdade, que o Chromium decodifica), com uma cor por vaga:
+ * nenhum documento real.
+ */
+async function fakePhoto(page: Page, seed: number) {
+  const dataUrl = await page.evaluate((hue) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 48;
+    const context = canvas.getContext("2d")!;
+    context.fillStyle = `hsl(${hue}, 60%, 60%)`;
+    context.fillRect(0, 0, 64, 48);
+    return canvas.toDataURL("image/png");
+  }, seed * 90);
+  return { name: `foto-${seed}.png`, mimeType: "image/png", buffer: Buffer.from(dataUrl.split(",")[1]!, "base64") };
 }
 
 async function choosePhoto(page: Page, label: string, seed: number) {
-  await page.locator(`input[aria-label="${label}: galeria"]`).setInputFiles(fakePhoto(seed));
+  await page.locator(`input[aria-label="${label}: galeria"]`).setInputFiles(await fakePhoto(page, seed));
   await expect(page.getByRole("button", { name: `${label}, foto escolhida` })).toBeVisible();
 }
 
@@ -106,7 +114,8 @@ test("REQ-HVER-014 recusa mostra o motivo, as tentativas e 'Tentar de novo', sem
     page.getByText("Não deu pra ler o documento. Tira a foto de dia, perto da janela, sem reflexo."),
   ).toBeVisible();
   await expect(page.getByText("Você ainda tem 2 tentativas.")).toBeVisible();
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  // O anunciador de rotas do Next também é role=alert: a regra vale para o conteúdo da página.
+  await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
   const retry = page.getByRole("link", { name: "Tentar de novo" });
   await waitForHydration(retry);
   await retry.click();
