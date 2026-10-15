@@ -7,7 +7,7 @@ import type { z } from "zod";
 import { ChipPicker } from "@/shared/ui/forms/ChipPicker";
 import { petWizardCopy } from "../../../lib/petWizardCopy";
 import { petStepSchemas } from "../../../schemas/petProfileSchema";
-import { usePetWizard } from "../../../stores/PetWizardProvider";
+import { usePetStep } from "./PetStepHost";
 import { StepForm } from "./StepForm";
 import { useServerErrors } from "./useServerErrors";
 
@@ -28,16 +28,15 @@ function withChip(text: string, chip: string): string {
  * @example <RoutineStep />
  */
 export function RoutineStep() {
-  const values = usePetWizard((state) => state.values);
-  const acceptStep = usePetWizard((state) => state.acceptStep);
-  const { control, handleSubmit, setError } = useForm<Values, unknown, Accepted>({
+  const { values, accept: acceptStep } = usePetStep();
+  const { control, handleSubmit, setError, formState } = useForm<Values, unknown, Accepted>({
     resolver: zodResolver(petStepSchemas.routine),
     defaultValues: { feedingNotes: values.feedingNotes ?? "", notes: values.notes ?? "" },
   });
   useServerErrors(setError, ["feedingNotes", "notes"]);
 
   return (
-    <StepForm title={copy.title} onSubmit={handleSubmit((accepted) => acceptStep(accepted))}>
+    <StepForm dirty={formState.isDirty} title={copy.title} onSubmit={handleSubmit((accepted) => acceptStep(accepted))}>
       <Typography color="text.secondary">{copy.help}</Typography>
       {(["feedingNotes", "notes"] as const).map((name) => (
         <Controller

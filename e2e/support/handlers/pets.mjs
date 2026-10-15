@@ -2,7 +2,7 @@ import { http } from "msw";
 import { fail, ok, sessionUserOf } from "./session.mjs";
 import { switchAccounts } from "./switchAccounts.mjs";
 import { randomUUID } from "node:crypto";
-import { PostApiV1PetsBody } from "../../../src/shared/api/generated/pets/pets.zod.ts";
+import { PostApiV1PetsBody, PatchApiV1PetsPetIdBody } from "../../../src/shared/api/generated/pets/pets.zod.ts";
 import { validateImageFile } from "../../../src/shared/lib/files/validateImageFile.ts";
 import { fileFingerprint } from "../../../src/shared/lib/files/fileFingerprint.ts";
 
@@ -23,6 +23,14 @@ function pet(id, name, overrides = {}) {
     goodWithDogs: true,
     goodWithCats: true,
     goodWithKids: true,
+    medicationNotes: null,
+    feedingNotes: null,
+    vetContact: null,
+    notes: null,
+    weightKg: null,
+    microchip: null,
+    allergies: null,
+    deactivatedAt: null,
     photos: [],
     isActive: true,
     createdAt: "2026-10-01T12:00:00Z",
@@ -121,17 +129,126 @@ function validateBody(input) {
   return { value, errors };
 }
 
+function ownedPet(request, petId) {
+  const user = sessionUserOf(request);
+  if (!user) return { error: fail(401, "UNAUTHORIZED") };
+  if (user.role === "admin") return { error: fail(403, "FORBIDDEN") };
+  const current = petsFor(user).find((item) => item.id === petId);
+  return current ? { current } : { error: fail(404, "PET_NOT_FOUND") };
+}
+function microchipConflict(petId, microchip) {
+  return (
+    Boolean(microchip) &&
+    [...petsByAccount.values()]
+      .flat()
+      .some((item) => item.id !== petId && item.isActive && item.microchip === microchip)
+  );
+}
+
 /**
  * `GET /pets/me` do mock: o dono uma vez e os pets da conta do token (spec 020).
  * @example app.use(createMiddleware(...petsHandlers));
  */
 export const petsHandlers = [
+  http.patch(`${API}/pets/:petId`, async ({ request, params }) => {
+    const result = ownedPet(request, params.petId);
+    if (result.error) return result.error;
+    const parsed = PatchApiV1PetsPetIdBody.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return fail(400, "VALIDATION_ERROR");
+    const patch = Object.fromEntries(Object.entries(parsed.data).filter(([, value]) => value != null));
+    const candidate = { ...result.current, ...patch };
+    if (!["dog", "cat"].includes(candidate.species)) candidate.size = null;
+    if (candidate.species !== "exotic") candidate.speciesDescription = null;
+    if (result.current.species !== "dog" && candidate.species === "dog" && !patch.size)
+      return fail(400, "VALIDATION_ERROR", [{ field: "size", messages: ["Escolhe o porte do cachorro."] }]);
+    const { value, errors } = validateBody(candidate);
+    if (errors.length) return fail(400, "VALIDATION_ERROR", errors);
+    if (candidate.isActive && microchipConflict(candidate.id, value.microchip))
+      return fail(409, "PET_MICROCHIP_ALREADY_REGISTERED");
+    Object.assign(result.current, candidate, value, { updatedAt: new Date().toISOString() });
+    for (const field of [
+      "breed",
+      "birthDate",
+      "medicationNotes",
+      "feedingNotes",
+      "vetContact",
+      "notes",
+      "microchip",
+      "allergies",
+    ])
+      if (result.current[field] === "") result.current[field] = null;
+    return ok(result.current);
+  }),
+  http.post(`${API}/pets/:petId/deactivation`, ({ request, params }) => {
+    const result = ownedPet(request, params.petId);
+    if (result.error) return result.error;
+    if (result.current.isActive)
+      Object.assign(result.current, {
+        isActive: false,
+        deactivatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    return ok(result.current);
+  }),
+  http.delete(`${API}/pets/:petId/deactivation`, ({ request, params }) => {
+    const result = ownedPet(request, params.petId);
+    if (result.error) return result.error;
+    if (microchipConflict(result.current.id, result.current.microchip))
+      return fail(409, "PET_MICROCHIP_ALREADY_REGISTERED");
+    Object.assign(result.current, { isActive: true, deactivatedAt: null, updatedAt: new Date().toISOString() });
+    return ok(result.current);
+  }),
+  http.patch(`${API}/pets/:petId/photos/:photoId`, async ({ request, params }) => {
+    const result = ownedPet(request, params.petId);
+    if (result.error) return result.error;
+    const photo = result.current.photos.find((item) => item.id === params.photoId);
+    if (!photo) return fail(404, "PET_PHOTO_NOT_FOUND");
+    const form = await request.formData().catch(() => null);
+    const file = form?.get("file");
+    if (!file || typeof file === "string")
+      return fail(400, "VALIDATION_ERROR", [{ field: "file", messages: ["Falta a foto."] }]);
+    const valid = validateImageFile(file);
+    if (!valid.ok)
+      return fail(
+        valid.reason === "size" ? 413 : valid.reason === "type" ? 415 : 400,
+        valid.reason === "size"
+          ? "PAYLOAD_TOO_LARGE"
+          : valid.reason === "type"
+            ? "UNSUPPORTED_MEDIA_TYPE"
+            : "VALIDATION_ERROR",
+      );
+    if (file.name === "falha.jpg") return fail(500, "UNEXPECTED_ERROR");
+    const fingerprint = await fileFingerprint(file);
+    const known = fingerprints.get(result.current.id) ?? new Map();
+    if ([...known.entries()].some(([id, hash]) => id !== photo.id && hash === fingerprint))
+      return fail(409, "PET_PHOTO_ALREADY_EXISTS");
+    known.set(photo.id, fingerprint);
+    fingerprints.set(result.current.id, known);
+    photo.url = `https://images.example.test/pets/${result.current.id}/${randomUUID()}.jpg`;
+    result.current.updatedAt = new Date().toISOString();
+    return ok(result.current);
+  }),
+  http.delete(`${API}/pets/:petId/photos/:photoId`, ({ request, params }) => {
+    const result = ownedPet(request, params.petId);
+    if (result.error) return result.error;
+    const index = result.current.photos.findIndex((item) => item.id === params.photoId);
+    if (index < 0) return fail(404, "PET_PHOTO_NOT_FOUND");
+    result.current.photos.splice(index, 1);
+    fingerprints.get(result.current.id)?.delete(params.photoId);
+    result.current.updatedAt = new Date().toISOString();
+    return ok(result.current);
+  }),
+
   http.get(`${API}/pets/me`, ({ request }) => {
     const user = sessionUserOf(request);
     if (!user) return fail(401, "UNAUTHORIZED");
     if (user.role === "admin") return fail(403, "FORBIDDEN");
     const pets = petsFor(user);
     return ok({ keeper: { id: user.id, type: user.role, name: user.fullName, avatarUrl: null }, pets });
+  }),
+  http.get(`${API}/pets/:petId`, ({ request, params }) => {
+    const result = ownedPet(request, params.petId);
+    return result.error ?? ok(result.current);
   }),
   http.post(`${API}/pets`, async ({ request }) => {
     const user = sessionUserOf(request);
@@ -141,7 +258,10 @@ export const petsHandlers = [
       return fail(404, "PET_KEEPER_NOT_FOUND");
     const { value, errors } = validateBody(await request.json().catch(() => null));
     if (errors.length) return fail(400, "VALIDATION_ERROR", errors);
-    if (value.microchip && [...petsByAccount.values()].flat().some((item) => item.microchip === value.microchip))
+    if (
+      value.microchip &&
+      [...petsByAccount.values()].flat().some((item) => item.isActive && item.microchip === value.microchip)
+    )
       return fail(409, "PET_MICROCHIP_ALREADY_REGISTERED");
     const createdAt = new Date().toISOString();
     const created = pet(randomUUID(), value.name, {
@@ -180,11 +300,11 @@ export const petsHandlers = [
     if (file.name === "falha.jpg") return fail(500, "UNEXPECTED_ERROR");
     if (current.photos.length >= 3) return fail(422, "PET_PHOTO_LIMIT_REACHED");
     const fingerprint = await fileFingerprint(file);
-    const known = fingerprints.get(current.id) ?? new Set();
-    if (known.has(fingerprint)) return fail(409, "PET_PHOTO_ALREADY_EXISTS");
-    known.add(fingerprint);
-    fingerprints.set(current.id, known);
+    const known = fingerprints.get(current.id) ?? new Map();
+    if ([...known.values()].includes(fingerprint)) return fail(409, "PET_PHOTO_ALREADY_EXISTS");
     const id = randomUUID();
+    known.set(id, fingerprint);
+    fingerprints.set(current.id, known);
     current.photos.push({ id, url: `https://images.example.test/pets/${current.id}/${id}.jpg` });
     current.updatedAt = new Date().toISOString();
     return ok(current);

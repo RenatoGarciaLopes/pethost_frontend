@@ -4,19 +4,30 @@ import { Box, Button, CircularProgress, FormHelperText, Stack, Typography } from
 import { useId, useState, type ChangeEvent } from "react";
 import { useObjectUrl } from "../../../hooks/useObjectUrl";
 import { validateImageFile } from "../../../lib/files/validateImageFile";
+import { visuallyHidden } from "../../a11y/visuallyHidden";
 import { photoSlotsCopy as copy } from "./photoSlotsCopy";
+
+const ACCEPTED_IMAGES = "image/jpeg,image/png,image/webp";
 
 export interface PhotoSlotsProps {
   /** Nome do grupo para o leitor de tela (ex.: "Fotos de Pipoca"). */
   label: string;
-  /** Uma posição por vaga, na ordem; a primeira é a capa. `null` = vaga livre. */
-  files: readonly (File | null)[];
+  /**
+   * Uma posição por vaga, na ordem; a primeira é a capa. `null` = vaga livre; `File` = escolhida agora (prévia em
+   * memória); `string` = URL de foto já salva, mostrada direto.
+   */
+  files: readonly (File | string | null)[];
   /** Erro de cada vaga vindo de fora (foto repetida, falha do envio), já em português. */
   errors?: readonly (string | null | undefined)[];
   /** Vaga sendo enviada agora: indicador e botões travados. */
   uploadingIndex?: number | null;
   /** Arquivo já conferido (tipo e tamanho); quem usa decide o resto (repetida, envio). */
   onPick: (index: number, file: File) => void;
+  /**
+   * Troca da foto de uma vaga preenchida, com a mesma conferência de `onPick`. Se vier, cada vaga preenchida mostra
+   * "Trocar foto N"; sem ele, não há troca (o cadastro da 021 não usa).
+   */
+  onReplace?: (index: number, file: File) => void;
   onRemove: (index: number) => void;
   disabled?: boolean;
 }
@@ -24,9 +35,11 @@ export interface PhotoSlotsProps {
 /**
  * Vagas de foto com capa, prévia e erro por vaga (spec 021, REQ-PNEW-007). Controlado e sem HTTP: confere tipo
  * e tamanho (`validateImageFile`) antes de entregar o arquivo e recusa na própria vaga. Arquivos e prévias ficam
- * só em memória (object URL revogado). Reutilizável em fotos do pet (022), documentos (030) e fotos da casa (044).
+ * só em memória (object URL revogado). Mostra fotos já salvas (URL) e, com `onReplace`, oferece a troca na mesma
+ * vaga (spec 022, REQ-PEDIT-008). Reutilizável em fotos do pet (021, 022), documentos (030) e fotos da casa (044).
  *
  * @example <PhotoSlots label="Fotos de Pipoca" files={photos} onPick={pick} onRemove={remove} />
+ * @example <PhotoSlots label="Fotos de Thor" files={pet.photoUrls} onPick={add} onReplace={replace} onRemove={remove} />
  */
 export function PhotoSlots({
   label,
@@ -34,15 +47,23 @@ export function PhotoSlots({
   errors = [],
   uploadingIndex = null,
   onPick,
+  onReplace,
   onRemove,
   disabled = false,
 }: PhotoSlotsProps) {
   const [invalid, setInvalid] = useState<readonly boolean[]>(() => files.map(() => false));
 
-  function pick(index: number, file: File) {
-    const ok = validateImageFile(file).ok;
-    setInvalid((current) => current.map((value, slot) => (slot === index ? !ok : value)));
-    if (ok) onPick(index, file);
+  function markInvalid(index: number, value: boolean) {
+    setInvalid((current) => current.map((item, slot) => (slot === index ? value : item)));
+  }
+
+  /** Confere o arquivo e só entrega se servir; o erro fica na vaga. */
+  function deliverChecked(index: number, deliver: (index: number, file: File) => void) {
+    return (file: File) => {
+      const ok = validateImageFile(file).ok;
+      markInvalid(index, !ok);
+      if (ok) deliver(index, file);
+    };
   }
 
   return (
@@ -59,9 +80,10 @@ export function PhotoSlots({
           error={invalid[index] ? copy.invalid : (errors[index] ?? null)}
           uploading={uploadingIndex === index}
           disabled={disabled || uploadingIndex !== null}
-          onPick={(picked) => pick(index, picked)}
+          onPick={deliverChecked(index, onPick)}
+          onReplace={onReplace && deliverChecked(index, onReplace)}
           onRemove={() => {
-            setInvalid((current) => current.map((value, slot) => (slot === index ? false : value)));
+            markInvalid(index, false);
             onRemove(index);
           }}
         />
@@ -72,24 +94,35 @@ export function PhotoSlots({
 
 interface SlotProps {
   index: number;
-  file: File | null;
+  file: File | string | null;
   error: string | null;
   uploading: boolean;
   disabled: boolean;
   onPick: (file: File) => void;
+  onReplace?: (file: File) => void;
   onRemove: () => void;
 }
 
-function Slot({ index, file, error, uploading, disabled, onPick, onRemove }: SlotProps) {
+function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRemove }: SlotProps) {
   const id = useId();
-  const preview = useObjectUrl(file);
+  const objectUrl = useObjectUrl(file instanceof File ? file : null);
+  const preview = typeof file === "string" ? file : objectUrl;
   const number = index + 1;
   const errorId = `${id}-erro`;
 
-  function choose(event: ChangeEvent<HTMLInputElement>) {
-    const picked = event.currentTarget.files?.[0];
-    event.currentTarget.value = "";
-    if (picked && !disabled) onPick(picked);
+  function fileInputProps(deliver: (file: File) => void) {
+    return {
+      type: "file",
+      accept: ACCEPTED_IMAGES,
+      disabled,
+      onChange: (event: ChangeEvent<HTMLInputElement>) => {
+        const picked = event.currentTarget.files?.[0];
+        event.currentTarget.value = "";
+        if (picked && !disabled) deliver(picked);
+      },
+      "aria-describedby": error ? errorId : undefined,
+      "aria-invalid": error ? true : undefined,
+    };
   }
 
   return (
@@ -132,7 +165,7 @@ function Slot({ index, file, error, uploading, disabled, onPick, onRemove }: Slo
           <Box
             component="img"
             src={preview}
-            alt={copy.preview(number)}
+            alt={typeof file === "string" ? copy.saved(number) : copy.preview(number)}
             sx={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         ) : (
@@ -147,13 +180,15 @@ function Slot({ index, file, error, uploading, disabled, onPick, onRemove }: Slo
             <Box
               component="input"
               id={id}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              disabled={disabled}
-              onChange={choose}
-              aria-describedby={error ? errorId : undefined}
-              aria-invalid={error ? true : undefined}
-              sx={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%", cursor: "pointer" }}
+              {...fileInputProps(onPick)}
+              sx={{
+                position: "absolute",
+                inset: 0,
+                opacity: 0,
+                width: "100%",
+                height: "100%",
+                cursor: disabled ? "not-allowed" : "pointer",
+              }}
             />
           </>
         )}
@@ -171,8 +206,28 @@ function Slot({ index, file, error, uploading, disabled, onPick, onRemove }: Slo
           </Box>
         )}
       </Box>
+      {preview && onReplace && (
+        <Box
+          component="label"
+          sx={{
+            minHeight: 48,
+            display: "grid",
+            placeItems: "center",
+            borderRadius: 2,
+            fontWeight: 700,
+            fontSize: "0.8125rem",
+            textAlign: "center",
+            color: disabled ? "text.disabled" : "text.primary",
+            cursor: disabled ? "not-allowed" : "pointer",
+            "&:focus-within": { outline: "2px solid", outlineColor: "text.primary", outlineOffset: 2 },
+          }}
+        >
+          {copy.replace(number)}
+          <Box component="input" {...fileInputProps(onReplace)} sx={visuallyHidden} />
+        </Box>
+      )}
       {preview && (
-        <Button size="small" variant="text" onClick={onRemove} disabled={disabled}>
+        <Button size="small" variant="text" onClick={onRemove} disabled={disabled} sx={{ minHeight: 48 }}>
           {copy.remove(number)}
         </Button>
       )}

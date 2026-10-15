@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@mui/material/styles";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { useFlashMessage } from "@/shared/hooks/useFlashMessage";
 import { useAnnounce } from "@/shared/ui/feedback/Announcer";
 import { AppProviders } from "./AppProviders";
 
@@ -11,11 +12,12 @@ function Probe() {
   const theme = useTheme();
   const queryClient = useQueryClient();
   useAnnounce();
+  useFlashMessage();
   return <p>{`${theme.palette.primary.main} ${queryClient ? "query" : ""}`}</p>;
 }
 
 describe("AppProviders", () => {
-  it("REQ-HTTP-017 REQ-SWITCH-006 entrega o tema Quintal, o QueryClient e a região viva aos filhos", () => {
+  it("REQ-HTTP-017 REQ-SWITCH-006 REQ-PEDIT-012 entrega o tema Quintal, o QueryClient, a região viva e o aviso de navegação aos filhos", () => {
     render(
       <AppProviders>
         <Probe />

@@ -6,4 +6,6 @@ import "server-only";
  * Não importe este índice em componentes client.
  */
 export { MyPetsScreen } from "./components/MyPetsScreen";
+export { PetEditScreen, PetProfileScreen } from "./components/PetProfileScreen";
+export { getPetDetail } from "./api/server/petDetail.server";
 export { PetWizardScreen } from "./components/PetWizardScreen";
