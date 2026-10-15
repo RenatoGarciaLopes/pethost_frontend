@@ -189,7 +189,9 @@ Fase 5  050 pedir · 051 pagar + Fechado! · 052 minhas estadias · 053 pedidos 
 
 ---
 
-## Fase 4 · Descoberta e cantinho (API ⛔, contratos a acordar)
+## Fase 4 · Descoberta e cantinho (API ✅ desde 15/10, menos a agenda)
+
+Specs escritas em 15/10 a partir do backend (`modulo-listings.md`, `modulo-hosts.md` seção 9): 041, 042, 043 e 044. A 040 (home) e a 045 (agenda, sem `availability_blocks`) seguem sem spec. Rotas reais: 041 `/search`, 042 `/listings/[listingId]`, 043 `/host/payments`, 044 `/host`, `/host/listings/new` e `/host/listings/[listingId]`.
 
 | Spec                    | Tela                                    | Design                                                        | API necessária                                         | Pontos de atenção                                                                                               |
 | ----------------------- | --------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
@@ -200,7 +202,9 @@ Fase 5  050 pedir · 051 pagar + Fechado! · 052 minhas estadias · 053 pedidos 
 | 044 montar cantinho     | `/host/listings`, `/host/listings/edit` | `Fluxo-Cantinho` (painel, quem recebe, fotos, diária, aberto) | `listings` CRUD ⛔                                     | Simulação líquida de 90% como função pura testada                                                               |
 | 045 agenda              | `/host/availability-blocks`             | `Fluxo-Cantinho` → "Agenda"                                   | `availability_blocks` ⛔                               | Calendário sem MUI X Pro; datas como `yyyy-MM-dd`                                                               |
 
-## Fase 5 · Estadia (API ⛔)
+## Fase 5 · Estadia (reserva ✅ desde 15/10; pagamento, conversa, avaliação e ganhos ⛔)
+
+Specs escritas em 15/10 a partir de `modulo-bookings.md`: 050, 052, 053 e 054. Sem o módulo de pagamento, aceitar já confirma; 051, 055, 056 e 057 esperam a API. Rotas reais: 050 `/listings/[listingId]/request`, 052 `/owner/bookings` e o detalhe, 053 `/host/bookings` e o detalhe (054 entra no detalhe).
 
 | Spec                     | Tela                                                                        | Design                                               | API necessária                                                              |
 | ------------------------ | --------------------------------------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------- |

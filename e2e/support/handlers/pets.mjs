@@ -7,6 +7,18 @@ import { validateImageFile } from "../../../src/shared/lib/files/validateImageFi
 import { fileFingerprint } from "../../../src/shared/lib/files/fileFingerprint.ts";
 
 const API = "http://localhost:5099/api/v1";
+// Ids dos perfis aprovados, deliberadamente diferentes das contas de login.
+const HOST_PROFILES = [
+  { scenario: "both", id: "0199d2a0-0000-7000-8000-0000000000b1" },
+  { scenario: "paused", id: "0199d2a0-0000-7000-8000-0000000000b2" },
+];
+function hostProfile(user) {
+  const scenario = switchAccounts.find((account) => account.user.id === user.id)?.scenario;
+  return user.role === "host" ? HOST_PROFILES.find((profile) => profile.scenario === scenario) : undefined;
+}
+function keeperFor(user) {
+  return { id: hostProfile(user)?.id ?? user.id, type: user.role, name: user.fullName, avatarUrl: null };
+}
 
 function pet(id, name, overrides = {}) {
   return {
@@ -150,6 +162,14 @@ function microchipConflict(petId, microchip) {
  * @example app.use(createMiddleware(...petsHandlers));
  */
 export const petsHandlers = [
+  http.get(`${API}/hosts/:hostId/pets`, ({ request, params }) => {
+    if (!sessionUserOf(request)) return fail(401, "UNAUTHORIZED");
+    const profile = HOST_PROFILES.find((item) => item.id === params.hostId);
+    const account =
+      profile && switchAccounts.find((item) => item.user.role === "host" && item.scenario === profile.scenario);
+    if (!account) return fail(404, "PET_HOST_NOT_FOUND");
+    return ok({ keeper: keeperFor(account.user), pets: petsFor(account.user).filter((item) => item.isActive) });
+  }),
   http.patch(`${API}/pets/:petId`, async ({ request, params }) => {
     const result = ownedPet(request, params.petId);
     if (result.error) return result.error;
@@ -243,8 +263,9 @@ export const petsHandlers = [
     const user = sessionUserOf(request);
     if (!user) return fail(401, "UNAUTHORIZED");
     if (user.role === "admin") return fail(403, "FORBIDDEN");
+    if (user.role === "host" && !hostProfile(user)) return fail(404, "PET_KEEPER_NOT_FOUND");
     const pets = petsFor(user);
-    return ok({ keeper: { id: user.id, type: user.role, name: user.fullName, avatarUrl: null }, pets });
+    return ok({ keeper: keeperFor(user), pets });
   }),
   http.get(`${API}/pets/:petId`, ({ request, params }) => {
     const result = ownedPet(request, params.petId);
@@ -254,8 +275,7 @@ export const petsHandlers = [
     const user = sessionUserOf(request);
     if (!user) return fail(401, "UNAUTHORIZED");
     if (user.role === "admin") return fail(403, "FORBIDDEN");
-    if (switchAccounts.find((account) => account.user.id === user.id)?.scenario === "unverified")
-      return fail(404, "PET_KEEPER_NOT_FOUND");
+    if (user.role === "host" && !hostProfile(user)) return fail(404, "PET_KEEPER_NOT_FOUND");
     const { value, errors } = validateBody(await request.json().catch(() => null));
     if (errors.length) return fail(400, "VALIDATION_ERROR", errors);
     if (

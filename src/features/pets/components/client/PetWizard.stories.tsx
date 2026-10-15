@@ -8,20 +8,22 @@ import { AnnouncerProvider } from "@/shared/ui/feedback/Announcer";
 import { petProfileValuesFixture } from "@/test/fixtures/pets";
 import { petDraftKey } from "../../lib/petDraft";
 import type { PetSpecies } from "../../types";
+import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { PetWizardScreen } from "../PetWizardScreen";
 
 interface FrameProps {
+  role?: PersonalRole;
   step: number;
   species: PetSpecies;
 }
 /** Providers reais, cache isolado e rascunho sem arquivos/identificadores; não chama API nas stories. */
-function Frame({ species }: FrameProps) {
+function Frame({ species, role = "owner" }: FrameProps) {
   const [client] = useState(() => new QueryClient());
   return (
     <QueryClientProvider client={client}>
       <AnnouncerProvider>
         <main>
-          <PetWizardScreen accountId="storybook-pet" initialSpecies={species} />
+          <PetWizardScreen accountId="storybook-pet" initialSpecies={species} role={role} />
         </main>
       </AnnouncerProvider>
     </QueryClientProvider>
@@ -51,7 +53,7 @@ const meta = {
   },
   play: async ({ canvasElement, args }) => {
     const titles = [
-      "Que bicho é o seu?",
+      args.role === "host" ? "Quem mora com você?" : "Que bicho é o seu?",
       "Como seu pet se chama?",
       "Sobre o corpo de Mel",
       "Saúde",
@@ -67,6 +69,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Bicho: Story = { name: "REQ-PNEW-002 Passo 1: cachorro" };
+export const Anfitriao: Story = { name: "REQ-HPETS-004 Quem mora com você", args: { role: "host" } };
 export const NomeEFotos: Story = { name: "REQ-PNEW-006/007 Passo 2: nome e fotos", args: { step: 2 } };
 export const Corpo: Story = { name: "REQ-PNEW-004/009 Passo 3: corpo", args: { step: 3 } };
 export const Saude: Story = { name: "REQ-PNEW-010 Passo 4: saúde", args: { step: 4 } };
