@@ -6,6 +6,32 @@ const ownerId = "15d2c8a8-8f67-44f7-8eb3-4ecf56c65e83";
 const actorId = "9f19b59c-2c65-40a4-9e72-371ae9fdcd6e";
 const entries = [
   {
+    id: "7f9200d3-94a5-45c4-956d-1f43d091a761",
+    occurredAt: "2026-10-11T12:00:00Z",
+    action: "host.stripe_account_rejected",
+    targetType: "host",
+    targetId: "0199d2a0-0000-7000-8000-000000003302",
+    actorId,
+    actorRole: "admin",
+    reason: "Cadastro de recebimento recusado no cenário sintético",
+    details: { stripeStatus: "rejected" },
+    ipAddress: null,
+    traceId: "trace-e2e-host-accounts",
+  },
+  {
+    id: "c87582ef-1d46-44e5-9355-d9e21eef6d83",
+    occurredAt: "2026-10-10T12:00:00Z",
+    action: "owner.suspended",
+    targetType: "owner",
+    targetId: "0199d2a0-0000-7000-8000-000000003201",
+    actorId,
+    actorRole: "admin",
+    reason: "Revisão sintética da conta",
+    details: { status: "suspended" },
+    ipAddress: "203.0.113.18",
+    traceId: "trace-e2e-accounts",
+  },
+  {
     id: "77b9c00c-fdc0-4422-b4c7-7e237741a4a7",
     occurredAt: "2026-10-09T12:00:00Z",
     action: "owner.suspended",

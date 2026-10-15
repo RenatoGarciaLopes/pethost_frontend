@@ -159,7 +159,6 @@ export function AccountsDirectoryView({
         rows={filtered}
         columns={columns}
         rowKey={(row) => row.id}
-        rowLabel={(row) => row.fullName}
         rowHref={(row) => `/admin/users/${row.kind}/${row.id}`}
         page={page}
         onPageChange={(next) => onChange({ page: next })}

@@ -47,6 +47,13 @@ test("REQ-AACC-001/003/005/007/008/009 tutor encontra conta, suspende e libera C
     "href",
     new RegExp(`targetType=owner.*targetId=${"0199d2a0-0000-7000-8000-000000003201"}`),
   );
+  await expect(page.getByRole("link", { name: /Abrir detalhes: Tutor suspenso/ })).toBeVisible();
+  await page.getByRole("link", { name: "Ver na trilha", exact: true }).click();
+  await expect(page).toHaveURL(
+    new RegExp(`/admin/audit-entries\\?targetType=owner&targetId=${"0199d2a0-0000-7000-8000-000000003201"}`),
+  );
+  await expect(page.getByRole("heading", { name: "Auditoria" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Abrir detalhes: Tutor suspenso/ })).toBeVisible();
 });
 
 test("REQ-AACC-014/015 anfitrião filtra Stripe na API e reinicia somente cadastro recusado", async ({ page }) => {
@@ -66,6 +73,13 @@ test("REQ-AACC-014/015 anfitrião filtra Stripe na API e reinicia somente cadast
   await expect(page.getByText("Não começou", { exact: true })).toBeVisible();
   await expect(page.getByText("Não", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Dar nova chance no Stripe" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Abrir detalhes: Conta de recebimento recusada/ })).toBeVisible();
+  await page.getByRole("link", { name: "Ver na trilha", exact: true }).click();
+  await expect(page).toHaveURL(
+    new RegExp(`/admin/audit-entries\\?targetType=host&targetId=${"0199d2a0-0000-7000-8000-000000003302"}`),
+  );
+  await expect(page.getByRole("heading", { name: "Auditoria" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Abrir detalhes: Conta de recebimento recusada/ })).toBeVisible();
 });
 
 test("REQ-AACC-007/008 empresa suspensa libera identidade sem apagar evidência nem expor CNPJ na URL", async ({

@@ -368,3 +368,15 @@ e2e/mocked/admin/audit.spec.ts, e2e/real/admin/audit.spec.ts
 ```
 
 O detalhe mantém o IP fora da tabela; IDs e traceId são copiados ou navegados apenas por ação do usuário. `details` segue o OpenAPI como mapa texto-texto. E2E foi escrito, mas não iniciado aguardando portas reservadas. Catálogo e notas do vault ficam para integração fora desta worktree; as linhas de recurso seguem no resumo.
+
+### Integração da trilha nos detalhes 032 (15/10/2026)
+
+```text
+src/app/(admin)/admin/(panel)/users/owners/[ownerId]/page.tsx  compõe AuditTable com alvo owner fixo
+src/app/(admin)/admin/(panel)/users/hosts/[hostId]/page.tsx    compõe AuditTable com alvo host fixo
+src/app/(admin)/admin/(panel)/users/accountAuditComposition.stories.tsx  story da composição no nível app
+src/widgets/admin-accounts/components/AccountDetail.test.tsx   slot e link filtrado para tutor/anfitrião
+e2e/mocked/admin/accounts.spec.ts                              jornada conta → trilha para os dois alvos
+```
+
+As rotas compõem `AuditTable` pelo índice público `features/admin-audit/index.client.ts` e passam o nó pelo `auditTrail`; `widgets/admin-accounts` não importa a feature. O mock mantém eventos sintéticos para ids de tutor e anfitrião e registra ambos os handlers e resets em `mock-backend.mjs`. A primeira coluna do diretório de contas já traz o texto visível do nome, então não fornece `rowLabel` redundante ao `AdminDataTable` atualizado.

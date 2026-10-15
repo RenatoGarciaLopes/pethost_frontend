@@ -21,6 +21,15 @@ Implementação local concluída na worktree `pethost_frontend-032`. Sem commit.
 
 ## Cobertura e validação desta entrega
 
+### Integração com a trilha (033)
+
+- [x] Merge da 033 concluído na branch `feat/admin-audit-in-accounts`; conflitos de navegação preservam fila, contas e auditoria. O mock E2E registra e reseta handlers de contas e auditoria.
+- [x] Rotas RSC de tutor e anfitrião passam `AuditTable` compacta ao slot `auditTrail`, com filtros fixos `owner|host` e id do perfil. `widgets/admin-accounts` não importa a feature de auditoria.
+- [x] Adicionado teste funcional do slot e link nos dois tipos de conta, story app-level com a composição real e E2E mocked de conta → trilha para tutor e anfitrião.
+- [x] Removido `rowLabel` duplicado da primeira coluna de contas após atualização do `AdminDataTable`.
+- [x] Testes focais executados: `npx.cmd vitest run src/features/admin-audit src/widgets/admin-accounts src/shared/config/navigation.test.ts --maxWorkers=1` — 47 testes em 19 arquivos passaram; `npx.cmd vitest run src/shared/ui/data-display/AdminDataTable/AdminDataTable.test.tsx --maxWorkers=1` — 2 passaram. TypeScript e ESLint escopado passaram.
+- [ ] E2E Playwright e Storybook aguardam execução coordenada; foram escritos e não executados nesta tarefa.
+
 - Unitários: schemas, normalização de linhas, busca textual, erros e validação de motivo.
 - Componentes: diretório, ações, resumo, diálogo e carteirinha; testes verificam interações e conteúdo acessível.
 - Integração: clientes HTTP, hooks de mutação/invalidação, renderização de rotas servidoras e abertura da aplicação na navegação admin.

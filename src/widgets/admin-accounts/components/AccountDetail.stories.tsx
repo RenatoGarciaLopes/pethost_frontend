@@ -24,4 +24,13 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Tutor: Story = {};
-export const SlotDaTrilha: Story = { args: { auditTrail: <div>Slot aguardando a auditoria (033)</div> } };
+export const SlotDaTrilha: Story = {
+  args: {
+    auditTrail: (
+      <div aria-label="Registros recentes" role="region">
+        <p>1 de 1 registros</p>
+        <p>Conta suspensa · Revisão sintética da conta</p>
+      </div>
+    ),
+  },
+};

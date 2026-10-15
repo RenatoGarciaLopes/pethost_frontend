@@ -11,12 +11,12 @@ updated: 2026-10-15
 | Rota                            | Composição                                                                                                                                                      |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/admin/users`                  | RSC protege com `requireRole("admin")`, valida `type`, `status`, `stripeStatus` e `page`, preenche a query de lista da aba, depois hidrata `AccountsDirectory`. |
-| `/admin/users/owners/[ownerId]` | RSC valida UUID, busca o tutor pelo `ownerId` e hidrata `AccountDetail` com `kind="owners"`.                                                                    |
-| `/admin/users/hosts/[hostId]`   | RSC valida UUID, busca o anfitrião pelo `hostId` e hidrata `AccountDetail` com `kind="hosts"`.                                                                  |
+| `/admin/users/owners/[ownerId]` | RSC valida UUID, busca o tutor pelo `ownerId` e hidrata `AccountDetail` com `kind="owners"`; compõe `AuditTable` compacta com alvo owner fixo.                  |
+| `/admin/users/hosts/[hostId]`   | RSC valida UUID, busca o anfitrião pelo `hostId` e hidrata `AccountDetail` com `kind="hosts"`; compõe `AuditTable` compacta com alvo host fixo.                 |
 
 As três rotas ficam sob o painel de admin, usam `noindex` e mantêm a consulta dinâmica por requisição. A lista usa duas abas. A busca pessoal fica no estado React e não entra em URL, cache key ou log. Status e página ficam na URL. O filtro Stripe fica na URL e na chave da lista de anfitriões, e só então pede `GET /hosts?stripeStatus=`. Trocar de aba limpa os filtros e a busca. A busca permanece no componente pai enquanto uma nova lista carrega.
 
-`AccountDetail` recebe `auditTrail?: ReactNode`; nesta entrega o slot fica vazio. "Ver na trilha" aponta para `/admin/audit-entries?targetType=owner|host&targetId={profileId}`, usando os nomes confirmados no contrato de `GET /audit-entries`. A feature 032 não consulta, implementa ou invalida a trilha. A 033 preenche o slot e gerencia sua própria query.
+`AccountDetail` recebe `auditTrail?: ReactNode`. As páginas RSC compõem o slot com `AuditTable` da 033, passando `variant="compact"` e `fixedFilters` com `targetType` (`owner` ou `host`) e o id do perfil. "Ver na trilha" aponta para `/admin/audit-entries?targetType=owner|host&targetId={profileId}`, usando os nomes confirmados no contrato de `GET /audit-entries`. A feature 032 não importa a 033, nem consulta, implementa ou invalida a trilha; `AuditTable` controla sua própria query.
 
 ## Fronteiras e contratos
 
@@ -42,13 +42,13 @@ Os módulos independentes `features/owners` e `features/hosts` derivam seus sche
 
 ## Testes e validação
 
-| Camada                | Recursos cobertos                                                                             | Evidência                                                                                                                                 |
-| --------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Unitária              | `reasonSchema`, `filterText`, `accountsSearchSchema`, prioridade/normalização de `AccountRow` | Testes ao lado das funções; motivos vazios, limites 1/500/501, acentos, busca CPF mascarada e parâmetros inválidos.                       |
-| Componente            | diálogo, diretório, ações e resumo                                                            | Testes ao lado dos componentes; busca sem URL, seletores públicos, status que permite ações, `LIBERAR`, privacidade e erros de validação. |
-| Integração HTTP/cache | clientes de owners/hosts, `useAccountAction`, detalhe 032 e atalho de conflito 031            | MSW verifica corpo e verbo, filtro Stripe, resposta 422, invalidação de detalhe/listas e atalho sem documento na URL.                     |
-| E2E simulado          | lista, CPF disputado, ações, Stripe e trilha                                                  | Escrito para execução coordenada; cobre fluxo da UI e backend simulado, não substitui API real.                                           |
-| E2E real              | suspender e reativar tutor criado pelo próprio cenário                                        | Escrito para execução coordenada; pendente execução com API real e dados de teste autorizados.                                            |
-| Storybook             | diálogo, diretório, ações, resumo e detalhe com slot vazio/opcional                           | Stories registram estados ativos, suspensos, liberados, empresa e Stripe recusado; E2E não substitui aceitação visual.                    |
+| Camada                | Recursos cobertos                                                                             | Evidência                                                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unitária              | `reasonSchema`, `filterText`, `accountsSearchSchema`, prioridade/normalização de `AccountRow` | Testes ao lado das funções; motivos vazios, limites 1/500/501, acentos, busca CPF mascarada e parâmetros inválidos.                                |
+| Componente            | diálogo, diretório, ações, resumo e slot de auditoria                                         | `AccountDetail.test.tsx` cobre slot preenchido e href correto para owner/host; demais testes cobrem busca sem URL, `LIBERAR`, privacidade e erros. |
+| Integração HTTP/cache | clientes de owners/hosts, `useAccountAction`, detalhe 032 e atalho de conflito 031            | MSW verifica corpo e verbo, filtro Stripe, resposta 422, invalidação de detalhe/listas e atalho sem documento na URL.                              |
+| E2E simulado          | lista, CPF disputado, ações, Stripe e trilha                                                  | Jornada mocked cobre detalhe de tutor/anfitrião, tabela compacta e clique para auditoria com alvo fixo; não substitui API real.                    |
+| E2E real              | suspender e reativar tutor criado pelo próprio cenário                                        | Escrito para execução coordenada; pendente execução com API real e dados de teste autorizados.                                                     |
+| Storybook             | diálogo, diretório, ações, resumo e composição de detalhe com trilha compacta                 | `accountAuditComposition.stories.tsx` compõe detalhe + `AuditTable`; `AuditTable.stories.tsx` mostra a variante compacta.                          |
 
 Validação registrada será atualizada em `tasks.md` após os checks disponíveis nesta execução. A revisão visual, Storybook executado, E2E pelo navegador e integração real ficam para a execução coordenada pelo usuário.
