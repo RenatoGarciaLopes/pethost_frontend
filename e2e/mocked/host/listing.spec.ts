@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { accountFixture, loginAccount, resetAccountMock } from "../../support/account";
+import { hideDevIndicator } from "../../support/devIndicator";
 import { waitForHydration } from "../../support/hydration";
 import { mockViaCep } from "../../support/registration";
 
@@ -20,7 +21,8 @@ const section = (page: Page, name: string) => page.getByRole("region", { name, e
 async function saveSection(page: Page, name: string) {
   const region = section(page, name);
   await region.getByRole("button", { name: `Salvar ${name}` }).click();
-  await expect(region.getByRole("status")).toHaveText("Pronto.");
+  // Na seção "Quem você recebe" o contador também é um status (output): o aviso é o que diz "Pronto.".
+  await expect(region.getByRole("status").filter({ hasText: "Pronto." })).toBeVisible();
 }
 
 /** Foto fictícia gerada no próprio navegador (canvas → PNG de verdade): nada de foto real. */
@@ -39,6 +41,8 @@ async function fakePhoto(page: Page, seed: number) {
 
 // Os projetos mocked-desktop e mocked-mobile executam a mesma jornada, com estado isolado.
 test.beforeEach(async ({ page, baseURL }) => {
+  // No celular, "Abrir meu cantinho" fica no fim da página, sob o selo do `next dev`.
+  await hideDevIndicator(page);
   await resetAccountMock(page);
   await mockViaCep(page);
   await loginAccount(page, baseURL!, "both", "host");

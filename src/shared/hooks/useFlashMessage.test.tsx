@@ -83,3 +83,33 @@ describe("useFlashMessage", () => {
     expect(() => renderHook(() => useFlashMessage())).toThrow("useFlashMessage precisa do FlashMessageProvider");
   });
 });
+
+describe("useFlashMessage com a página restaurada", () => {
+  it("REQ-PEDIT-012 REQ-HVER-010 remontagem logo em seguida (o Next trocando a página) não perde o aviso", async () => {
+    const user = userEvent.setup();
+    function Remounting() {
+      const flash = useFlashMessage();
+      const [round, setRound] = useState(0);
+      return (
+        <>
+          <button type="button" onClick={() => flash.show("Pronto, enviada!")}>
+            Gravar
+          </button>
+          <button type="button" onClick={() => setRound((value) => value + 1)}>
+            Remontar
+          </button>
+          <Lista key={round} onOpen={() => undefined} />
+        </>
+      );
+    }
+    render(
+      <FlashMessageProvider>
+        <Remounting />
+      </FlashMessageProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "Gravar" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Pronto, enviada!");
+    await user.click(screen.getByRole("button", { name: "Remontar" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Pronto, enviada!");
+  });
+});

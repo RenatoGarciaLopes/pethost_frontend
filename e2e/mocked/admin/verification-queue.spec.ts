@@ -34,7 +34,8 @@ test("REQ-AQUEUE-005/006/007/009/012/016 abre foto sob ação e decide com check
   });
   await page.goto("/admin/host-applications");
   await page.getByRole("link", { name: "Pessoa 01", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Conferir verificação: Pessoa 01" })).toBeVisible();
+  // Sem prefetch (página privada), a rota do detalhe compila no clique na primeira visita do `next dev`.
+  await expect(page.getByRole("heading", { name: "Conferir verificação: Pessoa 01" })).toBeVisible({ timeout: 15_000 });
   expect(photoRequests).toEqual([]);
   const open = page.getByRole("button", { name: "Abrir foto: Frente do documento", exact: true });
   await waitForHydration(open);

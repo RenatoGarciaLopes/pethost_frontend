@@ -31,9 +31,9 @@ function renderSlot(props: Partial<DocumentSlotProps> = {}) {
 }
 
 describe("DocumentSlot", () => {
-  it("REQ-HVER-018 vaga vazia é um botão com nome e estado, descrito pela dica, com o desenho do que se espera", () => {
+  it("REQ-HVER-018 vaga vazia é um botão com o nome igual ao texto visível, descrito pela dica, com o desenho do que se espera", () => {
     renderSlot();
-    const slot = screen.getByRole("button", { name: "Foto da frente do documento, vazia" });
+    const slot = screen.getByRole("button", { name: "Foto da frente do documento Tirar foto" });
     expect(slot).toHaveAccessibleDescription("O documento inteiro, com a foto aparecendo.");
     expect(screen.getByTestId("desenho").closest("[aria-hidden='true']")).not.toBeNull();
     expect(screen.getByText("Tirar foto")).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe("DocumentSlot", () => {
     expect(gallery).not.toHaveAttribute("capture");
     expect(camera).toHaveAttribute("accept", "image/*");
 
-    await user.click(screen.getByRole("button", { name: "Foto da frente do documento, vazia" }));
+    await user.click(screen.getByRole("button", { name: "Foto da frente do documento Tirar foto" }));
     expect(click.mock.contexts.at(-1)).toBe(camera);
     await user.click(screen.getByRole("button", { name: "Escolher da galeria" }));
     expect(click.mock.contexts.at(-1)).toBe(gallery);
@@ -75,11 +75,9 @@ describe("DocumentSlot", () => {
         onPick={onPick}
       />,
     );
-    expect(screen.getByRole("button", { name: "Foto da frente do documento, foto escolhida" })).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "Prévia: Foto da frente do documento" })).toHaveAttribute(
-      "src",
-      "blob:previa-1",
-    );
+    expect(screen.getByRole("button", { name: "Foto da frente do documento Tirar de novo" })).toBeInTheDocument();
+    // A miniatura é decorativa dentro do botão: o nome continua sendo o texto visível.
+    expect(document.querySelector("img[alt='']")).toHaveAttribute("src", "blob:previa-1");
     expect(screen.getByText("Tirar de novo")).toBeInTheDocument();
   });
 
@@ -100,13 +98,13 @@ describe("DocumentSlot", () => {
 
   it("REQ-HVER-010 foto já enviada (sem imagem de volta) aparece como enviada", () => {
     renderSlot({ uploaded: true });
-    expect(screen.getByRole("button", { name: "Foto da frente do documento, enviada" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Foto da frente do documento Enviada ✓" })).toBeInTheDocument();
     expect(screen.getByText("Enviada ✓")).toBeInTheDocument();
   });
 
   it("REQ-HVER-008 erro aparece na própria vaga e descreve o botão", () => {
     renderSlot({ error: "Essa foto não deu certo. Tira outra, de dia e sem flash." });
-    const slot = screen.getByRole("button", { name: "Foto da frente do documento, vazia" });
+    const slot = screen.getByRole("button", { name: "Foto da frente do documento Tirar foto" });
     expect(screen.getByRole("alert")).toHaveTextContent("Essa foto não deu certo.");
     expect(slot).toHaveAccessibleDescription(
       "O documento inteiro, com a foto aparecendo. Essa foto não deu certo. Tira outra, de dia e sem flash.",
@@ -115,7 +113,7 @@ describe("DocumentSlot", () => {
 
   it("REQ-HVER-007 preparando a foto: botões travados e aviso", () => {
     renderSlot({ busy: true });
-    const slot = screen.getByRole("button", { name: "Foto da frente do documento, vazia" });
+    const slot = screen.getByRole("button", { name: "Foto da frente do documento Preparando a foto…" });
     expect(slot).toBeDisabled();
     expect(slot).toHaveAttribute("aria-busy", "true");
     expect(screen.getByRole("button", { name: "Escolher da galeria" })).toBeDisabled();

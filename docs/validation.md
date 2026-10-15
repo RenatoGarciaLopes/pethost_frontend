@@ -1,24 +1,5 @@
 # Validação da base
 
-## 15/10/2026 · Busca de cantinhos (spec 041)
-
-Worktree `pethost_frontend-041`, branch `feat/041-search`. Recursos, interfaces, limites e níveis N/A documentados no [design da spec](../specs/041-search/design.md). T8 (mapa) fora do escopo. Vault somente leitura por coordenação: nota e linhas de catálogo serão enviadas por maestri; o vault não foi alterado.
-
-| Verificação                                             | Resultado                                                                                                                                                                                                                                                                                            |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vitest da entrega + regressão de errorCopy              | 14 arquivos, 88 testes aprovados: 39 da 041 (16 unitários, 12 componentes, 5 integrações Node, 6 integrações DOM) e 49 regressões existentes de getErrorMessage                                                                                                                                      |
-| Comando                                                 | `npx vitest run --maxWorkers=2 src/features/search src/shared/lib/money src/shared/lib/date/stayRules.test.ts src/shared/ui/forms/DateRangeField src/shared/ui/feedback/SniffingBanner 'src/app/(account)/search' src/test/msw/searchMock.int.test.ts src/shared/api/errors/getErrorMessage.test.ts` |
-| ESLint dos arquivos alterados/criados                   | Aprovado, sem erro nem warning                                                                                                                                                                                                                                                                       |
-| `npx tsc --noEmit -p .`                                 | Aprovado                                                                                                                                                                                                                                                                                             |
-| Storybook/Chromium com axe pelo `scratchpad/stories.sh` | 7 arquivos, 19 testes aprovados, sem violação reportada                                                                                                                                                                                                                                              |
-| E2E mocked desktop/celular                              | Aguardando exclusividade das portas 3100/5099; seis jornadas por projeto escritas em `e2e/mocked/search/search.spec.ts`                                                                                                                                                                              |
-| API .NET real                                           | Não executado; MSW/E2E simulado não valida geocoder ou disponibilidade real                                                                                                                                                                                                                          |
-| BOM e whitespace                                        | Nenhum arquivo novo com BOM; `git diff --check` aprovado                                                                                                                                                                                                                                             |
-
-O primeiro ciclo unitário falhou por módulos ainda inexistentes e passou após implementar regras/parser. A story da composição falhou inicialmente pelo contexto do App Router do Storybook incompatível com Next 16.4; foi corrigida com mock de `useSearchParams` apenas na story, sem alterar produção. Uma rodada Vitest concorrente com Chromium atingiu o timeout padrão de 5 segundos em SearchBar; o mesmo conjunto completo passou com `--maxWorkers=2`. Não foi executado `npm run verify` global, conforme coordenação da máquina compartilhada.
-
-O mock E2E tem teste de contrato/autorização/paginação/filtros/erros em `src/test/msw/searchMock.int.test.ts`. A primeira lista é prefetched no servidor; testes Node conferem cache hidratável e isolamento de conta. DOM confere manter cards durante busca e depois de falha, campos 400, endereços 422, retry 503, filtros/histórico e acumulação.
-
 Em 11/10/2026, o projeto foi gerado pelo CLI `create-next-app@latest`, com TypeScript, ESLint, App Router, src-dir, npm e sem Tailwind. Next 16.4.0, React 19.3.0, MUI 9.5.0; versões completas no lockfile.
 
 A primeira checagem de TypeScript encontrou `LayoutProps`, tipo gerado pelo Next ainda indisponível antes do primeiro build. O layout foi ajustado para declarar `children: ReactNode`, permitindo checagem independente do build.
@@ -246,7 +227,72 @@ Sem `--maxWorkers=2`, nesta máquina o verify estoura o timeout de 5 s em testes
 
 Detalhes na nota `development/resources/pets.md` do vault.
 
+## 15/10/2026 · Pets da casa e vitrine autenticada (spec 023)
+
+Implementação dos REQ-HPETS-001 a 010 na branch `feat/023-host-house-pets`, worktree `pethost_frontend-023`. Detalhes por recurso na nota `development/resources/pets.md` do vault.
+
+| Verificação                                                                           | Resultado real                                                                                                         |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Rodada ampla Vitest de pets e consumidores afetados                                   | 47 arquivos, 300 testes aprovados, 157,91 s com maxWorkers=2                                                           |
+| Regressão final de abertura direta/invalidação                                        | 4 arquivos, 20 testes aprovados (3 novos), 30,05 s                                                                     |
+| Conjunto distinto das duas rodadas, substituindo os resultados repetidos pelos finais | 47 arquivos, 303 testes aprovados, sem falhas; 46 nomes com REQ-HPETS                                                  |
+| Unitário (inclui contratos/copy/navegação/metadata)                                   | 22 arquivos, 177 testes aprovados                                                                                      |
+| Componente (comportamento observável)                                                 | 10 arquivos, 51 testes aprovados                                                                                       |
+| Integração Node/MSW                                                                   | 6 arquivos, 33 testes aprovados                                                                                        |
+| Integração DOM/MSW/providers/cache                                                    | 9 arquivos, 42 testes aprovados                                                                                        |
+| ESLint dos arquivos criados/alterados                                                 | aprovado                                                                                                               |
+| `npx.cmd tsc --noEmit -p .`                                                           | aprovado, incluindo E2E e stories escritos                                                                             |
+| Prettier dos arquivos criados/alterados                                               | aplicado e conferido                                                                                                   |
+| `git diff --check`                                                                    | aprovado                                                                                                               |
+| E2E simulado (Claude Code)                                                            | pets 020 a 023: 38 de 38; casca: 14 de 14 (desktop e celular, workers 1)                                               |
+| E2E real                                                                              | 1 jornada escrita; requer API real e seed aprovado via E2E_HOST_EMAIL/E2E_HOST_PASSWORD; não executada                 |
+| Stories/a11y (Claude Code)                                                            | 7 arquivos de pets, 32 testes, sem violação, depois de corrigir o export das stories e o nome acessível da carteirinha |
+| `npm run verify -- -- --maxWorkers=2` (Claude Code)                                   | 217 arquivos, 1287 testes verdes                                                                                       |
+| Cobertura v8                                                                          | não executada nesta entrega; não foi inferido percentual                                                               |
+
+Comando amplo executado:
+
+```powershell
+npx.cmd vitest run src/features/pets src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/msw/petsMock.int.test.ts 'src/app/(account)/pets' src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2
+```
+
+Regressão final, depois de identificar que uma ficha aberta por URL pode não ter mine no cache:
+
+```powershell
+npx.cmd vitest run src/features/pets/api/petQueries.int.test.ts src/features/pets/hooks/usePetMutations.int.test.tsx src/features/pets/hooks/usePetPhotoMutations.int.test.tsx src/features/pets/components/client/PetWizard.int.test.tsx --maxWorkers=2
+```
+
+Os relatórios JSON temporários (`pethost-023-vitest-results.json` e `pethost-023-cache-vitest-results.json`, no TEMP do runner) permitiram contabilizar o conjunto distinto por arquivo/nível. Não são artefatos versionados. Os testes usam MSW estrito e dados sintéticos; não equivalem à integração completa com API real.
+
+Evidências funcionais: projeção explícita sem dados privados no cache e na desidratação; 404/500 da vitrine silenciosos, inclusive no refetch de dados antigos; logs de desenvolvimento só com status/código; bloqueio de keeper antes do cadastro com sessão autenticada via MSW; contas e perfis distintos; invalidação seletiva após cadastro, edição, transições e fotos, incluindo ficha aberta diretamente; navegação exclusiva de host. Suítes red foram executadas antes das implementações dos recursos e da correção final de invalidação.
+
+A 030/044 não estão nesta base: links ausentes permanecem ocultos, e a confirmação host oferece voltar para `/pets`. A tabela real de navegação não possui available: a entrada host-pets passou a existir. Não foi criada uma página fictícia para a vitrine; o uso em produção depende da 042. Status da spec permanece in-progress para o aceite de navegador e o registro do vault.
+
+## Spec 031: fila e decisão administrativa (15/10/2026)
+
+Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verification-queue`, pelo Rivet (Codex). Validação central pelo Claude Code em 15/10: `npm run verify -- -- --maxWorkers=2` com 232 arquivos e 1329 testes verdes; Storybook com a11y dos 7 arquivos novos, 22 testes sem violação; E2E mocked no job `browser` do CI. Documentação no vault (`development/resources/admin-verification.md`).
+
+- Vitest direcionado ao domínio, widgets, recursos shared alterados, mock administrativo, erros, privacidade e consumidores de navegação: **20 arquivos, 109 testes aprovados**, com `--maxWorkers=2`. Por nível do runner: 67 unitários/arquitetura, 27 funcionais de componente, 8 integrações Node e 7 integrações DOM. TDD com falhas iniciais de módulos ausentes/implementação gerada e regressão de filtros repetidos reproduzida antes da correção.
+- Comando: `npx.cmd vitest run src/features/admin-host-applications src/widgets/host-application-review src/shared/lib/pagination src/shared/hooks/useSearchParamsState.test.tsx src/shared/ui/data-display/AdminDataTable src/shared/ui/forms/ReasonField src/test/msw/adminApplicationsMock.int.test.ts src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/architecture/no-token-storage.test.ts src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2`.
+- `npx.cmd tsc --noEmit -p .`: aprovado, sem erros. ESLint direcionado a todos os arquivos TypeScript/TSX/MJS alterados: aprovado. Prettier no escopo e git diff --check: aprovados.
+- A execução inicial com muitos workers teve timeout em um teste funcional com várias interações. A execução final limita a dois workers na máquina compartilhada. Um teste de prazo futuro revelou overflow de setTimeout; o prazo é limitado ao máximo da plataforma sem expirar a foto antes do expiresAt.
+- Playwright simulado: **escrito, não executado**, por instrução explícita. Quatro casos compartilhados por desktop/celular, incluindo paginação, filtro, foto, decisão, próxima da fila, fraude e UUID inválido. A decisão por fraude é pulada no celular, pois a regra aprovada exige largura >=900px.
+- Playwright real: **escrito, não executado**, condicionado a conta host de teste descartável com cadastro completo/verificado, CPF sintético e admin de teste. Cria a própria solicitação, envia front/back/selfie fictícios e recusa, sem decidir solicitações preexistentes. Variáveis exigidas estão descritas no design da spec. A execução real não usa o mock.
+- Stories: 7 arquivos, cobrindo fila, tabela, motivo, comparação, decisão, foto e detalhe; execução Storybook/a11y e conferência visual desktop/celular **pendentes**. Build, next dev e verify completo não foram executados por instrução explícita de coordenação.
+- MSW estrito cobre contratos reais na borda HTTP, autenticação do prefetch, erro 400 de campo, conflito 409/422, invalidação, próximos itens, autorização do mock e imagens no-store. Isso não equivale a integração com a API .NET.
+- Funções puras não têm E2E isolado: paginação e schemas têm unitários e são exercitados pelas composições/jornadas. O hook de URL é testado com a borda Next simulada, incluindo voltar/avançar e parâmetros repetidos. O viewer tem relógio falso, descarte, cancelamento, foco preso, Esc e nenhuma entrada no Query.
+- O vault foi somente leitura. Conforme orientação recebida, conteúdo e linhas de catálogo seguem no resumo para integração; não foi criada `docs/admin-verification.md`. A integração no vault não está concluída nesta worktree.
+
 ## 15/10/2026 · Minha verificação do anfitrião (spec 030)
+
+| Verificação                                                                                                                 | Resultado                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Vitest da 030 (`--maxWorkers=2`): feature, `DocumentSlot`, `StatusTimeline`, imagem, CNPJ, widget, rotas, mock              | 132 testes verdes: 58 unitários, 49 de componente, 16 de integração (Node), 9 de integração (jsdom)       |
+| Vitest das áreas tocadas (inclui `shared/ui/forms`, `shared/api/errors`, `shared/config`, arquitetura e `features/account`) | 74 arquivos, 482 testes verdes                                                                            |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                                    | sem erros                                                                                                 |
+| E2E mocked (Claude Code, 15/10)                                                                                             | host 6 de 6, casca e admin juntos 26 de 27 e, com a espera de 15 s no detalhe do admin, 7 de 7            |
+| Storybook com a11y (Claude Code)                                                                                            | verde depois de o nome da `DocumentSlot` passar a ser o texto visível (axe `label-content-name-mismatch`) |
+| E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                           |
 
 | Verificação                                                                                                                 | Resultado                                                                                           |
 | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -300,63 +346,34 @@ Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da
 - Avatar com iniciais sem contraste (axe) na lista e no detalhe do anfitrião: coral com o texto de contraste do tema, como no shell.
 - `host-requests.spec.ts`: espera a hidratação antes de abrir o pedido e dá 60 s à primeira jornada, que compila as rotas a frio no `next dev`.
 
-## 15/10/2026 · Pets da casa e vitrine autenticada (spec 023)
+## 15/10/2026 · Busca de cantinhos (spec 041)
 
-Implementação dos REQ-HPETS-001 a 010 na branch `feat/023-host-house-pets`, worktree `pethost_frontend-023`. Detalhes por recurso na nota `development/resources/pets.md` do vault.
+Worktree `pethost_frontend-041`, branch `feat/041-search`. Recursos, interfaces, limites e níveis N/A documentados no [design da spec](../specs/041-search/design.md). T8 (mapa) fora do escopo. Vault somente leitura por coordenação: nota e linhas de catálogo serão enviadas por maestri; o vault não foi alterado.
 
-| Verificação                                                                           | Resultado real                                                                                                                 |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Rodada ampla Vitest de pets e consumidores afetados                                   | 47 arquivos, 300 testes aprovados, 157,91 s com maxWorkers=2                                                                   |
-| Regressão final de abertura direta/invalidação                                        | 4 arquivos, 20 testes aprovados (3 novos), 30,05 s                                                                             |
-| Conjunto distinto das duas rodadas, substituindo os resultados repetidos pelos finais | 47 arquivos, 303 testes aprovados, sem falhas; 46 nomes com REQ-HPETS                                                          |
-| Unitário (inclui contratos/copy/navegação/metadata)                                   | 22 arquivos, 177 testes aprovados                                                                                              |
-| Componente (comportamento observável)                                                 | 10 arquivos, 51 testes aprovados                                                                                               |
-| Integração Node/MSW                                                                   | 6 arquivos, 33 testes aprovados                                                                                                |
-| Integração DOM/MSW/providers/cache                                                    | 9 arquivos, 42 testes aprovados                                                                                                |
-| ESLint dos arquivos criados/alterados                                                 | aprovado                                                                                                                       |
-| `npx.cmd tsc --noEmit -p .`                                                           | aprovado, incluindo E2E e stories escritos                                                                                     |
-| Prettier dos arquivos criados/alterados                                               | aplicado e conferido                                                                                                           |
-| `git diff --check`                                                                    | aprovado                                                                                                                       |
-| E2E simulado                                                                          | 2 jornadas escritas, configuradas para desktop/celular; execução reservada ao Claude Code                                      |
-| E2E real                                                                              | 1 jornada escrita; requer API real e seed aprovado via E2E_HOST_EMAIL/E2E_HOST_PASSWORD; não executada                         |
-| Stories/a11y                                                                          | 13 stories novas/variante host entre HouseResidents, KeeperPendingNotice, MyPetsScreen, PetWelcome e PetWizard; não executadas |
-| Next build, verify global, inspeção visual no navegador                               | não executados por spec-owner-common.md; aceite posterior com Claude Code                                                      |
-| Cobertura v8                                                                          | não executada nesta entrega; não foi inferido percentual                                                                       |
+| Verificação                                             | Resultado                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest da entrega + regressão de errorCopy              | 14 arquivos, 88 testes aprovados: 39 da 041 (16 unitários, 12 componentes, 5 integrações Node, 6 integrações DOM) e 49 regressões existentes de getErrorMessage                                                                                                                                      |
+| Comando                                                 | `npx vitest run --maxWorkers=2 src/features/search src/shared/lib/money src/shared/lib/date/stayRules.test.ts src/shared/ui/forms/DateRangeField src/shared/ui/feedback/SniffingBanner 'src/app/(account)/search' src/test/msw/searchMock.int.test.ts src/shared/api/errors/getErrorMessage.test.ts` |
+| ESLint dos arquivos alterados/criados                   | Aprovado, sem erro nem warning                                                                                                                                                                                                                                                                       |
+| `npx tsc --noEmit -p .`                                 | Aprovado                                                                                                                                                                                                                                                                                             |
+| Storybook/Chromium com axe pelo `scratchpad/stories.sh` | 7 arquivos, 19 testes aprovados, sem violação reportada                                                                                                                                                                                                                                              |
+| E2E mocked desktop/celular                              | Aguardando exclusividade das portas 3100/5099; seis jornadas por projeto escritas em `e2e/mocked/search/search.spec.ts`                                                                                                                                                                              |
+| API .NET real                                           | Não executado; MSW/E2E simulado não valida geocoder ou disponibilidade real                                                                                                                                                                                                                          |
+| BOM e whitespace                                        | Nenhum arquivo novo com BOM; `git diff --check` aprovado                                                                                                                                                                                                                                             |
 
-Comando amplo executado:
+O primeiro ciclo unitário falhou por módulos ainda inexistentes e passou após implementar regras/parser. A story da composição falhou inicialmente pelo contexto do App Router do Storybook incompatível com Next 16.4; foi corrigida com mock de `useSearchParams` apenas na story, sem alterar produção. Uma rodada Vitest concorrente com Chromium atingiu o timeout padrão de 5 segundos em SearchBar; o mesmo conjunto completo passou com `--maxWorkers=2`. Não foi executado `npm run verify` global, conforme coordenação da máquina compartilhada.
 
-```powershell
-npx.cmd vitest run src/features/pets src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/msw/petsMock.int.test.ts 'src/app/(account)/pets' src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2
-```
+O mock E2E tem teste de contrato/autorização/paginação/filtros/erros em `src/test/msw/searchMock.int.test.ts`. A primeira lista é prefetched no servidor; testes Node conferem cache hidratável e isolamento de conta. DOM confere manter cards durante busca e depois de falha, campos 400, endereços 422, retry 503, filtros/histórico e acumulação.
 
-Regressão final, depois de identificar que uma ficha aberta por URL pode não ter mine no cache:
+Em 11/10/2026, o projeto foi gerado pelo CLI `create-next-app@latest`, com TypeScript, ESLint, App Router, src-dir, npm e sem Tailwind. Next 16.4.0, React 19.3.0, MUI 9.5.0; versões completas no lockfile.
 
-```powershell
-npx.cmd vitest run src/features/pets/api/petQueries.int.test.ts src/features/pets/hooks/usePetMutations.int.test.tsx src/features/pets/hooks/usePetPhotoMutations.int.test.tsx src/features/pets/components/client/PetWizard.int.test.tsx --maxWorkers=2
-```
+A primeira checagem de TypeScript encontrou `LayoutProps`, tipo gerado pelo Next ainda indisponível antes do primeiro build. O layout foi ajustado para declarar `children: ReactNode`, permitindo checagem independente do build.
 
-Os relatórios JSON temporários (`pethost-023-vitest-results.json` e `pethost-023-cache-vitest-results.json`, no TEMP do runner) permitiram contabilizar o conjunto distinto por arquivo/nível. Não são artefatos versionados. Os testes usam MSW estrito e dados sintéticos; não equivalem à integração completa com API real.
+`npm run lint`, `npm run typecheck` e `npm run build` passaram. O build publicou somente a home estática do scaffold e o not-found interno, conforme esperado; SSR de negócio e integração com a API aguardam implementação.
 
-Evidências funcionais: projeção explícita sem dados privados no cache e na desidratação; 404/500 da vitrine silenciosos, inclusive no refetch de dados antigos; logs de desenvolvimento só com status/código; bloqueio de keeper antes do cadastro com sessão autenticada via MSW; contas e perfis distintos; invalidação seletiva após cadastro, edição, transições e fotos, incluindo ficha aberta diretamente; navegação exclusiva de host. Suítes red foram executadas antes das implementações dos recursos e da correção final de invalidação.
+Features, widgets, shared e bootstrap não contêm arquivos. As rotas planejadas também não têm páginas/handlers implementados. Metadados e idioma foram ajustados no layout gerado; nenhuma tela de produto foi criada.
 
-A 030/044 não estão nesta base: links ausentes permanecem ocultos, e a confirmação host oferece voltar para `/pets`. A tabela real de navegação não possui available: a entrada host-pets passou a existir. Não foi criada uma página fictícia para a vitrine; o uso em produção depende da 042. Status da spec permanece in-progress para o aceite de navegador e o registro do vault.
-
-## Spec 031: fila e decisão administrativa (15/10/2026)
-
-Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verification-queue`, pelo Rivet (Codex). Validação central pelo Claude Code em 15/10: `npm run verify -- -- --maxWorkers=2` com 232 arquivos e 1329 testes verdes; Storybook com a11y dos 7 arquivos novos, 22 testes sem violação; E2E mocked no job `browser` do CI. Documentação no vault (`development/resources/admin-verification.md`).
-
-- Vitest direcionado ao domínio, widgets, recursos shared alterados, mock administrativo, erros, privacidade e consumidores de navegação: **20 arquivos, 109 testes aprovados**, com `--maxWorkers=2`. Por nível do runner: 67 unitários/arquitetura, 27 funcionais de componente, 8 integrações Node e 7 integrações DOM. TDD com falhas iniciais de módulos ausentes/implementação gerada e regressão de filtros repetidos reproduzida antes da correção.
-- Comando: `npx.cmd vitest run src/features/admin-host-applications src/widgets/host-application-review src/shared/lib/pagination src/shared/hooks/useSearchParamsState.test.tsx src/shared/ui/data-display/AdminDataTable src/shared/ui/forms/ReasonField src/test/msw/adminApplicationsMock.int.test.ts src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/architecture/no-token-storage.test.ts src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2`.
-- `npx.cmd tsc --noEmit -p .`: aprovado, sem erros. ESLint direcionado a todos os arquivos TypeScript/TSX/MJS alterados: aprovado. Prettier no escopo e git diff --check: aprovados.
-- A execução inicial com muitos workers teve timeout em um teste funcional com várias interações. A execução final limita a dois workers na máquina compartilhada. Um teste de prazo futuro revelou overflow de setTimeout; o prazo é limitado ao máximo da plataforma sem expirar a foto antes do expiresAt.
-- Playwright simulado: **escrito, não executado**, por instrução explícita. Quatro casos compartilhados por desktop/celular, incluindo paginação, filtro, foto, decisão, próxima da fila, fraude e UUID inválido. A decisão por fraude é pulada no celular, pois a regra aprovada exige largura >=900px.
-- Playwright real: **escrito, não executado**, condicionado a conta host de teste descartável com cadastro completo/verificado, CPF sintético e admin de teste. Cria a própria solicitação, envia front/back/selfie fictícios e recusa, sem decidir solicitações preexistentes. Variáveis exigidas estão descritas no design da spec. A execução real não usa o mock.
-- Stories: 7 arquivos, cobrindo fila, tabela, motivo, comparação, decisão, foto e detalhe; execução Storybook/a11y e conferência visual desktop/celular **pendentes**. Build, next dev e verify completo não foram executados por instrução explícita de coordenação.
-- MSW estrito cobre contratos reais na borda HTTP, autenticação do prefetch, erro 400 de campo, conflito 409/422, invalidação, próximos itens, autorização do mock e imagens no-store. Isso não equivale a integração com a API .NET.
-- Funções puras não têm E2E isolado: paginação e schemas têm unitários e são exercitados pelas composições/jornadas. O hook de URL é testado com a borda Next simulada, incluindo voltar/avançar e parâmetros repetidos. O viewer tem relógio falso, descarte, cancelamento, foco preso, Esc e nenhuma entrada no Query.
-- O vault foi somente leitura. Conforme orientação recebida, conteúdo e linhas de catálogo seguem no resumo para integração; não foi criada `docs/admin-verification.md`. A integração no vault não está concluída nesta worktree.
-
-> > > > > > > feat/042-listing-page
+Após alinhar a nomenclatura à API e ao ER, a estrutura passou a ter 14 features, com `users`, `owners` e `hosts` separados. Todas as pastas de interface estão em inglês; recursos seguem plural/kebab-case, e autenticação usa `auth`, conforme o backend. A conferência de diretórios não encontrou os nomes antigos em português, os links locais da documentação são válidos e as camadas de negócio continuam com zero arquivos. TypeScript e build foram executados novamente após a reorganização.
 
 ## 15/10/2026 · Pedir estadia (spec 050)
 
