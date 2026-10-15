@@ -31,6 +31,6 @@ Pré-requisito: 002, 003, 004 e as máscaras e o CEP da 011. Cada tarefa: teste 
   - Implementar: `StatusTimeline` (`shared/ui/data-display`), `widgets/host-onboarding`, rota `/host/application`; ligar `host-application` em `NAV_ITEMS`
 - [x] **T9 · Privacidade** (2026-10-15) (REQ-HVER-009)
   - Ampliar `src/test/architecture/no-token-storage.test.ts`
-- [ ] **T10 · E2E** (REQ-HVER-002 a 012)
+- [x] **T10 · E2E** (2026-10-15) (REQ-HVER-002 a 012)
   - `e2e/mocked/host/verification.spec.ts` (handlers do mock para `/hosts/me/application*`); `e2e/real/host/verification.spec.ts` com documentos fictícios
 - [ ] **T11 · Documentação:** TSDoc; catálogo do vault (`DocumentSlot`, `prepareImageForUpload`, `StatusTimeline`, `HostOnboardingPanel`, `rejectionCopy`); nota `development/resources/host-verification.md`; resultados reais em `docs/validation.md`
