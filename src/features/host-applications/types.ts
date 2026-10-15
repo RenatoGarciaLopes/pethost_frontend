@@ -69,3 +69,6 @@ export interface MyApplication {
   /** Versão do aviso de uso das fotos que a API exige aceitar. */
   noticeVersion: string;
 }
+
+/** Por onde o assistente abre: `start` em "Antes de começar"; `documents` no passo que falta do rascunho. */
+export type WizardEntry = "start" | "documents";

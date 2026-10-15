@@ -5,7 +5,11 @@ import type { DocumentKind, DocumentType } from "../types";
  * presumido de quem lê. O aviso das fotos fica por versão (`noticeVersion` da API).
  */
 export const verificationCopy = {
-  pageTitle: "Minha verificação",
+  pageTitles: {
+    status: "Minha verificação · PetHost",
+    start: "Começar a verificação · PetHost",
+    documents: "Fotos da verificação · PetHost",
+  },
   loading: "Buscando sua verificação",
   loadError: "Não deu pra abrir sua verificação.",
 
@@ -72,6 +76,44 @@ export const verificationCopy = {
     back: "Voltar",
     next: "Continuar: fotos",
     saving: "Salvando seus dados…",
+  },
+
+  photos: {
+    heading: "Fotos do documento",
+    intro: "Três fotos: a frente, o verso e você segurando o documento.",
+    tipsTitle: "Pra foto sair boa",
+    tips: "De dia, perto da janela, sem flash, o documento inteiro na foto.",
+    hints: {
+      front: "O documento inteiro, com a sua foto aparecendo.",
+      back: "O verso inteiro, sem dedo na frente.",
+      selfie: "Seu rosto e o documento na mão, os dois aparecendo.",
+    } satisfies Record<DocumentKind, string>,
+    errors: {
+      IMAGE_UNREADABLE: "Não deu pra abrir essa foto. Tira outra ou escolhe uma em JPG, PNG ou WebP.",
+      IMAGE_TOO_LARGE: "Essa foto ficou grande demais. Tira outra com menos zoom.",
+      rejected: "Essa foto não deu certo. Tira outra, de dia e sem flash.",
+      tooLarge: "As fotos ficaram grandes demais juntas. Tira de novo com menos zoom.",
+    },
+    missingShort: { front: "a frente", back: "o verso", selfie: "a selfie" } satisfies Record<DocumentKind, string>,
+    missing: (items: string) => `Falta ${items}.`,
+    sending: "Enviando as fotos…",
+    back: "Voltar",
+    next: "Continuar: confere",
+  },
+
+  review: {
+    heading: "Confere e envia",
+    intro: "Dá uma olhada antes de mandar. Depois de enviada, a verificação não muda mais.",
+    photos: "Fotos",
+    sentPhoto: (label: string) => `${label}: enviada ✓`,
+    cpf: "CPF",
+    documentType: "Documento",
+    company: "Empresa",
+    missing: "Pra enviar, faltam fotos. Volta e completa as três vagas.",
+    back: "Voltar: fotos",
+    submit: "Enviar pra análise",
+    submitting: "Enviando…",
+    sent: "Pronto, enviada! Agora é com a gente.",
   },
 } as const;
 

@@ -5,4 +5,4 @@ import "server-only";
  * Exporte aqui RSC, chamadas ao backend e recursos exclusivos do servidor.
  * Não importe este índice em componentes client.
  */
-export {};
+export { ApplicationWizardScreen } from "./components/ApplicationWizardScreen";
