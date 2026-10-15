@@ -357,3 +357,13 @@ Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verif
 - O vault foi somente leitura. Conforme orientação recebida, conteúdo e linhas de catálogo seguem no resumo para integração; não foi criada `docs/admin-verification.md`. A integração no vault não está concluída nesta worktree.
 
 > > > > > > > feat/042-listing-page
+
+## 15/10/2026 · Pedir estadia (spec 050)
+
+| Verificação                                                                                            | Resultado                                                                                                         |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Vitest (`--maxWorkers=2`): `features/bookings`, rota do pedido, mock de reservas, `stayRules`, `money` | 27 arquivos, 141 testes verdes: 65 unitários, 16 de componente, 15 de integração (Node), 45 de integração (jsdom) |
+| Vitest de `src` inteiro depois do merge com a 042                                                      | 313 arquivos, 1720 testes verdes                                                                                  |
+| ESLint, `tsc --noEmit`, Prettier                                                                       | sem erros                                                                                                         |
+| Storybook (`RequestStayForm`, `RequestStayHostNotice`)                                                 | 5/5                                                                                                               |
+| E2E mocked `e2e/mocked/bookings/request.spec.ts`                                                       | ver a execução abaixo                                                                                             |

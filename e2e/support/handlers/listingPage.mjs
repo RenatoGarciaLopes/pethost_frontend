@@ -23,7 +23,7 @@ const detail = {
   capacity: 3,
   nightlyRate: 60,
   houseRules: "Traz a caminha favorita.",
-  availableWeekdays: ["monday", "friday"],
+  availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
   address: { neighborhood: "Centro", city: "Maringá", state: "PR" },
   location: null,
   photos: [{ id: "0199d2a0-0000-7000-8000-000000000043", url: "https://images.example.test/yard.webp", position: 1 }],
@@ -42,3 +42,8 @@ export const listingPageHandlers = [
     return ok(structuredClone(detail));
   }),
 ];
+
+/** O cantinho público do mock, para o pedido de estadia (spec 050) conferir regras e diária. @example publicListing(id) */
+export function publicListing(listingId) {
+  return listingId === LISTING_ID ? structuredClone(detail) : null;
+}
