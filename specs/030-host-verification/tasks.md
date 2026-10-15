@@ -16,7 +16,7 @@ Pré-requisito: 002, 003, 004 e as máscaras e o CEP da 011. Cada tarefa: teste 
 - [x] **T3 · Microcopy de erros** (2026-10-14) (REQ-HVER-019)
   - Teste primeiro: ampliar `getErrorMessage.test.ts` (os códigos novos entram no `it.each`)
   - Implementar: frases novas em `shared/api/errors/errorCopy.ts`
-- [ ] **T4 · Cliente e hooks** (REQ-HVER-005, 008, 013)
+- [x] **T4 · Cliente e hooks** (2026-10-14) (REQ-HVER-005, 008, 013)
   - Teste primeiro: `myApplication.client.int.test.ts`, `useUploadDocuments.int.test.tsx` (MSW no BFF)
   - Implementar: `api/client/myApplication.client.ts`, `api/server/myApplication.server.ts`, `hooks/*`
 - [ ] **T5 · prepareImageForUpload** (REQ-HVER-007)
