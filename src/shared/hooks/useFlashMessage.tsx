@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, use, useEffect, useState, type ReactNode } from "react";
+import { createContext, use, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 
 /** Objeto por aviso: a identidade marca qual aviso já foi lido. */
 interface Flash {
@@ -10,18 +10,39 @@ interface Flash {
 interface FlashStore {
   show: (message: string) => void;
   peek: () => Flash | null;
-  consume: (flash: Flash) => void;
+  subscribe: (listener: () => void) => () => void;
+  /** Alguém está mostrando o aviso: não some. */
+  hold: (flash: Flash) => void;
+  /** Quem mostrava saiu: o aviso some, a menos que alguém o mostre de novo logo em seguida. */
+  release: (flash: Flash) => void;
 }
 
 function createFlashStore(): FlashStore {
   let pending: Flash | null = null;
+  let releaseTimer: ReturnType<typeof setTimeout> | undefined;
+  const listeners = new Set<() => void>();
+  const notify = () => listeners.forEach((listener) => listener());
   return {
     show: (message) => {
+      clearTimeout(releaseTimer);
       pending = { message };
+      notify();
     },
     peek: () => pending,
-    consume: (flash) => {
-      if (pending === flash) pending = null;
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    hold: (flash) => {
+      if (pending === flash) clearTimeout(releaseTimer);
+    },
+    release: (flash) => {
+      // Remontagem imediata (StrictMode, o Next trocando a página do cache pela resposta nova) cancela o consumo.
+      releaseTimer = setTimeout(() => {
+        if (pending !== flash) return;
+        pending = null;
+        notify();
+      }, 0);
     },
   };
 }
@@ -62,10 +83,13 @@ export function useFlashMessage(): Pick<FlashStore, "show"> {
   return { show };
 }
 
+const serverSnapshot = () => null;
+
 /**
- * Lê e consome o aviso gravado pela tela anterior: devolve a frase nesta montagem e `null` nas seguintes. Seguro
- * com StrictMode: a leitura acontece no render (as duas renderizações veem a mesma frase) e o consumo, num efeito
- * idempotente. Mostre o resultado num `Notice` discreto (`role="status"`).
+ * Mostra o aviso gravado pela tela anterior e o consome quando a tela que o mostra sai: a frase fica enquanto quem a
+ * mostra estiver montado e some na visita seguinte. Uma remontagem logo em seguida (StrictMode, ou o Next restaurando a
+ * página da visita anterior e trocando pela resposta nova do servidor) não perde nem repete o aviso. Mostre o resultado
+ * num `Notice` discreto (`role="status"`).
  *
  * @throws {Error} fora do `FlashMessageProvider`
  * @example
@@ -74,9 +98,11 @@ export function useFlashMessage(): Pick<FlashStore, "show"> {
  */
 export function useFlashMessageOnce(): string | null {
   const store = useFlashStore("useFlashMessageOnce");
-  const [flash] = useState(store.peek);
+  const flash = useSyncExternalStore(store.subscribe, store.peek, serverSnapshot);
   useEffect(() => {
-    if (flash) store.consume(flash);
+    if (!flash) return;
+    store.hold(flash);
+    return () => store.release(flash);
   }, [store, flash]);
   return flash?.message ?? null;
 }

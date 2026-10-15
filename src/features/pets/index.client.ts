@@ -8,3 +8,5 @@ export { PetListSkeleton } from "./components/client/PetList";
 export { PetProfileSkeleton } from "./components/client/PetProfile";
 export { PetProfileCard } from "./components/PetProfileCard";
 export type { PetProfileCardProps } from "./components/PetProfileCard";
+export { HouseResidents } from "./components/client/HouseResidents";
+export type { HouseResidentsProps } from "./components/client/HouseResidents";

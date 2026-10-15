@@ -45,3 +45,16 @@ it("REQ-PETS-008 falha no prefetch fica como erro no cache (sem lista vazia inve
   expect(queryClient.getQueryState(petQueries.mine("account-1").queryKey)?.status).toBe("error");
   queryClient.clear();
 });
+it("REQ-HPETS-002 prefetch transforma perfil pendente em estado e não repete 404", async () => {
+  let calls = 0;
+  server.use(
+    http.get("http://api.test/api/v1/pets/me", () => {
+      calls++;
+      return HttpResponse.json(apiFail("PET_KEEPER_NOT_FOUND"), { status: 404 });
+    }),
+  );
+  const client = createQueryClient();
+  expect(await prefetchMyPets(client, "host-account")).toEqual({ keeperPending: true });
+  expect(calls).toBe(1);
+  client.clear();
+});

@@ -50,18 +50,18 @@ async function pickAll(user: ReturnType<typeof setup>["user"]) {
   await user.upload(screen.getByLabelText("Foto da frente do documento: galeria"), photo("frente.heic", "image/heic"));
   await user.upload(screen.getByLabelText("Foto do verso do documento: galeria"), photo("verso.jpg"));
   await user.upload(screen.getByLabelText("Selfie segurando o documento: galeria"), photo("selfie.png", "image/png"));
-  await screen.findByRole("button", { name: "Selfie segurando o documento, foto escolhida" });
+  await screen.findByRole("button", { name: "Selfie segurando o documento Tirar de novo" });
 }
 
 describe("DocumentsStep", () => {
   it("REQ-HVER-006 três vagas com o que se espera e as dicas", () => {
     setup();
     expect(screen.getByRole("heading", { level: 1, name: copy.photos.heading })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Foto da frente do documento, vazia" })).toHaveAccessibleDescription(
+    expect(screen.getByRole("button", { name: "Foto da frente do documento Tirar foto" })).toHaveAccessibleDescription(
       copy.photos.hints.front,
     );
-    expect(screen.getByRole("button", { name: "Foto do verso do documento, vazia" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Selfie segurando o documento, vazia" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Foto do verso do documento Tirar foto" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Selfie segurando o documento Tirar foto" })).toBeInTheDocument();
     expect(screen.getByText(copy.photos.tips)).toBeInTheDocument();
   });
 
@@ -78,7 +78,7 @@ describe("DocumentsStep", () => {
       target: { files: [photo("verso.pdf", "application/pdf")] },
     });
     expect(await screen.findByRole("alert")).toHaveTextContent(copy.photos.errors.IMAGE_UNREADABLE);
-    expect(screen.getByRole("button", { name: "Foto do verso do documento, vazia" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Foto do verso do documento Tirar foto" })).toBeInTheDocument();
   });
 
   it("REQ-HVER-007 REQ-HVER-008 prepara as fotos e manda as três num pedido só, já em JPEG", async () => {
@@ -125,9 +125,9 @@ describe("DocumentsStep", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(copy.photos.errors.rejected);
     expect(
-      screen.getByRole("button", { name: "Foto do verso do documento, foto escolhida" }),
+      screen.getByRole("button", { name: "Foto do verso do documento Tirar de novo" }),
     ).toHaveAccessibleDescription(`${copy.photos.hints.back} ${copy.photos.errors.rejected}`);
-    expect(screen.getByRole("button", { name: "Foto da frente do documento, foto escolhida" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Foto da frente do documento Tirar de novo" })).toBeInTheDocument();
     expect(onNext).not.toHaveBeenCalled();
   });
 
@@ -150,7 +150,7 @@ describe("DocumentsStep", () => {
 
   it("REQ-HVER-010 fotos já enviadas antes contam: segue sem reenviar", async () => {
     const { user, onNext } = setup(hostApplicationDto({ documents: allDocumentsDto, missingDocuments: [] }));
-    expect(screen.getByRole("button", { name: "Foto da frente do documento, enviada" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Foto da frente do documento Enviada ✓" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: copy.photos.next }));
     expect(onNext).toHaveBeenCalled();
   });

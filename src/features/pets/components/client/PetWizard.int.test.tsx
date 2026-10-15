@@ -201,3 +201,27 @@ it("REQ-PNEW-021 começar de novo não recria rascunho vazio depois do debounce"
     vi.useRealTimers();
   }
 }, 15_000);
+it("REQ-HPETS-004/005 cadastro de anfitrião termina com copy própria e invalida só sua vitrine", async () => {
+  server.use(http.post("*/api/pets", () => HttpResponse.json(apiOk(petDto({ name: "Bóris" })))));
+  sessionStorage.setItem(
+    petDraftKey("host-test"),
+    JSON.stringify({ step: 7, values: { ...petProfileValuesFixture, name: "Bóris" } }),
+  );
+  const { user, queryClient } = renderWithProviders(
+    <AnnouncerProvider>
+      <PetWizardProvider>
+        <PetWizard accountId="host-test" role="host" />
+      </PetWizardProvider>
+    </AnnouncerProvider>,
+    { theme: quintalTheme },
+  );
+  queryClient.setQueryData(petQueries.mine("host-test").queryKey, { active: [], inactive: [], hostId: "host-profile" });
+  queryClient.setQueryData(petQueries.house("host-profile").queryKey, []);
+  queryClient.setQueryData(petQueries.house("other-profile").queryKey, []);
+  await screen.findByRole("heading", { name: "Confere a ficha" });
+  await user.click(screen.getByRole("button", { name: "Salvar a ficha de Bóris" }));
+  expect(await screen.findByRole("heading", { name: "Prazer, Bóris!" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Apresentar outro pet da casa" })).toBeVisible();
+  expect(queryClient.getQueryState(petQueries.house("host-profile").queryKey)?.isInvalidated).toBe(true);
+  expect(queryClient.getQueryState(petQueries.house("other-profile").queryKey)?.isInvalidated).toBe(false);
+});

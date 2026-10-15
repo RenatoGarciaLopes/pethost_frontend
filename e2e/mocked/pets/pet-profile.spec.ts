@@ -19,7 +19,7 @@ test.afterEach(async ({ page }) => {
 
 test("REQ-PEDIT-001 abre a ficha pela carteirinha e apresenta os blocos completos", async ({ page }) => {
   await page.goto("/pets");
-  const card = page.getByRole("link", { name: "Ficha de Luna", exact: true });
+  const card = page.getByRole("link", { name: /^Ficha de Luna/ });
   await waitForHydration(card);
   await card.click();
   await expect(page).toHaveURL(profilePath, NAVIGATION);
@@ -132,7 +132,7 @@ test("REQ-PEDIT-003/011/012 tira da lista com confirmação e reativa pela ficha
   const inactive = page.getByRole("button", { name: "Fora da lista (2)", exact: true });
   await waitForHydration(inactive);
   await inactive.click();
-  await page.getByRole("link", { name: "Ficha de Luna", exact: true }).click();
+  await page.getByRole("link", { name: /^Ficha de Luna/ }).click();
   await expect(page).toHaveURL(profilePath, NAVIGATION);
   await expect(page.getByText("Fora da lista", { exact: true })).toBeVisible();
   const reactivate = page.getByRole("button", { name: "Voltar pra lista", exact: true });

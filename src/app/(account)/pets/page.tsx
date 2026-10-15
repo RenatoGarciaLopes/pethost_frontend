@@ -5,7 +5,11 @@ import { PetListSkeleton } from "@/features/pets/index.client";
 import { MyPetsScreen } from "@/features/pets/index.server";
 import { requirePersonalUser } from "@/shared/auth/server/requirePersonalUser";
 
-export const metadata: Metadata = { title: petsCopy.pageTitle, robots: { index: false, follow: false } };
+/** Título acompanha o papel da sessão. @example await generateMetadata() */
+export async function generateMetadata(): Promise<Metadata> {
+  const user = await requirePersonalUser("/pets");
+  return { title: `${petsCopy[user.role].title} · PetHost`, robots: { index: false, follow: false } };
+}
 
 /** `/pets` (spec 020): tutor ou anfitrião (REQ-PETS-010); admin vai para a casa dele. */
 export default function MyPetsPage() {
@@ -18,5 +22,5 @@ export default function MyPetsPage() {
 
 async function MyPetsContent() {
   const user = await requirePersonalUser("/pets");
-  return <MyPetsScreen accountId={user.id} />;
+  return <MyPetsScreen accountId={user.id} role={user.role} />;
 }

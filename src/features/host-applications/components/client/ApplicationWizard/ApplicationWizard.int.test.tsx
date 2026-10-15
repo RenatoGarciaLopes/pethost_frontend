@@ -98,7 +98,7 @@ describe("ApplicationWizard", { timeout: 20000 }, () => {
     await user.upload(screen.getByLabelText("Foto da frente do documento: galeria"), photo("frente.jpg"));
     await user.upload(screen.getByLabelText("Foto do verso do documento: galeria"), photo("verso.jpg"));
     await user.upload(screen.getByLabelText("Selfie segurando o documento: galeria"), photo("selfie.jpg"));
-    await screen.findByRole("button", { name: "Selfie segurando o documento, foto escolhida" });
+    await screen.findByRole("button", { name: "Selfie segurando o documento Tirar de novo" });
     await user.click(screen.getByRole("button", { name: copy.photos.next }));
 
     await screen.findByRole("heading", { level: 1, name: copy.review.heading });
@@ -214,7 +214,7 @@ describe("ApplicationWizard", { timeout: 20000 }, () => {
     const { user } = renderWizard("documents");
     await screen.findByRole("heading", { level: 1, name: copy.photos.heading });
     await user.upload(screen.getByLabelText("Foto da frente do documento: galeria"), photo("frente.jpg"));
-    await screen.findByRole("button", { name: "Foto da frente do documento, foto escolhida" });
+    await screen.findByRole("button", { name: "Foto da frente do documento Tirar de novo" });
 
     const event = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(event);

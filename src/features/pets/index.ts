@@ -9,3 +9,5 @@ export { petEditCopy } from "./lib/petEditCopy";
 export { isPetId } from "./lib/petId";
 export { petSpeciesSchema } from "./api/contracts";
 export { petQueries } from "./api/queries";
+export { coexistenceSummary } from "./lib/coexistenceSummary";
+export type { HouseResident } from "./types";

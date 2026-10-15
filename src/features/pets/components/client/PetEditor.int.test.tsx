@@ -14,8 +14,8 @@ import { PetEditor } from "./PetEditor";
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
-// Seis seções do MUI montadas por teste: com a suíte inteira em paralelo, 5 s não bastam.
-vi.setConfig({ testTimeout: 20_000 });
+// Seis seções do MUI montadas por teste: com a suíte em paralelo e a cobertura instrumentada do CI, 5 s não bastam.
+vi.setConfig({ testTimeout: 45_000 });
 
 const ACCOUNT = "account-1";
 const THOR = petDto().id;
