@@ -1,7 +1,7 @@
 ---
 spec: 023-host-house-pets
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-15
 area: HPETS
 ---
 
@@ -81,3 +81,12 @@ Esta spec também entrega a vitrine somente leitura que o tutor vê na página d
 - **Widget `host-onboarding`:** o roadmap põe a regra de aprovação num widget `host-onboarding` que nenhuma spec define ainda. Proposta: esta spec trata o `PET_KEEPER_NOT_FOUND` dentro da slice `pets` (é a resposta da própria rota) e a 030 decide se cria o widget para o painel do anfitrião.
 - **Rota `/pets` para dois papéis:** a 004 põe `/pets` no grupo `(owner)`, mas a rota atende tutor e anfitrião. Ajustar a 004 (`routeAccess` já prevê `/pets` para `owner` e `host`; o layout precisa aceitar os dois).
 - **`hostId` para a vitrine:** a página do cantinho (042) precisa do id do perfil de anfitrião, não da conta; depende do contrato do cantinho (API ⛔).
+
+## Ajustes conferidos na implementação (15/10/2026)
+
+- O layout `(account)` e `requirePersonalUser` já aceitam owner/host. Não há migração de rota ou novo layout na 023; a suposição de grupo `(owner)` era anterior ao código entregue.
+- `NAV_ITEMS` é uma lista apenas de telas disponíveis, sem campo `available`. Entregar o atalho significa acrescentar a entrada `host-pets` com role host; o efeito observável do REQ-HPETS-010 é o mesmo.
+- A 030 e a 044 ainda não estão implementadas nesta base. O aviso não oferece o link de verificação; o componente já tem a opção testada `verificationAvailable` para a composição futura. Ao concluir cadastro, o host volta a `/pets` com "Ver pets da casa"; o link do cantinho entra com a 044.
+- A API de vitrine exige qualquer token. "public" na query key significa dados projetados iguais entre contas autenticadas, sem indicar endpoint anônimo.
+- Não existe página do cantinho nesta base. O componente reutilizável tem stories e testes funcionais/de integração; o E2E desta spec verifica cadastro, bloqueio, isolamento e contrato ativo da vitrine. Não foi inventada uma rota de teste para antecipar a 042.
+- Documentação técnica e catálogo no vault (`development/resources/pets.md` e `resource-catalog.md`).

@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { beforeEach, expect, it, vi } from "vitest";
 import { sessionUserFixture } from "@/test/fixtures/session";
 import { requireRole } from "./requireRole";
@@ -6,6 +7,7 @@ import { requireSession } from "./getSession";
 
 vi.mock("./getSession", () => ({ requireSession: vi.fn() }));
 vi.mock("./currentPath", () => ({ currentPath: vi.fn() }));
+vi.mock("next/server", () => ({ connection: vi.fn() }));
 vi.mock("next/navigation", () => ({
   redirect: (path: string) => {
     throw new Error(`redirect:${path}`);
@@ -14,6 +16,13 @@ vi.mock("next/navigation", () => ({
 beforeEach(() => {
   vi.mocked(requireSession).mockResolvedValue(sessionUserFixture);
   vi.mocked(currentPath).mockResolvedValue("/pets?tab=all");
+});
+it("REQ-SHELL-010 espera a requisição antes de ler a sessão (o prerender não toca o relógio dela)", async () => {
+  vi.mocked(requireSession).mockImplementationOnce(async () => {
+    expect(connection).toHaveBeenCalled();
+    return sessionUserFixture;
+  });
+  await requireRole("owner");
 });
 it("REQ-SHELL-010 confirma sessão e aceita lista de papéis", async () => {
   await expect(requireRole(["owner", "host"])).resolves.toEqual(sessionUserFixture);

@@ -1,10 +1,35 @@
-/** Textos de "Meus pets" (spec 020, seção Microcopy). Erros da API vêm de `getErrorMessage`. */
+/** Textos por papel da lista, abertura e vitrine (020/023). Erros vêm de getErrorMessage. @example petsCopy.host.title */
 export const petsCopy = {
-  pageTitle: "Meus pets · PetHost",
-  title: "Meus pets",
-  card: (name: string) => `Ficha de ${name}`,
-  newPet: "Apresentar outro pet",
-  empty: { title: "Apresenta seu pet pra gente? Leva uns 3 minutos.", action: "Apresentar meu pet" },
+  owner: {
+    title: "Meus pets",
+    newPet: "Apresentar outro pet",
+    empty: { title: "Apresenta seu pet pra gente? Leva uns 3 minutos.", action: "Apresentar meu pet" },
+    opening: "Que bicho é o seu?",
+    another: "Apresentar outro pet",
+    myPets: "Ver meus pets",
+  },
+  host: {
+    title: "Pets da casa",
+    newPet: "Apresentar um pet da casa",
+    empty: {
+      title: "Tem bicho morando com você? Apresenta pra quem vai se hospedar aí.",
+      action: "Apresentar um pet da casa",
+    },
+    opening: "Quem mora com você?",
+    another: "Apresentar outro pet da casa",
+    myPets: "Ver pets da casa",
+  },
+  keeperPending: "Os pets da casa entram depois que sua verificação for aprovada.",
+  verification: "Ver minha verificação",
+  residents: {
+    title: "Quem mora aqui",
+    dogs: "cachorro",
+    cats: "gato",
+    kids: "crianças",
+    coexistence: (company: string) => `Se dá bem com ${company}`,
+  },
+  /** Começo do nome acessível da carteirinha, só para o leitor de tela: "Ficha de" + espaço + nome. */
+  cardPrefix: "Ficha de",
   inactive: {
     title: (count: number) => `Fora da lista (${count})`,
     help: "As fichas continuam aqui. As estadias antigas também.",

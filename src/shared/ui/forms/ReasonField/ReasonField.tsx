@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { TextField } from "@mui/material";
 /** Motivo controlado; rótulo, erro e ajuda vêm do domínio. @example const props: ReasonFieldProps = { label: "Motivo", value: "", onChange: () => {} }; */
 export interface ReasonFieldProps {

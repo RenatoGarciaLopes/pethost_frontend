@@ -1,4 +1,4 @@
-﻿import { screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
 import { AdminDataTable } from "./AdminDataTable";

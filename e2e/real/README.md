@@ -83,3 +83,7 @@ Tema Quintal, jornadas reais e reaproveitamento dos handlers TS continuam
 adiados conforme o escopo autorizado. Os testes de navegador e o build devem
 ser repetidos num ambiente com Chromium e acesso às pastas de resolução dos
 bundlers. O catálogo e a documentação de pastas no vault permanecem pendentes.
+
+## 023: seed real de anfitrião
+
+Existe agora `pets/host-pets.spec.ts`, somente leitura depois do login, para um perfil de anfitrião aprovado. Além das variáveis de origem acima, forneça `E2E_HOST_EMAIL` e `E2E_HOST_PASSWORD` de um seed de teste pelo ambiente do runner. Sem ambas, o teste é skipped com motivo explícito; um seed sem perfil aprovado falha no preflight `GET /pets/me`. Não copie credenciais para docs ou arquivos versionados. A execução não ocorreu na entrega da 023 porque os testes de navegador foram reservados ao Claude Code. Detalhes em [host-house-pets.md](../../docs/host-house-pets.md).

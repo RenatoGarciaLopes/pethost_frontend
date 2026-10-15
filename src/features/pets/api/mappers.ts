@@ -1,5 +1,5 @@
-import type { Pet, PetList } from "../types";
-import type { MyPetsDto, PetDto } from "./contracts";
+import type { HouseResident, Pet, PetList } from "../types";
+import type { HostPetsResponse, MyPetsDto, PetDto } from "./contracts";
 import { PostApiV1PetsBody } from "@/shared/api/generated/pets/pets.zod";
 import { petProfileSchema, type PetProfileValues } from "../schemas/petProfileSchema";
 
@@ -29,7 +29,28 @@ export function toPet(dto: PetDto): Pet {
  */
 export function toPetList(dto: MyPetsDto): PetList {
   const pets = dto.pets.map(toPet);
-  return { active: pets.filter((pet) => pet.isActive), inactive: pets.filter((pet) => !pet.isActive) };
+  return {
+    ...(dto.keeper?.type === "host" ? { hostId: dto.keeper.id } : {}),
+    active: pets.filter((pet) => pet.isActive),
+    inactive: pets.filter((pet) => !pet.isActive),
+  };
+}
+
+/** Projeção explícita da vitrine: campos privados nunca chegam ao cache público. @example toHouseResidents(dto) */
+export function toHouseResidents(dto: HostPetsResponse): HouseResident[] {
+  return dto.pets
+    .filter((pet) => pet.isActive)
+    .map((pet) => ({
+      id: pet.id,
+      name: pet.name,
+      species: pet.species,
+      speciesDescription: pet.species === "exotic" ? (pet.speciesDescription ?? null) : null,
+      size: pet.species === "dog" || pet.species === "cat" ? (pet.size ?? null) : null,
+      coverUrl: pet.photos[0]?.url ?? null,
+      goodWithDogs: pet.goodWithDogs,
+      goodWithCats: pet.goodWithCats,
+      goodWithKids: pet.goodWithKids,
+    }));
 }
 
 /** Corpo validado na ficha e no contrato gerado; valores ausentes não são enviados. @example toCreatePetRequest(values) */

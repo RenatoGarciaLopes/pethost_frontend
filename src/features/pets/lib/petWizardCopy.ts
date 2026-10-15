@@ -85,7 +85,5 @@ export const petWizardCopy = {
   welcome: {
     title: (pet: string) => `Prazer, ${pet}!`,
     announce: (pet: string) => `Ficha de ${pet} salva.`,
-    another: "Apresentar outro pet",
-    myPets: "Ver meus pets",
   },
 } as const;

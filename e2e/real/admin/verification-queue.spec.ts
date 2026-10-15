@@ -1,4 +1,4 @@
-﻿import { expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { waitForHydration } from "../../support/hydration";
 
 // Exige uma conta pessoal descartável, verificada e sem solicitação aberta, e o admin do ambiente de teste.

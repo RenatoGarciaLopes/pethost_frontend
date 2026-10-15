@@ -1,4 +1,4 @@
-﻿# Validação da base
+# Validação da base
 
 Em 11/10/2026, o projeto foi gerado pelo CLI `create-next-app@latest`, com TypeScript, ESLint, App Router, src-dir, npm e sem Tailwind. Next 16.4.0, React 19.3.0, MUI 9.5.0; versões completas no lockfile.
 
@@ -227,9 +227,50 @@ Sem `--maxWorkers=2`, nesta máquina o verify estoura o timeout de 5 s em testes
 
 Detalhes na nota `development/resources/pets.md` do vault.
 
+## 15/10/2026 · Pets da casa e vitrine autenticada (spec 023)
+
+Implementação dos REQ-HPETS-001 a 010 na branch `feat/023-host-house-pets`, worktree `pethost_frontend-023`. Detalhes por recurso na nota `development/resources/pets.md` do vault.
+
+| Verificação                                                                           | Resultado real                                                                                                                 |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Rodada ampla Vitest de pets e consumidores afetados                                   | 47 arquivos, 300 testes aprovados, 157,91 s com maxWorkers=2                                                                   |
+| Regressão final de abertura direta/invalidação                                        | 4 arquivos, 20 testes aprovados (3 novos), 30,05 s                                                                             |
+| Conjunto distinto das duas rodadas, substituindo os resultados repetidos pelos finais | 47 arquivos, 303 testes aprovados, sem falhas; 46 nomes com REQ-HPETS                                                          |
+| Unitário (inclui contratos/copy/navegação/metadata)                                   | 22 arquivos, 177 testes aprovados                                                                                              |
+| Componente (comportamento observável)                                                 | 10 arquivos, 51 testes aprovados                                                                                               |
+| Integração Node/MSW                                                                   | 6 arquivos, 33 testes aprovados                                                                                                |
+| Integração DOM/MSW/providers/cache                                                    | 9 arquivos, 42 testes aprovados                                                                                                |
+| ESLint dos arquivos criados/alterados                                                 | aprovado                                                                                                                       |
+| `npx.cmd tsc --noEmit -p .`                                                           | aprovado, incluindo E2E e stories escritos                                                                                     |
+| Prettier dos arquivos criados/alterados                                               | aplicado e conferido                                                                                                           |
+| `git diff --check`                                                                    | aprovado                                                                                                                       |
+| E2E simulado                                                                          | 2 jornadas escritas, configuradas para desktop/celular; execução reservada ao Claude Code                                      |
+| E2E real                                                                              | 1 jornada escrita; requer API real e seed aprovado via E2E_HOST_EMAIL/E2E_HOST_PASSWORD; não executada                         |
+| Stories/a11y                                                                          | 13 stories novas/variante host entre HouseResidents, KeeperPendingNotice, MyPetsScreen, PetWelcome e PetWizard; não executadas |
+| Next build, verify global, inspeção visual no navegador                               | não executados por spec-owner-common.md; aceite posterior com Claude Code                                                      |
+| Cobertura v8                                                                          | não executada nesta entrega; não foi inferido percentual                                                                       |
+
+Comando amplo executado:
+
+```powershell
+npx.cmd vitest run src/features/pets src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/msw/petsMock.int.test.ts 'src/app/(account)/pets' src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2
+```
+
+Regressão final, depois de identificar que uma ficha aberta por URL pode não ter mine no cache:
+
+```powershell
+npx.cmd vitest run src/features/pets/api/petQueries.int.test.ts src/features/pets/hooks/usePetMutations.int.test.tsx src/features/pets/hooks/usePetPhotoMutations.int.test.tsx src/features/pets/components/client/PetWizard.int.test.tsx --maxWorkers=2
+```
+
+Os relatórios JSON temporários (`pethost-023-vitest-results.json` e `pethost-023-cache-vitest-results.json`, no TEMP do runner) permitiram contabilizar o conjunto distinto por arquivo/nível. Não são artefatos versionados. Os testes usam MSW estrito e dados sintéticos; não equivalem à integração completa com API real.
+
+Evidências funcionais: projeção explícita sem dados privados no cache e na desidratação; 404/500 da vitrine silenciosos, inclusive no refetch de dados antigos; logs de desenvolvimento só com status/código; bloqueio de keeper antes do cadastro com sessão autenticada via MSW; contas e perfis distintos; invalidação seletiva após cadastro, edição, transições e fotos, incluindo ficha aberta diretamente; navegação exclusiva de host. Suítes red foram executadas antes das implementações dos recursos e da correção final de invalidação.
+
+A 030/044 não estão nesta base: links ausentes permanecem ocultos, e a confirmação host oferece voltar para `/pets`. A tabela real de navegação não possui available: a entrada host-pets passou a existir. Não foi criada uma página fictícia para a vitrine; o uso em produção depende da 042. Status da spec permanece in-progress para o aceite de navegador e o registro do vault.
+
 ## Spec 031: fila e decisão administrativa (15/10/2026)
 
-Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verification-queue`. Status da spec permanece `in-progress` porque a execução de navegador, o verify completo e a integração do vault estão centralizados no Claude Code.
+Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verification-queue`, pelo Rivet (Codex). Validação central pelo Claude Code em 15/10: `npm run verify -- -- --maxWorkers=2` com 232 arquivos e 1329 testes verdes; Storybook com a11y dos 7 arquivos novos, 22 testes sem violação; E2E mocked no job `browser` do CI. Documentação no vault (`development/resources/admin-verification.md`).
 
 - Vitest direcionado ao domínio, widgets, recursos shared alterados, mock administrativo, erros, privacidade e consumidores de navegação: **20 arquivos, 109 testes aprovados**, com `--maxWorkers=2`. Por nível do runner: 67 unitários/arquitetura, 27 funcionais de componente, 8 integrações Node e 7 integrações DOM. TDD com falhas iniciais de módulos ausentes/implementação gerada e regressão de filtros repetidos reproduzida antes da correção.
 - Comando: `npx.cmd vitest run src/features/admin-host-applications src/widgets/host-application-review src/shared/lib/pagination src/shared/hooks/useSearchParamsState.test.tsx src/shared/ui/data-display/AdminDataTable src/shared/ui/forms/ReasonField src/test/msw/adminApplicationsMock.int.test.ts src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/architecture/no-token-storage.test.ts src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2`.
