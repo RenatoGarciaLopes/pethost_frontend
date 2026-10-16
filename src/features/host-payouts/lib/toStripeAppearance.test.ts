@@ -9,6 +9,8 @@ it("REQ-PAYOUT-005 cores, borda, raio e fonte vêm do tema, sem variáveis CSS d
       text: { primary: "#222222" },
       divider: "#abcdef",
     },
+    // Base de raio de um tema de teste (configuração do tema, não estilo de tela).
+    // eslint-disable-next-line pethost/no-numeric-radius
     shape: { borderRadius: 13 },
     typography: { fontFamily: "var(--font-body, 'Fonte do tema'), sans-serif" },
   });

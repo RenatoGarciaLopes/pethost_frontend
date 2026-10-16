@@ -1,4 +1,6 @@
 "use client";
+
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box } from "@mui/material";
 import { SPRING_ACOLHER } from "@/shared/theme/tokens/springs";
 
@@ -34,7 +36,7 @@ export function Sticker({ label, color = "gema", tilt = 4, playful = true }: Sti
         color: "text.primary",
         backgroundColor: theme.palette[color].main,
         border: `2px solid ${theme.palette.quintal.tinta}`,
-        borderRadius: 999,
+        borderRadius: `${quintalRadii.pill}px`,
         boxShadow: `2px 2px 0 ${theme.palette.quintal.tinta}`,
         transform: `rotate(${tilt}deg)`,
         transition: `transform ${SPRING_ACOLHER.duration}ms ${SPRING_ACOLHER.easing}`,

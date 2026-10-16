@@ -40,7 +40,7 @@ const meta = {
   tags: ["autodocs"],
   // O decorator App Router do Storybook ainda usa o LayoutRouterContext anterior ao Next 16.4.
   // Reaproveita o router do framework e seu mock de next/navigation, sem simular hooks do widget.
-  parameters: { layout: "fullscreen" },
+  parameters: { layout: "fullscreen", a11y: { test: "error" } },
   beforeEach: () => {
     useRouter.mockReturnValue({ ...getRouter(), refresh: fn(), bfcacheId: "story" });
   },

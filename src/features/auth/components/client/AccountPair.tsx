@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Stack, Typography } from "@mui/material";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { roleLabel } from "@/shared/config/roleLabels";
@@ -33,7 +34,7 @@ function AccountRow({ role, text, strong = false }: { role: PersonalRole; text: 
         bgcolor: `account.${role}`,
         border: 1,
         borderColor: "divider",
-        borderRadius: 2,
+        borderRadius: `${quintalRadii.control}px`,
         px: 2,
         py: 1.5,
       }}
