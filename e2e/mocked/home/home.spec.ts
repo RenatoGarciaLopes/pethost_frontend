@@ -13,7 +13,7 @@ async function expandSearchOnMobile(page: Page) {
 async function submitSearch(page: Page) {
   const desktopSearch = page.getByRole("button", { name: "Achar um cantinho", exact: true });
   const mobileSearch = page.getByRole("button", { name: "Buscar cantinhos", exact: true });
-  await (await desktopSearch.isVisible() ? desktopSearch : mobileSearch).click();
+  await ((await desktopSearch.isVisible()) ? desktopSearch : mobileSearch).click();
 }
 
 test("REQ-HOME-001/002 visitante vê o início e volta à busca depois de entrar", async ({ page }) => {

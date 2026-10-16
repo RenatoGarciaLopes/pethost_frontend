@@ -19,6 +19,7 @@ e2e/mocked/home/home.spec.ts                       jornadas de navegador desktop
 ```
 
 `HomeScreen` usa componentes de marca e confiança de `shared`, recebe do servidor apenas sessão reduzida e pets ativos reduzidos, e não chama a API de anúncios. A nota canônica está em `development/resources/home` e o recurso consta no catálogo do vault.
+
 ## Pagamentos do anfitrião (spec 043, 15/10/2026)
 
 ```text
