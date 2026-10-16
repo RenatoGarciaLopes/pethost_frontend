@@ -377,7 +377,7 @@ Validação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`.
 - Test runner: `.agent-tools/e2e.sh`, one worker, no concurrent E2E. Servers were stopped explicitly after each run because automatic taskkill cleanup did not finish in this sandbox. Ports 3100/5099 released.
 - These E2E suites use the simulated backend; no real API or Storybook execution claimed. Existing HTTP integration tests were not rerun because their contracts did not change. No new pure domain logic was introduced.
 - Vault untouched per user instruction. No fetch/push after the user reserved publishing; commits are local and have no coauthor trailers.
-Final targeted ESLint and tsc --noEmit: passed (exit 0).
+  Final targeted ESLint and tsc --noEmit: passed (exit 0).
 
 ## Revisão PR 17: filtros, cache da trilha e paginação (2026-10-16)
 
