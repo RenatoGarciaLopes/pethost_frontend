@@ -1,5 +1,11 @@
 # Estrutura real do frontend
 
+## Conformidade de painéis e conta (005, lote T5/005b)
+
+As composições existentes de `features/{pets,bookings,account,auth,host-payouts}` e a escolha de `features/registration` reutilizam `shared/ui/layout/{PageContainer,PageHeader,Surface}`. Não foram criadas pastas de produção nem duplicados layouts compartilhados. Interface e lista de consumidores alterados: [design da 005](../specs/005-ui-conformance/design.md#t5-lote-de-painéis-fichas-conta-e-entrada-005b).
+
+Stories novas de telas públicas/conta ficam junto das composições; as stories existentes de pets/reservas/recebimentos continuam ao lado dos componentes. `e2e/mocked/ui-conformance/panels.spec.ts` concentra a conferência responsiva das rotas do lote, com os helpers existentes em `e2e/support`. PNGs gerados por essa conferência vão para `test-results/panels/{desktop,mobile}`, ignorados pelo Git. Os prints da auditoria T1 continuam na worktree gallery; o código atual ainda exige revisão visual T6.
+
 ## Pagamentos do anfitrião (spec 043, 15/10/2026)
 
 ```text
