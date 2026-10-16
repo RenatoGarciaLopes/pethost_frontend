@@ -1,6 +1,6 @@
 ---
 spec: 054-stay-day
-status: draft
+status: in-progress
 updated: 2026-10-15
 area: STDAY
 ---

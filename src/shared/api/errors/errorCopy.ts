@@ -63,7 +63,7 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_CNPJ_ALREADY_REGISTERED: (_error, context) =>
     context.adminReview
       ? "Esse CPF/CNPJ já pertence a outro anfitrião. Recuse com 'Os dados não batem' ou abra a conta indevida em Contas."
-      : "Esse CNPJ já está em outra conta. Fala com o suporte para conferir.",
+      : "Esse CNPJ já está em outra conta. Se a empresa é sua, fala com o suporte.",
   HOST_APPLICATION_CONFLICT: "Outra pessoa da equipe já decidiu essa verificação.",
   HOST_APPLICATION_NOT_UNDER_REVIEW: "Outra pessoa da equipe já decidiu essa verificação.",
   HOST_APPLICATION_NOT_FOUND: "Não encontramos essa verificação. Volte para a fila.",
@@ -82,7 +82,49 @@ export const errorCopy: Record<string, CopyEntry> = {
   HOST_APPLICATION_ATTEMPTS_EXCEEDED: "Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.",
   HOST_APPLICATION_BLOCKED: "Não foi possível confirmar sua identidade. Fala com o suporte.",
   HOST_APPLICATION_DOCUMENT_ALREADY_EXISTS: "Essa foto já foi usada em outra vaga. Tira uma foto nova.",
+  HOST_APPLICATION_DOCUMENTS_MISSING: "Ainda falta foto. Confere as três vagas antes de enviar.",
+  HOST_APPLICATION_ALREADY_EXISTS: "Você já tem uma verificação aberta. Vamos continuar de onde parou.",
+  HOST_APPLICATION_NOT_EDITABLE: "Essa verificação já foi enviada e não dá mais pra mudar.",
+  HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED: "Dados de empresa só valem pra verificação de empresa.",
+  HOST_ALREADY_VERIFIED: "Sua verificação já foi aprovada.",
   HOST_IDENTITY_LOCKED: "Esses dados foram conferidos na verificação. Pra mudar, fala com o suporte.",
+
+  // Cantinho
+  LISTING_HOST_PAYOUTS_NOT_ENABLED: "Seu cantinho abre depois que o recebimento estiver conectado.",
+  LISTING_LIMIT_REACHED: "Você já tem um cantinho. Dá pra editar ele quando quiser.",
+  LISTING_HOST_NOT_FOUND: "O cantinho abre depois que a sua verificação for aprovada.",
+  LISTING_HOST_DEACTIVATED: "Sua conta de anfitrião está pausada. Reative a conta pra mexer no cantinho.",
+  LISTING_GEOCODER_UNAVAILABLE: "Não conseguimos achar o endereço no mapa agora. Tenta de novo em alguns minutos.",
+  LISTING_ADDRESS_NOT_LOCATED: "Não achamos esse endereço no mapa. Confere o CEP, a rua e o número.",
+  LISTING_PHOTO_LIMIT_REACHED: "Já tem 5 fotos. Tira uma pra colocar outra.",
+  LISTING_PHOTO_ALREADY_EXISTS: "Essa foto já está no cantinho.",
+  LISTING_NOT_FOUND: "Não achamos esse cantinho.",
+
+  // Reservas e estadias (specs 050 a 054)
+  BOOKING_NOT_FOUND: "Não achamos essa estadia.",
+  BOOKING_OWNER_NOT_FOUND: "Pra pedir estadia, falta o seu perfil de tutor.",
+  BOOKING_OWNER_DEACTIVATED: "Sua conta de tutor está pausada.",
+  BOOKING_OWNER_INACTIVE: "Esse tutor não está mais ativo. Dá pra recusar ou deixar expirar.",
+  BOOKING_HOST_NOT_FOUND: "Os pedidos chegam depois que a sua verificação for aprovada.",
+  BOOKING_HOST_DEACTIVATED: "Sua conta de anfitrião está pausada. Reative a conta pra responder pedidos.",
+  BOOKING_LISTING_NOT_FOUND: "Esse cantinho não está recebendo pedidos agora.",
+  BOOKING_PET_NOT_FOUND: "Não achamos esse pet na sua lista.",
+  BOOKING_PET_INACTIVE: "Esse pet está fora da sua lista. Volta ele pra lista pra pedir.",
+  BOOKING_PET_SPECIES_NOT_ACCEPTED: "Esse cantinho não recebe esse tipo de bicho.",
+  BOOKING_PET_SIZE_NOT_ACCEPTED: "Esse cantinho não recebe esse porte.",
+  BOOKING_PET_PERIOD_CONFLICT: "Esse pet já tem outra estadia nessas datas.",
+  BOOKING_WEEKDAY_NOT_AVAILABLE: "O cantinho não recebe em algum dia desse período. Tenta outras datas.",
+  BOOKING_CAPACITY_EXCEEDED: "Não cabe mais ninguém nessas noites.",
+  BOOKING_NOT_AWAITING_RESPONSE: "Esse pedido já foi respondido. A tela foi atualizada.",
+  BOOKING_RESPONSE_EXPIRED: "O prazo de 24 horas passou e o pedido expirou.",
+  BOOKING_ALREADY_CANCELLED: "Essa estadia já foi cancelada.",
+  BOOKING_ALREADY_CLOSED: "Esse pedido já foi recusado ou expirou: não há o que cancelar.",
+  BOOKING_CANNOT_CANCEL_AFTER_CHECK_IN: "Depois que o pet chegou, não dá pra cancelar.",
+  BOOKING_NOT_CONFIRMED: "Só dá pra marcar a chegada de estadia confirmada.",
+  BOOKING_CHECK_IN_TOO_EARLY: "Ainda não é o dia da chegada.",
+  BOOKING_CHECK_IN_WINDOW_CLOSED: "O período dessa estadia já passou.",
+  BOOKING_NOT_IN_PROGRESS: "Só dá pra marcar a volta de estadia que está acontecendo.",
+  BOOKING_CONFLICT: "A estadia mudou enquanto você olhava. Confere de novo.",
 
   // Transversais da API
   VALIDATION_ERROR: "Alguns campos precisam de ajuste. Confere as mensagens embaixo de cada um.",

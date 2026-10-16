@@ -15,7 +15,7 @@ import {
   unmaskPhone,
 } from "../../../lib/masks";
 
-/** Supported Brazilian numeric formats; presentation is not document validation. */
+/** Supported Brazilian formats (CNPJ may be alphanumeric); presentation is not document validation. */
 export type MaskKind = "cpf" | "cnpj" | "cep" | "phone" | "date";
 const formats = {
   cpf: [maskCpf, unmaskCpf],
@@ -25,6 +25,8 @@ const formats = {
   date: [maskDate, unmaskDate],
 } as const;
 /** Controlled MUI field; consumers store only digits. */
+/** Teclado do celular por formato; o padrão é o numérico. */
+const INPUT_MODE: Partial<Record<MaskKind, "tel" | "text">> = { phone: "tel", cnpj: "text" };
 export type MaskedTextFieldProps = Omit<TextFieldProps, "label" | "value" | "onChange" | "type"> & {
   /** Visible field label. */ label: string;
   /** Format selector. */ mask: MaskKind;
@@ -32,8 +34,8 @@ export type MaskedTextFieldProps = Omit<TextFieldProps, "label" | "value" | "onC
   /** Receives digits on typing, deletion or paste. */ onValueChange: (value: string) => void;
 };
 /**
- * Numeric format presentation preserving cursor position and deletion across punctuation.
- * Use for Brazilian numeric documents/phones, not international/alphanumeric inputs.
+ * Brazilian document/phone presentation preserving cursor position and deletion across punctuation.
+ * Use for CPF, CNPJ (numeric or alphanumeric), CEP, phone and date; not for international inputs.
  * @example <MaskedTextField label="CPF" mask="cpf" value={value} onValueChange={setValue} />
  */
 export function MaskedTextField({
@@ -57,7 +59,8 @@ export function MaskedTextField({
     let position = 0,
       count = 0;
     while (position < input.value.length && count < caretDigits.current) {
-      if (/\d/.test(input.value[position])) count++;
+      // Letra conta como dígito: o CNPJ alfanumérico tem letras nas posições do valor.
+      if (/[0-9A-Z]/i.test(input.value[position]!)) count++;
       position++;
     }
     input.setSelectionRange(position, position);
@@ -93,8 +96,9 @@ export function MaskedTextField({
         ...slotProps,
         htmlInput: (state) => ({
           ...(typeof htmlProps === "function" ? htmlProps(state) : htmlProps),
-          // Telefone abre o teclado de telefone; o resto, o numérico (REQ-OREG-016).
-          inputMode: mask === "phone" ? "tel" : "numeric",
+          // Telefone abre o teclado de telefone; CNPJ, o de texto (aceita letras, REQ-HVER-004); o resto, o numérico
+          // (REQ-OREG-016).
+          inputMode: INPUT_MODE[mask] ?? "numeric",
         }),
       }}
     />

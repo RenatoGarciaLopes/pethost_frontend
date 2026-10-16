@@ -170,3 +170,40 @@ describe("vagas de foto", () => {
     expect(screen.getByRole("button", { name: "Tirar foto 1" })).toBeDisabled();
   });
 });
+
+describe("vagas de foto com reordenação", () => {
+  const saved = (n: number) => `https://fotos.test/casa-${n}.jpg`;
+
+  it("REQ-LIST-014 com onMove, cada foto ganha capa e mover por botão (nunca só arrastar)", async () => {
+    const onMove = vi.fn();
+    const { user } = renderWithProviders(
+      <PhotoSlots
+        label="Fotos da casa"
+        files={[saved(1), saved(2), saved(3), null, null]}
+        onPick={vi.fn()}
+        onRemove={vi.fn()}
+        onMove={onMove}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.queryByRole("button", { name: "Usar como capa: foto 1" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Mover a foto 1 para cima" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Mover a foto 3 para baixo" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Usar como capa: foto 3" }));
+    expect(onMove).toHaveBeenLastCalledWith(2, 0);
+    await user.click(screen.getByRole("button", { name: "Mover a foto 2 para cima" }));
+    expect(onMove).toHaveBeenLastCalledWith(1, 0);
+    await user.click(screen.getByRole("button", { name: "Mover a foto 1 para baixo" }));
+    expect(onMove).toHaveBeenLastCalledWith(0, 1);
+  });
+
+  it("REQ-LIST-014 cinco vagas; sem onMove não há reordenação", () => {
+    renderWithProviders(
+      <PhotoSlots label="Fotos" files={[saved(1), saved(2), null, null, null]} onPick={vi.fn()} onRemove={vi.fn()} />,
+      { theme: quintalTheme },
+    );
+    expect(screen.getByLabelText("Adicionar foto 5")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /como capa|Mover a foto/ })).not.toBeInTheDocument();
+  });
+});
