@@ -1,3 +1,4 @@
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
@@ -35,7 +36,9 @@ function Frame({ overrides }: { overrides: Record<string, unknown> }) {
   return (
     <QueryClientProvider client={client}>
       <main>
-        <StayDetail accountId={ACCOUNT} bookingId={BOOKING_ID} now={NOW} />
+        <PageContainer width="page">
+          <StayDetail accountId={ACCOUNT} bookingId={BOOKING_ID} now={NOW} />
+        </PageContainer>
       </main>
     </QueryClientProvider>
   );

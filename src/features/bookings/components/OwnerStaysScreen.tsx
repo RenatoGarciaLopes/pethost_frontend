@@ -1,4 +1,7 @@
-import { Container, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { backendForRequest } from "@/shared/api/server/backendForRequest";
@@ -20,15 +23,13 @@ export async function OwnerStaysScreen({ accountId, tab }: { accountId: string; 
     bookingQueries.infinite(accountId, current.statuses, undefined, await backendForRequest()),
   );
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page">
       <Stack spacing={3}>
-        <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
-          {bookingCopy.owner.heading}
-        </Typography>
+        <PageHeader title={bookingCopy.owner.heading} />
         <HydrationBoundary state={dehydrate(queryClient)}>
           <StayList accountId={accountId} tab={current} />
         </HydrationBoundary>
       </Stack>
-    </Container>
+    </PageContainer>
   );
 }

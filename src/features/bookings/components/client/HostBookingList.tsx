@@ -31,7 +31,15 @@ function BookingCard({ booking, now }: { booking: Booking; now: Date }) {
       component="article"
       aria-label={`Pedido de ${owner}`}
       elevation="sm"
-      sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}
+      sx={{
+        p: 2.5,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+        height: "100%",
+        minWidth: 0,
+        overflowWrap: "anywhere",
+      }}
     >
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
         <Avatar
@@ -41,7 +49,7 @@ function BookingCard({ booking, now }: { booking: Booking; now: Date }) {
         >
           {initialsOf(owner)}
         </Avatar>
-        <Typography component="h3" sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+        <Typography component="h2" sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
           {owner}
         </Typography>
       </Stack>
@@ -153,9 +161,21 @@ export function HostBookingList({ accountId, tab, page, now }: HostBookingListPr
         <Typography color="text.secondary">{copy.empty[tab.id]}</Typography>
       ) : (
         <Stack spacing={2}>
-          {query.data.items.map((booking) => (
-            <BookingCard key={booking.id} booking={booking} now={moment} />
-          ))}
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                md: "repeat(2, minmax(0, 1fr))",
+                lg: "repeat(3, minmax(0, 1fr))",
+              },
+            }}
+          >
+            {query.data.items.map((booking) => (
+              <BookingCard key={booking.id} booking={booking} now={moment} />
+            ))}
+          </Box>
           {query.data.totalPages > 1 && (
             <Stack component="nav" aria-label={copy.pageLabel} direction="row" spacing={2}>
               {page > 1 && (

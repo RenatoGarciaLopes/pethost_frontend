@@ -34,7 +34,12 @@ function StayListItem({ booking }: { booking: Booking }) {
           "&:focus-visible [data-surface]": { outline: "3px solid", outlineOffset: 3 },
         }}
       >
-        <Surface component="span" interactive elevation="sm" sx={{ display: "grid", gap: 0.5, p: 2 }}>
+        <Surface
+          component="span"
+          interactive
+          elevation="sm"
+          sx={{ display: "grid", gap: 1, p: 2.5, height: "100%", overflowWrap: "anywhere" }}
+        >
           <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
             <Typography component="span" sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
               {title}
@@ -136,7 +141,22 @@ export function StayList({ accountId, tab, pageSize }: StayListProps) {
         </Stack>
       ) : (
         <Stack spacing={2}>
-          <Box component="ul" aria-label={copy.listLabel} sx={{ m: 0, p: 0, display: "grid", gap: 2 }}>
+          <Box
+            component="ul"
+            aria-label={copy.listLabel}
+            sx={{
+              m: 0,
+              p: 0,
+              display: "grid",
+              gap: 3,
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                md: "repeat(2, minmax(0, 1fr))",
+                lg: "repeat(3, minmax(0, 1fr))",
+              },
+              alignItems: "stretch",
+            }}
+          >
             {stays.map((booking) => (
               <StayListItem key={booking.id} booking={booking} />
             ))}

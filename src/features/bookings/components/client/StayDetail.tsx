@@ -1,6 +1,8 @@
 "use client";
 
-import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+import { Surface } from "@/shared/ui/layout/Surface";
+
 import { Box, Button, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
@@ -35,11 +37,7 @@ function ContactCard({ booking }: { booking: Booking }) {
   if (!contact || !CONTACT_STATUSES.includes(booking.status)) return null;
   const { address } = contact;
   return (
-    <Box
-      component="section"
-      aria-labelledby={headingId}
-      sx={{ p: 2, border: "2px solid", borderRadius: `${quintalRadii.card}px`, bgcolor: "background.paper" }}
-    >
+    <Surface component="section" aria-labelledby={headingId} sx={{ p: 3, minWidth: 0, overflowWrap: "anywhere" }}>
       <Typography id={headingId} variant="h2" sx={{ fontSize: 20, mb: 1 }}>
         {copy.contact}
       </Typography>
@@ -58,7 +56,7 @@ function ContactCard({ booking }: { booking: Booking }) {
           {`${address.neighborhood}, ${address.city} - ${address.state}, ${maskCep(address.zipCode)}`}
         </Typography>
       )}
-    </Box>
+    </Surface>
   );
 }
 
@@ -102,71 +100,87 @@ export function StayDetail({ accountId, bookingId, now }: StayDetailProps) {
       <Link component={NextLink} href={ownerBookingsPath("proximas")} sx={{ alignSelf: "flex-start" }}>
         {copy.back}
       </Link>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
-        <Typography variant="h1" sx={{ fontSize: { xs: 28, md: 36 } }}>
-          {booking.listing?.title ?? bookingCopy.owner.listingGone}
-        </Typography>
-        <StatusPill label={statusLabel[booking.status]} />
-      </Stack>
-      {booking.status === "cancelled" && (
-        <Notice
-          tone="ok"
-          title={copy.cancelled}
-          action={booking.refundPercentage !== null ? <span>{copy.refund(booking.refundPercentage)}</span> : undefined}
-        />
-      )}
-      {conflict && <Notice tone="atencao" title={conflict} />}
-      {steps && <StatusTimeline label={copy.trail} steps={steps} />}
-      {booking.status === "requested" && booking.responseDeadline && (
-        <Typography sx={{ fontWeight: 700 }}>
-          {copy.deadline(host, formatDeadline(booking.responseDeadline, moment))}
-        </Typography>
-      )}
+      <PageHeader
+        title={booking.listing?.title ?? bookingCopy.owner.listingGone}
+        actions={<StatusPill label={statusLabel[booking.status]} />}
+      />
       <Box
-        component="dl"
-        aria-label={copy.summary}
         sx={{
-          m: 0,
           display: "grid",
-          gridTemplateColumns: "max-content 1fr",
-          columnGap: 3,
-          rowGap: 1,
-          "& dd": { m: 0 },
+          gap: 3,
+          alignItems: "start",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1.2fr) minmax(0, 1fr)" },
         }}
       >
-        <dt>{copy.period}</dt>
-        <dd>{formatPeriod(booking.checkIn, booking.checkOut)}</dd>
-        <dt>{copy.pets}</dt>
-        <dd>{booking.pets.map((pet) => pet.name ?? bookingCopy.unknownPet).join(", ")}</dd>
-        {booking.listing && (
-          <>
-            <dt>{copy.listing}</dt>
-            <dd>{`${booking.listing.neighborhood}, ${booking.listing.city}`}</dd>
-          </>
-        )}
-        <dt>{bookingCopy.detail.total}</dt>
-        <dd>{copy.bill(nightly, booking.nights, booking.petCount, total)}</dd>
-      </Box>
-      <ContactCard booking={booking} />
-      {booking.status === "declined" && (
-        <Stack spacing={1}>
-          <Typography>{copy.declined(host)}</Typography>
-          {booking.declineReason && (
-            <Typography color="text.secondary">{copy.declinedReason(booking.declineReason)}</Typography>
+        <Surface sx={{ p: { xs: 2.5, md: 4 }, minWidth: 0 }}>
+          <Stack spacing={3}>
+            {booking.status === "cancelled" && (
+              <Notice
+                tone="ok"
+                title={copy.cancelled}
+                action={
+                  booking.refundPercentage !== null ? <span>{copy.refund(booking.refundPercentage)}</span> : undefined
+                }
+              />
+            )}
+            {conflict && <Notice tone="atencao" title={conflict} />}
+            {steps && <StatusTimeline label={copy.trail} steps={steps} />}
+            {booking.status === "requested" && booking.responseDeadline && (
+              <Typography sx={{ fontWeight: 700 }}>
+                {copy.deadline(host, formatDeadline(booking.responseDeadline, moment))}
+              </Typography>
+            )}
+            <Box
+              component="dl"
+              aria-label={copy.summary}
+              sx={{
+                m: 0,
+                display: "grid",
+                gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "max-content minmax(0, 1fr)" },
+                columnGap: 3,
+                rowGap: 1,
+                "& dd": { m: 0, overflowWrap: "anywhere" },
+                "& dt": { fontWeight: 700 },
+              }}
+            >
+              <dt>{copy.period}</dt>
+              <dd>{formatPeriod(booking.checkIn, booking.checkOut)}</dd>
+              <dt>{copy.pets}</dt>
+              <dd>{booking.pets.map((pet) => pet.name ?? bookingCopy.unknownPet).join(", ")}</dd>
+              {booking.listing && (
+                <>
+                  <dt>{copy.listing}</dt>
+                  <dd>{`${booking.listing.neighborhood}, ${booking.listing.city}`}</dd>
+                </>
+              )}
+              <dt>{bookingCopy.detail.total}</dt>
+              <dd>{copy.bill(nightly, booking.nights, booking.petCount, total)}</dd>
+            </Box>
+          </Stack>
+        </Surface>
+        <Stack spacing={3} sx={{ minWidth: 0 }}>
+          <ContactCard booking={booking} />
+          {booking.status === "declined" && (
+            <Stack spacing={1}>
+              <Typography>{copy.declined(host)}</Typography>
+              {booking.declineReason && (
+                <Typography color="text.secondary">{copy.declinedReason(booking.declineReason)}</Typography>
+              )}
+            </Stack>
+          )}
+          {booking.status === "expired" && <Typography>{copy.expired(host)}</Typography>}
+          {(booking.status === "declined" || booking.status === "expired") && (
+            <Box>
+              <Button component={NextLink} href={SEARCH_PATH} variant="contained">
+                {copy.searchAgain}
+              </Button>
+            </Box>
+          )}
+          {CANCELLABLE.includes(booking.status) && (
+            <CancelStayDialog accountId={accountId} booking={booking} onConflict={setConflict} />
           )}
         </Stack>
-      )}
-      {booking.status === "expired" && <Typography>{copy.expired(host)}</Typography>}
-      {(booking.status === "declined" || booking.status === "expired") && (
-        <Box>
-          <Button component={NextLink} href={SEARCH_PATH} variant="contained">
-            {copy.searchAgain}
-          </Button>
-        </Box>
-      )}
-      {CANCELLABLE.includes(booking.status) && (
-        <CancelStayDialog accountId={accountId} booking={booking} onConflict={setConflict} />
-      )}
+      </Box>
     </Stack>
   );
 }

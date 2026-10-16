@@ -1,6 +1,8 @@
 "use client";
 
-import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+import { Surface } from "@/shared/ui/layout/Surface";
+
 import { Avatar, Box, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
@@ -29,16 +31,12 @@ function OwnerContact({ booking }: { booking: Booking }) {
   const headingId = useId();
   if (!booking.contact) return null;
   return (
-    <Box
-      component="section"
-      aria-labelledby={headingId}
-      sx={{ p: 2, border: "2px solid", borderRadius: `${quintalRadii.card}px`, bgcolor: "background.paper" }}
-    >
+    <Surface component="section" aria-labelledby={headingId} sx={{ p: 3, minWidth: 0, overflowWrap: "anywhere" }}>
       <Typography id={headingId} sx={{ fontWeight: 800 }}>
         {copy.contact}
       </Typography>
       <Typography>{booking.contact.phone ? copy.phone(booking.contact.phone) : copy.noPhone}</Typography>
-    </Box>
+    </Surface>
   );
 }
 
@@ -83,50 +81,69 @@ export function HostBookingDetail({ accountId, bookingId, petProfiles, now }: Ho
       <Link component={NextLink} href={hostBookingsPath("pedidos")} sx={{ alignSelf: "flex-start" }}>
         {copy.back}
       </Link>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
-        <Avatar
-          src={booking.owner?.avatarUrl ?? undefined}
-          alt=""
-          sx={{ width: 56, height: 56, bgcolor: "primary.main", color: "primary.contrastText" }}
-        >
-          {initialsOf(owner)}
-        </Avatar>
-        <Typography variant="h1" sx={{ fontSize: { xs: 28, md: 36 } }}>
-          {copy.heading(owner)}
-        </Typography>
-        <StatusPill label={statusLabel[booking.status]} />
-      </Stack>
-      {justConfirmed && booking.status === "confirmed" && <Notice tone="ok" title={bookingCopy.accept.done} />}
-      <Stack spacing={0.5}>
-        <Typography>{`${formatPeriod(booking.checkIn, booking.checkOut)} · ${bookingCopy.host.nights(booking.nights)}`}</Typography>
-        <Typography>{booking.pets.map(describeBookingPet).join(" · ")}</Typography>
-        <Typography sx={{ fontWeight: 700 }}>
-          {bookingCopy.host.total(formatBRL(fromCents(booking.totalCents)))}
-        </Typography>
-        <Typography color="text.secondary">{copy.perNight(formatBRL(fromCents(booking.nightlyRateCents)))}</Typography>
-        {booking.status === "requested" && booking.responseDeadline && (
-          <Typography sx={{ fontWeight: isDeadlineNear(booking.responseDeadline, moment) ? 800 : 400 }}>
-            {bookingCopy.host.deadline(formatDeadline(booking.responseDeadline, moment))}
-          </Typography>
-        )}
-      </Stack>
-      {steps && <StatusTimeline label={copy.trail} steps={steps} />}
-      {closed && <Notice tone="info" title={closed} />}
-      {booking.status !== "in_progress" && <OwnerContact booking={booking} />}
-      {/* Continua montado em `completed`: senão "voltou pra casa" some junto com a mudança de status. */}
-      {(booking.status === "confirmed" || booking.status === "in_progress" || booking.status === "completed") && (
-        <StayMilestones accountId={accountId} booking={booking} now={moment} />
-      )}
-      {booking.status === "requested" && (
-        <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }} useFlexGap>
-          <AcceptDialog accountId={accountId} booking={booking} onAccepted={() => setJustConfirmed(true)} />
-          <DeclineDialog accountId={accountId} booking={booking} />
+      <PageHeader
+        title={copy.heading(owner)}
+        actions={
+          <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
+            <Avatar
+              src={booking.owner?.avatarUrl ?? undefined}
+              alt=""
+              sx={{ width: 56, height: 56, bgcolor: "primary.main", color: "primary.contrastText" }}
+            >
+              {initialsOf(owner)}
+            </Avatar>
+            <StatusPill label={statusLabel[booking.status]} />
+          </Stack>
+        }
+      />
+      <Box
+        sx={{
+          display: "grid",
+          gap: { xs: 3, md: 4 },
+          alignItems: "start",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" },
+        }}
+      >
+        <Stack spacing={3} sx={{ minWidth: 0 }}>
+          {justConfirmed && booking.status === "confirmed" && <Notice tone="ok" title={bookingCopy.accept.done} />}
+          <Surface sx={{ p: { xs: 2.5, md: 4 }, minWidth: 0 }}>
+            <Stack spacing={3}>
+              <Stack spacing={0.5}>
+                <Typography>{`${formatPeriod(booking.checkIn, booking.checkOut)} · ${bookingCopy.host.nights(booking.nights)}`}</Typography>
+                <Typography>{booking.pets.map(describeBookingPet).join(" · ")}</Typography>
+                <Typography sx={{ fontWeight: 700 }}>
+                  {bookingCopy.host.total(formatBRL(fromCents(booking.totalCents)))}
+                </Typography>
+                <Typography color="text.secondary">
+                  {copy.perNight(formatBRL(fromCents(booking.nightlyRateCents)))}
+                </Typography>
+                {booking.status === "requested" && booking.responseDeadline && (
+                  <Typography sx={{ fontWeight: isDeadlineNear(booking.responseDeadline, moment) ? 800 : 400 }}>
+                    {bookingCopy.host.deadline(formatDeadline(booking.responseDeadline, moment))}
+                  </Typography>
+                )}
+              </Stack>
+              {steps && <StatusTimeline label={copy.trail} steps={steps} />}
+            </Stack>
+          </Surface>
+          {closed && <Notice tone="info" title={closed} />}
+          {booking.status !== "in_progress" && <OwnerContact booking={booking} />}
+          {/* Continua montado em `completed`: senão "voltou pra casa" some junto com a mudança de status. */}
+          {(booking.status === "confirmed" || booking.status === "in_progress" || booking.status === "completed") && (
+            <StayMilestones accountId={accountId} booking={booking} now={moment} />
+          )}
+          {booking.status === "requested" && (
+            <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }} useFlexGap>
+              <AcceptDialog accountId={accountId} booking={booking} onAccepted={() => setJustConfirmed(true)} />
+              <DeclineDialog accountId={accountId} booking={booking} />
+            </Stack>
+          )}
+          {(booking.status === "accepted" || booking.status === "confirmed") && (
+            <CancelBookingDialog accountId={accountId} booking={booking} />
+          )}
         </Stack>
-      )}
-      {(booking.status === "accepted" || booking.status === "confirmed") && (
-        <CancelBookingDialog accountId={accountId} booking={booking} />
-      )}
-      {petProfiles}
+        <Box sx={{ minWidth: 0 }}>{petProfiles}</Box>
+      </Box>
     </Stack>
   );
 }

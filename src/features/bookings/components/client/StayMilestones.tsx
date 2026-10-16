@@ -1,6 +1,6 @@
 "use client";
 
-import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
@@ -20,7 +20,7 @@ const arrivalDay = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "UTC",
 });
 
-/** Botão grande do marco (64 px), ocupado durante o envio. */
+/** Botão grande do marco (56 px), ocupado durante o envio. */
 function MilestoneButton({ children, busy, onClick }: { children: ReactNode; busy: boolean; onClick: () => void }) {
   return (
     <Button
@@ -29,7 +29,7 @@ function MilestoneButton({ children, busy, onClick }: { children: ReactNode; bus
       disabled={busy}
       aria-busy={busy || undefined}
       onClick={onClick}
-      sx={{ minHeight: 64, fontSize: "1.2rem", px: 4 }}
+      sx={{ minHeight: 56, fontSize: "1.2rem", px: 4 }}
     >
       {children}
     </Button>
@@ -64,22 +64,12 @@ function EmergencyContact({ booking }: { booking: Booking }) {
   const headingId = useId();
   if (!booking.contact?.phone) return null;
   return (
-    <Box
-      component="section"
-      aria-labelledby={headingId}
-      sx={{
-        p: 2,
-        borderRadius: `${quintalRadii.card}px`,
-        border: "3px solid",
-        borderColor: "text.primary",
-        bgcolor: "background.paper",
-      }}
-    >
+    <Surface component="section" aria-labelledby={headingId} sx={{ p: 3, overflowWrap: "anywhere" }}>
       <Typography id={headingId} sx={{ fontWeight: 800 }}>
         {copy.emergency}
       </Typography>
       <Typography sx={{ fontSize: "1.25rem", fontWeight: 800 }}>{booking.contact.phone}</Typography>
-    </Box>
+    </Surface>
   );
 }
 

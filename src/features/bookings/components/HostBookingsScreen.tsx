@@ -1,4 +1,7 @@
-import { Container, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { backendForRequest } from "@/shared/api/server/backendForRequest";
@@ -22,15 +25,13 @@ export async function HostBookingsScreen({ accountId, tab, page }: { accountId: 
     queryClient.prefetchQuery(bookingQueries.mine(accountId, { statuses: HOST_TABS[0]!.statuses }, transport)),
   ]);
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page">
       <Stack spacing={3}>
-        <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
-          {bookingCopy.host.heading}
-        </Typography>
+        <PageHeader title={bookingCopy.host.heading} />
         <HydrationBoundary state={dehydrate(queryClient)}>
           <HostBookingList accountId={accountId} tab={current} page={page} />
         </HydrationBoundary>
       </Stack>
-    </Container>
+    </PageContainer>
   );
 }
