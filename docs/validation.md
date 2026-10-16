@@ -363,3 +363,7 @@ Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da
 | `bash .agent-tools/e2e.sh pethost_frontend-040 e2e/mocked/home/home.spec.ts` | 8/8 no desktop e celular |
 
 O E2E escolhe â€œCÃ£oâ€ e â€œGatoâ€ por nome exato, sem colidir com o placeholder â€œCÃ£o ou gato?â€. Nos fluxos mÃ³veis, expande a pÃ­lula antes de preencher os campos e usa o CTA responsivo â€œBuscar cantinhosâ€. As portas 3100/5099 foram liberadas ao fim.
+
+## Retomada 16/10/2026 — home
+
+E2E mocked/home: 8/8 aprovados após aguardar hidratação e acomodar compilação fria (60 s por teste; 15 s para navegação à busca). Integração de origin/dev local: 43adc05 (PR #20). tsc --noEmit aprovado antes da atualização do teste; repetido nesta entrega. Fetch/push indisponíveis: conexão com github.com:443 recusada neste ambiente. Portas 3100/5099 encerradas explicitamente.

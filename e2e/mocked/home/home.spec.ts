@@ -1,7 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import { loginAccount } from "../../support/account";
+import { waitForHydration } from "../../support/hydration";
+
+test.setTimeout(60_000);
 
 async function expandSearchOnMobile(page: Page) {
+  await waitForHydration(page.getByRole("main"));
   const openSearch = page.getByRole("button", { name: "Abrir busca", exact: true });
   if (await openSearch.isVisible()) await openSearch.click();
 }
@@ -36,7 +40,7 @@ test("REQ-HOME-003 tutor com pet segue para busca com o id, sem dados do perfil"
   await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Maringá");
   await submitSearch(page);
-  await expect(page).toHaveURL(/\/search\?/);
+  await expect(page).toHaveURL(/\/search\?/, { timeout: 15_000 });
   const params = new URL(page.url()).searchParams;
   expect(params.get("where")).toBe("Maringá");
   expect(params.getAll("pets")).toEqual(["0199d2a0-0000-7000-8000-0000000000e1"]);
