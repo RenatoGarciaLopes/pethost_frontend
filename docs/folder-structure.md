@@ -51,6 +51,31 @@ src/features/listing-page/
 e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
 ```
 
+## Pagamentos do anfitrião (spec 043, 15/10/2026)
+
+```text
+src/features/host-payouts/
+  api/                         contratos, mapper, query e cliente BFF
+    client/                    operações browser de sessão, link e sync
+    server/                    prefetch autenticado para a rota RSC
+  components/client/
+    EmbeddedOnboarding/        fronteira Stripe Connect, carregada sob demanda
+    HostPayouts/               estados e ações da tela
+  components/server/
+    HostPayoutsScreen/         prefetch e HydrationBoundary
+  hooks/                       início, link hospedado e sincronização
+  lib/                         copy, requisitos, appearance e etapa do painel 030
+  types.ts                     projeção segura da conta de recebimento
+src/app/(host)/host/payments/  rota privada /host/payments
+src/test/fixtures/payouts.ts   fixture sintética do DTO
+src/test/msw/stripeAccountMock.int.test.ts
+e2e/support/handlers/stripeAccount.mjs
+e2e/mocked/host/payouts.spec.ts
+e2e/support/devIndicator.ts       selo do next dev oculto em jornadas mobile
+```
+
+O painel 030 nao foi criado nem alterado; `payoutStageOf` esta exportado como contrato para a integracao paralela. A jornada Playwright cobre desktop e celular. `stripeAccount.mjs` semeia `restricted`/`enabled`; o teste intercepta `connect-js.stripe.com/v1.0/connect.js` com um elemento Connect sintetico, sem rede externa. A execucao aguarda o Renato informar quando as portas estiverem livres.
+
 ## Ampliação da base de pets (spec 021, 14/10/2026)
 
 Recursos implementados sobre a feature da 020; componentes, stores e páginas da composição paralela têm inventário próprio. Detalhes e validação no vault `development/resources/pets.md`, seção "Apresentar o pet (spec 021): base".

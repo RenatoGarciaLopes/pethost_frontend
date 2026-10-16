@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Link } from "@mui/material";
 import { shellCopy } from "../lib/shellCopy";
 
@@ -21,7 +22,7 @@ export function SkipLink() {
         bgcolor: "background.paper",
         border: 2,
         borderColor: "text.primary",
-        borderRadius: 2,
+        borderRadius: `${quintalRadii.control}px`,
         fontWeight: 700,
         "&:focus": { top: 16 },
       }}

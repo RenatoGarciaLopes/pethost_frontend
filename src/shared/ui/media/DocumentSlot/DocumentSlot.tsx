@@ -1,5 +1,6 @@
 "use client";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, ButtonBase, FormHelperText, Stack, Typography } from "@mui/material";
 import { useId, useRef, type ChangeEvent, type ReactNode } from "react";
 import { useObjectUrl } from "../../../hooks/useObjectUrl";
@@ -98,7 +99,7 @@ export function DocumentSlot({
           p: 2,
           width: "100%",
           textAlign: "left",
-          borderRadius: 3,
+          borderRadius: `${quintalRadii.card}px`,
           border: "2px solid",
           borderStyle: file || uploaded ? "solid" : "dashed",
           borderColor: error ? "error.main" : theme.palette.quintal.tinta,
@@ -110,7 +111,7 @@ export function DocumentSlot({
         <Box
           sx={{
             aspectRatio: "3 / 2",
-            borderRadius: 2,
+            borderRadius: `${quintalRadii.control}px`,
             overflow: "hidden",
             display: "grid",
             placeItems: "center",

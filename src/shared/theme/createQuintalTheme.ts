@@ -16,6 +16,7 @@ import { quintalColors as c } from "./tokens/colors";
 import { accountTones, feedbackColors, sceneColors, surfaceColors } from "./tokens/semantic";
 import { quintalTypography } from "./tokens/typography";
 import { hardShadow } from "./tokens/shadows";
+import { quintalRadii } from "./tokens/radii";
 
 /**
  * Tema Quintal do MUI (claro, com variáveis CSS). Mapeamento da paleta conforme o vault
@@ -45,7 +46,8 @@ export const quintalTheme = createTheme({
     divider: c.linha,
   },
   typography: quintalTypography,
-  shape: { borderRadius: 18 },
+  shape: { borderRadius: quintalRadii.field },
+  quintal: { radius: quintalRadii },
   shadows: [
     "none",
     ...Array.from({ length: 24 }, (_, index) => hardShadow(index < 8 ? 3 : index < 16 ? 5 : 8)),

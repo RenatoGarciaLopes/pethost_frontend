@@ -60,11 +60,11 @@ describe("atalhos na casca", () => {
     expect(screen.getByRole("navigation", { name: "Navegação principal" })).toBeInTheDocument();
     unmount();
     const host = setup("host");
-    expect(
-      within(screen.getByRole("navigation", { name: "Navegação principal" })).getByRole("link", {
-        name: "Minha verificação",
-      }),
-    ).toHaveAttribute("href", "/host/application");
+    const hostNav = within(screen.getByRole("navigation", { name: "Navegação principal" }));
+    const hostLinks = hostNav.getAllByRole("link");
+    expect(hostLinks[0]).toHaveAccessibleName("Painel");
+    expect(hostLinks[0]).toHaveAttribute("href", "/host");
+    expect(hostNav.getByRole("link", { name: "Minha verificação" })).toHaveAttribute("href", "/host/application");
     expect(
       within(screen.getByRole("navigation", { name: "Navegação principal" })).getByRole("link", {
         name: "Pets da casa",
@@ -77,6 +77,15 @@ describe("atalhos na casca", () => {
         name: "Fila de verificação",
       }),
     ).toHaveAttribute("href", "/admin/host-applications");
+  });
+
+  it("REQ-UIC-003 aplica geometria responsiva no cabeçalho sem duplicar o logo", () => {
+    setup("host");
+    const header = screen.getByRole("banner");
+    const injectedCss = [...document.querySelectorAll("style")].map((style) => style.textContent).join(" ");
+    expect(injectedCss).toMatch(/height:56px/);
+    expect(injectedCss).toMatch(/height:64px/);
+    expect(within(header).getAllByRole("link", { name: "PetHost" })).toHaveLength(1);
   });
   it("REQ-AQUEUE-001 admin tem atalho para a fila de verificação", () => {
     setup("admin");

@@ -1,5 +1,6 @@
 "use client";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Avatar, Box, Button, Link, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
@@ -9,6 +10,7 @@ import { formatBRL, fromCents } from "@/shared/lib/money";
 import { initialsOf } from "@/shared/lib/text/initials";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
@@ -25,11 +27,11 @@ function BookingCard({ booking, now }: { booking: Booking; now: Date }) {
   const owner = booking.owner?.name ?? "";
   const near = isDeadlineNear(booking.responseDeadline, now);
   return (
-    <Stack
+    <Surface
       component="article"
       aria-label={`Pedido de ${owner}`}
-      spacing={1.5}
-      sx={{ p: 2, border: "2px solid", borderRadius: 3, bgcolor: "background.paper" }}
+      elevation="sm"
+      sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}
     >
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
         <Avatar
@@ -66,7 +68,7 @@ function BookingCard({ booking, now }: { booking: Booking; now: Date }) {
           {copy.open}
         </Button>
       </Box>
-    </Stack>
+    </Surface>
   );
 }
 
@@ -90,7 +92,7 @@ function Tabs({ accountId, current }: { accountId: string; current: BookingTab }
                   gap: 1,
                   minHeight: 48,
                   px: 2,
-                  borderRadius: 999,
+                  borderRadius: `${quintalRadii.pill}px`,
                   border: "2px solid",
                   fontWeight: 700,
                   textDecoration: "none",
