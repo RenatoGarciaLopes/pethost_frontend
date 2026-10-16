@@ -62,10 +62,7 @@ test("REQ-REQST-002 a REQ-REQST-006 pede a estadia com o que veio da URL e acomp
   await expect(page.getByRole("link", { name: /^Quintal da Cida/ })).toContainText("Esperando resposta", NAVIGATION);
 });
 
-// Pendente da 042: /listings/[listingId] lê a sessão fora de <Suspense> e, com cacheComponents, a navegação no cliente
-// a partir da busca falha ("uncached data during prerendering or a navigation"). Tirar o fixme quando a página
-// envolver o conteúdo em <Suspense> e esperar connection() antes da sessão.
-test.fixme("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas e o pet da busca", async ({
+test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas e o pet da busca", async ({
   page,
   baseURL,
 }) => {

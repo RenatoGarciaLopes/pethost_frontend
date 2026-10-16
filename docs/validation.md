@@ -394,3 +394,11 @@ Após alinhar a nomenclatura à API e ao ER, a estrutura passou a ter 14 feature
 | ESLint, `tsc --noEmit`, Prettier                                                                       | sem erros                                                                                                                                                                                                                                                 |
 | Storybook (`RequestStayForm`, `RequestStayHostNotice`)                                                 | 5/5                                                                                                                                                                                                                                                       |
 | E2E mocked `e2e/mocked/bookings` e `e2e/mocked/search`, desktop e celular                              | request.spec 8/8; my-stays, host-requests, stay-day e search verdes (my-stays caiu uma vez no celular por lentidão de render e passou 10/10 ao repetir); `listing-page.spec` falha 2/2 pelo `component={Link}` da `ListingPageScreen` (042, em andamento) |
+
+### 16/10/2026 · 050 com a 042 corrigida e o dev (005 etapas 1 a 4, 043, 030)
+
+| Verificação                                                                           | Resultado                             |
+| ------------------------------------------------------------------------------------- | ------------------------------------- |
+| Vitest: `features/bookings`, `features/listing-page`, rotas de `listings`, `test/msw` | 37 arquivos, 167 testes verdes        |
+| ESLint (inclui `no-numeric-radius`), `tsc --noEmit`, Prettier                         | sem erros                             |
+| E2E mocked `bookings` e `search` (jornada busca → cantinho → pedido sem `fixme`)      | aguardando a vez nas portas 3100/5099 |

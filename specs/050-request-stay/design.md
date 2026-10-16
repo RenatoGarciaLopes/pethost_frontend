@@ -30,6 +30,7 @@ updated: 2026-10-15
 - **Envio único:** botão ocupado e uma trava contra o clique duplo antes do botão travar.
 - **Erros:** `400` volta ao campo (`applyFieldErrors`); regra (`422`/`409`/`404`) vira `Notice` no topo. A data do dia fechado e da noite cheia sai da mensagem da API (`bookingErrorDetail`, a API não manda `details`), e o pet em conflito sai do id citado. `BOOKING_LISTING_NOT_FOUND` ganha "Voltar pra busca".
 - **Pedido enviado:** troca o formulário, com o foco no título, o prazo em Brasília (`formatDeadline`) e os caminhos "Ver minhas estadias" e "Voltar pra busca".
+- **Layout (spec 005):** a rota usa `PageContainer` (largura `page`) e o resumo do pedido é um `Surface`; a capa usa `quintalRadii.media`, sem raio numérico.
 - **Desvio:** o período usa o `formatPeriod` curto das outras telas ("20 a 25 de dez. · 5 noites"), não o mês por extenso do exemplo.
 - **Shared unificado no merge com a 042:** `shared/lib/money` (uma implementação) e `shared/lib/date/stayRules` (`brasiliaToday` em UTC−3 fixo, como o `BookingClock`; `addDays` com validação, `nightsBetween` e `validateStay` da 041).
 - **Mock do E2E:** `POST /bookings` na ordem da seção 4 (campos, cantinho, pets do tutor e ativos, espécie e porte, conflito do pet, dia da semana com a data na mensagem; sem capacidade). O cantinho do mock da 042 passou a receber de segunda a sábado (`publicListing` exportado), e o mock de pets exporta `petsOfAccount`. O `GET /listings/:id` do mock do anfitrião (044) só responde o cantinho do próprio anfitrião e deixa os outros para o mock público.

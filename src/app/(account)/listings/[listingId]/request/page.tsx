@@ -1,4 +1,3 @@
-import { Container } from "@mui/material";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -16,6 +15,7 @@ import { requirePersonalUser } from "@/shared/auth/server/requirePersonalUser";
 import { brasiliaToday } from "@/shared/lib/date/stayRules";
 import type { SearchParams } from "@/shared/lib/url/searchParams";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { RequestStayComposer } from "./RequestStayComposer";
 
 export const metadata: Metadata = { title: bookingCopy.pageTitles.request, robots: { index: false, follow: false } };
@@ -28,11 +28,11 @@ interface RequestStayPageProps {
 /** `/listings/{id}/request` (spec 050): o pedido de estadia do tutor, com datas e pets da URL (`from`, `to`, `pets`). */
 export default function RequestStayPage(props: RequestStayPageProps) {
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer>
       <Suspense fallback={<SniffLoader label={bookingCopy.loading} />}>
         <RequestStayContent {...props} />
       </Suspense>
-    </Container>
+    </PageContainer>
   );
 }
 

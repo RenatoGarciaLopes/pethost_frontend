@@ -9,8 +9,10 @@ import { hasErrorCode } from "@/shared/api/errors/ApiError";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { nightsBetween } from "@/shared/lib/date/stayRules";
 import { formatBRL } from "@/shared/lib/money";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { DateRangeField } from "@/shared/ui/forms/DateRangeField";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { toBooking } from "../../api/mappers";
 import { useRequestBooking } from "../../hooks/useBookingMutations";
 import { bookingCopy } from "../../lib/bookingCopy";
@@ -96,11 +98,7 @@ function RequestSummary({
   const nights = nightsBetween(values.checkIn, values.checkOut);
   const chosen = pets.filter((pet) => values.petIds.includes(pet.id));
   return (
-    <Box
-      component="section"
-      aria-labelledby={headingId}
-      sx={{ p: 2, border: "2px solid", borderRadius: 3, bgcolor: "background.paper", display: "grid", gap: 1 }}
-    >
+    <Surface component="section" aria-labelledby={headingId} sx={{ p: 2, display: "grid", gap: 1 }}>
       <Typography id={headingId} variant="h2" sx={{ fontSize: 20 }}>
         {copy.summary}
       </Typography>
@@ -109,7 +107,7 @@ function RequestSummary({
           component="img"
           src={listing.coverUrl}
           alt=""
-          sx={{ width: "100%", aspectRatio: "3 / 2", objectFit: "cover", borderRadius: 2 }}
+          sx={{ width: "100%", aspectRatio: "3 / 2", objectFit: "cover", borderRadius: `${quintalRadii.media}px` }}
         />
       ) : (
         <Typography color="text.secondary">{copy.noCover}</Typography>
@@ -127,7 +125,7 @@ function RequestSummary({
       ) : (
         <Typography aria-live="polite">{copy.choose}</Typography>
       )}
-    </Box>
+    </Surface>
   );
 }
 
