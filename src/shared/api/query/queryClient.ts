@@ -12,6 +12,14 @@ export function accountQueryKey(userId: string, ...parts: readonly unknown[]) {
   return ["account", userId, ...parts] as const;
 }
 
+/** Prefixo privado da trilha, opcionalmente limitado ao alvo; permite invalidar sem importar features.
+ * @example adminAuditQueryKey(adminId, { targetType: "owner", targetId: ownerId })
+ */
+export function adminAuditQueryKey(userId: string, target?: { targetType: string; targetId: string }) {
+  const prefix = accountQueryKey(userId, "admin", "audit");
+  return target ? ([...prefix, target] as const) : prefix;
+}
+
 /** Repete só o que pode passar sozinho: rede caída e erro 5xx da API. */
 export function shouldRetry(failureCount: number, error: unknown): boolean {
   if (failureCount >= MAX_RETRIES || !isApiError(error)) return false;

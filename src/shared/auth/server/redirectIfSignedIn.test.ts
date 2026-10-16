@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sessionUserFixture } from "@/test/fixtures/session";
 import { redirectIfSignedIn } from "./redirectIfSignedIn";
 
-const { getSession, redirect } = vi.hoisted(() => ({
+const { connection, getSession, redirect } = vi.hoisted(() => ({
+  connection: vi.fn(async () => undefined),
   getSession: vi.fn(),
   redirect: vi.fn((path: string) => {
     throw new Error(`NEXT_REDIRECT ${path}`);
@@ -10,6 +11,7 @@ const { getSession, redirect } = vi.hoisted(() => ({
 }));
 vi.mock("./getSession", () => ({ getSession }));
 vi.mock("next/navigation", () => ({ redirect }));
+vi.mock("next/server", () => ({ connection }));
 
 describe("redirectIfSignedIn", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -17,6 +19,8 @@ describe("redirectIfSignedIn", () => {
   it("REQ-OREG-015 sem sessão, a tela aparece", async () => {
     getSession.mockResolvedValue(null);
     await expect(redirectIfSignedIn("/hosts/42")).resolves.toBeUndefined();
+    expect(connection).toHaveBeenCalledOnce();
+    expect(connection.mock.invocationCallOrder[0]).toBeLessThan(getSession.mock.invocationCallOrder[0]);
     expect(redirect).not.toHaveBeenCalled();
   });
 

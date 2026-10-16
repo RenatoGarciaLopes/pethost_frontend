@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "./ApiError";
 import { errorCopy, GENERIC_ERROR_MESSAGE } from "./errorCopy";
-import { getErrorMessage } from "./getErrorMessage";
+import { getErrorCopy, getErrorMessage } from "./getErrorMessage";
 
 const apiError = (code: string, extra: Partial<ConstructorParameters<typeof ApiError>[0]> = {}) =>
   new ApiError({ status: 400, code, message: "english from the API", ...extra });
@@ -12,6 +12,23 @@ describe("getErrorMessage", () => {
       expect(getErrorMessage(apiError(code))).toBe("Outra pessoa da equipe já decidiu essa verificação.");
     expect(getErrorMessage(apiError("HOST_CPF_ALREADY_REGISTERED"), { adminReview: true })).toContain("Recuse com");
     expect(getErrorMessage(apiError("HOST_CPF_ALREADY_REGISTERED"))).not.toContain("Recuse com");
+  });
+  it("REQ-AACC-011 usa orientação de admin sem trocar a copy da conta pessoal", () => {
+    expect(getErrorMessage(apiError("HOST_NOT_FOUND"), { adminAccounts: true })).toBe(
+      "Esse perfil de anfitrião não existe mais.",
+    );
+    expect(getErrorMessage(apiError("OWNER_NOT_FOUND"))).toBe("Não achamos seu perfil de tutor. Fala com o suporte.");
+    expect(getErrorMessage(apiError("OWNER_SUSPENSION_REQUIRED"), { adminAccounts: true })).toContain(
+      "não está suspensa",
+    );
+    expect(getErrorMessage(apiError("OWNER_CPF_RELEASED"), { adminAccounts: true })).toContain("já foi liberado");
+    expect(getErrorMessage(apiError("HOST_IDENTITY_RELEASED"), { adminAccounts: true })).toContain("já foi liberada");
+    expect(getErrorMessage(apiError("AUTH_ADMIN_SUSPENSION_FORBIDDEN"), { adminAccounts: true })).toContain(
+      "não pode ser suspensa",
+    );
+    expect(getErrorMessage(apiError("HOST_STRIPE_ACCOUNT_NOT_REJECTED"), { adminAccounts: true })).toContain(
+      "não está recusado",
+    );
   });
   it("REQ-PNEW-007 tipo de arquivo recusado tem frase em português", () => {
     expect(getErrorMessage(apiError("UNSUPPORTED_MEDIA_TYPE"))).toBe(
@@ -133,6 +150,12 @@ describe("getErrorMessage", () => {
     );
     expect(getErrorMessage(apiError("NETWORK_ERROR"))).toMatch(/conexão/);
   });
+});
+
+it("REQ-HTTP-005 getErrorCopy resolve frases que dependem do contexto, sem um erro em mãos", () => {
+  expect(getErrorCopy("HOST_NOT_FOUND")).toBe("Seus dados ficam editáveis depois da verificação.");
+  expect(getErrorCopy("HOST_NOT_FOUND", { adminAccounts: true })).toBe("Esse perfil de anfitrião não existe mais.");
+  expect(getErrorCopy("CODIGO_QUE_NAO_EXISTE")).toBe(getErrorMessage(new Error("x")));
 });
 it.each([
   ["HOST_STRIPE_UNAVAILABLE", "O Stripe não respondeu agora. Tenta de novo em alguns minutos."],

@@ -22,6 +22,9 @@ export function useSearchParamsState<T extends Record<string, string | number | 
   function update(patch: Partial<T>) {
     const next = schema.parse({ ...state, ...patch });
     const query = new URLSearchParams(params.toString());
+    for (const [key, value] of Object.entries(patch)) {
+      if (value === undefined || value === null) query.delete(key);
+    }
     for (const [key, value] of Object.entries(next)) {
       if (value === undefined || value === null) query.delete(key);
       else query.set(key, String(value));

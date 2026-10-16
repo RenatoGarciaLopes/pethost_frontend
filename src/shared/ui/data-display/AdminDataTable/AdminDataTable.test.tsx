@@ -16,7 +16,6 @@ it("REQ-AQUEUE-001/003 tabela navega, ordena e pagina sem perder links", async (
       ]}
       rowKey={(row) => row.id}
       rowHref={(row) => `/review/${row.id}`}
-      rowLabel={(row) => row.name}
       page={1}
       pageSize={1}
       onPageChange={onPageChange}
@@ -41,7 +40,6 @@ it("REQ-AQUEUE-004 tabela vazia apresenta saída fornecida pelo consumidor", () 
       columns={[]}
       rowKey={() => ""}
       rowHref={() => "/"}
-      rowLabel={() => ""}
       page={1}
       onPageChange={() => {}}
       empty="Ninguém esperando agora"
