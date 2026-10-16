@@ -1,4 +1,5 @@
 "use client";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { useState } from "react";
 import {
   Box,
@@ -33,7 +34,7 @@ export function SearchBar(props: SearchBarProps) {
       <Button
         variant="outlined"
         onClick={() => setOpen(true)}
-        sx={{ display: { xs: "flex", md: "none" }, borderRadius: 8 }}
+        sx={{ display: { xs: "flex", md: "none" }, borderRadius: `${quintalRadii.pill}px` }}
       >
         {copy.edit}
       </Button>

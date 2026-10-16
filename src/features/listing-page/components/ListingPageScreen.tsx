@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Avatar, Box, Chip, Container, Divider, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { formatBRL } from "@/shared/lib/money";
@@ -130,7 +131,12 @@ export function ListingPageScreen({
                     return (
                       <Typography
                         key={pet.id}
-                        sx={{ border: "1px dashed", borderColor: "text.secondary", borderRadius: 1, p: 1.5 }}
+                        sx={{
+                          border: "1px dashed",
+                          borderColor: "text.secondary",
+                          borderRadius: `${quintalRadii.control}px`,
+                          p: 1.5,
+                        }}
                       >
                         {reason ?? copy.fit(pet.name)}
                       </Typography>
@@ -188,7 +194,15 @@ export function ListingPageScreen({
 function ListingGallery({ title, photos }: { title: string; photos: ListingDetail["photos"] }) {
   if (photos.length === 0)
     return (
-      <Box sx={{ minHeight: 220, display: "grid", placeItems: "center", bgcolor: "action.hover", borderRadius: 3 }}>
+      <Box
+        sx={{
+          minHeight: 220,
+          display: "grid",
+          placeItems: "center",
+          bgcolor: "action.hover",
+          borderRadius: `${quintalRadii.media}px`,
+        }}
+      >
         {copy.noPhoto}
       </Box>
     );
@@ -200,7 +214,7 @@ function ListingGallery({ title, photos }: { title: string; photos: ListingDetai
         gridTemplateColumns: { xs: "1fr", md: photos.length > 1 ? "2fr 1fr 1fr" : "1fr" },
         gap: 1,
         overflow: "hidden",
-        borderRadius: 3,
+        borderRadius: `${quintalRadii.card}px`,
       }}
     >
       {photos.map((photo, index) => (

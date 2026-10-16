@@ -1,4 +1,5 @@
 "use client";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import Link from "next/link";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { nightsBetween } from "@/shared/lib/date/stayRules";
@@ -41,7 +42,7 @@ export function ListingCard({ listing, query, petCount }: ListingCardProps) {
         textDecoration: "none",
         border: "2px solid",
         borderColor: "text.primary",
-        borderRadius: 4,
+        borderRadius: `${quintalRadii.card}px`,
         overflow: "hidden",
         height: "100%",
         boxShadow: "4px 4px 0 currentColor",
