@@ -157,3 +157,19 @@ it("REQ-HTTP-005 getErrorCopy resolve frases que dependem do contexto, sem um er
   expect(getErrorCopy("HOST_NOT_FOUND", { adminAccounts: true })).toBe("Esse perfil de anfitrião não existe mais.");
   expect(getErrorCopy("CODIGO_QUE_NAO_EXISTE")).toBe(getErrorMessage(new Error("x")));
 });
+it.each([
+  ["HOST_STRIPE_UNAVAILABLE", "O Stripe não respondeu agora. Tenta de novo em alguns minutos."],
+  ["HOST_STRIPE_REQUEST_REJECTED", "O Stripe não aceitou esses dados. Fala com o suporte pra gente conferir."],
+  [
+    "HOST_STRIPE_ONBOARDING_NOT_ALLOWED",
+    "O cadastro de recebimento não está disponível pra essa conta agora. Fala com o suporte.",
+  ],
+  [
+    "HOST_STRIPE_ACCOUNT_REJECTED",
+    "O Stripe não aprovou o recebimento dessa conta. Fala com a gente pra entender o que aconteceu.",
+  ],
+  ["HOST_STRIPE_ACCOUNT_ALREADY_EXISTS", "Essa conta já tem recebimento conectado. Pra trocar, fala com o suporte."],
+  ["HOST_STRIPE_ACCOUNT_NOT_FOUND", "Você ainda não começou seu cadastro de recebimento. Começa por aqui."],
+])("REQ-PAYOUT-012 %s tem frase própria", (code, message) => {
+  expect(getErrorMessage(apiError(code))).toBe(message);
+});

@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { formatBRL, fromCents } from "@/shared/lib/money";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
@@ -13,20 +14,20 @@ function ListingCard({ listing }: { listing: Listing }) {
       component="article"
       aria-label={listing.title}
       spacing={1.5}
-      sx={{ p: 2, border: "2px solid", borderRadius: 3, bgcolor: "background.paper" }}
+      sx={{ p: 2, border: "2px solid", borderRadius: `${quintalRadii.card}px`, bgcolor: "background.paper" }}
     >
       {listing.coverUrl ? (
         <Box
           component="img"
           src={listing.coverUrl}
           alt={copy.cover(listing.title)}
-          sx={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: 2 }}
+          sx={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: `${quintalRadii.control}px` }}
         />
       ) : (
         <Box
           sx={{
             aspectRatio: "4 / 3",
-            borderRadius: 2,
+            borderRadius: `${quintalRadii.control}px`,
             border: "2px dashed",
             borderColor: "divider",
             display: "grid",
