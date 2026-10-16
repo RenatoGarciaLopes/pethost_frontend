@@ -1,4 +1,4 @@
-import { Container, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -7,6 +7,8 @@ import { listingCopy } from "@/features/host-listings";
 import { MyListingsSummary } from "@/features/host-listings/index.server";
 import { requireRole } from "@/shared/auth/server/requireRole";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 import { HostOnboardingPanel } from "@/widgets/host-onboarding/index.server";
 
 export const metadata: Metadata = { title: listingCopy.pageTitles.panel, robots: { index: false, follow: false } };
@@ -14,16 +16,14 @@ export const metadata: Metadata = { title: listingCopy.pageTitles.panel, robots:
 /** `/host` (specs 044 e 053): o painel do anfitrião, com os pedidos esperando resposta, as três etapas e os cantinhos. */
 export default function HostHomePage() {
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page">
       <Stack spacing={4}>
-        <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
-          {listingCopy.panelHeading}
-        </Typography>
+        <PageHeader title={listingCopy.panelHeading} />
         <Suspense fallback={<SniffLoader label={listingCopy.loading} />}>
           <HostHomeContent />
         </Suspense>
       </Stack>
-    </Container>
+    </PageContainer>
   );
 }
 

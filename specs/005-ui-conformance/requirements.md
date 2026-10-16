@@ -1,6 +1,6 @@
 ---
 spec: 005-ui-conformance
-status: approved
+status: in-progress
 updated: 2026-10-15
 area: UIC
 ---
