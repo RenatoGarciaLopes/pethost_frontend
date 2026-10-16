@@ -355,3 +355,34 @@ Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da
 - "voltou pra casa" sumia: a `StayMilestones` desmontava quando a estadia virava `completed`. Agora fica montada.
 - Avatar com iniciais sem contraste (axe) na lista e no detalhe do anfitrião: coral com o texto de contraste do tema, como no shell.
 - `host-requests.spec.ts`: espera a hidratação antes de abrir o pedido e dá 60 s à primeira jornada, que compila as rotas a frio no `next dev`.
+
+## Spec 033: auditoria administrativa (15/10/2026)
+
+Validação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`.
+
+- Vitest direcionado: **16 arquivos, 43 testes aprovados**, com `--maxWorkers=2`. Inclui unitários de schema/mapper/contratos/datas/copy/links, testes funcionais de filtros/tabela/detalhe/explorer e integrações MSW no cliente BFF e prefetch server-side, mais regressão de navegação e consumers do hook 031.
+- Comando: `npx.cmd vitest run src/features/admin-audit src/shared/lib/date/formatDateTime.test.ts src/shared/lib/clipboard/writeClipboard.test.ts src/shared/ui/data-display/CopyButton/CopyButton.test.tsx src/shared/hooks/useSearchParamsState.test.tsx src/shared/config/navigation.test.ts --maxWorkers=2`.
+- `npx.cmd tsc --noEmit -p .`: aprovado, sem erros. ESLint direcionado: aprovado. Prettier check: aprovado. `git diff --check` e inspeção de BOM UTF-8 em 64 arquivos: aprovados.
+- Playwright mockado e real: jornadas escritas; não executadas enquanto aguardamos as portas reservadas.
+- Storybook/a11y, build e verify global: não executados conforme `spec-owner-common.md`; as stories usam `export default meta`.
+- Vault e catálogo: somente leitura e fora desta worktree. Recursos e respectivas linhas estão incluídos no resumo a Claude Code; não declarar integração do vault concluída.
+
+## Admin accounts and audit regression - 2026-10-16
+
+- Local `origin/dev` merged in `2836cd1`; both error-message test groups and host/admin navigation expectations retained.
+- `vitest run` for AccountDetail, AdminDataTable, redirectIfSignedIn, navigation and getErrorMessage: 5 files, 162 tests passed.
+- Mocked `accounts.spec.ts` after merge: 6/6 passed (desktop/mobile), including suspension and CPF release. Executed together with audit (8/12 combined passed before audit selectors were corrected).
+- Mocked `audit.spec.ts` after selecting the exact fixture entry: 6/6 passed (desktop/mobile), including action filtering, details, target href and unauthorized redirect.
+- `tsc --noEmit` passed after merge; final typecheck/lint results recorded below. `git diff --check` passed.
+- Test runner: `.agent-tools/e2e.sh`, one worker, no concurrent E2E. Servers were stopped explicitly after each run because automatic taskkill cleanup did not finish in this sandbox. Ports 3100/5099 released.
+- These E2E suites use the simulated backend; no real API or Storybook execution claimed. Existing HTTP integration tests were not rerun because their contracts did not change. No new pure domain logic was introduced.
+- Vault untouched per user instruction. No fetch/push after the user reserved publishing; commits are local and have no coauthor trailers.
+  Final targeted ESLint and tsc --noEmit: passed (exit 0).
+
+## Revisão PR 17: filtros, cache da trilha e paginação (2026-10-16)
+
+- Regressões iniciais: `npx.cmd vitest run` com os arquivos de código alterados como filtros, `--maxWorkers=2`: **3 arquivos, 18 testes aprovados** (limpar rascunho/erros, paginação full/compact, sete ações com refetch ativo e isolamento de admin/alvo).
+- Suíte ampliada: `npx.cmd vitest run src/features/admin-audit src/widgets/admin-accounts src/shared/api/query/queryClient.test.ts --maxWorkers=2`: **18 arquivos aprovados, 1 com falha; 59/60 testes aprovados**. Única falha: timeout de 5s no caso owner de AccountDetail ao abrir diálogo; nenhuma assertion funcional falhou.
+- Repetição isolada após simplificar a key sem mudar seu formato: `npx.cmd vitest run src/widgets/admin-accounts/hooks/useAccountAction.int.test.tsx src/widgets/admin-accounts/components/AccountDetail.test.tsx src/shared/api/query/queryClient.test.ts --maxWorkers=1`: **3 arquivos, 17 testes aprovados**, incluindo os dois casos de AccountDetail e cobertura unitária do prefixo compartilhado. Não foi necessário aumentar timeout nem alterar o teste existente.
+- `npx.cmd tsc --noEmit` e ESLint de todos os arquivos TS/TSX alterados: **aprovados**, exit 0. O primeiro typecheck apontou fixture antiga com array no lugar de AuditPage; corrigida para reutilizar auditPageModelFixture. Prettier aplicado ao código/spec e `git diff --check` aprovado.
+- Integrações usam MSW/cache TanStack, não API real. E2E/Storybook não executados por instrução sem portas. Nenhum push/fetch ou alteração no vault. Interfaces, limites, migração (N/A: formato de key preservado), níveis de teste e catálogo provisório de adminAuditQueryKey em `specs/033-admin-audit/design.md`.

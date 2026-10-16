@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "../errors/ApiError";
-import { accountQueryKey, createQueryClient, getQueryClient, shouldRetry } from "./queryClient";
+import { accountQueryKey, adminAuditQueryKey, createQueryClient, getQueryClient, shouldRetry } from "./queryClient";
+
+it("prefixo de auditoria limita invalidação ao admin e ao alvo", () => {
+  const target = { targetType: "owner", targetId: "owner-1" };
+  expect(adminAuditQueryKey("admin-1")).toEqual(["account", "admin-1", "admin", "audit"]);
+  expect(adminAuditQueryKey("admin-1", target)).toEqual([...adminAuditQueryKey("admin-1"), target]);
+  expect(adminAuditQueryKey("admin-2", target)).not.toEqual(adminAuditQueryKey("admin-1", target));
+  expect(adminAuditQueryKey("admin-1", { ...target, targetId: "owner-2" })).not.toEqual(
+    adminAuditQueryKey("admin-1", target),
+  );
+  expect(adminAuditQueryKey("admin-1", { ...target, targetType: "host" })).not.toEqual(
+    adminAuditQueryKey("admin-1", target),
+  );
+});
 
 it("REQ-SWITCH-003 chave de conta separa usuários e mantém o prefixo para consultas", () => {
   expect(accountQueryKey("user-1")).toEqual(["account", "user-1"]);

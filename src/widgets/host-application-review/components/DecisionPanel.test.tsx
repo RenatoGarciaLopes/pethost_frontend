@@ -3,6 +3,9 @@ import { expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
 import { DecisionPanel } from "./DecisionPanel";
 import { adminReviewCopy as copy } from "@/features/admin-host-applications";
+
+// Checklist inteiro e motivo digitado: com a suíte em paralelo, 5 s não bastam.
+vi.setConfig({ testTimeout: 20_000 });
 it("REQ-AQUEUE-008/009 aprovação exige checklist inteiro e motivo", async () => {
   const decide = vi.fn();
   const { user } = renderWithProviders(<DecisionPanel personType="pj" onDecide={decide} busy={false} />);

@@ -372,3 +372,36 @@ e2e/real/admin/verification-queue.spec.ts
 ```
 
 Os testes unitários, funcionais e de integração ficam junto dos recursos. Cada componente novo tem story, incluindo estados de empresa, decisão, fotos apagadas, conflito e celular. O checklist não tem export separado: sua cobertura pertence a `DecisionPanel.test.tsx`. `DecisionSummary` é interno e coberto pela composição e story de solicitação decidida. Não há dependência da feature da spec 030. `shared` não conhece o domínio de verificação; o widget compõe o domínio usando as APIs públicas da feature. Links assinados não entram no prefetch, no Query ou na URL da página.
+
+## Spec 033: auditoria administrativa (15/10/2026)
+
+Implementação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`. O domínio fica isolado em `features/admin-audit`; `AuditTable` é exportada para composição compacta pela 032. Reutiliza `AdminDataTable`, `useSearchParamsState` e `paginate` da 031. O ajuste de URL remove filtros opcionais solicitados e preserva parâmetros alheios.
+
+```text
+src/app/(admin)/admin/(panel)/audit-entries/page.tsx
+src/features/admin-audit/
+  api/contracts.ts, mappers.ts, queries.ts
+  api/client/audit.client.ts, audit.client.int.test.ts
+  api/server/audit.server.ts, audit.server.int.test.ts
+  schemas/auditSearchSchema.ts, lib/{toAuditQuery,auditActionCopy,auditTargetLink,auditCopy}.ts
+  components/client/{AuditExplorer,AuditFilters,AuditTable,AuditEntryDetail}/
+src/shared/lib/date/formatDateTime.ts
+src/shared/ui/data-display/CopyButton/
+src/test/fixtures/audit.ts
+e2e/support/handlers/auditEntries.mjs
+e2e/mocked/admin/audit.spec.ts, e2e/real/admin/audit.spec.ts
+```
+
+O detalhe mantém o IP fora da tabela; IDs e traceId são copiados ou navegados apenas por ação do usuário. `details` segue o OpenAPI como mapa texto-texto. E2E foi escrito, mas não iniciado aguardando portas reservadas. Catálogo e notas do vault ficam para integração fora desta worktree; as linhas de recurso seguem no resumo.
+
+### Integração da trilha nos detalhes 032 (15/10/2026)
+
+```text
+src/app/(admin)/admin/(panel)/users/owners/[ownerId]/page.tsx  compõe AuditTable com alvo owner fixo
+src/app/(admin)/admin/(panel)/users/hosts/[hostId]/page.tsx    compõe AuditTable com alvo host fixo
+src/app/(admin)/admin/(panel)/users/accountAuditComposition.stories.tsx  story da composição no nível app
+src/widgets/admin-accounts/components/AccountDetail.test.tsx   slot e link filtrado para tutor/anfitrião
+e2e/mocked/admin/accounts.spec.ts                              jornada conta → trilha para os dois alvos
+```
+
+As rotas compõem `AuditTable` pelo índice público `features/admin-audit/index.client.ts` e passam o nó pelo `auditTrail`; `widgets/admin-accounts` não importa a feature. O mock mantém eventos sintéticos para ids de tutor e anfitrião e registra ambos os handlers e resets em `mock-backend.mjs`. A primeira coluna do diretório de contas já traz o texto visível do nome, então não fornece `rowLabel` redundante ao `AdminDataTable` atualizado.
