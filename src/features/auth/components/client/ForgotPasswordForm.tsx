@@ -17,7 +17,7 @@ import {
   type ForgotPasswordValues,
 } from "../../schemas/forgotPasswordSchema";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 
 const { forgot } = passwordCopy;
 const ROLE_OPTIONS = (["owner", "host"] as const).map((role) => ({ value: role, label: forgot.roles[role] }));
@@ -60,7 +60,7 @@ export function ForgotPasswordForm({ headingRef, initialRole, onSent }: ForgotPa
 
   return (
     <Stack spacing={3}>
-      <StepHeading ref={headingRef}>{forgot.title}</StepHeading>
+      <PageHeader headingRef={headingRef} title={forgot.title} />
       <ErrorNotice message={notice.message} tone={notice.tone} />
       <Box component="form" noValidate onSubmit={onSubmit}>
         <Stack spacing={3}>

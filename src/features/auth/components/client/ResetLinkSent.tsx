@@ -9,7 +9,7 @@ import { useRequestPasswordResetMutation } from "../../hooks/usePasswordMutation
 import { passwordCopy } from "../../lib/passwordCopy";
 import type { ForgotPasswordValues } from "../../schemas/forgotPasswordSchema";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 
 /** Espera para mandar de novo (REQ-PWD-004). */
 const RESEND_AFTER_SECONDS = 60;
@@ -56,7 +56,7 @@ export function ResetLinkSent({ headingRef, values, onUseOtherEmail }: ResetLink
 
   return (
     <Stack spacing={3}>
-      <StepHeading ref={headingRef}>{sent.title}</StepHeading>
+      <PageHeader headingRef={headingRef} title={sent.title} />
       <Typography sx={{ fontSize: 18 }}>{sent.body}</Typography>
       {resent && <Notice tone="info">{sent.onlyNewest}</Notice>}
       <ErrorNotice message={notice.message} tone={notice.tone} />

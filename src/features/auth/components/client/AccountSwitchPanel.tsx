@@ -16,7 +16,7 @@ import { useLinkedAccounts } from "../../hooks/useLinkedAccounts";
 import { switchAvailability } from "../../lib/switchAvailability";
 import { switchCopy } from "../../lib/switchCopy";
 import { AccountPair } from "./AccountPair";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 import { SwitchPasswordForm } from "./SwitchPasswordForm";
 
 export interface AccountSwitchPanelProps {
@@ -51,7 +51,7 @@ export function AccountSwitchPanel({ userId, current, target }: AccountSwitchPan
 
   return (
     <Stack spacing={3}>
-      <StepHeading>{switchCopy.title}</StepHeading>
+      <PageHeader title={switchCopy.title} />
       {leaving || accounts.isPending ? (
         <Box sx={{ display: "grid", placeItems: "center", py: 3 }}>
           <SniffLoader label={leaving ? switchCopy.submitting : switchCopy.loading} scale={1} />

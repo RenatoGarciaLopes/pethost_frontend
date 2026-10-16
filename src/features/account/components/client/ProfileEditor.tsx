@@ -1,6 +1,8 @@
 "use client";
 
-import { Box, Button, Paper, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Button, Skeleton, Stack } from "@mui/material";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+import { Surface } from "@/shared/ui/layout/Surface";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -67,9 +69,7 @@ export function ProfileEditor({ userId, role }: ProfileEditorProps) {
 
   return (
     <Stack spacing={3}>
-      <Typography variant="h1" sx={{ fontSize: { xs: 28, md: 34 } }}>
-        {copy.title}
-      </Typography>
+      <PageHeader title={copy.title} />
       {role === "host" && !profile.verified && (
         <Notice
           tone="info"
@@ -86,11 +86,11 @@ export function ProfileEditor({ userId, role }: ProfileEditorProps) {
         sx={{
           display: "grid",
           gap: { xs: 3, md: 4 },
-          gridTemplateColumns: { xs: "1fr", md: "minmax(220px, 280px) minmax(0, 1fr)" },
+          gridTemplateColumns: { xs: "1fr", md: "360px minmax(0, 1fr)" },
           alignItems: "start",
         }}
       >
-        <Paper variant="outlined" sx={{ p: 2.5 }}>
+        <Surface component="aside" elevation="md" sx={{ p: 2.5 }}>
           <PublicProfileCard
             profile={profile}
             photo={
@@ -112,14 +112,16 @@ export function ProfileEditor({ userId, role }: ProfileEditorProps) {
               ) : undefined
             }
           />
-        </Paper>
-        <ProfileForm
-          profile={profile}
-          editability={editability}
-          save={(patch) => save.mutateAsync(patch)}
-          saving={save.isPending}
-          onSaved={() => router.refresh()}
-        />
+        </Surface>
+        <Surface sx={{ p: { xs: 2.5, md: 4 }, minWidth: 0, "& .MuiFormHelperText-root.Mui-disabled": { color: "text.secondary" } }}>
+          <ProfileForm
+            profile={profile}
+            editability={editability}
+            save={(patch) => save.mutateAsync(patch)}
+            saving={save.isPending}
+            onSaved={() => router.refresh()}
+          />
+        </Surface>
       </Box>
     </Stack>
   );

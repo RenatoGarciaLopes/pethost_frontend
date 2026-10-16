@@ -17,7 +17,7 @@ import {
   type ResetPasswordValues,
 } from "../../schemas/resetPasswordSchema";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 
 const { reset } = passwordCopy;
 
@@ -63,7 +63,7 @@ export function ResetPasswordForm({ token, onDone, onTokenRejected }: ResetPassw
 
   return (
     <Stack spacing={3}>
-      <StepHeading>{reset.title}</StepHeading>
+      <PageHeader title={reset.title} />
       <ErrorNotice message={notice.message} tone={notice.tone} />
       <Box component="form" noValidate onSubmit={onSubmit}>
         <Stack spacing={3}>

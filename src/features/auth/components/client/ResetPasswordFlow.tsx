@@ -8,7 +8,7 @@ import { useUrlSecret } from "@/shared/hooks/useUrlSecret";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { passwordCopy } from "../../lib/passwordCopy";
 import { ResetPasswordForm } from "./ResetPasswordForm";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 
 const { reset, done } = passwordCopy;
 
@@ -59,7 +59,7 @@ function RequestNewLink({
 }) {
   return (
     <Stack spacing={3}>
-      <StepHeading ref={headingRef}>{reset.title}</StepHeading>
+      <PageHeader headingRef={headingRef} title={reset.title} />
       <Notice tone="atencao">{message}</Notice>
       <Button variant="contained" size="large" component={NextLink} href={forgotPasswordPath()}>
         {reset.requestNew}
@@ -72,7 +72,7 @@ function RequestNewLink({
 function ResetDone({ headingRef }: { headingRef: RefObject<HTMLHeadingElement | null> }) {
   return (
     <Stack spacing={3}>
-      <StepHeading ref={headingRef}>{done.title}</StepHeading>
+      <PageHeader headingRef={headingRef} title={done.title} />
       <Typography sx={{ fontSize: 18 }}>{done.body}</Typography>
       <Button variant="contained" size="large" component={NextLink} href={LOGIN_PATH}>
         {done.login}

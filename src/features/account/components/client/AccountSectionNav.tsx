@@ -34,7 +34,9 @@ export function AccountSectionNav() {
                 aria-current={current ? "page" : undefined}
                 underline="none"
                 sx={{
-                  display: "inline-block",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  minHeight: 48,
                   py: 1,
                   fontWeight: current ? 700 : 400,
                   color: current ? "text.primary" : "text.secondary",

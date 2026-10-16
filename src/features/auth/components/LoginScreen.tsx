@@ -1,4 +1,7 @@
-import { Box, Container, Paper, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+import { Surface } from "@/shared/ui/layout/Surface";
 import type { AccountRole } from "@/shared/auth/contracts/session";
 import type { LoginNotice } from "@/shared/config/appRoutes";
 import { DoorMark } from "@/shared/ui/brand/DoorMark";
@@ -37,26 +40,27 @@ export function LoginScreen({ variant, initialRole, next, notice }: LoginScreenP
 
   if (variant === "admin") {
     return (
-      <Container component="main" id="conteudo" maxWidth="xs" sx={{ py: { xs: 4, md: 8 } }}>
+      <PageContainer component="main" id="conteudo" width="reading">
         <Stack spacing={3} sx={{ alignItems: "center", mb: 3 }}>
           <Reveal order={0}>
             <DoorMark size="header" withWordmark title="PetHost" interactive={false} />
           </Reveal>
           <Reveal order={1}>
-            <Typography variant="h1" component="h1" sx={{ fontSize: { xs: 28, md: 34 }, textAlign: "center" }}>
-              {authCopy.adminTitle}
-            </Typography>
+            <PageHeader title={authCopy.adminTitle} />
           </Reveal>
         </Stack>
         <Reveal order={2}>
-          <Paper sx={{ p: { xs: 3, md: 4 } }}>{form}</Paper>
+          <Surface elevation="md" sx={{ p: { xs: 3, md: 4 } }}>
+            {form}
+          </Surface>
         </Reveal>
-      </Container>
+      </PageContainer>
     );
   }
 
   return (
-    <Box
+    <PageContainer
+      width="page"
       component="main"
       id="conteudo"
       sx={{
@@ -65,10 +69,6 @@ export function LoginScreen({ variant, initialRole, next, notice }: LoginScreenP
         alignItems: "center",
         gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) minmax(360px, 460px)" },
         gap: { xs: 2, md: 8 },
-        px: { xs: 2, md: 8 },
-        py: { xs: 3, md: 6 },
-        maxWidth: 1240,
-        mx: "auto",
       }}
     >
       <Stack
@@ -83,9 +83,7 @@ export function LoginScreen({ variant, initialRole, next, notice }: LoginScreenP
             </Typography>
           </Reveal>
           <Reveal order={1}>
-            <Typography variant="h1" component="h1" sx={{ fontSize: { xs: 26, md: 48 }, maxWidth: 520 }}>
-              {authCopy.title}
-            </Typography>
+            <PageHeader title={authCopy.title} />
           </Reveal>
         </Box>
 
@@ -101,8 +99,10 @@ export function LoginScreen({ variant, initialRole, next, notice }: LoginScreenP
       </Stack>
 
       <Reveal order={2}>
-        <Paper sx={{ p: { xs: 2.5, md: 4 } }}>{form}</Paper>
+        <Surface elevation="md" sx={{ p: { xs: 2.5, md: 4 } }}>
+          {form}
+        </Surface>
       </Reveal>
-    </Box>
+    </PageContainer>
   );
 }

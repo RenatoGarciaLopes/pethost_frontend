@@ -1,4 +1,5 @@
 "use client";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 
 import { Button, Link, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
@@ -33,9 +34,7 @@ export function RegisterChoice({ next }: RegisterChoiceProps) {
   return (
     <Stack spacing={4}>
       <Reveal order={0}>
-        <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 44 } }}>
-          {choice.title}
-        </Typography>
+        <PageHeader title={choice.title} />
       </Reveal>
       <Reveal order={1}>
         <ChoiceCardGroup

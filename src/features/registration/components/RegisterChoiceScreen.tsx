@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { RegisterChoice } from "./client/RegisterChoice";
 
 export interface RegisterChoiceScreenProps {
@@ -8,8 +8,8 @@ export interface RegisterChoiceScreenProps {
 /** `/register` (REQ-OREG-001), Server Component: a página estreita e centralizada com a escolha. */
 export function RegisterChoiceScreen({ next }: RegisterChoiceScreenProps) {
   return (
-    <Container component="main" id="conteudo" maxWidth="sm" sx={{ py: { xs: 4, md: 10 } }}>
+    <PageContainer component="main" id="conteudo" width="reading">
       <RegisterChoice next={next} />
-    </Container>
+    </PageContainer>
   );
 }

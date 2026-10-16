@@ -1,4 +1,6 @@
-import { Container, Paper } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { Surface } from "@/shared/ui/layout/Surface";
+
 import type { ReactNode } from "react";
 import { Reveal } from "@/shared/ui/motion/Reveal";
 
@@ -13,10 +15,12 @@ export function PasswordScreen({ children, inShell = false }: { children: ReactN
   // Dentro da casca (spec 004) o `<main id="conteudo">` é dela; fora (telas de entrada), é desta tela.
   const landmark = inShell ? {} : ({ component: "main", id: "conteudo" } as const);
   return (
-    <Container {...landmark} maxWidth="sm" sx={{ py: { xs: 3, md: 10 } }}>
+    <PageContainer {...landmark} width="reading">
       <Reveal order={0}>
-        <Paper sx={{ p: { xs: 2.5, md: 4 } }}>{children}</Paper>
+        <Surface elevation="md" sx={{ p: { xs: 2.5, md: 4 } }}>
+          {children}
+        </Surface>
       </Reveal>
-    </Container>
+    </PageContainer>
   );
 }

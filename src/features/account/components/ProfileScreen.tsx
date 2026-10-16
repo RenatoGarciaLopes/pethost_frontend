@@ -1,3 +1,4 @@
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { getQueryClient } from "@/shared/api/query/queryClient";
@@ -20,8 +21,10 @@ export async function ProfileScreen({ userId, role }: ProfileScreenProps) {
   await prefetchAccountProfile(queryClient, userId, role);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ProfileEditor userId={userId} role={role} />
-    </HydrationBoundary>
+    <PageContainer width="page">
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <ProfileEditor userId={userId} role={role} />
+      </HydrationBoundary>
+    </PageContainer>
   );
 }

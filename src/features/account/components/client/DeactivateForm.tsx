@@ -1,6 +1,9 @@
 "use client";
 
-import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from "@mui/material";
+import { Box, Button, Checkbox, FormControlLabel, Stack } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+import { Surface } from "@/shared/ui/layout/Surface";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -37,34 +40,36 @@ export function DeactivateForm({ role }: { role: PersonalRole }) {
   }
 
   return (
-    <Stack spacing={3}>
-      <Typography variant="h1" sx={{ fontSize: { xs: 28, md: 34 } }}>
-        {copy.title}
-      </Typography>
-      <Box component="ul" sx={{ m: 0, pl: 3, display: "grid", gap: 1 }}>
-        <li>{copy.onlyThis(roleLabel(role))}</li>
-        <li>{copy.signOut}</li>
-        <li>{copy.comeBack}</li>
-      </Box>
-      <ErrorNotice message={notice.message} tone={notice.tone} />
-      <FormControlLabel
-        control={<Checkbox checked={understood} onChange={(event) => setUnderstood(event.target.checked)} />}
-        label={copy.understood}
-      />
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-        <Button
-          variant="contained"
-          size="large"
-          disabled={!understood || mutation.isPending || notice.blocked}
-          aria-busy={mutation.isPending}
-          onClick={handleDeactivate}
-        >
-          {mutation.isPending ? copy.submitting : copy.submit}
-        </Button>
-        <Button component={NextLink} href={homeOf(role)} variant="text" size="large">
-          {copy.notNow}
-        </Button>
-      </Stack>
-    </Stack>
+    <PageContainer width="reading">
+      <Surface elevation="md" sx={{ p: { xs: 2.5, md: 4 } }}>
+        <Stack spacing={3}>
+          <PageHeader title={copy.title} />
+          <Box component="ul" sx={{ m: 0, pl: 3, display: "grid", gap: 1 }}>
+            <li>{copy.onlyThis(roleLabel(role))}</li>
+            <li>{copy.signOut}</li>
+            <li>{copy.comeBack}</li>
+          </Box>
+          <ErrorNotice message={notice.message} tone={notice.tone} />
+          <FormControlLabel
+            control={<Checkbox checked={understood} onChange={(event) => setUnderstood(event.target.checked)} />}
+            label={copy.understood}
+          />
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+            <Button
+              variant="contained"
+              size="large"
+              disabled={!understood || mutation.isPending || notice.blocked}
+              aria-busy={mutation.isPending}
+              onClick={handleDeactivate}
+            >
+              {mutation.isPending ? copy.submitting : copy.submit}
+            </Button>
+            <Button component={NextLink} href={homeOf(role)} variant="text" size="large">
+              {copy.notNow}
+            </Button>
+          </Stack>
+        </Stack>
+      </Surface>
+    </PageContainer>
   );
 }

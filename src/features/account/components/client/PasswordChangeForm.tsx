@@ -2,6 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Link, Stack, Typography } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+import { Surface } from "@/shared/ui/layout/Surface";
 import NextLink from "next/link";
 import { useState } from "react";
 import { Controller, useForm, useWatch, type Control } from "react-hook-form";
@@ -61,64 +64,66 @@ export function PasswordChangeForm({ role }: { role: PersonalRole }) {
   });
 
   return (
-    <Stack spacing={3}>
-      <Typography variant="h1" sx={{ fontSize: { xs: 28, md: 34 } }}>
-        {copy.title}
-      </Typography>
-      <Notice tone="info">{copy.otherDevices}</Notice>
-      <ErrorNotice message={notice.message} tone={notice.tone} />
-      {done && <Notice tone="ok">{copy.done}</Notice>}
-      <Box component="form" noValidate onSubmit={onSubmit}>
+    <PageContainer width="reading">
+      <Surface elevation="md" sx={{ p: { xs: 2.5, md: 4 } }}>
         <Stack spacing={3}>
-          <Stack spacing={1}>
-            <Controller
-              control={control}
-              name="currentPassword"
-              render={({ field: { ref, ...field }, fieldState }) => (
-                <PasswordField
-                  {...field}
-                  inputRef={ref}
-                  label={copy.current}
-                  autoComplete="current-password"
-                  required
-                  error={Boolean(fieldState.error)}
-                  helperText={fieldState.error?.message}
-                  fullWidth
+          <PageHeader title={copy.title} />
+          <Notice tone="info">{copy.otherDevices}</Notice>
+          <ErrorNotice message={notice.message} tone={notice.tone} />
+          {done && <Notice tone="ok">{copy.done}</Notice>}
+          <Box component="form" noValidate onSubmit={onSubmit}>
+            <Stack spacing={3}>
+              <Stack spacing={1}>
+                <Controller
+                  control={control}
+                  name="currentPassword"
+                  render={({ field: { ref, ...field }, fieldState }) => (
+                    <PasswordField
+                      {...field}
+                      inputRef={ref}
+                      label={copy.current}
+                      autoComplete="current-password"
+                      required
+                      error={Boolean(fieldState.error)}
+                      helperText={fieldState.error?.message}
+                      fullWidth
+                    />
+                  )}
                 />
-              )}
-            />
-            <Link component={NextLink} href={forgotPasswordPath(role)} sx={{ alignSelf: "flex-start" }}>
-              {copy.forgot}
-            </Link>
-          </Stack>
-          <Controller
-            control={control}
-            name="newPassword"
-            render={({ field: { ref, ...field }, fieldState }) => (
-              <Stack spacing={1.5}>
-                <PasswordField
-                  {...field}
-                  inputRef={ref}
-                  label={copy.next}
-                  autoComplete="new-password"
-                  required
-                  error={Boolean(fieldState.error)}
-                  helperText={fieldState.error?.message}
-                  fullWidth
-                />
-                <PasswordStrengthChecklist password={field.value} />
+                <Link component={NextLink} href={forgotPasswordPath(role)} sx={{ alignSelf: "flex-start" }}>
+                  {copy.forgot}
+                </Link>
               </Stack>
-            )}
-          />
-          {formState.errors.root?.server && (
-            <Typography color="error" role="alert">
-              {formState.errors.root.server.message}
-            </Typography>
-          )}
-          <SubmitButton control={control} busy={mutation.isPending} blocked={notice.blocked} />
+              <Controller
+                control={control}
+                name="newPassword"
+                render={({ field: { ref, ...field }, fieldState }) => (
+                  <Stack spacing={1.5}>
+                    <PasswordField
+                      {...field}
+                      inputRef={ref}
+                      label={copy.next}
+                      autoComplete="new-password"
+                      required
+                      error={Boolean(fieldState.error)}
+                      helperText={fieldState.error?.message}
+                      fullWidth
+                    />
+                    <PasswordStrengthChecklist password={field.value} />
+                  </Stack>
+                )}
+              />
+              {formState.errors.root?.server && (
+                <Typography color="error" role="alert">
+                  {formState.errors.root.server.message}
+                </Typography>
+              )}
+              <SubmitButton control={control} busy={mutation.isPending} blocked={notice.blocked} />
+            </Stack>
+          </Box>
         </Stack>
-      </Box>
-    </Stack>
+      </Surface>
+    </PageContainer>
   );
 }
 
