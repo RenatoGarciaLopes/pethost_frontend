@@ -20,13 +20,6 @@ updated: 2026-10-15
 | `FlowActions`                                                                                          | `shared/ui/layout/FlowActions` (evolui `FormActions`)            | Voltar (texto) + Continuar (coral); fixa embaixo no celular com área segura                                                                        |
 | Cabeçalho                                                                                              | `widgets/app-shell`                                              | altura fixa 64/56, logo único, atalho ativo por prefixo, "Painel" do anfitrião                                                                     |
 
-## T2/T3 implementados nesta worktree
-
-- `quintalRadii` mantém os raios numéricos de configuração; `quintalRadiusCss` e `radius(name)` fornecem valores CSS com unidade, para que o MUI não multiplique tokens de `borderRadius` pelo `shape.borderRadius`. O tema expõe essas strings em `theme.quintal.radius`; `pethost/no-numeric-radius` barra os números literais em código de produto.
-- `Surface` aceita `elevation: sm | md | lg`, `interactive` e `component`, e permite `sx` para geometria e composição. É usado em `HostOnboardingStages`, `PetIdCard`, `NewPetTile`, `StayList` e `HostBookingList`.
-- `PageContainer` aceita `page | reading`, com máximos de 1200/720 px, gutter 16/32 px e espaçamento vertical padrão. `PageHeader` apresenta h1, subtítulo e ações responsivas. `/host` usa os dois recursos.
-- `FlowProgress` recebe os passos, id atual e ids concluídos; `FlowActions` recebe callbacks de voltar/continuar; `FlowLayout` compõe trilha, passo, prévia opcional e ações. Nesta entrega são biblioteca com stories e testes: cadastros existentes permanecem em `WizardProgress`/layout próprio até T4.
-- `AppShell` usa 64/56 px; `HeaderNav` escolhe o atalho correspondente de prefixo mais longo. `Painel` é o primeiro atalho do anfitrião; uma subrota de verificação seleciona “Minha verificação” e subrotas sem atalho específico selecionam “Painel”.
 
 ## Aplicação nas telas
 
