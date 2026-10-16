@@ -26,10 +26,16 @@ describe("atalhos do cabeçalho", () => {
     navigation.pathname = "/pets";
   });
 
-  it("REQ-UIC-003 host subroutes keep the Panel shortcut active by prefix", () => {
-    navigation.pathname = "/host/bookings/123";
-    renderWithProviders(<HeaderNav items={navItemsFor("host")} />, { theme: quintalTheme });
-    expect(screen.getByRole("link", { name: "Painel" })).toHaveAttribute("aria-current", "page");
+  it.each([
+    ["/host", "Painel"],
+    ["/host/application", "Minha verificação"],
+    ["/host/bookings/123", "Painel"],
+  ])("REQ-UIC-003 %s marks only the most specific matching host shortcut", (pathname, label) => {
+    navigation.pathname = pathname;
+    const { unmount } = renderWithProviders(<HeaderNav items={navItemsFor("host")} />, { theme: quintalTheme });
+    expect(screen.getByRole("link", { name: label })).toHaveAttribute("aria-current", "page");
+    expect(screen.getAllByRole("link", { current: "page" })).toHaveLength(1);
+    unmount();
     navigation.pathname = "/pets/0199d2a0-0000-7000-8000-000000000001";
   });
 

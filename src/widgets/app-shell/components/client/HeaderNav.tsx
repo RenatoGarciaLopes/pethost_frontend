@@ -8,7 +8,7 @@ import type { NavItem } from "@/shared/config/navigation";
 import { shellCopy } from "../../lib/shellCopy";
 
 /** A página do atalho ou uma de dentro dela (`/pets/123` marca "Meus pets"). */
-function isCurrent(pathname: string, href: string) {
+function matchesPath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -23,10 +23,13 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
   // Fora do App Router (ex.: Storybook) o caminho pode vir nulo: nenhum atalho fica marcado.
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
+  const activeHref = [...items]
+    .filter((item) => matchesPath(pathname, item.href))
+    .sort((left, right) => right.href.length - left.href.length)[0]?.href;
 
   const links = (onNavigate?: () => void) =>
     items.map((item) => {
-      const current = isCurrent(pathname, item.href);
+      const current = item.href === activeHref;
       return (
         <ListItem key={item.id} disablePadding sx={{ width: "auto" }}>
           <Link
