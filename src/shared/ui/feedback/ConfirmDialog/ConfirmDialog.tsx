@@ -21,6 +21,8 @@ export interface ConfirmDialogProps {
   busy?: boolean;
   /** Erro da confirmação, já em português (ex.: 409), mostrado dentro do diálogo. */
   error?: string | null;
+  /** Campos da confirmação (ex.: motivo opcional), abaixo do texto; não entram na descrição do diálogo. */
+  children?: ReactNode;
 }
 
 /**
@@ -55,11 +57,13 @@ export function ConfirmDialog({
   onCancel,
   busy = false,
   error = null,
+  children,
 }: ConfirmDialogProps) {
   const id = useId();
   const titleId = `${id}-titulo`;
   const messageId = `${id}-corpo`;
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   return (
     <Dialog
@@ -70,14 +74,22 @@ export function ConfirmDialog({
         if (!busy) onCancel();
       }}
       // No navegador o FocusTrap do MUI pode tomar o foco depois do `autoFocus`; ao terminar de abrir, a ação
-      // segura recebe o foco de novo (REQ-PEDIT-011).
-      slotProps={{ transition: { onEntered: () => cancelRef.current?.focus() } }}
+      // segura recebe o foco de novo (REQ-PEDIT-011). Se a pessoa já foi a um campo do corpo, o foco fica lá:
+      // roubá-lo no meio da digitação perderia letras.
+      slotProps={{
+        transition: {
+          onEntered: () => {
+            if (!contentRef.current?.contains(document.activeElement)) cancelRef.current?.focus();
+          },
+        },
+      }}
     >
       <DialogTitle id={titleId}>{title}</DialogTitle>
-      <DialogContent>
+      <DialogContent ref={contentRef}>
         <DialogContentText id={messageId} sx={{ color: "text.primary" }}>
           {message}
         </DialogContentText>
+        {children}
         {error && (
           <Notice tone="erro" id={`${id}-erro`}>
             {error}

@@ -16,6 +16,17 @@ export const formCopy = {
   decrease: "Diminuir",
   increase: "Aumentar",
   datePlaceholder: "dd/mm/aaaa",
+  /** Dias da semana (`WeekdayPicker`), de segunda a domingo, com a chave da API. */
+  weekdays: {
+    monday: "Segunda",
+    tuesday: "Terça",
+    wednesday: "Quarta",
+    thursday: "Quinta",
+    friday: "Sexta",
+    saturday: "Sábado",
+    sunday: "Domingo",
+  },
+  allWeekdays: "Todos os dias",
   /** Endereço brasileiro (`AddressFields`): rótulos genéricos, iguais em qualquer tela. */
   address: {
     zipCode: "CEP",

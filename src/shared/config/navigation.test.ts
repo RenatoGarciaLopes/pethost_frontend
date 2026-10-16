@@ -4,8 +4,17 @@ import { NAV_ITEMS, navItemsFor } from "./navigation";
 describe("REQ-SHELL-002 tabela única de atalhos", () => {
   it("cada papel vê só os seus atalhos", () => {
     expect(navItemsFor("owner").map((item) => item.href)).toEqual(["/pets"]);
-    expect(navItemsFor("host").map((item) => item.href)).toEqual(["/pets"]);
+    expect(navItemsFor("host").map((item) => item.href)).toEqual(["/host/application", "/pets"]);
     expect(navItemsFor("admin").map((item) => item.href)).toEqual(["/admin/host-applications"]);
+  });
+
+  it("REQ-HVER-001 anfitrião tem o atalho Minha verificação", () => {
+    expect(navItemsFor("host")).toContainEqual({
+      id: "host-application",
+      label: "Minha verificação",
+      href: "/host/application",
+      roles: ["host"],
+    });
   });
 
   it("todo atalho é interno e tem id único", () => {

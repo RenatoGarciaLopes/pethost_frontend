@@ -55,11 +55,16 @@ describe("casca do app", () => {
 });
 
 describe("atalhos na casca", () => {
-  it("REQ-SHELL-002 REQ-HPETS-010 tutor tem Meus pets e anfitrião tem Pets da casa; admin tem a fila de verificação", () => {
+  it("REQ-SHELL-002 REQ-HVER-001 REQ-HPETS-010 tutor tem Meus pets; anfitrião tem Minha verificação e Pets da casa; admin tem a fila de verificação", () => {
     const { unmount } = setup("owner");
     expect(screen.getByRole("navigation", { name: "Navegação principal" })).toBeInTheDocument();
     unmount();
     const host = setup("host");
+    expect(
+      within(screen.getByRole("navigation", { name: "Navegação principal" })).getByRole("link", {
+        name: "Minha verificação",
+      }),
+    ).toHaveAttribute("href", "/host/application");
     expect(
       within(screen.getByRole("navigation", { name: "Navegação principal" })).getByRole("link", {
         name: "Pets da casa",

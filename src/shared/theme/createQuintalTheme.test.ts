@@ -1,3 +1,4 @@
+import NextLink from "next/link";
 import { expect, it } from "vitest";
 import { quintalTheme } from "./createQuintalTheme";
 import { quintalColors } from "./tokens/colors";
@@ -10,4 +11,8 @@ it("REQ-DS-001 expõe todos os tokens como variáveis CSS MUI", () => {
     );
   }
   expect(quintalTheme.palette.primary.contrastText).toBe(quintalColors.tinta);
+});
+
+it("REQ-DS-001 botão com href vira link do Next pelo tema (componente de servidor passa só o href)", () => {
+  expect(quintalTheme.components?.MuiButtonBase?.defaultProps?.LinkComponent).toBe(NextLink);
 });

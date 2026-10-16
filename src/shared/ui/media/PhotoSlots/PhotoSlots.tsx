@@ -8,6 +8,8 @@ import { visuallyHidden } from "../../a11y/visuallyHidden";
 import { photoSlotsCopy as copy } from "./photoSlotsCopy";
 
 const ACCEPTED_IMAGES = "image/jpeg,image/png,image/webp";
+/** No computador, até 5 vagas lado a lado. */
+const MAX_COLUMNS = 5;
 
 export interface PhotoSlotsProps {
   /** Nome do grupo para o leitor de tela (ex.: "Fotos de Pipoca"). */
@@ -29,6 +31,11 @@ export interface PhotoSlotsProps {
    */
   onReplace?: (index: number, file: File) => void;
   onRemove: (index: number) => void;
+  /**
+   * Reordenar (spec 044, REQ-LIST-014): se vier, cada foto ganha "Usar como capa" e "Mover a foto N para cima/baixo",
+   * por botão (nunca só arrastando). Recebe a posição de origem e a de destino.
+   */
+  onMove?: (from: number, to: number) => void;
   disabled?: boolean;
 }
 
@@ -49,8 +56,10 @@ export function PhotoSlots({
   onPick,
   onReplace,
   onRemove,
+  onMove,
   disabled = false,
 }: PhotoSlotsProps) {
+  const lastFilled = files.findLastIndex((file) => file !== null);
   const [invalid, setInvalid] = useState<readonly boolean[]>(() => files.map(() => false));
 
   function markInvalid(index: number, value: boolean) {
@@ -70,7 +79,14 @@ export function PhotoSlots({
     <Box
       role="group"
       aria-label={label}
-      sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "repeat(3, minmax(0, 1fr))", sm: "repeat(3, 120px)" } }}
+      sx={{
+        display: "grid",
+        gap: 2,
+        gridTemplateColumns: {
+          xs: "repeat(3, minmax(0, 1fr))",
+          sm: `repeat(${Math.min(files.length, MAX_COLUMNS)}, 120px)`,
+        },
+      }}
     >
       {files.map((file, index) => (
         <Slot
@@ -86,6 +102,15 @@ export function PhotoSlots({
             markInvalid(index, false);
             onRemove(index);
           }}
+          moves={
+            onMove && file !== null
+              ? {
+                  cover: index > 0 ? () => onMove(index, 0) : undefined,
+                  up: index > 0 ? () => onMove(index, index - 1) : undefined,
+                  down: index < lastFilled ? () => onMove(index, index + 1) : undefined,
+                }
+              : undefined
+          }
         />
       ))}
     </Box>
@@ -101,9 +126,11 @@ interface SlotProps {
   onPick: (file: File) => void;
   onReplace?: (file: File) => void;
   onRemove: () => void;
+  /** Reordenar a foto desta vaga (só com `onMove`). */
+  moves?: { cover?: () => void; up?: () => void; down?: () => void };
 }
 
-function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRemove }: SlotProps) {
+function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRemove, moves }: SlotProps) {
   const id = useId();
   const objectUrl = useObjectUrl(file instanceof File ? file : null);
   const preview = typeof file === "string" ? file : objectUrl;
@@ -230,6 +257,28 @@ function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRe
         <Button size="small" variant="text" onClick={onRemove} disabled={disabled} sx={{ minHeight: 48 }}>
           {copy.remove(number)}
         </Button>
+      )}
+      {preview && moves && (
+        <Stack spacing={0.25}>
+          {moves.cover && (
+            <Button size="small" variant="text" onClick={moves.cover} disabled={disabled}>
+              {copy.makeCover}
+              <Box component="span" sx={visuallyHidden}>
+                {copy.makeCoverOf(number)}
+              </Box>
+            </Button>
+          )}
+          {moves.up && (
+            <Button size="small" variant="text" onClick={moves.up} disabled={disabled}>
+              {copy.moveUp(number)}
+            </Button>
+          )}
+          {moves.down && (
+            <Button size="small" variant="text" onClick={moves.down} disabled={disabled}>
+              {copy.moveDown(number)}
+            </Button>
+          )}
+        </Stack>
       )}
       {error && (
         <FormHelperText id={errorId} role="alert" error sx={{ m: 0 }}>
