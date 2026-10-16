@@ -1,6 +1,6 @@
 ---
 spec: 053-host-requests
-status: draft
+status: in-progress
 updated: 2026-10-15
 area: HREQ
 ---

@@ -5,29 +5,37 @@ import { renderWithProviders } from "@/test/render";
 import { hostOnboardingCopy as copy } from "../lib/hostOnboardingCopy";
 import { HostOnboardingStages } from "./HostOnboardingStages";
 
-const stages = () =>
-  within(screen.getByRole("region", { name: copy.heading }))
-    .getAllByRole("listitem")
-    .map((item) => item.textContent);
+const items = () => within(screen.getByRole("region", { name: copy.heading })).getAllByRole("listitem");
 
 describe("HostOnboardingStages", () => {
   it("REQ-HVER-001 antes da aprovação, só a verificação está liberada; as outras dizem o que falta", () => {
-    renderWithProviders(<HostOnboardingStages verificationApproved={false} />, { theme: quintalTheme });
-    expect(stages()).toEqual([
-      `1Mostrar quem eu souAgora${copy.stages.verification.current}`,
-      `2Como eu receboTravada${copy.stages.payout.locked}`,
-      `3Montar meu cantinhoTravada${copy.stages.listing.locked}`,
-    ]);
-    expect(screen.getAllByRole("listitem")[0]).toHaveAttribute("aria-current", "step");
+    renderWithProviders(<HostOnboardingStages progress={{ verified: false, payouts: null, hasListing: false }} />, {
+      theme: quintalTheme,
+    });
+    const [first, second, third] = items();
+    expect(first).toHaveAttribute("aria-current", "step");
+    expect(within(first!).getByRole("link", { name: copy.stages.verification.action })).toHaveAttribute(
+      "href",
+      "/host/application",
+    );
+    expect(second).toHaveTextContent(copy.stages.payout.locked);
+    expect(third).toHaveTextContent(copy.stages.listing.locked);
+    expect(within(second!).queryByRole("link")).not.toBeInTheDocument();
   });
 
-  it("REQ-HVER-016 aprovada, a etapa 2 é liberada", () => {
-    renderWithProviders(<HostOnboardingStages verificationApproved />, { theme: quintalTheme });
-    expect(stages()).toEqual([
-      `1Mostrar quem eu souPronta${copy.stages.verification.done}`,
-      `2Como eu receboLiberada${copy.stages.payout.unlocked}`,
-      `3Montar meu cantinhoTravada${copy.stages.listing.locked}`,
-    ]);
-    expect(screen.getAllByRole("listitem")[1]).toHaveAttribute("aria-current", "step");
+  it("REQ-LIST-001 recebimento liberado: a etapa 3 leva ao cadastro do cantinho", () => {
+    renderWithProviders(
+      <HostOnboardingStages
+        progress={{ verified: true, payouts: { enabled: true, status: "enabled" }, hasListing: false }}
+      />,
+      { theme: quintalTheme },
+    );
+    const third = items()[2]!;
+    expect(third).toHaveAttribute("aria-current", "step");
+    expect(within(third).getByRole("link", { name: copy.stages.listing.action })).toHaveAttribute(
+      "href",
+      "/host/listings/new",
+    );
+    expect(items()[1]).toHaveTextContent(copy.states.done);
   });
 });
