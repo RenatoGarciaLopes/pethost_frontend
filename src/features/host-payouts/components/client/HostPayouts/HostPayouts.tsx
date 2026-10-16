@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { payoutQueries } from "../../../api/queries";
 import { useStartOnboarding } from "../../../hooks/useStartOnboarding";
@@ -173,93 +174,95 @@ export function HostPayouts({ accountId }: HostPayoutsProps) {
     (current.status === "enabled" && !current.payoutsEnabled);
   const fallback = <HostedFallback busy={busy} onOpen={() => void hosted()} />;
   return (
-    <Stack spacing={3}>
-      {actionError != null && (
-        <Notice
-          tone="atencao"
-          title={getErrorMessage(actionError)}
-          action={
-            !blocked ? (
-              <Button disabled={busy} onClick={retry}>
-                {copy.retry}
-              </Button>
-            ) : undefined
-          }
-        >
-          {blocked && copy.support}
-        </Notice>
-      )}
-      {embedded ? (
-        <Box component="section" aria-labelledby="payout-onboarding-title">
-          <Stack spacing={2}>
-            <Link component={NextLink} href="/host">
-              {copy.back}
-            </Link>
-            <Typography component="h2" variant="h5" id="payout-onboarding-title" tabIndex={-1} ref={heading}>
-              {copy.embeddedTitle}
-            </Typography>
-            {unavailable ? (
-              fallback
-            ) : (
-              <OnboardingBoundary fallback={fallback}>
-                <Embedded
-                  createSession={createSession}
-                  onExit={exit}
-                  onRequestError={requestError}
-                  onUnavailable={scriptUnavailable}
-                />
-              </OnboardingBoundary>
-            )}
-            <Button variant="text" onClick={exit} disabled={busy}>
-              {copy.close}
-            </Button>
-          </Stack>
-        </Box>
-      ) : (
-        <>
+    <Surface sx={{ p: { xs: 2.5, md: 4 } }}>
+      <Stack spacing={3}>
+        {actionError != null && (
           <Notice
-            tone={current.status === "enabled" && current.payoutsEnabled ? "ok" : "info"}
-            title={messageFor(current)}
-          />
-          {current.status === "not_started" && <Typography color="text.secondary">{copy.stripeHelp}</Typography>}
-          {renewHint && canStart && <Typography role="status">{copy.renewed}</Typography>}
-          {current.status === "rejected" && <Typography>{copy.support}</Typography>}
-          {canStart && !blocked && (
-            <Button
-              variant="contained"
-              onClick={start}
-              disabled={busy}
-              sx={{ alignSelf: "flex-start", minHeight: { xs: 56, sm: 48 } }}
-            >
-              {current.status === "not_started"
-                ? copy.start
-                : current.status === "restricted"
-                  ? copy.resolve
-                  : copy.continue}
-            </Button>
-          )}
-          {current.status === "under_review" && (
-            <Button
-              variant="outlined"
-              disabled={busy}
-              onClick={() => void synchronize()}
-              sx={{ alignSelf: "flex-start", minHeight: { xs: 56, sm: 48 } }}
-            >
-              {copy.refresh}
-            </Button>
-          )}
-          {current.status === "enabled" && current.payoutsEnabled && (
-            <Button
-              component={NextLink}
-              href="/host/listings"
-              variant="contained"
-              sx={{ alignSelf: "flex-start", minHeight: { xs: 56, sm: 48 } }}
-            >
-              {copy.next}
-            </Button>
-          )}
-        </>
-      )}
-    </Stack>
+            tone="atencao"
+            title={getErrorMessage(actionError)}
+            action={
+              !blocked ? (
+                <Button disabled={busy} onClick={retry}>
+                  {copy.retry}
+                </Button>
+              ) : undefined
+            }
+          >
+            {blocked && copy.support}
+          </Notice>
+        )}
+        {embedded ? (
+          <Box component="section" aria-labelledby="payout-onboarding-title">
+            <Stack spacing={2}>
+              <Link component={NextLink} href="/host">
+                {copy.back}
+              </Link>
+              <Typography component="h2" variant="h5" id="payout-onboarding-title" tabIndex={-1} ref={heading}>
+                {copy.embeddedTitle}
+              </Typography>
+              {unavailable ? (
+                fallback
+              ) : (
+                <OnboardingBoundary fallback={fallback}>
+                  <Embedded
+                    createSession={createSession}
+                    onExit={exit}
+                    onRequestError={requestError}
+                    onUnavailable={scriptUnavailable}
+                  />
+                </OnboardingBoundary>
+              )}
+              <Button variant="text" onClick={exit} disabled={busy}>
+                {copy.close}
+              </Button>
+            </Stack>
+          </Box>
+        ) : (
+          <>
+            <Notice
+              tone={current.status === "enabled" && current.payoutsEnabled ? "ok" : "info"}
+              title={messageFor(current)}
+            />
+            {current.status === "not_started" && <Typography color="text.secondary">{copy.stripeHelp}</Typography>}
+            {renewHint && canStart && <Typography role="status">{copy.renewed}</Typography>}
+            {current.status === "rejected" && <Typography>{copy.support}</Typography>}
+            {canStart && !blocked && (
+              <Button
+                variant="contained"
+                onClick={start}
+                disabled={busy}
+                sx={{ alignSelf: "flex-start", minHeight: 56 }}
+              >
+                {current.status === "not_started"
+                  ? copy.start
+                  : current.status === "restricted"
+                    ? copy.resolve
+                    : copy.continue}
+              </Button>
+            )}
+            {current.status === "under_review" && (
+              <Button
+                variant="outlined"
+                disabled={busy}
+                onClick={() => void synchronize()}
+                sx={{ alignSelf: "flex-start", minHeight: 56 }}
+              >
+                {copy.refresh}
+              </Button>
+            )}
+            {current.status === "enabled" && current.payoutsEnabled && (
+              <Button
+                component={NextLink}
+                href="/host/listings"
+                variant="contained"
+                sx={{ alignSelf: "flex-start", minHeight: 56 }}
+              >
+                {copy.next}
+              </Button>
+            )}
+          </>
+        )}
+      </Stack>
+    </Surface>
   );
 }

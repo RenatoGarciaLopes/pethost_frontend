@@ -3,7 +3,9 @@ import { useRouter, useSearchParams } from "@storybook/nextjs-vite/navigation.mo
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
 import { ReadonlyURLSearchParams } from "next/navigation";
 import { fn } from "storybook/test";
-import { Container, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { payoutAccountDto } from "@/test/fixtures/payouts";
@@ -24,12 +26,12 @@ function Frame() {
   });
   return (
     <QueryClientProvider client={client}>
-      <Container maxWidth="md">
+      <PageContainer width="page">
         <Stack spacing={3}>
-          <Typography variant="h1">{payoutsCopy.title}</Typography>
+          <PageHeader title={payoutsCopy.title} />
           <HostPayouts accountId="screen-story" />
         </Stack>
-      </Container>
+      </PageContainer>
     </QueryClientProvider>
   );
 }
