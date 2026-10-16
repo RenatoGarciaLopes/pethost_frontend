@@ -9,6 +9,39 @@ test.afterEach(async ({ page }) => {
   await resetAccountMock(page);
 });
 
+test("REQ-UIC-003 host header has fixed height and one most-specific active shortcut", async ({ page, baseURL }) => {
+  await loginAccount(page, baseURL!, "both", "host");
+  await page.goto("/host");
+  const header = page.getByRole("banner");
+  const expectedHeight = (page.viewportSize()?.width ?? 1440) < 900 ? 56 : 64;
+  await expect(header).toHaveCSS("height", `${expectedHeight}px`);
+  await expect(header.getByRole("link", { name: "PetHost" })).toHaveCount(1);
+
+  const primaryNav = async () => {
+    if ((page.viewportSize()?.width ?? 1440) < 900) {
+      await header.getByRole("button", { name: "Abrir a navegação" }).click();
+    }
+    return page.getByRole("navigation", { name: "Navegação principal" });
+  };
+
+  let nav = await primaryNav();
+  let links = nav.getByRole("link");
+  await expect(links.nth(0)).toHaveAccessibleName("Painel");
+  await expect(links.nth(0)).toHaveAttribute("aria-current", "page");
+  await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+  await page.goto("/host/application");
+  nav = await primaryNav();
+  links = nav.getByRole("link");
+  await expect(links).toHaveCount(3);
+  await expect(nav.getByRole("link", { name: "Minha verificação" })).toHaveAttribute("aria-current", "page");
+  await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+  await page.goto("/host/bookings?aba=pedidos");
+  nav = await primaryNav();
+  links = nav.getByRole("link");
+  await expect(links.first()).toHaveAttribute("aria-current", "page");
+  await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+});
+
 test("REQ-SHELL-009/010 visitante entra e volta ao perfil que tentou abrir", async ({ page }) => {
   await page.goto("/users/profile");
   await expect(page).toHaveURL(/\/login\?next=%2Fusers%2Fprofile$/);

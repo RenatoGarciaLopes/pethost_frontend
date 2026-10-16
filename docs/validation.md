@@ -243,7 +243,7 @@ Implementação dos REQ-HPETS-001 a 010 na branch `feat/023-host-house-pets`, wo
 | ESLint dos arquivos criados/alterados                                                 | aprovado                                                                                                               |
 | `npx.cmd tsc --noEmit -p .`                                                           | aprovado, incluindo E2E e stories escritos                                                                             |
 | Prettier dos arquivos criados/alterados                                               | aplicado e conferido                                                                                                   |
-| `git diff --check`                                                                    | aprovado                                                                                                               |
+| `git diff --check`                                                                    | passed                                                                                                                 |
 | E2E simulado (Claude Code)                                                            | pets 020 a 023: 38 de 38; casca: 14 de 14 (desktop e celular, workers 1)                                               |
 | E2E real                                                                              | 1 jornada escrita; requer API real e seed aprovado via E2E_HOST_EMAIL/E2E_HOST_PASSWORD; não executada                 |
 | Stories/a11y (Claude Code)                                                            | 7 arquivos de pets, 32 testes, sem violação, depois de corrigir o export das stories e o nome acessível da carteirinha |
@@ -345,3 +345,18 @@ Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da
 - "voltou pra casa" sumia: a `StayMilestones` desmontava quando a estadia virava `completed`. Agora fica montada.
 - Avatar com iniciais sem contraste (axe) na lista e no detalhe do anfitrião: coral com o texto de contraste do tema, como no shell.
 - `host-requests.spec.ts`: espera a hidratação antes de abrir o pedido e dá 60 s à primeira jornada, que compila as rotas a frio no `next dev`.
+
+## Spec 005 · conformidade visual
+
+| Verificação                                                                                                                                     | Resultado                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Vitest de tokens e regra ESLint                                                                                                                 | 4/4 testes passaram                                                                    |
+| Vitest Surface, pets, onboarding e estadias                                                                                                     | 13/13 testes passaram                                                                  |
+| Vitest AppShell, navegação e atalhos                                                                                                            | 20/20 testes passaram; correção de prefixo específico 6/6                              |
+| Vitest PageContainer, PageHeader e `/host`                                                                                                      | 5/5 testes passaram                                                                    |
+| Vitest FlowProgress, FlowActions e FlowLayout                                                                                                   | 7/7 testes passaram                                                                    |
+| `stories.sh` para 10 stories (AppShell, HostOnboardingStages, Surface, PetIdCard, NewPetTile, PageContainer, PageHeader e componentes de fluxo) | 27/27 passed without accessibility violations                                          |
+| ESLint dos arquivos alterados                                                                                                                   | aprovado                                                                               |
+| `git diff --check`                                                                                                                              | aprovado                                                                               |
+| `tsc --no-emit -p .` | aprovado |
+| Playwright E2E / galeria                                                                                                                        | não executados nesta entrega; o E2E de shell foi atualizado para a validação posterior |

@@ -343,7 +343,23 @@ src/test/fixtures/adminApplications.ts
 src/test/msw/adminApplicationsMock.int.test.ts
 e2e/support/handlers/adminApplications.mjs
 e2e/mocked/admin/verification-queue.spec.ts
+
 e2e/real/admin/verification-queue.spec.ts
 ```
 
 Os testes unitários, funcionais e de integração ficam junto dos recursos. Cada componente novo tem story, incluindo estados de empresa, decisão, fotos apagadas, conflito e celular. O checklist não tem export separado: sua cobertura pertence a `DecisionPanel.test.tsx`. `DecisionSummary` é interno e coberto pela composição e story de solicitação decidida. Não há dependência da feature da spec 030. `shared` não conhece o domínio de verificação; o widget compõe o domínio usando as APIs públicas da feature. Links assinados não entram no prefetch, no Query ou na URL da página.
+
+## Spec 005: fundamentos visuais Quintal
+
+```text
+scripts/eslint/no-numeric-radius.mjs      regra ESLint contra raios numéricos
+src/shared/theme/tokens/radii.ts          raios numéricos e tokens CSS
+src/shared/ui/layout/Surface/             superfície, testes e stories
+src/shared/ui/layout/PageContainer/       larguras page/reading e stories
+src/shared/ui/layout/PageHeader/          título, subtítulo e ações
+src/shared/ui/layout/FlowActions/         barra de ações do fluxo
+src/shared/ui/layout/FlowLayout/          três faixas desktop e uma mobile
+src/shared/ui/navigation/FlowProgress/    trilha desktop e anel mobile
+```
+
+`AppShell` e `HeaderNav` padronizam a navegação das áreas autenticadas. `/host` consome `PageContainer` e `PageHeader`; `HostOnboardingStages`, `PetIdCard`, `NewPetTile` e listas de estadia usam `Surface`. Os fluxos de cadastro existentes não foram migrados nesta etapa.
