@@ -1,6 +1,7 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
+import { adminAuditQueryKey } from "@/shared/api/query/queryClient";
 import { adminOwnerQueries, type AdminOwner } from "@/features/owners";
 import { adminHostQueries, type AdminHost } from "@/features/hosts";
 import { suspendOwner, liftOwnerSuspension, releaseOwnerCpf } from "@/features/owners/index.client";
@@ -42,6 +43,12 @@ export function useAccountAction(accountId: string, kind: AccountKind, id: strin
       await Promise.all([
         client.invalidateQueries({ queryKey: keys.lists(accountId) }),
         client.invalidateQueries({ queryKey: keys.detail(accountId, id).queryKey }),
+        client.invalidateQueries({
+          queryKey: adminAuditQueryKey(accountId, {
+            targetType: kind === "owners" ? "owner" : "host",
+            targetId: id,
+          }),
+        }),
       ]);
     },
     onError: async (error) => {

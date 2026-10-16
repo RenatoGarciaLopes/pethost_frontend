@@ -35,6 +35,7 @@ export function AuditExplorer({ accountId, initialInvalidFilters }: AuditExplore
   const invalidSignature = parsed.invalid.join(",");
   const invalidFields = parsed.invalid.length ? parsed.invalid : initialInvalidFilters;
   const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const [clearVersion, setClearVersion] = useState(0);
   const showInvalidNotice = invalidFields.length > 0 && !noticeDismissed;
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export function AuditExplorer({ accountId, initialInvalidFilters }: AuditExplore
   }
 
   function clearFilters() {
+    setClearVersion((version) => version + 1);
     applyFilters({ page: 1, pageSize: filters.pageSize });
   }
 
@@ -81,7 +83,7 @@ export function AuditExplorer({ accountId, initialInvalidFilters }: AuditExplore
         </Typography>
       )}
       <AuditFilters
-        key={JSON.stringify(filters)}
+        key={`${clearVersion}:${JSON.stringify(filters)}`}
         filters={filters}
         invalidFields={invalidFields}
         onApply={applyFilters}

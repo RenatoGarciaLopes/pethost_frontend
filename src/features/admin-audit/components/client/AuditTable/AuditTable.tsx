@@ -152,7 +152,7 @@ export function AuditTable({
       to: undefined,
       page: 1,
     });
-  if (!entries.length) {
+  if (!entries.length && query.data.totalCount === 0) {
     return compact ? (
       <Typography>{copy.empty}</Typography>
     ) : (
@@ -186,6 +186,7 @@ export function AuditTable({
           </TextField>
         )}
       </Stack>
+      {!entries.length && <Typography role="status">{copy.empty}</Typography>}
       <AdminDataTable
         label={copy.tableLabel}
         rows={entries}
@@ -198,11 +199,11 @@ export function AuditTable({
         onPageChange={() => {}}
         empty={<span />}
       />
-      {totalPages > 1 && (
+      {(totalPages > 1 || filters.page > totalPages) && (
         <Pagination
           aria-label={copy.page}
           count={totalPages}
-          page={Math.min(filters.page, totalPages)}
+          page={filters.page}
           onChange={(_, page) => updateFilters({ page })}
           getItemAriaLabel={(type, pageNumber, selectedPage) =>
             type === "page" ? `${selectedPage ? "Página atual" : "Ir para a página"} ${pageNumber}` : type

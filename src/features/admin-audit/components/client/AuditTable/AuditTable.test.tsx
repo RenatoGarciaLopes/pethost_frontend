@@ -15,6 +15,37 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("REQ-AUDIT-001/005/010/011 AuditTable", () => {
+  it.each(["full", "compact"] as const)("recupera página fora do intervalo no modo %s", async (variant) => {
+    router.search = "page=999";
+    const client = new QueryClient();
+    const filters = { page: 999, pageSize: 20 } as const;
+    const fixedFilters = variant === "compact" ? { targetType: "owner", targetId: "owner-id" } : undefined;
+    client.setQueryData(
+      auditQueries.page("admin-range", { ...filters, ...fixedFilters, pageSize: variant === "compact" ? 10 : 20 })
+        .queryKey,
+      {
+        ...auditPageModelFixture([]),
+        totalCount: 1,
+        totalPages: 1,
+      },
+    );
+    const onFiltersChange = vi.fn();
+    const { user } = renderWithProviders(
+      <AuditTable
+        adminId="admin-range"
+        filters={filters}
+        fixedFilters={fixedFilters}
+        variant={variant}
+        onFiltersChange={onFiltersChange}
+      />,
+      { queryClient: client },
+    );
+    expect(screen.getByRole("navigation", { name: "Página" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Ir para a página 1" }));
+    expect(onFiltersChange).toHaveBeenCalledWith({ page: 1 });
+    client.clear();
+  });
+
   it("renderiza colunas sem IP e mostra contagem da resposta paginada", () => {
     router.search = "";
     const client = new QueryClient();

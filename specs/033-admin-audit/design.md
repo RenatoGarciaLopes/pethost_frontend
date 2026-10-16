@@ -6,6 +6,22 @@ updated: 2026-10-15
 
 # 033 · Design técnico
 
+## Regressões da revisão do PR 17 (2026-10-16)
+
+- `AuditExplorer` (`src/features/admin-audit/components/client/AuditExplorer/AuditExplorer.tsx`) incrementa uma versão local ao limpar. A key de `AuditFilters` inclui essa versão: mesmo sem filtros aplicados, o rascunho e os erros locais são descartados. Interface pública inalterada; depende do estado React e do hook de URL existente. Cobertura funcional em `AuditExplorer.test.tsx` (digitar UUID inválido, enviar, limpar e verificar campo/erro).
+- `AuditTable` (`src/features/admin-audit/components/client/AuditTable/AuditTable.tsx`) mantém a paginação quando a API retorna página vazia com `totalCount > 0`, inclusive quando só existe uma página. Não apresenta a página inexistente como selecionada; o botão de página válida chama `onFiltersChange({ page })`. Vale para explorer e compacto; filtros fixos permanecem no request. Regressão parametrizada dos dois modos em `AuditTable.test.tsx`.
+- `useAccountAction` (`src/widgets/admin-accounts/hooks/useAccountAction.ts`) invalida a trilha do mesmo admin/tipo/id após cada sucesso, além das listas e detalhe. Continua sem importar features de auditoria. A invalidação aguarda refetch de observadores ativos; falha da mutation não dispara essa atualização. Integração MSW em `useAccountAction.int.test.tsx` cobre suspender, retirar suspensão, liberar CPF/documento e resetar Stripe, atualização ativa e isolamento de outros admins/alvos.
+
+### Catálogo provisório: adminAuditQueryKey
+
+| Nome               | Tipo/domínio                 | Status      | Local real                            | Documentação                                                         |
+| ------------------ | ---------------------------- | ----------- | ------------------------------------- | -------------------------------------------------------------------- |
+| adminAuditQueryKey | utility, frontend/shared API | implemented | `src/shared/api/query/queryClient.ts` | Esta seção; registro no vault pendente por instrução de não editá-lo |
+
+Interface: `adminAuditQueryKey(adminId, target?)`, com `target = { targetType, targetId }`, retorna prefixo de query key. Sem alvo retorna `accountQueryKey(adminId, "admin", "audit")`; com alvo acrescenta o objeto de alvo. `auditQueries.page` preserva a key existente: prefixo sem alvo seguido do request completo. A invalidação usa o objeto parcial `{ targetType, targetId }`, que TanStack Query compara parcialmente com o request, cobrindo todas as páginas/filtros do alvo. Uso: `client.invalidateQueries({ queryKey: adminAuditQueryKey(adminId, { targetType: "owner", targetId }) })`. Consumidores: `features/admin-audit/api/queries.ts` e `widgets/admin-accounts/hooks/useAccountAction.ts`. Não armazena dados nem faz HTTP; não autoriza acesso. Use apenas ids internos e códigos de tipo; sem CPF, e-mail ou motivo. Não há migração de keys: o formato existente por request é preservado. Teste unitário em `src/shared/api/query/queryClient.test.ts`, integração na mutation acima. Sem UI própria: story N/A.
+
+Validação da rodada em `docs/validation.md`. E2E é aplicável às jornadas administrativas, mas não foi executado nesta rodada sem portas; os testes funcionais e de integração cobrem as regressões. Não há nova função pura nos componentes; estados internos são cobertos pela composição. Vault e catálogo do Obsidian não foram editados por instrução do usuário.
+
 Implementação conferida em 15/10/2026. O código está em `src/features/admin-audit` (não `features/audit`); o endpoint e os parâmetros são os do contrato OpenAPI registrados em requirements.md. `details` é `Record<string, string>`, IDs podem ser nulos e `totalPages` pode faltar.
 
 ## Rota e renderização

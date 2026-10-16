@@ -378,3 +378,11 @@ Validação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`.
 - These E2E suites use the simulated backend; no real API or Storybook execution claimed. Existing HTTP integration tests were not rerun because their contracts did not change. No new pure domain logic was introduced.
 - Vault untouched per user instruction. No fetch/push after the user reserved publishing; commits are local and have no coauthor trailers.
 Final targeted ESLint and tsc --noEmit: passed (exit 0).
+
+## Revisão PR 17: filtros, cache da trilha e paginação (2026-10-16)
+
+- Regressões iniciais: `npx.cmd vitest run` com os arquivos de código alterados como filtros, `--maxWorkers=2`: **3 arquivos, 18 testes aprovados** (limpar rascunho/erros, paginação full/compact, sete ações com refetch ativo e isolamento de admin/alvo).
+- Suíte ampliada: `npx.cmd vitest run src/features/admin-audit src/widgets/admin-accounts src/shared/api/query/queryClient.test.ts --maxWorkers=2`: **18 arquivos aprovados, 1 com falha; 59/60 testes aprovados**. Única falha: timeout de 5s no caso owner de AccountDetail ao abrir diálogo; nenhuma assertion funcional falhou.
+- Repetição isolada após simplificar a key sem mudar seu formato: `npx.cmd vitest run src/widgets/admin-accounts/hooks/useAccountAction.int.test.tsx src/widgets/admin-accounts/components/AccountDetail.test.tsx src/shared/api/query/queryClient.test.ts --maxWorkers=1`: **3 arquivos, 17 testes aprovados**, incluindo os dois casos de AccountDetail e cobertura unitária do prefixo compartilhado. Não foi necessário aumentar timeout nem alterar o teste existente.
+- `npx.cmd tsc --noEmit` e ESLint de todos os arquivos TS/TSX alterados: **aprovados**, exit 0. O primeiro typecheck apontou fixture antiga com array no lugar de AuditPage; corrigida para reutilizar auditPageModelFixture. Prettier aplicado ao código/spec e `git diff --check` aprovado.
+- Integrações usam MSW/cache TanStack, não API real. E2E/Storybook não executados por instrução sem portas. Nenhum push/fetch ou alteração no vault. Interfaces, limites, migração (N/A: formato de key preservado), níveis de teste e catálogo provisório de adminAuditQueryKey em `specs/033-admin-audit/design.md`.

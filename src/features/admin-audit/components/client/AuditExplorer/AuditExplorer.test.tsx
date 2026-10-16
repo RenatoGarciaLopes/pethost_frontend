@@ -14,6 +14,22 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("REQ-AUDIT-002/003/004 explorer", () => {
+  it("limpa rascunho e erros mesmo com filtros aplicados vazios", async () => {
+    navigation.search = "";
+    const client = new QueryClient();
+    client.setQueryData(auditQueries.page("admin-clear", { page: 1, pageSize: 20 }).queryKey, auditPageModelFixture());
+    const { user } = renderWithProviders(<AuditExplorer accountId="admin-clear" initialInvalidFilters={[]} />, {
+      queryClient: client,
+    });
+    await user.type(screen.getByRole("textbox", { name: "ID do alvo" }), "invalido");
+    await user.click(screen.getByRole("button", { name: "Buscar registros" }));
+    expect(screen.getByText("Informe um UUID válido.")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Limpar filtros" }));
+    expect(screen.getByRole("textbox", { name: "ID do alvo" })).toHaveValue("");
+    expect(screen.queryByText("Informe um UUID válido.")).not.toBeInTheDocument();
+    client.clear();
+  });
+
   it("usa filtros válidos da URL e apresenta a página hidratada", () => {
     navigation.search = "action=owner.suspended&page=1&pageSize=20";
     const client = new QueryClient();
