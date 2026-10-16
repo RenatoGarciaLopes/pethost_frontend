@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { ListingPageScreen, getListingPageContext, getListingPageDetail } from "@/features/listing-page/index.server";
@@ -28,8 +29,16 @@ export async function generateMetadata({ params, searchParams }: ListingPageProp
   return { title: `${listing.title} · PetHost`, robots: { index: false, follow: false } };
 }
 
-/** Detalhe de cantinho protegido, renderizado no servidor. */
-export default async function ListingPage({ params, searchParams }: ListingPageProps) {
+/** Detalhe de cantinho protegido, renderizado no servidor. A leitura da sessão fica sob Suspense. */
+export default function ListingPage(props: ListingPageProps) {
+  return (
+    <Suspense fallback={null}>
+      <ListingPageContent {...props} />
+    </Suspense>
+  );
+}
+
+async function ListingPageContent({ params, searchParams }: ListingPageProps) {
   const [{ listingId }, rawSearch] = await Promise.all([params, searchParams]);
   if (!isPetId(listingId)) notFound();
   const query = searchParamsToQuery(rawSearch);
