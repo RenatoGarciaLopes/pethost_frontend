@@ -52,9 +52,9 @@ export function AccountDetail({ accountId, resourceId, kind, auditTrail }: Detai
   return (
     <Stack spacing={3} sx={{ py: 3 }}>
       <Link href={`/admin/users?type=${kind}`}>{copy.back}</Link>
-      <AccountSummary key={resourceId} source={source} />
+      <AccountSummary key={`summary-${resourceId}`} source={source} />
       <AccountActions
-        key={resourceId}
+        key={`actions-${resourceId}`}
         row={row}
         busy={mutation.isPending}
         onAction={mutation.mutateAsync}

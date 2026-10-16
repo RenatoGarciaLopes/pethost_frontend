@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 import { loginAccount, resetAccountMock } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 
+test.setTimeout(60_000);
+
 test.beforeEach(async ({ page, baseURL }) => {
   await resetAccountMock(page);
   await loginAccount(page, baseURL!, "admin", "admin");
@@ -21,7 +23,9 @@ test("REQ-AACC-001/003/005/007/008/009 tutor encontra conta, suspende e libera C
 
   await expect(page.getByRole("heading", { name: "João de teste" })).toBeVisible();
   await expect(page.getByText("***.***.***-25")).toBeVisible();
-  await page.getByRole("button", { name: "Suspender conta" }).click();
+  const suspend = page.getByRole("button", { name: "Suspender conta" });
+  await waitForHydration(suspend);
+  await suspend.click();
   const suspension = page.getByRole("dialog", { name: "Suspender conta" });
   await expect(suspension).toContainText("A pessoa sai na hora e não entra com a senha");
   await suspension.getByRole("textbox", { name: "Motivo" }).fill("Disputa documental conferida no cenário de teste.");
@@ -51,6 +55,7 @@ test("REQ-AACC-001/003/005/007/008/009 tutor encontra conta, suspende e libera C
   await page.getByRole("link", { name: "Ver na trilha", exact: true }).click();
   await expect(page).toHaveURL(
     new RegExp(`/admin/audit-entries\\?targetType=owner&targetId=${"0199d2a0-0000-7000-8000-000000003201"}`),
+    { timeout: 15_000 },
   );
   await expect(page.getByRole("heading", { name: "Auditoria" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Abrir detalhes: Tutor suspenso/ })).toBeVisible();
@@ -63,7 +68,9 @@ test("REQ-AACC-014/015 anfitrião filtra Stripe na API e reinicia somente cadast
   await page.getByRole("link", { name: "Dani Stripe recusado", exact: true }).click();
 
   await expect(page.getByRole("heading", { name: "Dani Stripe recusado" })).toBeVisible();
-  await page.getByRole("button", { name: "Dar nova chance no Stripe" }).click();
+  const resetStripe = page.getByRole("button", { name: "Dar nova chance no Stripe" });
+  await waitForHydration(resetStripe);
+  await resetStripe.click();
   const dialog = page.getByRole("dialog", { name: "Dar nova chance no Stripe" });
   await expect(dialog).toContainText("A conta recusada fica no histórico");
   await expect(dialog).toContainText("Isso não libera repasses nem tira uma suspensão");
@@ -90,7 +97,9 @@ test("REQ-AACC-007/008 empresa suspensa libera identidade sem apagar evidência 
   await expect(page.getByRole("heading", { name: "Ana empresa" })).toBeVisible();
   await expect(page.getByText("**.***.***/****-81")).toBeVisible();
 
-  await page.getByRole("button", { name: "Suspender conta" }).click();
+  const suspend = page.getByRole("button", { name: "Suspender conta" });
+  await waitForHydration(suspend);
+  await suspend.click();
   const suspension = page.getByRole("dialog", { name: "Suspender conta" });
   await suspension.getByRole("textbox", { name: "Motivo" }).fill("Conflito de CNPJ conferido.");
   await suspension.getByRole("button", { name: "Suspender conta" }).click();

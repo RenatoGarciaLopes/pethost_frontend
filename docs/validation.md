@@ -366,3 +366,15 @@ Validação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`.
 - Playwright mockado e real: jornadas escritas; não executadas enquanto aguardamos as portas reservadas.
 - Storybook/a11y, build e verify global: não executados conforme `spec-owner-common.md`; as stories usam `export default meta`.
 - Vault e catálogo: somente leitura e fora desta worktree. Recursos e respectivas linhas estão incluídos no resumo a Claude Code; não declarar integração do vault concluída.
+
+## Admin accounts and audit regression - 2026-10-16
+
+- Local `origin/dev` merged in `2836cd1`; both error-message test groups and host/admin navigation expectations retained.
+- `vitest run` for AccountDetail, AdminDataTable, redirectIfSignedIn, navigation and getErrorMessage: 5 files, 162 tests passed.
+- Mocked `accounts.spec.ts` after merge: 6/6 passed (desktop/mobile), including suspension and CPF release. Executed together with audit (8/12 combined passed before audit selectors were corrected).
+- Mocked `audit.spec.ts` after selecting the exact fixture entry: 6/6 passed (desktop/mobile), including action filtering, details, target href and unauthorized redirect.
+- `tsc --noEmit` passed after merge; final typecheck/lint results recorded below. `git diff --check` passed.
+- Test runner: `.agent-tools/e2e.sh`, one worker, no concurrent E2E. Servers were stopped explicitly after each run because automatic taskkill cleanup did not finish in this sandbox. Ports 3100/5099 released.
+- These E2E suites use the simulated backend; no real API or Storybook execution claimed. Existing HTTP integration tests were not rerun because their contracts did not change. No new pure domain logic was introduced.
+- Vault untouched per user instruction. No fetch/push after the user reserved publishing; commits are local and have no coauthor trailers.
+Final targeted ESLint and tsc --noEmit: passed (exit 0).

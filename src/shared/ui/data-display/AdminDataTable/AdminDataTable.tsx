@@ -1,8 +1,8 @@
 "use client";
 import { useState, type ReactNode } from "react";
-import Link from "next/link";
 import {
   Box,
+  Link,
   Pagination,
   Table,
   TableBody,
@@ -125,7 +125,11 @@ export function AdminDataTable<T>({
                 {columns.map((col, index) => (
                   <TableCell key={col.key}>
                     {index === 0 ? (
-                      <Link href={rowHref(row)} style={{ display: "block", minHeight: 44, alignContent: "center" }}>
+                      <Link
+                        component="a"
+                        href={rowHref(row)}
+                        style={{ display: "block", minHeight: 44, alignContent: "center" }}
+                      >
                         {col.render(row)}
                         {rowLabel && (
                           <Box component="span" sx={visuallyHidden}>

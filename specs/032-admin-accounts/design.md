@@ -52,3 +52,12 @@ Os módulos independentes `features/owners` e `features/hosts` derivam seus sche
 | Storybook             | diálogo, diretório, ações, resumo e composição de detalhe com trilha compacta                 | `accountAuditComposition.stories.tsx` compõe detalhe + `AuditTable`; `AuditTable.stories.tsx` mostra a variante compacta.                          |
 
 Validação registrada será atualizada em `tasks.md` após os checks disponíveis nesta execução. A revisão visual, Storybook executado, E2E pelo navegador e integração real ficam para a execução coordenada pelo usuário.
+
+## Browser regression, 2026-10-16
+
+- `src/widgets/admin-accounts/components/AccountDetail.tsx`: the summary and actions retain independent keys (`summary-${resourceId}` and `actions-${resourceId}`), so changing accounts resets local action state without duplicate sibling keys. Props, HTTP contracts and the optional `auditTrail` slot are unchanged. This remains a client composition of owners, hosts, QueryClient and admin-audit; it requires the existing admin route guard and prefetched detail.
+- `src/shared/ui/data-display/AdminDataTable/AdminDataTable.tsx`: first-column links use MUI Link with a native anchor. Opening a detail performs document navigation; sorting, pagination and keyboard-accessible links retain their interface. This also affects the review queue and audit table. Existing functional tests cover row activation and hrefs; browser tests cover accounts and audit navigation.
+- `e2e/mocked/admin/accounts.spec.ts`: waits for hydration before detail actions; allows 60 seconds for the journey and 15 seconds for the final audit navigation while Next compiles routes. Covers suspension, irreversible identity release, literal confirmation, Stripe reset and the composed audit trail on desktop/mobile. All identity fixtures are synthetic.
+- `e2e/mocked/admin/audit.spec.ts`: detail selectors include the accessible target context; a non-admin is redirected to `/`, matching the current role destination.
+- `AccountDetail.test.tsx`: functional composition coverage includes opening suspension for both owner and host alongside the audit slot and target link. There is no new pure function requiring another unit suite; HTTP integration remains covered by the existing feature suites. E2E uses the mock backend, not the real API.
+- Temporary `debug-hydration.spec.ts` was removed. No reusable helper or production API was introduced. Vault changes are intentionally deferred by the user's instruction; this section records the resource changes for the vault maintainer.

@@ -24,11 +24,11 @@ it.each([
   },
 ])(
   "REQ-AACC-012 $targetType shows the composed audit slot and filtered trail link",
-  ({ kind, targetType, source, queries }) => {
+  async ({ kind, targetType, source, queries }) => {
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(queries.detail(adminId, source.id).queryKey, source);
 
-    renderWithProviders(
+    const { user } = renderWithProviders(
       <AccountDetail
         accountId={adminId}
         resourceId={source.id}
@@ -44,5 +44,7 @@ it.each([
       "href",
       `/admin/audit-entries?targetType=${targetType}&targetId=${source.id}`,
     );
+    await user.click(screen.getByRole("button", { name: "Suspender conta" }));
+    expect(screen.getByRole("dialog", { name: "Suspender conta" })).toBeVisible();
   },
 );
