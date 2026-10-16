@@ -6,6 +6,20 @@ updated: 2026-10-15
 
 # 040 · Design técnico
 
+## Renovação na home — revisão do PR 18 (2026-10-16)
+
+`src/app/page.tsx` recebe `searchParams` do Next, preserva valores repetidos e chama `getSession(currentPath)` com a raiz e seus parâmetros, depois de `connection()`. Não lê claims para definir o papel. Sem sessão continua visitante; sessão renovável passa pelo handler de refresh e volta ao mesmo destino; sessão válida mantém o fluxo existente. Os parâmetros são serializados por `URLSearchParams`, sem log ou cache persistido.
+
+### Catálogo provisório: getSession(currentPath?)
+
+| Nome       | Tipo/domínio                         | Status                           | Local real                             | Documentação                                                            |
+| ---------- | ------------------------------------ | -------------------------------- | -------------------------------------- | ----------------------------------------------------------------------- |
+| getSession | service, frontend/shared auth server | implemented, interface estendida | `src/shared/auth/server/getSession.ts` | Esta seção; atualização no vault pendente por instrução de não editá-lo |
+
+Parâmetro opcional `currentPath?: string`: em `refresh-required`, redireciona por `refreshRedirectPath(currentPath)`, usando a mesma renovação de `requireSession`. Sem argumento preserva o comportamento dos consumidores existentes (`null` para sessão ausente/renovável, como no login). Retorna `Promise<SessionUser | null>`; o redirect do Next interrompe o render. Dependências: leitor de sessão memorizado por requisição, cookies/headers do Next, `redirect` e `refreshRedirectPath`. Uso na home: `await getSession("/?source=home")`. Apenas servidor, após dados da requisição e sob Suspense; não use o parâmetro para exigir login de visitante (para isso existe `requireSession`). Não grava cookies em RSC nem cria cache compartilhado entre usuários. Demais consumidores não precisam migrar.
+
+Validação funcional e de integração em `src/app/page.int.test.tsx`: access vencido, ausente com refresh ou revogado pela API redirecionam antes de renderizar visitante/pets; retorno preserva parâmetros repetidos/codificados e a raiz sem query. Access vencido sem refresh permanece visitante. `getSession.int.test.ts` cobre o leitor/erros HTTP; componentes da home não mudaram. Nível unitário adicional N/A para o ramo trivial de redirect coberto na composição; E2E de renovação é aplicável, mas não executado nesta rodada sem portas. Comandos/resultados em `docs/validation.md`; vault não editado por instrução do usuário.
+
 ## Rota e renderização
 
 `src/app/page.tsx` é uma RSC pública com metadata. A página coloca `HomeContent` dentro de `Suspense`; `HomeContent` chama `connection()` antes de `getSession()` para que leitura de cookies/tempo da sessão só ocorra na requisição. Visitante e anfitrião não fazem chamada de pets. Tutor autenticado usa `prefetchMyPets` e o `petQueries.mine` já existente; erro dessa consulta vira o estado genérico recuperável. O resultado é projetado para `{ id, name, species }`; URLs de fotos e campos privados não cruzam a fronteira RSC/client. Fallback `HomeLoading` não contém busca clicável. Não há cache compartilhado por sessão.

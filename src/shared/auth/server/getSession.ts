@@ -59,10 +59,12 @@ const getSessionState = cache(createSessionReader({ readCookies: cookies, readHe
 
 /**
  * Conta atual ou `null`. Para página que funciona com ou sem sessão (ex.: `/login`).
+ * Com currentPath, renova sessão expirada antes de renderizar o estado anônimo.
  * @example const user = await getSession(); if (user) redirect(homeOf(user.role));
  */
-export async function getSession(): Promise<SessionUser | null> {
+export async function getSession(currentPath?: string): Promise<SessionUser | null> {
   const state = await getSessionState();
+  if (state.status === "refresh-required" && currentPath !== undefined) redirect(refreshRedirectPath(currentPath));
   return state.status === "authenticated" ? state.user : null;
 }
 

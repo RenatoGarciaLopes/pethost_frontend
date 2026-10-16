@@ -12,6 +12,7 @@ import HomePage, { metadata } from "./page";
 
 const requestState = vi.hoisted(() => ({
   accessToken: undefined as string | undefined,
+  refreshToken: undefined as string | undefined,
   events: [] as string[],
   connection: vi.fn(async () => {
     requestState.events.push("connection");
@@ -24,14 +25,24 @@ vi.mock("next/server", async (importOriginal) => ({
 }));
 vi.mock("next/headers", () => ({
   cookies: async () => ({
-    get: (name: string) =>
-      name === "pethost_at" && requestState.accessToken ? { value: requestState.accessToken } : undefined,
+    get: (name: string) => {
+      const value =
+        name === "pethost_at"
+          ? requestState.accessToken
+          : name === "pethost_rt"
+            ? requestState.refreshToken
+            : undefined;
+      return value ? { value } : undefined;
+    },
   }),
   headers: async () => new Headers(),
 }));
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
   useRouter: () => ({ push: vi.fn() }),
+  redirect: (path: string) => {
+    throw new Error(`NEXT_REDIRECT ${path}`);
+  },
 }));
 
 function authenticate(role: "owner" | "host") {
@@ -44,11 +55,11 @@ function authenticate(role: "owner" | "host") {
   );
 }
 
-async function resolveHomeContent() {
-  const page = HomePage();
+async function resolveHomeContent(params: Record<string, string | string[] | undefined> = {}) {
+  const page = HomePage({ searchParams: Promise.resolve(params) });
   const content = page.props.children as ReactElement;
-  const renderContent = content.type as () => Promise<ReactNode>;
-  const resolved = await renderContent();
+  const renderContent = content.type as (props: typeof content.props) => Promise<ReactNode>;
+  const resolved = await renderContent(content.props);
   if (!isValidElement(resolved)) throw new Error("HomeContent não retornou uma composição React.");
   return resolved;
 }
@@ -56,8 +67,37 @@ async function resolveHomeContent() {
 afterEach(() => {
   getQueryClient().clear();
   requestState.accessToken = undefined;
+  requestState.refreshToken = undefined;
   requestState.events.splice(0);
   requestState.connection.mockClear();
+});
+
+it.each(["expired", "missing", "revoked"])(
+  "renova access %s sem mostrar visitante e preserva parâmetros repetidos",
+  async (access) => {
+    requestState.refreshToken = "refresh-sintetico";
+    if (access !== "missing") requestState.accessToken = fakeJwt(nowSeconds() + (access === "expired" ? -60 : 600));
+    if (access === "revoked")
+      server.use(
+        http.get("http://api.test/api/v1/users/me", () => HttpResponse.json(apiFail("UNAUTHORIZED"), { status: 401 })),
+      );
+    const expectedPath = "/?where=Maring%C3%A1&pets=one&pets=two";
+    await expect(resolveHomeContent({ where: "Maringá", pets: ["one", "two"], ignored: undefined })).rejects.toThrow(
+      `NEXT_REDIRECT /api/auth/sessions/refresh?next=${encodeURIComponent(expectedPath)}`,
+    );
+    expect(requestState.events).toEqual(["connection"]);
+  },
+);
+
+it("renova sessão na raiz sem parâmetros", async () => {
+  requestState.refreshToken = "refresh-sintetico";
+  await expect(resolveHomeContent()).rejects.toThrow("NEXT_REDIRECT /api/auth/sessions/refresh?next=%2F");
+});
+
+it("access vencido sem refresh continua visitante", async () => {
+  requestState.accessToken = fakeJwt(nowSeconds() - 60);
+  renderWithProviders(await resolveHomeContent(), { theme: quintalTheme });
+  expect(screen.getByRole("link", { name: "Entrar" })).toBeVisible();
 });
 
 it("REQ-HOME-001 home pública tem metadata e não consulta sessão sem cookie", async () => {
@@ -69,7 +109,7 @@ it("REQ-HOME-001 home pública tem metadata e não consulta sessão sem cookie",
 });
 
 it("REQ-HOME-010 fallback de carregamento não oferece busca com destino incompleto", () => {
-  const page = HomePage();
+  const page = HomePage({});
   renderWithProviders(page.props.fallback as ReactElement, { theme: quintalTheme });
   expect(screen.getByRole("main")).toHaveAttribute("aria-busy", "true");
   expect(screen.getByRole("status")).toHaveTextContent("Preparando seu quintal");

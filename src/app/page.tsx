@@ -14,7 +14,11 @@ export const metadata: Metadata = { title: homeCopy.pageTitle };
  * Início público (spec 040): a identidade e a lista de pets só são lidas na requisição. A página não busca
  * disponibilidade; entrega os filtros preparados para `/search` (spec 041).
  */
-export default function HomePage() {
+interface HomePageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default function HomePage({ searchParams }: HomePageProps) {
   return (
     <Suspense
       fallback={
@@ -27,14 +31,19 @@ export default function HomePage() {
         </main>
       }
     >
-      <HomeContent />
+      <HomeContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function HomeContent() {
+async function HomeContent({ searchParams }: HomePageProps) {
   await connection();
-  const user = await getSession();
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries((await searchParams) ?? {})) {
+    if (Array.isArray(value)) value.forEach((item) => params.append(key, item));
+    else if (value !== undefined) params.set(key, value);
+  }
+  const user = await getSession(params.size ? `/?${params.toString()}` : "/");
   const viewer = user?.role === "owner" || user?.role === "host" ? user.role : "visitor";
   let pets: HomePetOption[] = [];
   let petsUnavailable = false;
