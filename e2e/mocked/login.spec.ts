@@ -44,7 +44,7 @@ test("REQ-AUTH-004/005/018 login pelo formulário normaliza email e segue next s
   expect(request.postDataJSON()).toEqual({ email: "tutora@pethost.test", password: "senha-de-teste", role: "owner" });
   expect(new URL((await destinationPromise).url()).searchParams.get("next")).toBe("/");
   // /login já com sessão redireciona no servidor para next=/.
-  await expect(page).toHaveURL(`${baseURL}/`);
+  await expect(page).toHaveURL(`${baseURL}/`, { timeout: 15_000 });
   const cookies = await page.context().cookies();
   expect(cookies.find((cookie) => cookie.name === "pethost_at")?.httpOnly).toBe(true);
   expect(cookies.find((cookie) => cookie.name === "pethost_rt")?.httpOnly).toBe(true);
@@ -56,7 +56,7 @@ test("REQ-AUTH-006 login ignora next externo", async ({ page, baseURL }) => {
   await page.getByLabel("E-mail", { exact: false }).fill("tutora@pethost.test");
   await page.getByLabel(/^Senha/).fill("senha-de-teste");
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page).toHaveURL(`${baseURL}/`);
+  await expect(page).toHaveURL(`${baseURL}/`, { timeout: 15_000 });
 });
 
 test("REQ-AUTH-016/021 cena preserva foco e movimento reduzido deixa pólen parado", async ({ page }) => {

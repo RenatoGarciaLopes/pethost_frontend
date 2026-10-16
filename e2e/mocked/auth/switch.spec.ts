@@ -25,7 +25,7 @@ test("REQ-SWITCH-005/006/009 tutor troca para anfitrião com cookies novos HttpO
   );
   await page.getByRole("button", { name: "Entrar na conta de anfitrião" }).click();
   expect((await responsePromise).status()).toBe(200);
-  await expect(page).toHaveURL(`${baseURL}/host`, { timeout: 15_000 });
+  await expect(page).toHaveURL(`${baseURL}/host`, { timeout: 30_000 });
   const next = await page.context().cookies();
   for (const name of ["pethost_at", "pethost_rt"]) {
     const cookie = next.find((item) => item.name === name);

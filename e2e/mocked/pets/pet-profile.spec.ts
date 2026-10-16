@@ -6,7 +6,7 @@ const lunaId = "0199d2a0-0000-7000-8000-0000000000e1";
 const profilePath = `/pets/${lunaId}`;
 const apiPath = `/api/pets/${lunaId}`;
 // Navegação no cliente: no `next dev` a primeira visita compila a rota (como em `new-pet.spec.ts`).
-const NAVIGATION = { timeout: 15_000 };
+const NAVIGATION = { timeout: 30_000 };
 
 // Os projetos mocked-desktop e mocked-mobile executam a mesma jornada, com estado isolado.
 test.beforeEach(async ({ page, baseURL }) => {

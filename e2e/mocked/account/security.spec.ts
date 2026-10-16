@@ -51,9 +51,10 @@ test("REQ-ACC-026/027 navegação entre perfil, senha e pausa conserva títulos 
     ["Senha", "Trocar a senha · PetHost"],
     ["Pausar conta", "Pausar a conta · PetHost"],
   ];
+  await waitForHydration(page.getByRole("navigation", { name: "Minha conta" }));
   for (const [label, title] of destinations) {
     await page.getByRole("navigation", { name: "Minha conta" }).getByRole("link", { name: label, exact: true }).click();
-    await expect(page).toHaveTitle(title);
+    await expect(page).toHaveTitle(title, { timeout: 15_000 });
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   }
 });

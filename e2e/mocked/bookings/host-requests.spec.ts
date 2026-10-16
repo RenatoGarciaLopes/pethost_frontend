@@ -3,7 +3,7 @@ import { accountFixture, loginAccount, resetAccountMock } from "../../support/ac
 import { waitForHydration } from "../../support/hydration";
 
 // Navegação no cliente: no `next dev` a primeira visita compila a rota (como em `new-pet.spec.ts`).
-const NAVIGATION = { timeout: 15_000 };
+const NAVIGATION = { timeout: 30_000 };
 // A ficha do pet vem do BFF no cliente; no `next dev` a primeira chamada ainda compila a rota dele.
 const FIRST_BFF_CALL = { timeout: 30_000 };
 const MOCK = process.env.E2E_ACCOUNT_MOCK_URL ?? "http://localhost:5099";
