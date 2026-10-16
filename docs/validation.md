@@ -397,8 +397,8 @@ Após alinhar a nomenclatura à API e ao ER, a estrutura passou a ter 14 feature
 
 ### 16/10/2026 · 050 com a 042 corrigida e o dev (005 etapas 1 a 4, 043, 030)
 
-| Verificação                                                                           | Resultado                             |
-| ------------------------------------------------------------------------------------- | ------------------------------------- |
-| Vitest: `features/bookings`, `features/listing-page`, rotas de `listings`, `test/msw` | 37 arquivos, 167 testes verdes        |
-| ESLint (inclui `no-numeric-radius`), `tsc --noEmit`, Prettier                         | sem erros                             |
-| E2E mocked `bookings` e `search` (jornada busca → cantinho → pedido sem `fixme`)      | aguardando a vez nas portas 3100/5099 |
+| Verificação                                                                                         | Resultado                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest: `features/bookings`, `features/listing-page`, rotas de `listings`, `test/msw`               | 37 arquivos, 167 testes verdes                                                                                                                                                   |
+| ESLint (inclui `no-numeric-radius`), `tsc --noEmit`, Prettier                                       | sem erros                                                                                                                                                                        |
+| E2E mocked `bookings` e `search` (jornada busca → cantinho → pedido sem `fixme`), desktop e celular | 1ª execução 41/44: compilação da primeira visita no `next dev` (cantinho e `/login`) e rótulos duplicados da busca oculta no celular; testes ajustados, 2ª execução 44/44 verdes |

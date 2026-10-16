@@ -8,7 +8,8 @@ async function openSearch(page: Page) {
 
 test("REQ-SRCH-001 visitante preserva a busca no login", async ({ page }) => {
   await page.goto("/search?where=Maring%C3%A1&hasKids=false");
-  await expect(page).toHaveURL(/\/login\?next=/);
+  // Primeira visita da execução: o `next dev` ainda compila o redirect e o /login.
+  await expect(page).toHaveURL(/\/login\?next=/, { timeout: 15_000 });
   const next = new URL(page.url()).searchParams.get("next")!;
   expect(new URL(next, "http://test").searchParams.get("where")).toBe("Maringá");
   expect(next).toContain("hasKids=false");

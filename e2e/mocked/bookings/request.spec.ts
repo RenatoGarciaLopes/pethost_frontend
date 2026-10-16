@@ -4,6 +4,8 @@ import { waitForHydration } from "../../support/hydration";
 
 // Navegação no cliente: no `next dev` a primeira visita compila a rota (como em `new-pet.spec.ts`).
 const NAVIGATION = { timeout: 15_000 };
+// A primeira visita ao cantinho compila a rota e a sessão no `next dev` webpack; leva mais que as outras.
+const FIRST_COMPILE = { timeout: 30_000 };
 const LISTING_ID = "0199d2a0-0000-7000-8000-000000000042";
 const LUNA = "0199d2a0-0000-7000-8000-0000000000e1";
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -66,7 +68,7 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   page,
   baseURL,
 }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(90_000);
   await loginAccount(page, baseURL!, "both", "owner");
   const from = nextMonday();
   const to = plus(from, 2);
@@ -83,15 +85,16 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   const title = (await card.getByRole("heading").first().textContent())?.trim() ?? "";
   await waitForHydration(card);
   await card.click();
-  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible(NAVIGATION);
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible(FIRST_COMPILE);
 
   const ask = page.getByRole("link", { name: "Pedir estadia" });
   await waitForHydration(ask);
   await ask.click();
   await expect(page).toHaveURL(/\/listings\/[0-9a-f-]+\/request\?/, NAVIGATION);
   await expect(page.getByRole("heading", { name: "Pedir estadia", level: 1 })).toBeVisible(NAVIGATION);
-  await expect(page.getByLabel("Chegada")).toHaveValue(from);
-  await expect(page.getByLabel("Saída")).toHaveValue(to);
+  // No celular a busca anterior continua montada e oculta, com os mesmos rótulos.
+  await expect(page.getByLabel("Chegada", { exact: true }).filter({ visible: true })).toHaveValue(from);
+  await expect(page.getByLabel("Saída", { exact: true }).filter({ visible: true })).toHaveValue(to);
   await expect(page.getByRole("group", { name: "Quem vai?" }).getByRole("checkbox", { name: /Luna/ })).toBeChecked();
   const summary = page.getByRole("region", { name: "Resumo do pedido" });
   await expect(summary).toContainText(title);
