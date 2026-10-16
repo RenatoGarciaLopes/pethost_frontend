@@ -345,3 +345,11 @@ Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da
 - "voltou pra casa" sumia: a `StayMilestones` desmontava quando a estadia virava `completed`. Agora fica montada.
 - Avatar com iniciais sem contraste (axe) na lista e no detalhe do anfitrião: coral com o texto de contraste do tema, como no shell.
 - `host-requests.spec.ts`: espera a hidratação antes de abrir o pedido e dá 60 s à primeira jornada, que compila as rotas a frio no `next dev`.
+
+## Regressão de CI · Início (spec 040)
+
+| Verificação | Resultado |
+|---|---|
+| `bash .agent-tools/e2e.sh pethost_frontend-040 e2e/mocked/home/home.spec.ts` | 8/8 no desktop e celular |
+
+O E2E escolhe “Cão” e “Gato” por nome exato, sem colidir com o placeholder “Cão ou gato?”. Nos fluxos móveis, expande a pílula antes de preencher os campos e usa o CTA responsivo “Buscar cantinhos”. As portas 3100/5099 foram liberadas ao fim.

@@ -1,5 +1,16 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { loginAccount } from "../../support/account";
+
+async function expandSearchOnMobile(page: Page) {
+  const openSearch = page.getByRole("button", { name: "Abrir busca", exact: true });
+  if (await openSearch.isVisible()) await openSearch.click();
+}
+
+async function submitSearch(page: Page) {
+  const desktopSearch = page.getByRole("button", { name: "Achar um cantinho", exact: true });
+  const mobileSearch = page.getByRole("button", { name: "Buscar cantinhos", exact: true });
+  await (await desktopSearch.isVisible() ? desktopSearch : mobileSearch).click();
+}
 
 test("REQ-HOME-001/002 visitante vê o início e volta à busca depois de entrar", async ({ page }) => {
   await page.goto("/");
@@ -7,10 +18,11 @@ test("REQ-HOME-001/002 visitante vê o início e volta à busca depois de entrar
   await expect(
     page.getByRole("heading", { level: 1, name: "Um quintal pro seu pet enquanto você viaja." }),
   ).toBeVisible();
+  await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Zona 7");
   await page.getByRole("combobox", { name: "Pet" }).click();
-  await page.getByRole("option", { name: "Cão" }).click();
-  await page.getByRole("button", { name: "Achar um cantinho" }).click();
+  await page.getByRole("option", { name: "Cão", exact: true }).click();
+  await submitSearch(page);
 
   await expect(page).toHaveURL(/\/login\?next=/);
   const next = new URL(page.url()).searchParams.get("next");
@@ -21,8 +33,9 @@ test("REQ-HOME-003 tutor com pet segue para busca com o id, sem dados do perfil"
   await loginAccount(page, baseURL!);
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "Um quintal pra Luna enquanto você viaja." })).toBeVisible();
+  await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Maringá");
-  await page.getByRole("button", { name: "Achar um cantinho" }).click();
+  await submitSearch(page);
   await expect(page).toHaveURL(/\/search\?/);
   const params = new URL(page.url()).searchParams;
   expect(params.get("where")).toBe("Maringá");
@@ -34,9 +47,10 @@ test("REQ-HOME-002 tutor sem pet escolhe espécie sem convite para cadastro", as
   await loginAccount(page, baseURL!, "single");
   await page.goto("/");
   await expect(page.getByText("Você pode buscar antes de cadastrar seu pet.")).toBeVisible();
+  await expandSearchOnMobile(page);
   await page.getByRole("combobox", { name: "Pet" }).click();
-  await page.getByRole("option", { name: "Gato" }).click();
-  await page.getByRole("button", { name: "Achar um cantinho" }).click();
+  await page.getByRole("option", { name: "Gato", exact: true }).click();
+  await submitSearch(page);
   await expect(page).toHaveURL(/\/search\?species=cat$/);
 });
 
