@@ -1,5 +1,15 @@
 # Validação da base
 
+## 15/10/2026 · Spec 043 · T7 escrita
+
+Na worktree `feat/043-host-payouts`, `npx.cmd vitest run src/features/host-payouts src/test/msw/stripeAccountMock.int.test.ts 'src/app/(host)/host/payments'` passou: **13 arquivos, 57 testes**. `npx.cmd tsc --noEmit -p .` e ESLint nos arquivos da jornada e mock passaram. Prettier foi aplicado aos novos arquivos e checked em seguida. O E2E `e2e/mocked/host/payouts.spec.ts` foi escrito para desktop/celular; Playwright não foi iniciado porque esta entrega deve solicitar e aguardar a liberação das portas.
+
+## 15/10/2026 · Spec 043 (parcial)
+
+Na worktree `feat/043-host-payouts`, `npx.cmd vitest run src/features/host-payouts src/test/msw/stripeAccountMock.int.test.ts 'src/app/(host)/host/payments' src/shared/api/errors/getErrorMessage.test.ts --maxWorkers=2` passou: **14 arquivos, 114 testes**. `npx.cmd tsc --noEmit -p .` passou após corrigir o cache tipado da story. As stories usam `export default meta` e os arquivos da entrega foram verificados sem BOM.
+
+Playwright não foi iniciado: o Renato pediu para solicitar as portas antes de qualquer E2E. Permanecem pendentes a jornada E2E e integração da etapa exportada ao `HostOnboardingPanel` da spec 030 (em trabalho com Lynx). O Renato cuidará da nota e do catálogo do vault. Lint, Prettier, build, Storybook e E2E não foram executados nesta etapa.
+
 Em 11/10/2026, o projeto foi gerado pelo CLI `create-next-app@latest`, com TypeScript, ESLint, App Router, src-dir, npm e sem Tailwind. Next 16.4.0, React 19.3.0, MUI 9.5.0; versões completas no lockfile.
 
 A primeira checagem de TypeScript encontrou `LayoutProps`, tipo gerado pelo Next ainda indisponível antes do primeiro build. O layout foi ajustado para declarar `children: ReactNode`, permitindo checagem independente do build.
