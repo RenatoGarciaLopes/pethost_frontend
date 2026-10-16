@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
@@ -34,7 +35,7 @@ export function PetIdCard({ pet, now }: PetIdCardProps) {
           bgcolor: "background.paper",
           border: 2,
           borderColor: "divider",
-          borderRadius: 3,
+          borderRadius: `${quintalRadii.card}px`,
           transition: "border-color 120ms",
           "&:hover": { borderColor: "text.primary" },
         }}

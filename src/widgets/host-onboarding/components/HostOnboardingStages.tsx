@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useId } from "react";
 import { StatusPill, type StatusPillTone } from "@/shared/ui/feedback/StatusPill";
@@ -44,7 +45,7 @@ export function HostOnboardingStages({ progress }: HostOnboardingStagesProps) {
             aria-current={stage.state === "current" ? "step" : undefined}
             sx={{
               p: 2,
-              borderRadius: 3,
+              borderRadius: `${quintalRadii.card}px`,
               border: "2px solid",
               borderColor: stage.state === "locked" ? "divider" : "text.primary",
               bgcolor: "background.paper",

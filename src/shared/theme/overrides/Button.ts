@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import type { Components, Theme } from "@mui/material/styles";
 import { quietVariant } from "../variants/quintalVariants";
 import { quintalColors as c } from "../tokens/colors";
@@ -9,7 +10,7 @@ export const focusRing = { outline: `3px solid ${c.foco}`, outlineOffset: "3px" 
 export const buttonStyles = {
   minHeight: 48,
   border: `2px solid ${c.tinta}`,
-  borderRadius: 18,
+  borderRadius: `${quintalRadii.field}px`,
   boxShadow: hardShadow(3),
   padding: "10px 24px",
   textTransform: "none" as const,

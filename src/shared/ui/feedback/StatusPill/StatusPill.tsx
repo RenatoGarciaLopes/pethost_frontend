@@ -1,4 +1,6 @@
 "use client";
+
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box } from "@mui/material";
 import { toneIcon, type FeedbackTone } from "../feedbackIcons";
 import { toneSurface } from "../toneStyles";
@@ -38,7 +40,7 @@ export function StatusPill({ label, tone = "neutro", size = "md" }: StatusPillPr
           display: "inline-flex",
           alignItems: "center",
           gap: 0.75,
-          borderRadius: 999,
+          borderRadius: `${quintalRadii.pill}px`,
           padding: size === "sm" ? "2px 10px" : "4px 12px",
           fontSize: size === "sm" ? "0.82rem" : "0.9rem",
           fontWeight: 700,

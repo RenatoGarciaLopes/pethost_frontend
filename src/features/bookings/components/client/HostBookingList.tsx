@@ -1,5 +1,6 @@
 "use client";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Avatar, Box, Button, Link, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
@@ -29,7 +30,7 @@ function BookingCard({ booking, now }: { booking: Booking; now: Date }) {
       component="article"
       aria-label={`Pedido de ${owner}`}
       spacing={1.5}
-      sx={{ p: 2, border: "2px solid", borderRadius: 3, bgcolor: "background.paper" }}
+      sx={{ p: 2, border: "2px solid", borderRadius: `${quintalRadii.card}px`, bgcolor: "background.paper" }}
     >
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
         <Avatar
@@ -90,7 +91,7 @@ function Tabs({ accountId, current }: { accountId: string; current: BookingTab }
                   gap: 1,
                   minHeight: 48,
                   px: 2,
-                  borderRadius: 999,
+                  borderRadius: `${quintalRadii.pill}px`,
                   border: "2px solid",
                   fontWeight: 700,
                   textDecoration: "none",

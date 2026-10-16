@@ -1,5 +1,6 @@
 "use client";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
@@ -31,7 +32,7 @@ function StayListItem({ booking }: { booking: Booking }) {
           gap: 0.5,
           p: 2,
           border: "2px solid",
-          borderRadius: 3,
+          borderRadius: `${quintalRadii.card}px`,
           bgcolor: "background.paper",
           color: "text.primary",
           textDecoration: "none",
@@ -76,7 +77,7 @@ function Tabs({ current }: { current: BookingTab }) {
                   alignItems: "center",
                   minHeight: 48,
                   px: 2,
-                  borderRadius: 999,
+                  borderRadius: `${quintalRadii.pill}px`,
                   border: "2px solid",
                   fontWeight: 700,
                   textDecoration: "none",

@@ -1,5 +1,6 @@
 "use client";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Avatar, Box, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
@@ -31,7 +32,7 @@ function OwnerContact({ booking }: { booking: Booking }) {
     <Box
       component="section"
       aria-labelledby={headingId}
-      sx={{ p: 2, border: "2px solid", borderRadius: 3, bgcolor: "background.paper" }}
+      sx={{ p: 2, border: "2px solid", borderRadius: `${quintalRadii.card}px`, bgcolor: "background.paper" }}
     >
       <Typography id={headingId} sx={{ fontWeight: 800 }}>
         {copy.contact}

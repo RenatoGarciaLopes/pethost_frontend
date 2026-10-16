@@ -1,4 +1,6 @@
 "use client";
+
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { useId, useRef, useState, type ChangeEvent } from "react";
 import {
   Avatar,
@@ -99,7 +101,7 @@ function AvatarPicker({ name, avatarUrl, busy, error, onUpload, onRemove, disabl
         sx={{
           position: "relative",
           display: "inline-flex",
-          borderRadius: 1,
+          borderRadius: `${quintalRadii.control}px`,
           "&:focus-within": { outline: "2px solid", outlineColor: "text.primary", outlineOffset: 3 },
         }}
       >

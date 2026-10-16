@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { PawMark } from "@/shared/ui/brand/PawMark";
@@ -24,7 +25,7 @@ export function NewPetTile({ role = "owner" }: { role?: PersonalRole }) {
           border: 2,
           borderStyle: "dashed",
           borderColor: "divider",
-          borderRadius: 3,
+          borderRadius: `${quintalRadii.card}px`,
           "&:hover": { borderColor: "text.primary" },
         }}
       >

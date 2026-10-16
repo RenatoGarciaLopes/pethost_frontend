@@ -1,5 +1,6 @@
 "use client";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -33,7 +34,13 @@ function Thumbnail({ file, label }: { file: File; label: string }) {
       component="img"
       src={url ?? undefined}
       alt={label}
-      sx={{ width: "100%", aspectRatio: "3 / 2", objectFit: "cover", borderRadius: 2, border: "2px solid" }}
+      sx={{
+        width: "100%",
+        aspectRatio: "3 / 2",
+        objectFit: "cover",
+        borderRadius: `${quintalRadii.control}px`,
+        border: "2px solid",
+      }}
     />
   );
 }
