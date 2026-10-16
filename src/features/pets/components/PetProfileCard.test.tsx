@@ -4,6 +4,23 @@ import { renderWithProviders } from "@/test/render";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { petProfileValuesFixture } from "@/test/fixtures/pets";
 import { PetProfileCard } from "./PetProfileCard";
+it("REQ-UIC-007 detail layout keeps health and routine readable without wizard edit controls", () => {
+  renderWithProviders(
+    <PetProfileCard
+      layout="details"
+      values={petProfileValuesFixture}
+      coverUrl={null}
+      now={new Date("2026-10-14")}
+      showEmptyBlocks
+    />,
+    { theme: quintalTheme },
+  );
+  const card = screen.getByRole("article");
+  expect(card).toHaveAttribute("data-surface");
+  expect(screen.getByRole("heading", { name: "Saúde" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Rotina e manias" })).toBeInTheDocument();
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
+});
 it("REQ-PNEW-013 carteirinha só mostra respostas conhecidas e foto decorativa", () => {
   renderWithProviders(
     <PetProfileCard

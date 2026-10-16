@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Button, Container, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import NextLink from "next/link";
 import { useState } from "react";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
@@ -98,11 +99,11 @@ function SkeletonGrid() {
  */
 export function PetListSkeleton() {
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page">
       <Stack spacing={3}>
         <Typography>{petsCopy.loading}</Typography>
         <SkeletonGrid />
       </Stack>
-    </Container>
+    </PageContainer>
   );
 }

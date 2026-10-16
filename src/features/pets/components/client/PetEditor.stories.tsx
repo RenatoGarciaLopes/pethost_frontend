@@ -1,3 +1,4 @@
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
@@ -41,9 +42,9 @@ function Frame({ overrides }: FrameProps) {
   });
   return (
     <QueryClientProvider client={client}>
-      <main>
+      <main><PageContainer width="page">
         <PetEditor accountId={ACCOUNT} petId={PET_ID} />
-      </main>
+      </PageContainer></main>
     </QueryClientProvider>
   );
 }
@@ -79,7 +80,7 @@ export const Exotico: Story = {
   args: { overrides: { species: "exotic", speciesDescription: "Iguana verde", size: null, photos: threePhotos } },
 };
 
-/** Celular (390 px): a carteirinha vem antes das seções. */
+/** Celular (390 px): as seções ficam antes da prévia para a edição abrir direto nos campos. */
 export const Celular: Story = {
   name: "REQ-PEDIT-004 Celular",
   globals: { viewport: { value: "celular", isRotated: false } },

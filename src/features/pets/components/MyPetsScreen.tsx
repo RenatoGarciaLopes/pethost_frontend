@@ -1,4 +1,7 @@
-import { Container, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { prefetchMyPets } from "../api/server/myPets.server";
@@ -18,15 +21,13 @@ export async function MyPetsScreen({ accountId, role = "owner" }: { accountId: s
   const { keeperPending } = await prefetchMyPets(queryClient, accountId);
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page">
       <Stack spacing={3}>
-        <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
-          {petsCopy[role].title}
-        </Typography>
+        <PageHeader title={petsCopy[role].title} />
         <HydrationBoundary state={dehydrate(queryClient)}>
           {role === "host" && keeperPending ? <KeeperPendingNotice /> : <PetList accountId={accountId} role={role} />}
         </HydrationBoundary>
       </Stack>
-    </Container>
+    </PageContainer>
   );
 }

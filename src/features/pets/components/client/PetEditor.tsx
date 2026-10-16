@@ -1,7 +1,9 @@
 "use client";
 
-import { Box, Divider, Link, Stack, Typography } from "@mui/material";
+import { Box, Link, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+import { Surface } from "@/shared/ui/layout/Surface";
 import NextLink from "next/link";
 import { useCallback, useState } from "react";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
@@ -50,7 +52,7 @@ const sectionOfField = (field: string) => SECTIONS.find((section) => section.fie
 
 /**
  * Edição da ficha (REQ-PEDIT-004 a 010, 017): fotos ligadas à API e seis seções, cada uma com "Salvar"
- * próprio, ao lado da carteirinha com o que está salvo (no celular, a carteirinha vem antes). Sair por um link
+ * próprio, ao lado da carteirinha com o que está salvo (no celular, os campos ficam antes da carteirinha). Sair por um link
  * com seção alterada pergunta "Sair sem salvar?".
  *
  * @example <PetEditor accountId={user.id} petId={petId} />
@@ -90,33 +92,34 @@ export function PetEditor({ accountId, petId }: { accountId: string; petId: stri
       <Link component={NextLink} href={petPath(petId)} sx={{ alignSelf: "flex-start" }}>
         {copy.backToProfile(name)}
       </Link>
-      <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
-        {copy.editTitle(name)}
-      </Typography>
+      <PageHeader title={copy.editTitle(name)} />
       <Box
         sx={{
           display: "grid",
           gap: { xs: 3, md: 5 },
-          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) 340px" },
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) 360px" },
           alignItems: "start",
         }}
       >
-        <Box sx={{ position: { md: "sticky" }, top: { md: 24 }, order: { md: 2 } }}>
-          <PetProfileCard values={pet.values} coverUrl={pet.photos[0]?.url ?? null} now={now} showEmptyBlocks />
-        </Box>
-        <Stack spacing={4} divider={<Divider />} sx={{ order: { md: 1 }, minWidth: 0 }}>
-          <PetPhotosSection accountId={accountId} pet={pet} />
+        <Stack spacing={4} sx={{ minWidth: 0 }}>
+          <Surface sx={{ p: { xs: 2.5, md: 3 } }}>
+            <PetPhotosSection accountId={accountId} pet={pet} />
+          </Surface>
           {SECTIONS.map((section) => (
-            <EditSection
-              key={section.id}
-              accountId={accountId}
-              pet={pet}
-              section={section}
-              sectionOfField={sectionOfField}
-              onDirtyChange={reportDirty}
-            />
+            <Surface key={section.id} sx={{ p: { xs: 2.5, md: 3 } }}>
+              <EditSection
+                accountId={accountId}
+                pet={pet}
+                section={section}
+                sectionOfField={sectionOfField}
+                onDirtyChange={reportDirty}
+              />
+            </Surface>
           ))}
         </Stack>
+        <Box sx={{ position: { md: "sticky" }, top: { md: 24 }, minWidth: 0 }}>
+          <PetProfileCard values={pet.values} coverUrl={pet.photos[0]?.url ?? null} now={now} showEmptyBlocks />
+        </Box>
       </Box>
       {dialog}
     </Stack>

@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { prefetchPetDetail } from "../api/server/petDetail.server";
@@ -20,11 +20,11 @@ export async function PetProfileScreen({ accountId, petId }: PetScreenProps) {
   const queryClient = getQueryClient();
   await prefetchPetDetail(queryClient, accountId, petId);
   return (
-    <Container maxWidth="sm" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <PetProfile accountId={accountId} petId={petId} />
       </HydrationBoundary>
-    </Container>
+    </PageContainer>
   );
 }
 
@@ -36,10 +36,10 @@ export async function PetEditScreen({ accountId, petId }: PetScreenProps) {
   const queryClient = getQueryClient();
   await prefetchPetDetail(queryClient, accountId, petId);
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <PetEditor accountId={accountId} petId={petId} />
       </HydrationBoundary>
-    </Container>
+    </PageContainer>
   );
 }

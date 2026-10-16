@@ -1,3 +1,4 @@
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
@@ -51,9 +52,9 @@ function Frame({ overrides }: FrameProps) {
   return (
     <QueryClientProvider client={client}>
       <FlashMessageProvider>
-        <main>
+        <main><PageContainer width="page">
           <PetProfile accountId={ACCOUNT} petId={PET_ID} />
-        </main>
+        </PageContainer></main>
       </FlashMessageProvider>
     </QueryClientProvider>
   );

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Container, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 import { useState } from "react";
 import { FlashMessageProvider } from "@/shared/hooks/useFlashMessage";
 import { petDto, petKeeperDto } from "@/test/fixtures/pets";
@@ -27,12 +29,12 @@ function Frame({ empty = false, pending = false }: { empty?: boolean; pending?: 
   return (
     <QueryClientProvider client={client}>
       <FlashMessageProvider>
-        <Container maxWidth="lg">
+        <PageContainer width="page">
           <Stack spacing={3}>
-            <Typography variant="h1">{petsCopy.host.title}</Typography>
+            <PageHeader title={petsCopy.host.title} />
             {pending ? <KeeperPendingNotice /> : <PetList accountId="storybook-host" role="host" />}
           </Stack>
-        </Container>
+        </PageContainer>
       </FlashMessageProvider>
     </QueryClientProvider>
   );

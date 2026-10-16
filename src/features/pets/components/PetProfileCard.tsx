@@ -1,4 +1,4 @@
-import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { Avatar, Box, Button, Divider, Stack, Typography } from "@mui/material";
 import { PawMark } from "@/shared/ui/brand/PawMark";
 import { describePet, speciesLabel } from "../lib/describePet";
@@ -86,6 +86,8 @@ function blocksOf(values: PetWizardValues): Block[] {
 }
 
 export interface PetProfileCardProps {
+  /** Details use two columns of information on desktop; wizard previews stay compact. */
+  layout?: "compact" | "details";
   values: PetWizardValues;
   /** Prévia da capa (object URL da foto da vaga 1) ou `null`. */
   coverUrl: string | null;
@@ -104,7 +106,14 @@ export interface PetProfileCardProps {
  *
  * @example <PetProfileCard values={values} coverUrl={cover} now={now} onEdit={(step) => goTo(step)} />
  */
-export function PetProfileCard({ values, coverUrl, now, onEdit, showEmptyBlocks = false }: PetProfileCardProps) {
+export function PetProfileCard({
+  values,
+  coverUrl,
+  now,
+  onEdit,
+  showEmptyBlocks = false,
+  layout = "compact",
+}: PetProfileCardProps) {
   const pet = previewPet(values, coverUrl);
   const name = values.name || petWizardCopy.fallbackName;
   const blocks = blocksOf(values).map((block) => ({
@@ -113,16 +122,15 @@ export function PetProfileCard({ values, coverUrl, now, onEdit, showEmptyBlocks 
   }));
 
   return (
-    <Stack
+    <Surface
       component="article"
       aria-label={petWizardCopy.review.cardLabel(name)}
-      spacing={2}
       sx={{
         p: 2.5,
-        border: 2,
-        borderColor: "divider",
-        borderRadius: `${quintalRadii.card}px`,
-        bgcolor: "background.paper",
+        display: "grid",
+        gap: 2,
+        minWidth: 0,
+        overflowWrap: "anywhere",
       }}
     >
       <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
@@ -154,44 +162,55 @@ export function PetProfileCard({ values, coverUrl, now, onEdit, showEmptyBlocks 
           </Button>
         )}
       </Stack>
-      {blocks
-        .filter((block) => onEdit || showEmptyBlocks || block.lines.length > 0)
-        .map((block) => (
-          <Box key={block.step}>
-            <Divider sx={{ mb: 1.5 }} />
-            <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
-              <Typography component="h3" sx={{ fontWeight: 700 }}>
-                {block.title}
-              </Typography>
-              {onEdit && (
-                <Button
-                  size="small"
-                  onClick={() => onEdit(block.step)}
-                  aria-label={petWizardCopy.review.editBlock(block.title)}
-                >
-                  {petWizardCopy.review.edit}
-                </Button>
+      <Box
+        sx={{
+          display: "grid",
+          gap: 3,
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            md: layout === "details" ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)",
+          },
+        }}
+      >
+        {blocks
+          .filter((block) => onEdit || showEmptyBlocks || block.lines.length > 0)
+          .map((block) => (
+            <Box key={block.step}>
+              <Divider sx={{ mb: 1.5 }} />
+              <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                <Typography component="h3" sx={{ fontWeight: 700 }}>
+                  {block.title}
+                </Typography>
+                {onEdit && (
+                  <Button
+                    size="small"
+                    onClick={() => onEdit(block.step)}
+                    aria-label={petWizardCopy.review.editBlock(block.title)}
+                  >
+                    {petWizardCopy.review.edit}
+                  </Button>
+                )}
+              </Stack>
+              {block.lines.length === 0 && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  {petWizardCopy.review.emptyBlock}
+                </Typography>
               )}
-            </Stack>
-            {block.lines.length === 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {petWizardCopy.review.emptyBlock}
-              </Typography>
-            )}
-            <Box component="dl" sx={{ m: 0, mt: 1, display: "grid", gap: 0.5 }}>
-              {block.lines.map(([label, value]) => (
-                <Box key={label} sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                  <Typography component="dt" variant="body2" color="text.secondary">
-                    {label}:
-                  </Typography>
-                  <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-                    {value}
-                  </Typography>
-                </Box>
-              ))}
+              <Box component="dl" sx={{ m: 0, mt: 1, display: "grid", gap: 0.5 }}>
+                {block.lines.map(([label, value]) => (
+                  <Box key={label} sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                    <Typography component="dt" variant="body2" color="text.secondary">
+                      {label}:
+                    </Typography>
+                    <Typography component="dd" variant="body2" sx={{ m: 0 }}>
+                      {value}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </Box>
-          </Box>
-        ))}
-    </Stack>
+          ))}
+      </Box>
+    </Surface>
   );
 }

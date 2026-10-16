@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { useState } from "react";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
-import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
@@ -46,12 +46,10 @@ export function PetProfile({ accountId, petId }: { accountId: string; petId: str
 
   return (
     <Stack spacing={3}>
-      <Typography component="h1" sx={visuallyHidden}>
-        {copy.profileHeading(name)}
-      </Typography>
       <Link component={NextLink} href={MY_PETS_PATH} sx={{ alignSelf: "flex-start" }}>
         {copy.backToList}
       </Link>
+      <PageHeader title={copy.profileHeading(name)} />
       {!pet.isActive && (
         <Stack spacing={1.5} sx={{ alignItems: "flex-start" }}>
           <StatusPill label={copy.inactive} />
@@ -69,7 +67,13 @@ export function PetProfile({ accountId, petId }: { accountId: string; petId: str
           <ErrorNotice message={reactivate.isError ? getErrorMessage(reactivate.error) : null} tone="erro" />
         </Stack>
       )}
-      <PetProfileCard values={pet.values} coverUrl={pet.photos[0]?.url ?? null} now={now} showEmptyBlocks />
+      <PetProfileCard
+        values={pet.values}
+        coverUrl={pet.photos[0]?.url ?? null}
+        now={now}
+        showEmptyBlocks
+        layout="details"
+      />
       <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }}>
         <Button component={NextLink} href={petEditPath(petId)} variant="contained">
           {copy.edit}
