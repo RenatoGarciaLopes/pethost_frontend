@@ -11,7 +11,7 @@ it("REQ-UIC-002 renders a semantic paper surface with ink border and hard shadow
   const surface = screen.getByRole("article");
   expect(surface).toHaveAttribute("data-surface");
   expect(surface).toHaveStyle({ borderRadius: "24px" });
-  expect(surface).toHaveStyle({ boxShadow: /5px 5px 0/ });
+  expect(getComputedStyle(surface).boxShadow).toMatch(/5px 5px 0/);
 });
 
 it("REQ-UIC-002 marks interactive surfaces for hover and press styling", () => {

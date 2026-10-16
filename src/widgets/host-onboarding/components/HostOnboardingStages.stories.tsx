@@ -5,8 +5,7 @@ const meta = {
   title: "Widgets/HostOnboarding/HostOnboardingStages",
   component: HostOnboardingStages,
   tags: ["autodocs"],
-  parameters: { a11y: { test: "error" } },
-  parameters: { design: { board: "Fluxo-Cantinho" } },
+  parameters: { a11y: { test: "error" }, design: { board: "Fluxo-Cantinho" } },
   args: { progress: { verified: false, payouts: null, hasListing: false } },
 } satisfies Meta<typeof HostOnboardingStages>;
 export default meta;
