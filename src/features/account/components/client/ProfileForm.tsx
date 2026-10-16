@@ -6,8 +6,7 @@ import { useId, useState, type ReactNode } from "react";
 import { FormProvider, useForm, useWatch, type Control, type FieldPath } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { errorCopy } from "@/shared/api/errors/errorCopy";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { getErrorCopy, getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import { useErrorNotice } from "@/shared/hooks/useErrorNotice";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -176,7 +175,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 /** Soma as travas descobertas ao salvar às do papel, com o motivo da API (REQ-ACC-007). */
 function withLocks(editability: FieldEditability, locks: readonly ("cpf" | "birthDate")[]): FieldEditability {
   if (locks.length === 0) return editability;
-  const reason = errorCopy.OWNER_CPF_LOCKED as string;
+  const reason = getErrorCopy("OWNER_CPF_LOCKED");
   const locked = { mode: "locked", reason } as const;
   return { ...editability, ...Object.fromEntries(locks.map((field) => [field, locked])) };
 }

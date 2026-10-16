@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "./ApiError";
 import { errorCopy, GENERIC_ERROR_MESSAGE } from "./errorCopy";
-import { getErrorMessage } from "./getErrorMessage";
+import { getErrorCopy, getErrorMessage } from "./getErrorMessage";
 
 const apiError = (code: string, extra: Partial<ConstructorParameters<typeof ApiError>[0]> = {}) =>
   new ApiError({ status: 400, code, message: "english from the API", ...extra });
@@ -150,4 +150,10 @@ describe("getErrorMessage", () => {
     );
     expect(getErrorMessage(apiError("NETWORK_ERROR"))).toMatch(/conexão/);
   });
+});
+
+it("REQ-HTTP-005 getErrorCopy resolve frases que dependem do contexto, sem um erro em mãos", () => {
+  expect(getErrorCopy("HOST_NOT_FOUND")).toBe("Seus dados ficam editáveis depois da verificação.");
+  expect(getErrorCopy("HOST_NOT_FOUND", { adminAccounts: true })).toBe("Esse perfil de anfitrião não existe mais.");
+  expect(getErrorCopy("CODIGO_QUE_NAO_EXISTE")).toBe(getErrorMessage(new Error("x")));
 });
