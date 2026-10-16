@@ -1,5 +1,6 @@
 "use client";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, CircularProgress, FormHelperText, Stack, Typography } from "@mui/material";
 import { useId, useState, type ChangeEvent } from "react";
 import { useObjectUrl } from "../../../hooks/useObjectUrl";
@@ -158,7 +159,7 @@ function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRe
         sx={{
           position: "relative",
           aspectRatio: "1",
-          borderRadius: 3,
+          borderRadius: `${quintalRadii.card}px`,
           border: 2,
           borderStyle: preview ? "solid" : "dashed",
           borderColor: error ? "error.main" : "divider",
@@ -179,7 +180,7 @@ function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRe
               top: 6,
               left: 6,
               px: 1,
-              borderRadius: 1,
+              borderRadius: `${quintalRadii.control}px`,
               bgcolor: "quintal.gema",
               fontWeight: 700,
               zIndex: 1,
@@ -240,7 +241,7 @@ function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRe
             minHeight: 48,
             display: "grid",
             placeItems: "center",
-            borderRadius: 2,
+            borderRadius: `${quintalRadii.control}px`,
             fontWeight: 700,
             fontSize: "0.8125rem",
             textAlign: "center",

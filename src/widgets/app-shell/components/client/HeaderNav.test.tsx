@@ -26,6 +26,19 @@ describe("atalhos do cabeçalho", () => {
     navigation.pathname = "/pets";
   });
 
+  it.each([
+    ["/host", "Painel"],
+    ["/host/application", "Minha verificação"],
+    ["/host/bookings/123", "Painel"],
+  ])("REQ-UIC-003 %s marks only the most specific matching host shortcut", (pathname, label) => {
+    navigation.pathname = pathname;
+    const { unmount } = renderWithProviders(<HeaderNav items={navItemsFor("host")} />, { theme: quintalTheme });
+    expect(screen.getByRole("link", { name: label })).toHaveAttribute("aria-current", "page");
+    expect(screen.getAllByRole("link", { current: "page" })).toHaveLength(1);
+    unmount();
+    navigation.pathname = "/pets/0199d2a0-0000-7000-8000-000000000001";
+  });
+
   it("REQ-SHELL-006 a gaveta abre com os mesmos atalhos, fecha com Esc e devolve o foco ao botão", async () => {
     const { user } = setup();
     const trigger = screen.getByRole("button", { name: "Abrir a navegação" });

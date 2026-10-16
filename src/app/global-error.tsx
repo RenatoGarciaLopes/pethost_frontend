@@ -1,4 +1,6 @@
 "use client";
+
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { appShellCopy } from "@/shared/config/appShellCopy";
 /** Último recurso se o layout raiz quebrar (REQ-SHELL-015), sem MUI, tema, fontes ou providers.
  * Recarrega o documento inteiro e não lê detalhes do erro.
@@ -21,7 +23,7 @@ export default function GlobalError() {
                 font: "inherit",
                 padding: "12px 20px",
                 border: "2px solid currentColor",
-                borderRadius: 999,
+                borderRadius: `${quintalRadii.pill}px`,
                 color: "inherit",
                 background: "transparent",
                 cursor: "pointer",

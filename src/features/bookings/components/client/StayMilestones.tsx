@@ -1,5 +1,6 @@
 "use client";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
@@ -66,7 +67,13 @@ function EmergencyContact({ booking }: { booking: Booking }) {
     <Box
       component="section"
       aria-labelledby={headingId}
-      sx={{ p: 2, borderRadius: 3, border: "3px solid", borderColor: "text.primary", bgcolor: "background.paper" }}
+      sx={{
+        p: 2,
+        borderRadius: `${quintalRadii.card}px`,
+        border: "3px solid",
+        borderColor: "text.primary",
+        bgcolor: "background.paper",
+      }}
     >
       <Typography id={headingId} sx={{ fontWeight: 800 }}>
         {copy.emergency}

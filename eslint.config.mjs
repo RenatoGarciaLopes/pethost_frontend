@@ -3,6 +3,7 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
 import boundaries from "eslint-plugin-boundaries";
+import noNumericRadius from "./scripts/eslint/no-numeric-radius.mjs";
 
 /**
  * Lint do frontend PetHost.
@@ -110,7 +111,7 @@ export default defineConfig([
   ]),
   {
     files: ["src/**/*.{ts,tsx}"],
-    plugins: { boundaries },
+    plugins: { boundaries, pethost: noNumericRadius },
     settings: {
       "import/resolver": { typescript: { alwaysTryTypes: true } },
       "boundaries/include": ["src/**/*"],
@@ -126,6 +127,7 @@ export default defineConfig([
       ],
     },
     rules: {
+      "pethost/no-numeric-radius": "error",
       "boundaries/dependencies": [
         "error",
         {

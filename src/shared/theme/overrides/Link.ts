@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import type { Components, Theme } from "@mui/material/styles";
 import { quintalColors as c } from "../tokens/colors";
 
@@ -16,7 +17,11 @@ export const quintalLink: Components<Theme>["MuiLink"] = {
       textDecorationThickness: 2,
       textUnderlineOffset: 3,
       "&:hover": { textDecorationThickness: 3 },
-      "&:focus-visible": { outline: `3px solid ${c.foco}`, outlineOffset: 2, borderRadius: 4 },
+      "&:focus-visible": {
+        outline: `3px solid ${c.foco}`,
+        outlineOffset: 2,
+        borderRadius: `${quintalRadii.control}px`,
+      },
     },
   },
 };

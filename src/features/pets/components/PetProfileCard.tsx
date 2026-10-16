@@ -1,3 +1,4 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Avatar, Box, Button, Divider, Stack, Typography } from "@mui/material";
 import { PawMark } from "@/shared/ui/brand/PawMark";
 import { describePet, speciesLabel } from "../lib/describePet";
@@ -116,7 +117,13 @@ export function PetProfileCard({ values, coverUrl, now, onEdit, showEmptyBlocks 
       component="article"
       aria-label={petWizardCopy.review.cardLabel(name)}
       spacing={2}
-      sx={{ p: 2.5, border: 2, borderColor: "divider", borderRadius: 3, bgcolor: "background.paper" }}
+      sx={{
+        p: 2.5,
+        border: 2,
+        borderColor: "divider",
+        borderRadius: `${quintalRadii.card}px`,
+        bgcolor: "background.paper",
+      }}
     >
       <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
         <Avatar

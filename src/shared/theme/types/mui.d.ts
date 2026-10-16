@@ -1,6 +1,7 @@
 import type { quintalColors } from "../tokens/colors";
 import type { accountTones, sceneColors } from "../tokens/semantic";
 import type { PaletteColor, SimplePaletteColorOptions } from "@mui/material/styles";
+import type { quintalRadii } from "../tokens/radii";
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -12,6 +13,12 @@ declare module "@mui/material/styles" {
     account: typeof accountTones;
     /** Cores das peças de marca (porta, céu, chão). */
     scene: typeof sceneColors;
+  }
+  interface Theme {
+    quintal: { radius: typeof quintalRadii };
+  }
+  interface ThemeOptions {
+    quintal?: { radius?: typeof quintalRadii };
   }
   interface PaletteOptions {
     quintal?: typeof quintalColors;
