@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import plugin from "../../../scripts/eslint/no-numeric-radius.mjs";
 
 const linter = new Linter({ configType: "flat" });
-const config = [{ plugins: { pethost: plugin }, rules: { "pethost/no-numeric-radius": "error" } }];
+const config = [{ plugins: { pethost: plugin as never }, rules: { "pethost/no-numeric-radius": "error" as const } }];
 
 describe("pethost/no-numeric-radius", () => {
   it("REQ-UIC-001 rejects numeric radii", () => {
@@ -11,6 +11,11 @@ describe("pethost/no-numeric-radius", () => {
     expect(messages.map(({ message }) => message)).toEqual([
       "Use theme.quintal.radius.* or quintalRadii instead of a numeric borderRadius.",
     ]);
+  });
+
+  it("REQ-UIC-001 rejects quoted numeric radius keys as well", () => {
+    const messages = linter.verify('const sx = { "borderRadius": 3 };', config);
+    expect(messages).toHaveLength(1);
   });
 
   it("REQ-UIC-001 accepts zero, percentage, and named tokens", () => {

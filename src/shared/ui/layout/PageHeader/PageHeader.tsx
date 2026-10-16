@@ -31,7 +31,9 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
         </Typography>
         {subtitle ? <Typography color="text.secondary">{subtitle}</Typography> : null}
       </Box>
-      {actions ? <Box sx={{ gridColumn: { xs: "1", md: "2" }, gridRow: { md: "1" } }}>{actions}</Box> : null}
+      {actions ? (
+        <Box sx={{ gridColumn: { xs: "1", md: "2" }, gridRow: { md: "1" }, justifySelf: { md: "end" } }}>{actions}</Box>
+      ) : null}
     </Box>
   );
 }

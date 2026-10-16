@@ -9,7 +9,13 @@ export const noNumericRadius = {
   create(context) {
     return {
       Property(node) {
-        if (node.key.type !== "Identifier" || node.key.name !== "borderRadius") return;
+        const key =
+          node.key.type === "Identifier"
+            ? node.key.name
+            : node.key.type === "Literal" && typeof node.key.value === "string"
+              ? node.key.value
+              : undefined;
+        if (key !== "borderRadius") return;
         const value = node.value;
         if (value.type === "Literal" && typeof value.value === "number" && value.value !== 0) {
           context.report({ node: value, messageId: "named" });

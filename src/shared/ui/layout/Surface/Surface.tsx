@@ -27,6 +27,7 @@ export function Surface({ elevation = "sm", interactive = false, component = "di
       component={component}
       data-surface
       data-interactive={interactive || undefined}
+      data-elevation={elevation}
       sx={[
         {
           bgcolor: "background.paper",

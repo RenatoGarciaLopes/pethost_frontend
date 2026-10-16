@@ -46,7 +46,11 @@ export function AppShell({ user, children }: AppShellProps) {
         >
           {/* O símbolo fica decorativo: o nome do link é "PetHost", lido uma vez só. `NextLink` direto: um Server
               Component não passa componente (função) como prop para o MUI. */}
-          <NextLink href={homeOf(user.role)} aria-label="PetHost" style={{ display: "inline-flex" }}>
+          <NextLink
+            href={homeOf(user.role)}
+            aria-label="PetHost"
+            style={{ display: "inline-flex", textDecoration: "none", color: "inherit" }}
+          >
             <DoorMark size="header" withWordmark interactive={false} />
           </NextLink>
           {navItems.length > 0 && <HeaderNav items={navItems} />}

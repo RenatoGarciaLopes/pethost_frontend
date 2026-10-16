@@ -1,7 +1,7 @@
 import type { quintalColors } from "../tokens/colors";
 import type { accountTones, sceneColors } from "../tokens/semantic";
 import type { PaletteColor, SimplePaletteColorOptions } from "@mui/material/styles";
-import type { quintalRadii } from "../tokens/radii";
+import type { quintalRadiusCss } from "../tokens/radii";
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -15,10 +15,10 @@ declare module "@mui/material/styles" {
     scene: typeof sceneColors;
   }
   interface Theme {
-    quintal: { radius: typeof quintalRadii };
+    quintal: { radius: typeof quintalRadiusCss };
   }
   interface ThemeOptions {
-    quintal?: { radius?: typeof quintalRadii };
+    quintal?: { radius?: typeof quintalRadiusCss };
   }
   interface PaletteOptions {
     quintal?: typeof quintalColors;
