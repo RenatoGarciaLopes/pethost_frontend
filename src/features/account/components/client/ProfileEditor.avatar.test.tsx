@@ -65,6 +65,8 @@ it.each(["owner", "host"] as const)(
     expect(router.refresh).toHaveBeenCalledTimes(2);
     expect(queryClient.getQueryData(accountQueryKey("user-1", "profile"))).toMatchObject({ avatarUrl: null });
   },
+  // Upload, cartão e confirmação: com a suíte inteira em paralelo, 5 s não bastam.
+  15_000,
 );
 it.each([413, 400])(
   "REQ-ACC-017 erro %s na foto aparece associado ao controle sem alterar o cartão",

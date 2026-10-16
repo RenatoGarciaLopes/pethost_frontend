@@ -9,6 +9,7 @@ import { hostApplicationsHandlers, resetHostApplications, seedHostApplication } 
 import { listingsHandlers, resetListings } from "./handlers/listings.mjs";
 import { passwordHandlers } from "./handlers/password.mjs";
 import { petsHandlers, resetPets } from "./handlers/pets.mjs";
+import { stripeAccountHandlers, resetStripeAccounts, seedStripeAccount } from "./handlers/stripeAccount.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 import { adminApplicationsHandlers, resetAdminApplications } from "./handlers/adminApplications.mjs";
@@ -24,6 +25,7 @@ const handlers = [
   http.post("http://localhost:5099/__e2e/account/reset", () => {
     resetAccountProfiles();
     resetPets();
+    resetStripeAccounts();
     resetAdminApplications();
     resetHostApplications();
     resetListings();
@@ -47,6 +49,12 @@ const handlers = [
     seedHostApplication(userId, application, remainingAttempts);
     return HttpResponse.json({ ok: true });
   }),
+  http.post("http://localhost:5099/__e2e/stripe-account", async ({ request }) => {
+    const { userId, status } = await request.json();
+    return seedStripeAccount(userId, status)
+      ? HttpResponse.json({ ok: true })
+      : HttpResponse.json({ error: "INVALID_STRIPE_FIXTURE" }, { status: 400 });
+  }),
   ...sessionHandlers,
   ...accountSwitchHandlers,
   ...accountProfileHandlers,
@@ -56,6 +64,7 @@ const handlers = [
   // Antes dos pets: o anfitrião lê a ficha dos pets dos pedidos dele.
   ...bookingsHandlers,
   ...petsHandlers,
+  ...stripeAccountHandlers,
   ...hostApplicationsHandlers,
   ...listingsHandlers,
   ...adminApplicationsHandlers,
