@@ -64,7 +64,7 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
           onClick={() => setOpen(true)}
           aria-label={shellCopy.openNav}
           aria-expanded={open}
-          sx={{ width: 44, height: 44 }}
+          sx={{ width: 48, height: 48 }}
         >
           <Box component="span" aria-hidden sx={{ fontSize: 22, lineHeight: 1 }}>
             ☰

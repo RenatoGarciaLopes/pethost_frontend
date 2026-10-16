@@ -30,14 +30,14 @@ export function AppShell({ user, children }: AppShellProps) {
       <Box
         component="header"
         data-account={user.role}
-        sx={{ bgcolor: `account.${user.role}`, borderBottom: 2, borderColor: "divider" }}
+        sx={{ height: { xs: 56, md: 64 }, bgcolor: `account.${user.role}`, borderBottom: 2, borderColor: "divider" }}
       >
         <Box
           sx={{
             maxWidth: 1240,
             mx: "auto",
+            height: "100%",
             px: { xs: 2, md: 4 },
-            py: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",

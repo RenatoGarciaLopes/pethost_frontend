@@ -26,6 +26,13 @@ describe("atalhos do cabeçalho", () => {
     navigation.pathname = "/pets";
   });
 
+  it("REQ-UIC-003 host subroutes keep the Panel shortcut active by prefix", () => {
+    navigation.pathname = "/host/bookings/123";
+    renderWithProviders(<HeaderNav items={navItemsFor("host")} />, { theme: quintalTheme });
+    expect(screen.getByRole("link", { name: "Painel" })).toHaveAttribute("aria-current", "page");
+    navigation.pathname = "/pets/0199d2a0-0000-7000-8000-000000000001";
+  });
+
   it("REQ-SHELL-006 a gaveta abre com os mesmos atalhos, fecha com Esc e devolve o foco ao botão", async () => {
     const { user } = setup();
     const trigger = screen.getByRole("button", { name: "Abrir a navegação" });
