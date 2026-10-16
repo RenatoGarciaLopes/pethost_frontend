@@ -1,7 +1,7 @@
-import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useId } from "react";
 import { StatusPill, type StatusPillTone } from "@/shared/ui/feedback/StatusPill";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { hostOnboardingCopy as copy } from "../lib/hostOnboardingCopy";
 import { hostStages, type HostProgress, type StageState } from "../lib/hostStages";
 
@@ -38,17 +38,17 @@ export function HostOnboardingStages({ progress }: HostOnboardingStagesProps) {
         }}
       >
         {hostStages(progress).map((stage, index) => (
-          <Stack
+          <Surface
             component="li"
             key={stage.title}
-            spacing={1}
+            elevation="sm"
             aria-current={stage.state === "current" ? "step" : undefined}
             sx={{
               p: 2,
-              borderRadius: `${quintalRadii.card}px`,
-              border: "2px solid",
-              borderColor: stage.state === "locked" ? "divider" : "text.primary",
-              bgcolor: "background.paper",
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              minWidth: 0,
               color: stage.state === "locked" ? "text.secondary" : "text.primary",
             }}
           >
@@ -80,7 +80,7 @@ export function HostOnboardingStages({ progress }: HostOnboardingStagesProps) {
                 </Button>
               </Box>
             )}
-          </Stack>
+          </Surface>
         ))}
       </Box>
     </Box>

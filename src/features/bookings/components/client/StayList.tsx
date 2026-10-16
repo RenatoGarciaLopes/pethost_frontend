@@ -9,6 +9,7 @@ import { formatBRL, fromCents } from "@/shared/lib/money";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
 import { ownerBookingPath, ownerBookingsPath, SEARCH_PATH } from "../../lib/bookingPaths";
@@ -28,33 +29,30 @@ function StayListItem({ booking }: { booking: Booking }) {
         component={NextLink}
         href={ownerBookingPath(booking.id)}
         sx={{
-          display: "grid",
-          gap: 0.5,
-          p: 2,
-          border: "2px solid",
-          borderRadius: `${quintalRadii.card}px`,
-          bgcolor: "background.paper",
           color: "text.primary",
           textDecoration: "none",
+          "&:focus-visible [data-surface]": { outline: "3px solid", outlineOffset: 3 },
         }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
-          <Typography component="span" sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
-            {title}
+        <Surface component="span" interactive elevation="sm" sx={{ display: "grid", gap: 0.5, p: 2 }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
+            <Typography component="span" sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+              {title}
+            </Typography>
+            <StatusPill label={statusLabel[booking.status]} size="sm" />
+          </Stack>
+          {booking.listing && (
+            <Typography component="span" color="text.secondary">
+              {`${booking.listing.neighborhood}, ${booking.listing.city}`}
+            </Typography>
+          )}
+          <Typography component="span">
+            {`${period} · ${booking.pets.map((pet) => pet.name ?? bookingCopy.unknownPet).join(", ")}`}
           </Typography>
-          <StatusPill label={statusLabel[booking.status]} size="sm" />
-        </Stack>
-        {booking.listing && (
-          <Typography component="span" color="text.secondary">
-            {`${booking.listing.neighborhood}, ${booking.listing.city}`}
+          <Typography component="span" sx={{ fontWeight: 700 }}>
+            {bookingCopy.host.total(formatBRL(fromCents(booking.totalCents)))}
           </Typography>
-        )}
-        <Typography component="span">
-          {`${period} · ${booking.pets.map((pet) => pet.name ?? bookingCopy.unknownPet).join(", ")}`}
-        </Typography>
-        <Typography component="span" sx={{ fontWeight: 700 }}>
-          {bookingCopy.host.total(formatBRL(fromCents(booking.totalCents)))}
-        </Typography>
+        </Surface>
       </Link>
     </Box>
   );

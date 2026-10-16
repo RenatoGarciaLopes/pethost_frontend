@@ -10,6 +10,7 @@ import { formatBRL, fromCents } from "@/shared/lib/money";
 import { initialsOf } from "@/shared/lib/text/initials";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
@@ -26,11 +27,11 @@ function BookingCard({ booking, now }: { booking: Booking; now: Date }) {
   const owner = booking.owner?.name ?? "";
   const near = isDeadlineNear(booking.responseDeadline, now);
   return (
-    <Stack
+    <Surface
       component="article"
       aria-label={`Pedido de ${owner}`}
-      spacing={1.5}
-      sx={{ p: 2, border: "2px solid", borderRadius: `${quintalRadii.card}px`, bgcolor: "background.paper" }}
+      elevation="sm"
+      sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}
     >
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
         <Avatar
@@ -67,7 +68,7 @@ function BookingCard({ booking, now }: { booking: Booking; now: Date }) {
           {copy.open}
         </Button>
       </Box>
-    </Stack>
+    </Surface>
   );
 }
 

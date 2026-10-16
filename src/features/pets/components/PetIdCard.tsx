@@ -1,8 +1,8 @@
-import { quintalRadii } from "@/shared/theme/tokens/radii";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
 import { PawMark } from "@/shared/ui/brand/PawMark";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { describePet } from "../lib/describePet";
 import { petPath } from "../lib/petPaths";
 import { petsCopy } from "../lib/petsCopy";
@@ -25,19 +25,15 @@ export interface PetIdCardProps {
 export function PetIdCard({ pet, now }: PetIdCardProps) {
   return (
     <NextLink href={petPath(pet.id)} style={{ textDecoration: "none", color: "inherit" }}>
-      <Stack
-        direction="row"
-        spacing={2}
+      <Surface
+        interactive
+        elevation="sm"
         sx={{
+          display: "flex",
+          gap: 2,
           alignItems: "center",
           minHeight: 88,
           p: 2,
-          bgcolor: "background.paper",
-          border: 2,
-          borderColor: "divider",
-          borderRadius: `${quintalRadii.card}px`,
-          transition: "border-color 120ms",
-          "&:hover": { borderColor: "text.primary" },
         }}
       >
         {/* A foto é decorativa: o nome já está no texto (alt vazio). */}
@@ -60,7 +56,7 @@ export function PetIdCard({ pet, now }: PetIdCardProps) {
             {describePet(pet, now)}
           </Typography>
         </Box>
-      </Stack>
+      </Surface>
     </NextLink>
   );
 }
