@@ -74,7 +74,10 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   const to = plus(from, 2);
   await page.goto("/search");
   const pill = page.getByRole("button", { name: "Onde, datas e pet" });
-  if (await pill.isVisible()) await pill.click();
+  if (await pill.isVisible()) {
+    await waitForHydration(pill);
+    await pill.click();
+  }
   await waitForHydration(page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }));
   await page.getByLabel("Chegada", { exact: true }).filter({ visible: true }).fill(from);
   await page.getByLabel("Saída", { exact: true }).filter({ visible: true }).fill(to);

@@ -4,7 +4,10 @@ import { waitForHydration } from "../../support/hydration";
 
 async function openSearch(page: Page) {
   const pill = page.getByRole("button", { name: "Onde, datas e pet" });
-  if (await pill.isVisible()) await pill.click();
+  if (await pill.isVisible()) {
+    await waitForHydration(pill);
+    await pill.click();
+  }
   await waitForHydration(page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }));
 }
 
