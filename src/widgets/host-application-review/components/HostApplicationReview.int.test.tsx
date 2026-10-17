@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { afterEach, expect, it, vi } from "vitest";
 import { renderWithProviders, createTestQueryClient } from "@/test/render";
@@ -123,4 +123,17 @@ it("REQ-AACC-012 conflito de CPF/CNPJ oferece atalho para anfitrião listado sem
   const link = await screen.findByRole("link", { name: `Ver conta de ${host.user?.fullName}` });
   expect(link).toHaveAttribute("href", `/admin/users/hosts/${host.id}`);
   expect(link.getAttribute("href")).not.toContain(app.cpf);
+});
+it("REQ-AQUEUE-005/006 REQ-UIC-009 nome no título, fotos como cartões com desenho e aviso da trilha, decisão na caixa ao lado", () => {
+  setup();
+  expect(screen.getByRole("heading", { level: 1, name: "Conferir verificação: Pessoa de teste" })).toBeVisible();
+  expect(screen.getByText(copy.requestLine("02/10", 1, copy.person.pf))).toBeVisible();
+  expect(screen.getByText(copy.status.submitted)).toHaveAttribute("data-tone", "info");
+  for (const kind of ["front", "back", "selfie"] as const) {
+    const open = screen.getByRole("button", { name: `${copy.open}: ${copy.photo[kind]}` });
+    expect(open.querySelector("svg")).not.toBeNull();
+  }
+  expect(screen.getByText(copy.photosAudit)).toBeVisible();
+  const decision = screen.getByRole("complementary", { name: copy.decision });
+  expect(within(decision).getByRole("button", { name: "Aprovar" })).toBeInTheDocument();
 });

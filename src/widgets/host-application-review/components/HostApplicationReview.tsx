@@ -10,17 +10,36 @@ import {
   type AdminApplication,
 } from "@/features/admin-host-applications";
 import { useDecision } from "@/features/admin-host-applications/index.client";
+import { documentDrawings } from "@/features/host-applications";
 import { hasErrorCode, isApiError } from "@/shared/api/errors/ApiError";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
+import { Hint } from "@/shared/ui/feedback/Hint";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
-import { StatusPill } from "@/shared/ui/feedback/StatusPill";
+import { StatusPill, type StatusPillTone } from "@/shared/ui/feedback/StatusPill";
+import { PageHeader } from "@/shared/ui/layout/PageHeader";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { ApplicantComparison } from "./ApplicantComparison";
 import { SignedDocumentViewer } from "./SignedDocumentViewer";
 import { DecisionPanel } from "./DecisionPanel";
 
-/** Detalhe administrativo: comparação, fotos sob ação, decisão ou resumo; não recebe links assinados do servidor.
+/** Tom do selo: em análise é espera (céu), aprovada é grama, o resto neutro. */
+const STATUS_TONE: Readonly<Record<AdminApplication["status"], StatusPillTone>> = {
+  draft: "neutro",
+  submitted: "info",
+  approved: "ok",
+  rejected: "neutro",
+  rejected_final: "neutro",
+  cancelled: "neutro",
+  expired: "neutro",
+};
+const dayMonth = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
+
+/** Detalhe administrativo (spec 031; composição da spec 005, REQ-UIC-002/009): à esquerda, quem pede, as fotos como
+ * cartões com o desenho da vaga (a foto só abre sob clique, com link temporário) e os dados para comparar; à direita, a
+ * caixa de decisão ou o resumo. Não recebe links assinados do servidor.
  * @example <HostApplicationReview accountId={user.id} applicationId={id} />
  */
 export function HostApplicationReview({ accountId, applicationId }: { accountId: string; applicationId: string }) {
@@ -42,73 +61,96 @@ export function HostApplicationReview({ accountId, applicationId }: { accountId:
     ?.filter((item) => item.id !== app.id)
     .sort((a, b) => (a.submittedAt ?? a.createdAt).localeCompare(b.submittedAt ?? b.createdAt))[0];
   return (
-    <Stack spacing={3} sx={{ py: 3 }}>
-      <Link href="/admin/host-applications">{copy.back}</Link>
-      <Typography component="h1" variant="h4">
-        {copy.reviewTitle}: {app.user?.fullName ?? copy.unavailable}
-      </Typography>
-      <StatusPill label={copy.status[app.status]} />
-      {decision.isSuccess && (
-        <Notice
-          tone="ok"
-          title={copy.success}
-          action={
-            following ? (
-              <Link href={`/admin/host-applications/${following.id}`}>{copy.next}</Link>
-            ) : next.isError ? (
-              <ErrorState onRetry={() => void next.refetch()} />
-            ) : (
-              <Typography>{next.isPending ? copy.loading : copy.noNext}</Typography>
-            )
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) 380px" },
+        gap: { xs: 3, md: 5 },
+        alignItems: "start",
+      }}
+    >
+      <Stack spacing={3} sx={{ minWidth: 0 }}>
+        <Box component={Link} href="/admin/host-applications" sx={{ alignSelf: "flex-start", color: "text.primary" }}>
+          {copy.back}
+        </Box>
+        <PageHeader
+          eyebrow={<StatusPill label={copy.status[app.status]} tone={STATUS_TONE[app.status]} size="sm" />}
+          title={
+            <>
+              <Box component="span" sx={visuallyHidden}>
+                {`${copy.reviewTitle}:`}
+              </Box>{" "}
+              {app.user?.fullName ?? copy.unavailable}
+            </>
           }
+          subtitle={copy.requestLine(
+            dayMonth.format(new Date(app.submittedAt ?? app.createdAt)),
+            app.attemptNumber,
+            copy.person[app.personType],
+          )}
         />
-      )}
-      {conflict ? (
-        <Notice tone="info" title={copy.conflict} />
-      ) : (
-        decision.isError && (
+        {decision.isSuccess && (
           <Notice
-            tone="erro"
-            title={getErrorMessage(decision.error, { adminReview: true })}
+            tone="ok"
+            title={copy.success}
             action={
-              duplicateDocument && (
-                <ExistingHostLinks
-                  application={app}
-                  hosts={existingHosts.data ?? []}
-                  loading={existingHosts.isPending}
-                />
+              following ? (
+                <Link href={`/admin/host-applications/${following.id}`}>{copy.next}</Link>
+              ) : next.isError ? (
+                <ErrorState onRetry={() => void next.refetch()} />
+              ) : (
+                <Typography>{next.isPending ? copy.loading : copy.noNext}</Typography>
               )
             }
           />
-        )
-      )}
-      <ApplicantComparison key={app.id} application={app} />
-      <Box component="section">
-        <Typography component="h2" variant="h5">
-          {copy.photos}
-        </Typography>
-        {app.documentsPurgedAt ? (
-          <Typography>
-            {copy.purged} {new Date(app.documentsPurgedAt).toLocaleString("pt-BR")}
-          </Typography>
-        ) : (
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-            {(["front", "back", "selfie"] as const).map((kind) =>
-              app.documents.some((doc) => doc.kind === kind) ? (
-                <SignedDocumentViewer
-                  key={`${app.id}-${kind}`}
-                  label={copy.photo[kind]}
-                  load={(signal) => getDocumentLink(app.id, kind, undefined, signal)}
-                />
-              ) : (
-                <Typography key={kind}>
-                  {copy.photo[kind]}: {copy.missing}
-                </Typography>
-              ),
-            )}
-          </Stack>
         )}
-      </Box>
+        {conflict ? (
+          <Notice tone="info" title={copy.conflict} />
+        ) : (
+          decision.isError && (
+            <Notice
+              tone="erro"
+              title={getErrorMessage(decision.error, { adminReview: true })}
+              action={
+                duplicateDocument && (
+                  <ExistingHostLinks
+                    application={app}
+                    hosts={existingHosts.data ?? []}
+                    loading={existingHosts.isPending}
+                  />
+                )
+              }
+            />
+          )
+        )}
+        <Stack component="section" aria-label={copy.photos} spacing={1.5}>
+          {app.documentsPurgedAt ? (
+            <Notice tone="info" title={`${copy.purged} ${new Date(app.documentsPurgedAt).toLocaleString("pt-BR")}`} />
+          ) : (
+            <>
+              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: { xs: 1, sm: 2 } }}>
+                {(["front", "back", "selfie"] as const).map((kind) =>
+                  app.documents.some((doc) => doc.kind === kind) ? (
+                    <SignedDocumentViewer
+                      key={`${app.id}-${kind}`}
+                      label={copy.photo[kind]}
+                      illustration={documentDrawings[kind]}
+                      load={(signal) => getDocumentLink(app.id, kind, undefined, signal)}
+                    />
+                  ) : (
+                    <Surface key={kind} sx={{ p: 2, borderStyle: "dashed", boxShadow: "none" }}>
+                      <Typography sx={{ fontWeight: 800 }}>{copy.photo[kind]}</Typography>
+                      <Typography color="text.secondary">{copy.missing}</Typography>
+                    </Surface>
+                  ),
+                )}
+              </Box>
+              <Hint>{copy.photosAudit}</Hint>
+            </>
+          )}
+        </Stack>
+        <ApplicantComparison key={app.id} application={app} />
+      </Stack>
       {app.status === "submitted" ? (
         wide ? (
           <DecisionPanel
@@ -124,7 +166,7 @@ export function HostApplicationReview({ accountId, applicationId }: { accountId:
       ) : (
         <DecisionSummary application={app} />
       )}
-    </Stack>
+    </Box>
   );
 }
 
@@ -165,14 +207,14 @@ function ExistingHostLinks({
   );
 }
 
-/** Resumo somente leitura para solicitação fora de análise. @example <DecisionSummary application={application} /> */
+/** Resumo somente leitura para solicitação fora de análise, na caixa à direita. @example <DecisionSummary application={application} /> */
 function DecisionSummary({ application: app }: { application: AdminApplication }) {
   return (
-    <Box component="section" aria-label={copy.decision}>
-      <Typography component="h2" variant="h5">
+    <Surface component="aside" aria-label={copy.decision} elevation="md" sx={{ p: 3, display: "grid", gap: 1 }}>
+      <Typography component="h2" variant="overline">
         {copy.decision}
       </Typography>
-      <Typography>{copy.status[app.status]}</Typography>
+      <Typography sx={{ fontWeight: 800 }}>{copy.status[app.status]}</Typography>
       {app.rejectionReason && <Typography>{copy.rejection[app.rejectionReason]}</Typography>}
       <Typography>
         {copy.reason}: {app.reviewNotes ?? copy.unavailable}
@@ -183,6 +225,6 @@ function DecisionSummary({ application: app }: { application: AdminApplication }
       <Typography>
         {copy.reviewedAt}: {app.reviewedAt ? new Date(app.reviewedAt).toLocaleString("pt-BR") : copy.unavailable}
       </Typography>
-    </Box>
+    </Surface>
   );
 }

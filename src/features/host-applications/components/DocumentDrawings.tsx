@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import type { DocumentKind } from "../../../types";
+import type { DocumentKind } from "../types";
 
 const stroke = {
   fill: "none",
@@ -45,7 +45,7 @@ function SelfieDrawing() {
   );
 }
 
-/** O desenho do que se espera em cada vaga (REQ-HVER-006); decorativo, a dica diz em texto. */
+/** O desenho do que se espera em cada vaga (REQ-HVER-006) e no cartão de cada foto do admin; decorativo, o texto diz. */
 export const documentDrawings: Readonly<Record<DocumentKind, ReactElement>> = {
   front: <FrontDrawing />,
   back: <BackDrawing />,

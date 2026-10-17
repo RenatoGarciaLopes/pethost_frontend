@@ -3,13 +3,12 @@
 import { InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
-import { formatBRL, fromCents } from "@/shared/lib/money";
+import { formatBRL, fromCents, netEarnings } from "@/shared/lib/money";
 import { AddressFields } from "@/shared/ui/forms/AddressFields";
 import { ChipPicker } from "@/shared/ui/forms/ChipPicker";
 import { Counter } from "@/shared/ui/forms/Counter";
 import { WeekdayPicker, type Weekday } from "@/shared/ui/forms/WeekdayPicker";
 import { listingCopy } from "../../../lib/listingCopy";
-import { netEarnings } from "../../../lib/netEarnings";
 import { parseRateCents } from "../../../schemas/listingSchema";
 import { ListingSection } from "./ListingSectionHost";
 
