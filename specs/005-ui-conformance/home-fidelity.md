@@ -45,3 +45,8 @@ A prancha mostra a lista de casas logo abaixo. A 041 (busca) já existe e o `/se
 4. Testes: os da 040 continuam valendo (ajustar o que mudou de estrutura, sem apagar cobertura); E2E da home e axe das stories verdes.
 5. Anexar os dois prints (1440 e 390) em `test-results/` e comparar com a prancha na mensagem de entrega, apontando o que ainda difere e por quê.
 6. Nada de código morto: o que sair da home sai do repositório.
+
+## Entrega em dois lotes (coordenação de 17/10)
+
+1. Header, hero, busca e confiança: implementação/testes em [home-fidelity-implementation.md](home-fidelity-implementation.md). E2E e prints aguardam portas.
+2. Casas próximas: autorizado pelo Renato com searchQueries + ListingCard, só tutor com endereço e pet; visitante/host sem consulta, vazio/erro ocultam a seção. Aguarda o PR #21 entrar no dev, depois `git merge origin/dev`; não copiar a 041 nem empilhar a branch antes disso. Atualizar os testes de integração da 040 nesse segundo lote.

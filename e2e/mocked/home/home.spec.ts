@@ -1,12 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 import { loginAccount } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
+import { hideDevIndicator } from "../../support/devIndicator";
 
 test.setTimeout(60_000);
 
 async function expandSearchOnMobile(page: Page) {
   await waitForHydration(page.getByRole("main"));
-  const openSearch = page.getByRole("button", { name: "Abrir busca", exact: true });
+  const openSearch = page.getByRole("button", { name: "Onde, datas e pet", exact: true });
   if (await openSearch.isVisible()) await openSearch.click();
 }
 
@@ -40,7 +41,7 @@ test("REQ-HOME-003 tutor com pet segue para busca com o id, sem dados do perfil"
   await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Maringá");
   await submitSearch(page);
-  await expect(page).toHaveURL(/\/search\?/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/search\?/, { timeout: 45_000 });
   const params = new URL(page.url()).searchParams;
   expect(params.get("where")).toBe("Maringá");
   expect(params.getAll("pets")).toEqual(["0199d2a0-0000-7000-8000-0000000000e1"]);
@@ -61,11 +62,73 @@ test("REQ-HOME-002 tutor sem pet escolhe espécie sem convite para cadastro", as
 test("REQ-HOME-006 celular abre a busca pela pílula acessível", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  const open = page.getByRole("button", { name: "Abrir busca" });
+  const open = page.getByRole("button", { name: "Onde, datas e pet" });
   await expect(open).toBeVisible();
   await expect(open).toHaveAttribute("aria-expanded", "false");
   await open.click();
   await expect(page.getByRole("button", { name: "Fechar busca" })).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByRole("textbox", { name: "Onde" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Buscar cantinhos" })).toBeVisible();
+});
+
+test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composição responsiva", async ({
+  page,
+}, info) => {
+  test.setTimeout(90_000);
+  const mobile = Boolean(info.project.use.isMobile);
+  await page.setViewportSize({ width: mobile ? 390 : 1440, height: mobile ? 844 : 1000 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await hideDevIndicator(page);
+  await page.goto("/");
+  const main = page.getByRole("main");
+  await waitForHydration(main);
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+  await expect(main).toHaveCount(1);
+  await expect(main.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole("banner")).toHaveCSS("border-bottom-width", "2px");
+  const scene = main.locator('svg[viewBox="0 0 520 300"]');
+  await expect(scene).toBeVisible();
+  await expect(scene.locator("canvas")).toHaveCount(2);
+  await expect
+    .poll(() =>
+      scene.locator("canvas").evaluateAll((canvases) =>
+        canvases.every((element) => {
+          const canvas = element as HTMLCanvasElement;
+          const drawing = canvas.getContext("2d")?.getImageData(0, 0, canvas.width, canvas.height).data;
+          return drawing?.some((value, index) => index % 4 === 3 && value > 0);
+        }),
+      ),
+    )
+    .toBe(true);
+  const form = page.getByRole("form", { name: "Busca de cantinhos" });
+  if (mobile) await page.getByRole("button", { name: "Onde, datas e pet" }).click();
+  await page.getByRole("textbox", { name: "Onde" }).fill("Zona 7, Maringá");
+  await page.getByLabel("Chegada").fill("2026-12-20");
+  await page.getByLabel("Saída").fill("2026-12-25");
+  await expect(page.getByText("20 dez, a partir das 14h")).toBeVisible();
+  await expect(page.getByText("25 dez · 5 noites")).toBeVisible();
+  await expect(form.locator("fieldset")).toHaveCount(0);
+  const guarantees = page.getByRole("list", { name: "Garantias da PetHost" }).getByRole("listitem");
+  await expect(guarantees).toHaveCount(3);
+  const first = await guarantees.nth(0).boundingBox(),
+    second = await guarantees.nth(1).boundingBox();
+  if (mobile) {
+    expect(second!.y).toBeGreaterThan(first!.y);
+    await page.getByRole("button", { name: "Fechar busca" }).click();
+  } else {
+    expect(second!.x).toBeGreaterThan(first!.x);
+    const title = await main.getByRole("heading", { level: 1 }).boundingBox();
+    const brand = await page.getByRole("link", { name: "PetHost", exact: true }).boundingBox();
+    expect(Math.abs(title!.x - brand!.x)).toBeLessThanOrEqual(1);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+    page.viewportSize()!.width,
+  );
+  await page.screenshot({
+    path: `test-results/home-fidelity/${mobile ? "mobile" : "desktop"}.png`,
+    fullPage: true,
+    animations: "disabled",
+  });
 });

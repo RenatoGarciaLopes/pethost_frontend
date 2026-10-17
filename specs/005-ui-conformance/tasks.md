@@ -12,3 +12,4 @@ updated: 2026-10-15
 - [ ] **T4 · Cadastros** (REQ-UIC-005, 006, 008): 011, 012, 021, 030, 044, 050
 - [ ] **T5 · Painéis, listas e fichas** (REQ-UIC-002, 007, 008, 009): 020, 022, 031 a 033, 041, 042, 043, 044 (painel), 052, 053, 015
 - [ ] **T6 · Revisão visual final**: galeria de novo, auditoria zerada ou com desvio aprovado pelo Renato
+- [ ] **T7 · Home fiel à prancha**: [spec](home-fidelity.md) e [implementação](home-fidelity-implementation.md). Primeiro lote visual implementado; E2E/prints aguardam portas. Segundo lote de casas próximas autorizado, aguardando PR #21 no dev antes do merge/reuso da 041.
