@@ -10,7 +10,7 @@ updated: 2026-10-12
 
 - **Escolha em `/register`:** os cartões do design system são radio (`ChoiceCard` não serve de link), então a escolha marca o cartão e o botão "Continuar como …" leva ao formulário. REQ-OREG-001 ajustado.
 - **Sem `router.refresh()` no sucesso:** a página de cadastro com sessão redireciona (REQ-OREG-015); um refresh tiraria a pessoa da tela de sucesso. A mutação só tira as queries do cache (`removeQueries`); o cache de mutações fica, porque a tela de sucesso lê o resultado.
-- **Guarda das telas de quem não entrou:** `redirectIfSignedIn(next)` em `shared/auth/server`, usada também pelo login e pelo login de admin (antes repetida em cada página).
+- **Guarda das telas de quem não entrou:** `redirectIfSignedIn(next)` em `shared/auth/server`, usada pelo login e pelo login de admin; aguarda `connection()` antes de `getSession()` e fica sob `<Suspense>` (Cache Components).
 - **Links:** `registerPath(role?, next?)` e `loginRedirectPath(next, as?)` em `appRoutes`; o "Criar conta" do login passou a levar o `next`.
 - **Schema de endereço em `shared`:** `createAddressSchema(messages)` (as frases vêm de quem usa), para 012, 015 e 030.
 - **Uma regra de senha só:** `PASSWORD_RULES` e `PASSWORD_MAX` em `shared/lib/validation/password.ts`; a régua, o cadastro e o login (limite de 128) leem dali.

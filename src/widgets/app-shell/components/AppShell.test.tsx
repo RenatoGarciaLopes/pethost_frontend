@@ -94,4 +94,8 @@ describe("atalhos na casca", () => {
       "/admin/host-applications",
     );
   });
+  it("REQ-AACC-001 admin tem atalho para as contas", () => {
+    setup("admin");
+    expect(screen.getByRole("link", { name: "Contas" })).toHaveAttribute("href", "/admin/users");
+  });
 });

@@ -1,98 +1,63 @@
 ---
 spec: 032-admin-accounts
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-15
 ---
 
 # 032 · Design técnico
 
-## Rota e renderização
+## Rotas e composição
 
-| Arquivo                                                     | Tipo         | Faz                                                                                                                                         |
-| ----------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/(admin)/admin/(panel)/users/page.tsx`                  | RSC dinâmico | `requireRole("admin")`; `accountsSearchSchema` nos `searchParams` (`type`, `status`, `page`); prefetch da lista da aba; `AccountsDirectory` |
-| `app/(admin)/admin/(panel)/users/owners/[ownerId]/page.tsx` | RSC dinâmico | UUID validado; prefetch do tutor; `OwnerAccountDetail`                                                                                      |
-| `app/(admin)/admin/(panel)/users/hosts/[hostId]/page.tsx`   | RSC dinâmico | UUID validado; prefetch do anfitrião; `HostAccountDetail`                                                                                   |
+| Rota                            | Composição                                                                                                                                                      |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/admin/users`                  | RSC protege com `requireRole("admin")`, valida `type`, `status`, `stripeStatus` e `page`, preenche a query de lista da aba, depois hidrata `AccountsDirectory`. |
+| `/admin/users/owners/[ownerId]` | RSC valida UUID, busca o tutor pelo `ownerId` e hidrata `AccountDetail` com `kind="owners"`; compõe `AuditTable` compacta com alvo owner fixo.                  |
+| `/admin/users/hosts/[hostId]`   | RSC valida UUID, busca o anfitrião pelo `hostId` e hidrata `AccountDetail` com `kind="hosts"`; compõe `AuditTable` compacta com alvo host fixo.                 |
 
-Sem `'use cache'`; `robots: noindex`.
+As três rotas ficam sob o painel de admin, usam `noindex` e mantêm a consulta dinâmica por requisição. A lista usa duas abas. A busca pessoal fica no estado React e não entra em URL, cache key ou log. Status e página ficam na URL. O filtro Stripe fica na URL e na chave da lista de anfitriões, e só então pede `GET /hosts?stripeStatus=`. Trocar de aba limpa os filtros e a busca. A busca permanece no componente pai enquanto uma nova lista carrega.
 
-## Árvore de componentes
+`AccountDetail` recebe `auditTrail?: ReactNode`. As páginas RSC compõem o slot com `AuditTable` da 033, passando `variant="compact"` e `fixedFilters` com `targetType` (`owner` ou `host`) e o id do perfil. "Ver na trilha" aponta para `/admin/audit-entries?targetType=owner|host&targetId={profileId}`, usando os nomes confirmados no contrato de `GET /audit-entries`. A feature 032 não importa a 033, nem consulta, implementa ou invalida a trilha; `AuditTable` controla sua própria query.
 
-```
-page lista (RSC)
-└─ AccountsDirectory (widgets/admin-accounts · client)
-   ├─ AccountTypeTabs          Tutores | Anfitriões (URL)
-   ├─ AccountFilters           busca (nome, e-mail, CPF; estado local) + status (URL)
-   └─ AdminDataTable (031)     linhas → detalhe
+## Fronteiras e contratos
 
-page detalhe (RSC)
-└─ OwnerAccountDetail | HostAccountDetail (widgets/admin-accounts · client)
-   ├─ AccountSummary           KeyValueList; CPF/CNPJ mascarados com "Mostrar"; StatusPill
-   ├─ SuspensionNotice         motivo e data quando suspensa
-   ├─ AccountActions           Suspender · Tirar suspensão · Liberar CPF | Liberar identidade
-   │  └─ ReasonActionDialog    ReasonField (031) + texto do efeito + confirmação reforçada quando irreversível
-   └─ AuditTable (033)         filtrada por targetType + targetId, compacta, com link para /admin/audit-entries
-```
+Os módulos independentes `features/owners` e `features/hosts` derivam seus schemas dos contratos gerados correspondentes. Eles exportam clientes, tipos, chaves e prefetch de servidor pela API pública da própria feature. Nenhuma feature importa a outra. O widget `widgets/admin-accounts` compõe as duas features e mantém o modelo de apresentação `AccountRow` no próprio domínio.
 
-## Contratos e modelos
+| Recurso                                                        | Localização                                 | Responsabilidade                                                                                                                                                        |
+| -------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adminOwnerSchema` e `adminOwnerListSchema`                    | `features/owners/api/contracts.ts`          | Derivam o perfil e lista do contrato gerado `owners`; aceitam `user` ausente e CPF nulo/ausente como identidade liberada.                                               |
+| `adminHostSchema`, `adminHostListSchema`, `stripeStatusSchema` | `features/hosts/api/contracts.ts`           | Derivam perfis do contrato gerado `hosts-admin`, preservam evidências após liberação e validam os seis valores do filtro Stripe.                                        |
+| Clientes e queries de admin                                    | `features/{owners,hosts}/api`               | Enviam motivo validado para POST de suspensão/liberação/reset; DELETE de retirada de suspensão não tem corpo; listagem de anfitriões aceita o filtro Stripe.            |
+| `AccountRow`, `toAccountRow`, `filterAccounts`                 | `widgets/admin-accounts/lib/accountRows.ts` | Modelo mínimo sem telefone/endereço. Prioridade de estado: identidade liberada, suspensa, inativa, ativa. Busca tolera acentos e caixa; CPF é comparado só com dígitos. |
+| `accountsSearchSchema`                                         | `widgets/admin-accounts/schemas`            | Normaliza parâmetros públicos desconhecidos para valores seguros padrão. Não contém texto pessoal de busca.                                                             |
+| `ReasonActionDialog`                                           | `shared/ui/feedback`                        | Diálogo controlado com motivo opcional por modo, efeito, erro, estado ocupado e confirmação de palavra literal.                                                         |
+| `filterText` e `reasonSchema`                                  | `shared/lib/text` e `shared/lib/validation` | Normalização pura da busca e validação comum de motivo entre 1 e 500 caracteres após trim.                                                                              |
 
-| Símbolo                                    | Onde                                             | Nota                                                                                                                                              |
-| ------------------------------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adminOwnerSchema`, `adminOwnerListSchema` | `features/owners/api/contracts`                  | `unwrapData(GetApiV1OwnersOwnerIdResponse)` / `GetApiV1OwnersResponse`; `user.role` estreitado                                                    |
-| `adminHostSchema`, `adminHostListSchema`   | `features/hosts/api/contracts`                   | `unwrapData(GetApiV1HostsHostIdResponse)` / `GetApiV1HostsResponse`; `personType` → `pf`/`pj`                                                     |
-| `AccountRow`                               | `widgets/admin-accounts/types`                   | linha comum às duas abas: `kind` (`owner`/`host`), `id`, `fullName`, `email`, `cpfDigits`, `status`, `createdAt`, `tradeName?`, `payoutsEnabled?` |
-| `toAccountRow`                             | `widgets/admin-accounts/lib`                     | tutor/anfitrião → linha; `status`: identidade liberada > suspensa > inativa > ativa                                                               |
-| `filterAccounts`                           | idem                                             | função pura: nome e e-mail sem acento e sem caixa; CPF só dígitos                                                                                 |
-| `reasonSchema`                             | `shared/lib/validation` (reuso do `ReasonField`) | 1 a 500, trim                                                                                                                                     |
-| `accountsSearchSchema`                     | `widgets/admin-accounts/schemas`                 | `type` (`owners`/`hosts`), `status`, `page`                                                                                                       |
+`useAccountAction` usa as operações da feature correspondente. Em sucesso grava a resposta do servidor no detalhe e invalida todas as listas daquela feature, incluindo cada chave de filtro Stripe. Nos erros de regra 403/422 atualiza o detalhe e invalida as listas para refletir o estado canônico. Não usa retry nem estado otimista. Erros 400 permanecem junto ao campo de motivo. Nenhuma ação toca a query da trilha.
 
-Chamadas: `features/owners/api/client/adminOwners.client.ts` (`listOwners`, `getOwner`, `suspendOwner`, `liftOwnerSuspension`, `releaseOwnerCpf`) e `features/hosts/api/client/adminHosts.client.ts` (`listHosts`, `getHost`, `suspendHost`, `liftHostSuspension`, `releaseHostIdentity`), via `bffClient`. O widget junta as duas features (widget pode importar features; features não se importam).
+## Interface e privacidade
 
-## Fluxo de dados
+`AccountsDirectory` usa o `AdminDataTable` compartilhado, colunas de nome, e-mail, CPF mascarado, status e criação. A aba anfitriões acrescenta pessoa física/empresa, nome fantasia, status Stripe e repasses. Status é filtrado em cliente; o Stripe é filtrado no servidor. Paginação local é de 25. Rótulos e selects têm associação explícita por `id`.
 
-- Keys: `accountQueryKey(admin.id, "admin", "owners")`, `accountQueryKey(admin.id, "admin", "owner", ownerId)` e as equivalentes de `hosts`.
-- Ações: mutation → `setQueryData` do detalhe com a resposta (a API devolve o recurso atualizado) + `invalidateQueries` da lista e da trilha da conta (key da 033).
-- Filtro e paginação no cliente (`filterAccounts` + `paginate` da 031); aba, status e página na URL (`useSearchParamsState`), texto da busca em estado local.
-- "Mostrar CPF": estado local da linha/detalhe, volta a mascarar ao sair; nunca na URL.
+`AccountSummary` mostra telefone, nascimento e endereço apenas no detalhe. CPF/CNPJ ficam mascarados até ação explícita e o estado de revelação não é persistido. Contas liberadas mantêm a evidência no contrato; a tela informa data e motivo e oculta a ação de retirada da suspensão. Suspender pede motivo e explica o efeito. Retirar suspensão confirma o efeito e aviso de e-mail sem inventar corpo para DELETE. Liberar identidade pede motivo e `LIBERAR`. Dar nova chance ao Stripe aparece apenas para status `rejected` e identidade não liberada; a confirmação deixa claro que não libera repasses, não remove suspensão e que a próxima abertura criará outra conta Stripe.
 
-## Erros
+## Testes e validação
 
-| Código                                                  | Onde aparece     | Texto                                                                        |
-| ------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------- |
-| `VALIDATION_ERROR` (`reason`)                           | campo do diálogo | mensagem do campo                                                            |
-| `OWNER_NOT_FOUND`, `HOST_NOT_FOUND`                     | página           | `notFound()`                                                                 |
-| `OWNER_SUSPENSION_REQUIRED`, `HOST_SUSPENSION_REQUIRED` | Notice           | **nova:** "Só dá pra liberar depois de suspender a conta."                   |
-| `OWNER_CPF_RELEASED`, `HOST_IDENTITY_RELEASED`          | Notice           | **nova:** "A identidade dessa conta foi liberada; a suspensão não sai mais." |
-| `AUTH_ADMIN_SUSPENSION_FORBIDDEN`                       | Notice           | **nova:** "Conta de admin não pode ser suspensa."                            |
+| Camada                | Recursos cobertos                                                                             | Evidência                                                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unitária              | `reasonSchema`, `filterText`, `accountsSearchSchema`, prioridade/normalização de `AccountRow` | Testes ao lado das funções; motivos vazios, limites 1/500/501, acentos, busca CPF mascarada e parâmetros inválidos.                                |
+| Componente            | diálogo, diretório, ações, resumo e slot de auditoria                                         | `AccountDetail.test.tsx` cobre slot preenchido e href correto para owner/host; demais testes cobrem busca sem URL, `LIBERAR`, privacidade e erros. |
+| Integração HTTP/cache | clientes de owners/hosts, `useAccountAction`, detalhe 032 e atalho de conflito 031            | MSW verifica corpo e verbo, filtro Stripe, resposta 422, invalidação de detalhe/listas e atalho sem documento na URL.                              |
+| E2E simulado          | lista, CPF disputado, ações, Stripe e trilha                                                  | Jornada mocked cobre detalhe de tutor/anfitrião, tabela compacta e clique para auditoria com alvo fixo; não substitui API real.                    |
+| E2E real              | suspender e reativar tutor criado pelo próprio cenário                                        | Escrito para execução coordenada; pendente execução com API real e dados de teste autorizados.                                                     |
+| Storybook             | diálogo, diretório, ações, resumo e composição de detalhe com trilha compacta                 | `accountAuditComposition.stories.tsx` compõe detalhe + `AuditTable`; `AuditTable.stories.tsx` mostra a variante compacta.                          |
 
-## Privacidade
+Validação registrada será atualizada em `tasks.md` após os checks disponíveis nesta execução. A revisão visual, Storybook executado, E2E pelo navegador e integração real ficam para a execução coordenada pelo usuário.
 
-- CPF e CNPJ mascarados por padrão (`maskCpf`, `maskCnpj`); completo só sob "Mostrar", sem persistir.
-- Endereço e telefone só no detalhe, não na lista.
-- O texto da busca fica só no estado do componente, nunca na URL (pode ser um CPF); rotas de admin com `robots: noindex`.
+## Browser regression, 2026-10-16
 
-## Reutiliza
-
-`AdminDataTable`, `ReasonField`, `paginate`, `useSearchParamsState` (031), `AuditTable` (033), `bffClient`, `accountQueryKey`, `getErrorMessage`, `applyFieldErrors`, `requireRole`, `StatusPill`, `KeyValueList`, `Notice`, `EmptyState`, `ErrorState`, `maskCpf`, `maskCnpj`.
-
-## Cria de reutilizável
-
-| Recurso                                                        | Onde                     | Quem mais usa                        |
-| -------------------------------------------------------------- | ------------------------ | ------------------------------------ |
-| `ReasonActionDialog` (motivo + efeito + confirmação reforçada) | `shared/ui/feedback`     | 031 (fraude), futuras ações de admin |
-| `filterText` (normaliza acento e caixa para busca no cliente)  | `shared/lib/text`        | 033, 041                             |
-| `AccountRow` / `toAccountRow`                                  | `widgets/admin-accounts` | só aqui                              |
-
-## Matriz de testes
-
-| REQ             | Nível                   | Arquivo                                                                                            | Caso                                                                                                                       |
-| --------------- | ----------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 002/003         | Unitário                | `toAccountRow.test.ts`, `filterAccounts.test.ts`, `filterText.test.ts`                             | prioridade de status; busca por nome com e sem acento, e-mail, CPF com máscara                                             |
-| 001/003         | Unitário                | `accountsSearchSchema.test.ts`                                                                     | aba e status desconhecidos voltam ao padrão                                                                                |
-| 001 a 004       | Componente              | `AccountsDirectory.test.tsx`                                                                       | abas na URL; CPF mascarado; vazio com "Limpar filtros"                                                                     |
-| 005 a 008/013   | Componente              | `AccountActions.test.tsx`, `ReasonActionDialog.test.tsx`                                           | ações por status; liberar só em suspensa; "LIBERAR" exigido; sem "Tirar suspensão" com identidade liberada; foco devolvido |
-| 004/009         | Componente              | `OwnerAccountDetail.test.tsx`, `HostAccountDetail.test.tsx`                                        | "Mostrar" CPF; trilha filtrada                                                                                             |
-| 005 a 011       | Integração (MSW no BFF) | `adminOwners.client.int.test.ts`, `adminHosts.client.int.test.ts`, `useAccountAction.int.test.tsx` | corpo com `reason`; detalhe atualizado com a resposta; 422 recarrega                                                       |
-| 001 a 013       | Storybook               | `AccountsDirectory.stories.tsx`, `AccountActions.stories.tsx`                                      | ativa, inativa, suspensa, liberada, empresa; a11y                                                                          |
-| 003/005/006/007 | E2E simulado            | `e2e/mocked/admin/accounts.spec.ts`                                                                | buscar CPF → suspender → liberar CPF (disputa) → conferir a trilha                                                         |
-| 005/006         | E2E real                | `e2e/real/admin/accounts.spec.ts`                                                                  | admin do seed suspende e tira a suspensão de um tutor criado no teste                                                      |
+- `src/widgets/admin-accounts/components/AccountDetail.tsx`: the summary and actions retain independent keys (`summary-${resourceId}` and `actions-${resourceId}`), so changing accounts resets local action state without duplicate sibling keys. Props, HTTP contracts and the optional `auditTrail` slot are unchanged. This remains a client composition of owners, hosts, QueryClient and admin-audit; it requires the existing admin route guard and prefetched detail.
+- `src/shared/ui/data-display/AdminDataTable/AdminDataTable.tsx`: first-column links use MUI Link with a native anchor. Opening a detail performs document navigation; sorting, pagination and keyboard-accessible links retain their interface. This also affects the review queue and audit table. Existing functional tests cover row activation and hrefs; browser tests cover accounts and audit navigation.
+- `e2e/mocked/admin/accounts.spec.ts`: waits for hydration before detail actions; allows 60 seconds for the journey and 15 seconds for the final audit navigation while Next compiles routes. Covers suspension, irreversible identity release, literal confirmation, Stripe reset and the composed audit trail on desktop/mobile. All identity fixtures are synthetic.
+- `e2e/mocked/admin/audit.spec.ts`: detail selectors include the accessible target context; a non-admin is redirected to `/`, matching the current role destination.
+- `AccountDetail.test.tsx`: functional composition coverage includes opening suspension for both owner and host alongside the audit slot and target link. There is no new pure function requiring another unit suite; HTTP integration remains covered by the existing feature suites. E2E uses the mock backend, not the real API.
+- Temporary `debug-hydration.spec.ts` was removed. No reusable helper or production API was introduced. Vault changes are intentionally deferred by the user's instruction; this section records the resource changes for the vault maintainer.

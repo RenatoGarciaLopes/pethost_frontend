@@ -5,8 +5,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { errorCopy } from "@/shared/api/errors/errorCopy";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { getErrorCopy, getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -60,7 +59,7 @@ export function ProfileEditor({ userId, role }: ProfileEditorProps) {
 
   function reportPhotoError(error: unknown) {
     const tooBig = isApiError(error) && (error.code === "PAYLOAD_TOO_LARGE" || Boolean(error.fieldErrors.file));
-    setPhotoError(tooBig ? (errorCopy.PAYLOAD_TOO_LARGE as string) : getErrorMessage(error));
+    setPhotoError(tooBig ? getErrorCopy("PAYLOAD_TOO_LARGE") : getErrorMessage(error));
   }
 
   const photoActions = { onSuccess: () => router.refresh(), onError: reportPhotoError };
@@ -79,7 +78,7 @@ export function ProfileEditor({ userId, role }: ProfileEditorProps) {
             </Button>
           }
         >
-          {errorCopy.HOST_NOT_FOUND as string}
+          {getErrorCopy("HOST_NOT_FOUND")}
         </Notice>
       )}
       <Box

@@ -8,11 +8,11 @@ updated: 2026-10-11
 
 ## Rotas e renderização
 
-| Arquivo                           | Tipo                     | Faz                                                                                                                                           |
-| --------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/(auth)/login/page.tsx`       | RSC dinâmico (lê cookie) | `getSession()` → se houver, `redirect(resolvePostLoginPath(role, next))`; senão, renderiza `LoginScreen` com `initialRole` (de `as`) e `next` |
-| `app/(auth)/admin/login/page.tsx` | RSC                      | Igual, com `variant="admin"`                                                                                                                  |
-| `app/(auth)/layout.tsx`           | RSC                      | Cabeçalho simples da marca (sem menu); metadados `robots: noindex`                                                                            |
+| Arquivo                           | Tipo                     | Faz                                                                                                                                                                                                       |
+| --------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/(auth)/login/page.tsx`       | RSC dinâmico (lê cookie) | `LoginGate` fica sob `<Suspense>` e `redirectIfSignedIn(next)` espera `connection()` antes de ler a sessão; com sessão redireciona para `resolvePostLoginPath(role, next)`, senão renderiza `LoginScreen` |
+| `app/(auth)/admin/login/page.tsx` | RSC                      | Igual, com `variant="admin"`                                                                                                                                                                              |
+| `app/(auth)/layout.tsx`           | RSC                      | Cabeçalho simples da marca (sem menu); metadados `robots: noindex`                                                                                                                                        |
 
 Sem `'use cache'` (lê sessão). Texto e layout são servidor; ilhas client: o formulário, a cena (`DoorScene`, Motion) e os `Reveal` da montagem (REQ-AUTH-020).
 

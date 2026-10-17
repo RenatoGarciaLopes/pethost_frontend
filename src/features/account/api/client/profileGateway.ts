@@ -1,7 +1,7 @@
 import { bffClient } from "@/shared/api/client/bffClient";
 import { unwrapData } from "@/shared/api/contracts/unwrapData";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
-import { errorCopy } from "@/shared/api/errors/errorCopy";
+import { getErrorCopy } from "@/shared/api/errors/getErrorMessage";
 import {
   PatchApiV1OwnersMeBody,
   PostApiV1OwnersMeDeactivateResponse,
@@ -48,7 +48,7 @@ function editability(profile: AccountProfile): FieldEditability {
     if (!profile.verified) {
       for (const field of fields) {
         if (result[field].mode !== "hidden" && field !== "email")
-          result[field] = { mode: "locked", reason: errorCopy.HOST_NOT_FOUND as string };
+          result[field] = { mode: "locked", reason: getErrorCopy("HOST_NOT_FOUND") };
       }
       result.avatarUrl = { mode: "hidden" };
     } else {
@@ -58,7 +58,7 @@ function editability(profile: AccountProfile): FieldEditability {
         "cpf",
         ...(profile.company ? (["cnpj", "legalName"] as const) : []),
       ] as const)
-        result[field] = { mode: "locked", reason: errorCopy.HOST_IDENTITY_LOCKED as string };
+        result[field] = { mode: "locked", reason: getErrorCopy("HOST_IDENTITY_LOCKED") };
     }
   }
   return result;

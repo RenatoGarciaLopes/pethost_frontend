@@ -57,7 +57,6 @@ export function ApplicationQueueView({ rows, status, page, onChange }: QueueView
         onPageChange={(next) => onChange({ page: next })}
         rowKey={(row) => row.id}
         rowHref={(row) => `/admin/host-applications/${row.id}`}
-        rowLabel={(row) => row.user?.fullName ?? copy.unavailable}
         empty={<EmptyState title={copy.empty} illustration={<span />} />}
         columns={[
           {

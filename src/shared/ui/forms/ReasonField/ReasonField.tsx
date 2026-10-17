@@ -12,7 +12,10 @@ export interface ReasonFieldProps {
   error?: string;
   /** Ajuda exibida quando não há erro. */
   helperText?: string;
-  /** Bloqueia edição durante uma operação externa. */
+  /**
+   * Bloqueia edição durante uma operação externa. O campo fica só de leitura (não desabilitado): o texto e a
+   * ajuda continuam legíveis, com contraste (o MUI clareia demais o campo desabilitado).
+   */
   disabled?: boolean;
   /** Limite de digitação, padrão 500; não substitui validação no schema. */
   maxLength?: number;
@@ -37,10 +40,9 @@ export function ReasonField({
       label={label}
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      disabled={disabled}
       error={Boolean(error)}
       helperText={`${error ?? helperText ?? ""} ${value.length}/${maxLength}`}
-      slotProps={{ htmlInput: { maxLength } }}
+      slotProps={{ htmlInput: { maxLength, readOnly: disabled } }}
     />
   );
 }

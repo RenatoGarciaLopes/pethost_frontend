@@ -1,10 +1,28 @@
 ---
 spec: 033-admin-audit
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-15
 ---
 
 # 033 · Design técnico
+
+## Regressões da revisão do PR 17 (2026-10-16)
+
+- `AuditExplorer` (`src/features/admin-audit/components/client/AuditExplorer/AuditExplorer.tsx`) incrementa uma versão local ao limpar. A key de `AuditFilters` inclui essa versão: mesmo sem filtros aplicados, o rascunho e os erros locais são descartados. Interface pública inalterada; depende do estado React e do hook de URL existente. Cobertura funcional em `AuditExplorer.test.tsx` (digitar UUID inválido, enviar, limpar e verificar campo/erro).
+- `AuditTable` (`src/features/admin-audit/components/client/AuditTable/AuditTable.tsx`) mantém a paginação quando a API retorna página vazia com `totalCount > 0`, inclusive quando só existe uma página. Não apresenta a página inexistente como selecionada; o botão de página válida chama `onFiltersChange({ page })`. Vale para explorer e compacto; filtros fixos permanecem no request. Regressão parametrizada dos dois modos em `AuditTable.test.tsx`.
+- `useAccountAction` (`src/widgets/admin-accounts/hooks/useAccountAction.ts`) invalida a trilha do mesmo admin/tipo/id após cada sucesso, além das listas e detalhe. Continua sem importar features de auditoria. A invalidação aguarda refetch de observadores ativos; falha da mutation não dispara essa atualização. Integração MSW em `useAccountAction.int.test.tsx` cobre suspender, retirar suspensão, liberar CPF/documento e resetar Stripe, atualização ativa e isolamento de outros admins/alvos.
+
+### Catálogo provisório: adminAuditQueryKey
+
+| Nome               | Tipo/domínio                 | Status      | Local real                            | Documentação                                                         |
+| ------------------ | ---------------------------- | ----------- | ------------------------------------- | -------------------------------------------------------------------- |
+| adminAuditQueryKey | utility, frontend/shared API | implemented | `src/shared/api/query/queryClient.ts` | Esta seção; registro no vault pendente por instrução de não editá-lo |
+
+Interface: `adminAuditQueryKey(adminId, target?)`, com `target = { targetType, targetId }`, retorna prefixo de query key. Sem alvo retorna `accountQueryKey(adminId, "admin", "audit")`; com alvo acrescenta o objeto de alvo. `auditQueries.page` preserva a key existente: prefixo sem alvo seguido do request completo. A invalidação usa o objeto parcial `{ targetType, targetId }`, que TanStack Query compara parcialmente com o request, cobrindo todas as páginas/filtros do alvo. Uso: `client.invalidateQueries({ queryKey: adminAuditQueryKey(adminId, { targetType: "owner", targetId }) })`. Consumidores: `features/admin-audit/api/queries.ts` e `widgets/admin-accounts/hooks/useAccountAction.ts`. Não armazena dados nem faz HTTP; não autoriza acesso. Use apenas ids internos e códigos de tipo; sem CPF, e-mail ou motivo. Não há migração de keys: o formato existente por request é preservado. Teste unitário em `src/shared/api/query/queryClient.test.ts`, integração na mutation acima. Sem UI própria: story N/A.
+
+Validação da rodada em `docs/validation.md`. E2E é aplicável às jornadas administrativas, mas não foi executado nesta rodada sem portas; os testes funcionais e de integração cobrem as regressões. Não há nova função pura nos componentes; estados internos são cobertos pela composição. Vault e catálogo do Obsidian não foram editados por instrução do usuário.
+
+Implementação conferida em 15/10/2026. O código está em `src/features/admin-audit` (não `features/audit`); o endpoint e os parâmetros são os do contrato OpenAPI registrados em requirements.md. `details` é `Record<string, string>`, IDs podem ser nulos e `totalPages` pode faltar.
 
 ## Rota e renderização
 
@@ -26,7 +44,7 @@ page (RSC)
       └─ AuditEntryDetail      diálogo: details (KeyValueList), IP, traceId copiável, links "filtrar por" e "abrir"
 ```
 
-`AuditTable` aceita `fixedFilters` (não editáveis) e `variant="compact"` (sem filtros, 10 por página, link "ver tudo"): é o que a 032 usa.
+`AuditTable` aceita `fixedFilters` (não editáveis) e `variant="compact"` (sem filtros, 10 por página, link "ver tudo"): contrato de integração da 032. A 031 não é dependente deste componente.
 
 ## Contratos e modelos
 
@@ -63,16 +81,16 @@ Chamada: `features/audit/api/client/audit.client.ts` → `listAuditEntries(query
 
 ## Reutiliza
 
-`AdminDataTable`, `useSearchParamsState` (031), `KeyValueList`, `EmptyState`, `ErrorState`, `bffClient`, `accountQueryKey`, `requireRole`, `formatDateTime`.
+`AdminDataTable` (e indiretamente `paginate`, com uma única página da API), `useSearchParamsState` (031; ajuste nesta entrega para excluir parâmetros opcionais removidos), `EmptyState`, `ErrorState`, `bffClient`, `accountQueryKey`, `requireRole`, `formatDateTime`.
 
 ## Cria de reutilizável
 
-| Recurso                                                 | Onde                            | Quem mais usa                    |
-| ------------------------------------------------------- | ------------------------------- | -------------------------------- |
-| `AuditTable` (com `fixedFilters` e `variant="compact"`) | `features/audit` (index.client) | 032; 031 (trilha da solicitação) |
-| `auditActionCopy`, `auditTargetLink`                    | `features/audit/lib`            | 032                              |
-| `formatDateTime` com fuso                               | `shared/lib/date`               | todas as telas com data e hora   |
-| `CopyButton` (copiar com anúncio acessível)             | `shared/ui/data-display`        | traceId no `ErrorState` (004)    |
+| Recurso                                                 | Onde                                  | Quem mais usa                            |
+| ------------------------------------------------------- | ------------------------------------- | ---------------------------------------- |
+| `AuditTable` (com `fixedFilters` e `variant="compact"`) | `features/admin-audit` (index.client) | 032 e outras telas admin                 |
+| `auditActionCopy`, `auditTargetLink`                    | `features/audit/lib`                  | 032                                      |
+| `formatDateTime` com fuso                               | `shared/lib/date`                     | apresentação de datas locais             |
+| `CopyButton` (copiar com anúncio acessível)             | `shared/ui/data-display/CopyButton`   | cópia acionada de textos identificadores |
 
 ## Matriz de testes
 
@@ -88,3 +106,12 @@ Chamada: `features/audit/api/client/audit.client.ts` → `listAuditEntries(query
 | 001 a 011       | Storybook               | `AuditExplorer.stories.tsx`, `AuditTable.stories.tsx` | cheio, vazio, compacto, ação desconhecida; a11y                                                       |
 | 001/002/006     | E2E simulado            | `e2e/mocked/admin/audit.spec.ts`                      | filtrar por ação, abrir registro, link "abrir" leva à conta                                           |
 | 001             | E2E real                | `e2e/real/admin/audit.spec.ts`                        | admin do seed vê o próprio `audit.searched` no topo depois da busca                                   |
+
+## Mapeamento implementado (fonte de verdade)
+
+- Rota efetiva: `src/app/(admin)/admin/(panel)/audit-entries/page.tsx`; ela chama `requireRole`, usa os parâmetros do OpenAPI, pula o prefetch em intervalo reverso e hidrata `AuditExplorer`.
+- Módulo efetivo: `src/features/admin-audit`. `api/contracts.ts` deriva envelope/página do schema gerado e restringe `details` a texto-texto; IDs/`actorRole` são nullish e `totalPages` é opcional. `api/mappers.ts` projeta `occurredAt` para `Date`.
+- A API declara os parâmetros `page`, `pageSize`, `action`, `targetType`, `targetId`, `actorId`, `from`, `to`. Datas locais são enviadas como limites inclusivos do dia com offset `-03:00`. A lista de ações inclui `pet.*`, `listing.*` e `booking.*` além das ações inicialmente citadas.
+- A tabela usa `AdminDataTable` para uma única página recebida e `Pagination` para pedir páginas seguintes à API; `paginate` é reutilizado internamente pela tabela compartilhada. O modo compacto limita a dez itens e é exportado por `index.client.ts` para a 032.
+- `AuditEntryDetail` apresenta os pares de texto em lista, IP somente no detalhe, links para filtrar e abrir destinos conhecidos, além de `CopyButton` acionado para traceId. `ReasonField` não é usado porque esta tela é somente leitura.
+- Integração HTTP e prefetch têm MSW, componentes têm testes comportamentais, e stories usam `export default meta`. E2E mockado e real estão escritos; execução pendente das portas e do aceite de navegador.

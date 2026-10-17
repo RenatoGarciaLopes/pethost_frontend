@@ -6,6 +6,8 @@ export interface ErrorCopyContext {
   role?: "owner" | "host";
   /** Orientação para a equipe ao decidir verificação; preserva a copy pessoal fora do admin. */
   adminReview?: boolean;
+  /** Copy contextual para a gestão de contas, sem alterar a mensagem pessoal da área logada. */
+  adminAccounts?: boolean;
 }
 
 type CopyEntry = string | ((error: ApiError, context: ErrorCopyContext) => string);
@@ -30,9 +32,25 @@ export const errorCopy: Record<string, CopyEntry> = {
   OWNER_CPF_LOCKED: "Depois do primeiro pagamento, o CPF e o nascimento ficam travados. Pra mudar, fala com o suporte.",
   OWNER_BIRTH_DATE_LOCKED:
     "Depois do primeiro pagamento, o CPF e o nascimento ficam travados. Pra mudar, fala com o suporte.",
-  OWNER_NOT_FOUND: "Não achamos seu perfil de tutor. Fala com o suporte.",
+  OWNER_NOT_FOUND: (_error, { adminAccounts }) =>
+    adminAccounts ? "Esse perfil de tutor não existe mais." : "Não achamos seu perfil de tutor. Fala com o suporte.",
+  OWNER_SUSPENSION_REQUIRED: (_error, { adminAccounts }) =>
+    adminAccounts ? "A conta não está suspensa. Recarregue os dados e confira o status." : GENERIC_ERROR_MESSAGE,
+  OWNER_CPF_RELEASED: (_error, { adminAccounts }) =>
+    adminAccounts ? "O CPF já foi liberado. Recarregue os dados da conta." : GENERIC_ERROR_MESSAGE,
   OWNER_HAS_OPEN_BOOKING: "Tem estadia pedida, marcada ou acontecendo. Cancela ou espera terminar pra pausar a conta.",
-  HOST_NOT_FOUND: "Seus dados ficam editáveis depois da verificação.",
+  HOST_NOT_FOUND: (_error, { adminAccounts }) =>
+    adminAccounts ? "Esse perfil de anfitrião não existe mais." : "Seus dados ficam editáveis depois da verificação.",
+  HOST_SUSPENSION_REQUIRED: (_error, { adminAccounts }) =>
+    adminAccounts ? "A conta não está suspensa. Recarregue os dados e confira o status." : GENERIC_ERROR_MESSAGE,
+  HOST_IDENTITY_RELEASED: (_error, { adminAccounts }) =>
+    adminAccounts ? "A identidade já foi liberada. Recarregue os dados da conta." : GENERIC_ERROR_MESSAGE,
+  AUTH_ADMIN_SUSPENSION_FORBIDDEN: (_error, { adminAccounts }) =>
+    adminAccounts ? "Conta de admin não pode ser suspensa." : GENERIC_ERROR_MESSAGE,
+  HOST_STRIPE_ACCOUNT_NOT_REJECTED: (_error, { adminAccounts }) =>
+    adminAccounts
+      ? "O cadastro Stripe não está recusado. Recarregue os dados e confira o status."
+      : GENERIC_ERROR_MESSAGE,
   HOST_HAS_OPEN_BOOKING:
     "Tem estadia pedida, marcada ou acontecendo no seu cantinho. Resolve ela antes de pausar a conta.",
   HOST_NOT_A_COMPANY: "Esses dados são só de conta de empresa.",

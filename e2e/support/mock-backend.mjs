@@ -15,6 +15,8 @@ import { searchHandlers } from "./handlers/search.mjs";
 import { listingPageHandlers } from "./handlers/listingPage.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 import { adminApplicationsHandlers, resetAdminApplications } from "./handlers/adminApplications.mjs";
+import { adminAccountsHandlers, resetAdminAccounts } from "./handlers/adminAccounts.mjs";
+import { auditEntriesHandlers, resetAuditEntries } from "./handlers/auditEntries.mjs";
 
 /**
  * Backend HTTP mínimo para E2E simulado; não representa a API .NET.
@@ -28,6 +30,9 @@ const handlers = [
     resetAccountProfiles();
     resetPets();
     resetStripeAccounts();
+    resetAdminApplications();
+    resetAdminAccounts();
+    resetAuditEntries();
     resetHostApplications();
     resetListings();
     resetBookings();
@@ -72,6 +77,8 @@ const handlers = [
   ...searchHandlers,
   ...listingPageHandlers,
   ...adminApplicationsHandlers,
+  ...adminAccountsHandlers,
+  ...auditEntriesHandlers,
 ];
 const app = express();
 app.use(createMiddleware(...handlers));
