@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
 import { fn } from "storybook/test";
+import { withQueryClient } from "@/test/storybook/withQueryClient";
 import { HomeScreen } from "./HomeScreen";
 
 const meta = {
@@ -10,6 +11,7 @@ const meta = {
   tags: ["autodocs"],
   parameters: { design: { board: "Quintal-Visitante / Quintal-Casas" }, layout: "fullscreen" },
   args: { pets: [], petsUnavailable: false },
+  decorators: [withQueryClient],
   beforeEach: () => {
     // Mock do framework: o appDirectory ainda usa o contexto anterior ao Next 16.4 (como no PetWizard).
     useRouter.mockReturnValue({ ...getRouter(), refresh: fn(), bfcacheId: "story" });

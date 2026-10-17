@@ -155,3 +155,20 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
     animations: "disabled",
   });
 });
+
+test.describe("vitrine perto de você", () => {
+  test.use({ geolocation: { latitude: -23.4273, longitude: -51.9375 }, permissions: ["geolocation"] });
+
+  test("REQ-NEARBY-020 visitante libera a localização e vê cantinhos por perto sem entrar", async ({ page }) => {
+    await page.goto("/");
+    await waitForHydration(page.getByRole("main"));
+    // Permissão concedida: a vitrine busca sozinha, sem pedir login e sem pôr a posição na URL.
+    await expect(page.getByRole("heading", { level: 2, name: /casas com vaga perto de você$/ })).toBeVisible({
+      timeout: 45_000,
+    });
+    await expect(page.getByRole("list").getByRole("link").first()).toBeVisible();
+    expect(page.url()).not.toMatch(/latitude|longitude|-23\.4/);
+    await hideDevIndicator(page);
+    await page.screenshot({ path: "test-results/home-fidelity/nearby.png", fullPage: true });
+  });
+});
