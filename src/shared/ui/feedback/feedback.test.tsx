@@ -1,3 +1,4 @@
+import NextLink from "next/link";
 import { createRef } from "react";
 import { screen, within } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
@@ -112,7 +113,7 @@ it("REQ-DS-014 EmptyState oferece próximo passo e ilustração decorativa", asy
 it("REQ-DS-014 ErrorState oferece retry, código e ação secundária", async () => {
   const retry = vi.fn();
   const { user, rerender } = renderWithProviders(
-    <ErrorState onRetry={retry} traceId="trace-teste" secondaryAction={<a href="/">Início</a>} />,
+    <ErrorState onRetry={retry} traceId="trace-teste" secondaryAction={<NextLink href="/">Início</NextLink>} />,
     { theme: quintalTheme },
   );
   expect(screen.getByRole("alert")).toHaveTextContent("Deu um problema do nosso lado.");

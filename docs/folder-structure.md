@@ -51,6 +51,26 @@ src/features/listing-page/
 e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
 ```
 
+## Início público (spec 040, 15/10/2026)
+
+```text
+src/app/page.tsx                                  rota pública `/`, sessão e prefetch opcional
+src/app/page.int.test.tsx                         sessão, prefetch e falha recuperável
+src/widgets/home/
+  components/HomeScreen/
+    HomeScreen.tsx                                 estados por papel, busca e hero
+    HomeScreen.test.tsx                            cobertura funcional
+    HomeScreen.stories.tsx                         estados de visitante, conta e celular
+    index.ts
+  lib/
+    homeCopy.ts                                    textos da home
+    homeSearchPath.ts, homeSearchPath.test.ts       handoff da busca
+  index.ts
+e2e/mocked/home/home.spec.ts                       jornadas de navegador desktop e celular
+```
+
+`HomeScreen` usa componentes de marca e confiança de `shared`, recebe do servidor apenas sessão reduzida e pets ativos reduzidos, e não chama a API de anúncios. A nota canônica está em `development/resources/home` e o recurso consta no catálogo do vault.
+
 ## Pagamentos do anfitrião (spec 043, 15/10/2026)
 
 ```text

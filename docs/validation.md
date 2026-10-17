@@ -433,3 +433,23 @@ Validação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`.
 - Repetição isolada após simplificar a key sem mudar seu formato: `npx.cmd vitest run src/widgets/admin-accounts/hooks/useAccountAction.int.test.tsx src/widgets/admin-accounts/components/AccountDetail.test.tsx src/shared/api/query/queryClient.test.ts --maxWorkers=1`: **3 arquivos, 17 testes aprovados**, incluindo os dois casos de AccountDetail e cobertura unitária do prefixo compartilhado. Não foi necessário aumentar timeout nem alterar o teste existente.
 - `npx.cmd tsc --noEmit` e ESLint de todos os arquivos TS/TSX alterados: **aprovados**, exit 0. O primeiro typecheck apontou fixture antiga com array no lugar de AuditPage; corrigida para reutilizar auditPageModelFixture. Prettier aplicado ao código/spec e `git diff --check` aprovado.
 - Integrações usam MSW/cache TanStack, não API real. E2E/Storybook não executados por instrução sem portas. Nenhum push/fetch ou alteração no vault. Interfaces, limites, migração (N/A: formato de key preservado), níveis de teste e catálogo provisório de adminAuditQueryKey em `specs/033-admin-audit/design.md`.
+
+## Regressão de CI · Início (spec 040)
+
+| Verificação                                                                  | Resultado                |
+| ---------------------------------------------------------------------------- | ------------------------ |
+| `bash .agent-tools/e2e.sh pethost_frontend-040 e2e/mocked/home/home.spec.ts` | 8/8 no desktop e celular |
+
+O E2E escolhe “Cão” e “Gato” por nome exato, sem colidir com o placeholder “Cão ou gato?”. Nos fluxos móveis, expande a pílula antes de preencher os campos e usa o CTA responsivo “Buscar cantinhos”. As portas 3100/5099 foram liberadas ao fim.
+
+## Retomada 16/10/2026 � home
+
+E2E mocked/home: 8/8 aprovados ap�s aguardar hidrata��o e acomodar compila��o fria (60 s por teste; 15 s para navega��o � busca). Integra��o de origin/dev local: 43adc05 (PR #20). tsc --noEmit aprovado antes da atualiza��o do teste; repetido nesta entrega. Fetch/push indispon�veis: conex�o com github.com:443 recusada neste ambiente. Portas 3100/5099 encerradas explicitamente.
+
+## Revisão PR 18: renovação na home (2026-10-16)
+
+- `npx.cmd vitest run src/app/page.int.test.tsx src/shared/auth/server/getSession.int.test.ts src/shared/auth/server/requireSession.int.test.ts src/shared/auth/server/redirectIfSignedIn.test.ts --maxWorkers=2`: **3 arquivos encontrados, 19 testes aprovados**. O filtro requireSession não corresponde a arquivo existente; o leitor e a guarda estão nos outros arquivos. A home tem 11 testes, incluindo refresh, raiz/query repetida e visitante sem refresh.
+- `npx.cmd tsc --noEmit` e ESLint em todos os arquivos TS/TSX alterados: **aprovados**, exit 0. A primeira execução encontrou assinatura opcional incompatível com os tipos gerados da página Next; corrigida e reexecutada com sucesso.
+- Prettier aplicado aos arquivos de código/spec alterados; `git diff --check` aprovado. Consumidores de `getSession()` sem argumento preservam o comportamento anterior.
+- Integração usa MSW e mocks de cookies/redirect do Next; não equivale à API real nem à navegação pelo handler de refresh. E2E/Storybook não executados, conforme instrução sem portas. Vault não editado; documentação e catálogo provisório de `getSession(currentPath?)` em `specs/040-home/design.md`.
+- Rodada final com a assinatura definitiva da página: `npx.cmd vitest run src/app/page.int.test.tsx src/shared/auth/server/getSession.int.test.ts src/shared/auth/server/redirectIfSignedIn.test.ts --maxWorkers=1`: **3 arquivos, 19 testes aprovados**, exit 0.
