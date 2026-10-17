@@ -1,0 +1,66 @@
+import { screen } from "@testing-library/react";
+import { expect, it, vi } from "vitest";
+import { renderWithProviders } from "@/test/render";
+import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { searchQueryFixture } from "@/test/fixtures/search";
+import { SearchResults } from "./SearchResults";
+it("REQ-SRCH-005/010 vazio oferece raio maior sem prometer vaga sem datas", async () => {
+  const onExpand = vi.fn();
+  const { user } = renderWithProviders(
+    <SearchResults
+      query={searchQueryFixture()}
+      items={[]}
+      totalCount={0}
+      petCount={1}
+      onMore={vi.fn()}
+      onRetry={vi.fn()}
+      onExpand={onExpand}
+    />,
+    { theme: quintalTheme },
+  );
+  expect(screen.getByText("0 cantinhos perto de casa")).toBeVisible();
+  expect(screen.queryByText(/com vaga/)).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Bora olhar até 20 km" }));
+  expect(onExpand).toHaveBeenCalledWith(20);
+});
+
+it.each([
+  [5, 10],
+  [20, 50],
+])("REQ-SRCH-010 amplia raio de %s para %s", async (radius, bigger) => {
+  const onExpand = vi.fn();
+  const { user } = renderWithProviders(
+    <SearchResults
+      query={searchQueryFixture({ radius })}
+      items={[]}
+      totalCount={0}
+      petCount={1}
+      onMore={vi.fn()}
+      onRetry={vi.fn()}
+      onExpand={onExpand}
+    />,
+    { theme: quintalTheme },
+  );
+  await user.click(screen.getByRole("button", { name: `Bora olhar até ${bigger} km` }));
+  expect(onExpand).toHaveBeenCalledWith(bigger);
+});
+
+it.each([searchQueryFixture({ radius: 50 }), searchQueryFixture({ where: "Curitiba" })])(
+  "REQ-SRCH-010 sem raio maior oferece outras datas ou filtros",
+  (query) => {
+    renderWithProviders(
+      <SearchResults
+        query={query}
+        items={[]}
+        totalCount={0}
+        petCount={1}
+        onMore={vi.fn()}
+        onRetry={vi.fn()}
+        onExpand={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.getByText("Tenta outras datas ou tira um filtro.")).toBeVisible();
+    expect(screen.queryByRole("button", { name: /Bora olhar/ })).not.toBeInTheDocument();
+  },
+);

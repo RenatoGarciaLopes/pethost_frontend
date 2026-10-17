@@ -1,5 +1,7 @@
-import { http } from "msw";
+import { http, HttpResponse } from "msw";
 import { randomUUID } from "node:crypto";
+import { publicListing } from "./listingPage.mjs";
+import { petsOfAccount } from "./pets.mjs";
 import { fail, ok, sessionUserOf } from "./session.mjs";
 
 const API = "http://localhost:5099/api/v1";
@@ -117,15 +119,96 @@ function touch(booking, changes) {
 }
 
 const OWNER_CONTACT = { phone: "44999990000", address: null };
+/** Erro de regra com a mensagem da API, que cita a data ou o pet (a tela extrai o dado dela). */
+const failWith = (status, code, message) =>
+  HttpResponse.json({ success: false, error: { code, message }, timestamp: new Date().toISOString() }, { status });
+const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Campos do corpo de `POST /bookings` (400 com todos juntos), sem as regras de negócio. */
+function requestFieldErrors(body) {
+  const errors = [];
+  const reject = (field, message) => errors.push({ field, messages: [message] });
+  const petIds = Array.isArray(body.petIds) ? body.petIds : [];
+  if (petIds.length < 1 || petIds.length > 10 || new Set(petIds).size !== petIds.length)
+    reject("petIds", "Escolhe de 1 a 10 pets, sem repetir.");
+  if (!DATE.test(body.checkIn ?? "")) reject("checkIn", "Data de chegada inválida.");
+  else if (body.checkIn < brasiliaToday()) reject("checkIn", "A chegada já passou.");
+  if (!DATE.test(body.checkOut ?? "") || (DATE.test(body.checkIn ?? "") && body.checkOut <= body.checkIn))
+    reject("checkOut", "A saída precisa ser depois da chegada.");
+  return errors;
+}
 
 /**
- * `/bookings*` dos dois lados (specs 052, 053 e 054): lista por status e página e detalhe para quem participa; do
+ * Pedido do tutor (spec 050), nas regras da seção 4 de `modulo-bookings.md`: campos, cantinho, pets do tutor e ativos,
+ * espécie e porte, outro pedido do pet nas mesmas noites, dia da semana (com a data na mensagem). Sem capacidade: o
+ * mock não guarda reservas confirmadas de outros tutores.
+ */
+function createRequest(user, body) {
+  const errors = requestFieldErrors(body);
+  if (errors.length) return fail(400, "VALIDATION_ERROR", errors);
+  const listing = publicListing(body.listingId);
+  if (!listing) return fail(404, "BOOKING_LISTING_NOT_FOUND");
+  const mine = petsOfAccount(user);
+  const pets = body.petIds.map((id) => mine.find((pet) => pet.id === id));
+  if (pets.some((pet) => !pet)) return fail(404, "BOOKING_PET_NOT_FOUND");
+  if (pets.some((pet) => !pet.isActive)) return fail(422, "BOOKING_PET_INACTIVE");
+  if (pets.some((pet) => !listing.acceptedSpecies.includes(pet.species)))
+    return fail(422, "BOOKING_PET_SPECIES_NOT_ACCEPTED");
+  const sizeOk = { small: listing.acceptsSmall, medium: listing.acceptsMedium, large: listing.acceptsLarge };
+  if (pets.some((pet) => pet.size && !sizeOk[pet.size])) return fail(422, "BOOKING_PET_SIZE_NOT_ACCEPTED");
+  const open = ["requested", "accepted", "confirmed", "in_progress"];
+  const busy = pets.find((pet) =>
+    [...bookings.values()].some(
+      ({ booking }) =>
+        open.includes(booking.status) &&
+        booking.pets.some((item) => item.id === pet.id) &&
+        booking.checkIn < body.checkOut &&
+        body.checkIn < booking.checkOut,
+    ),
+  );
+  if (busy) return failWith(409, "BOOKING_PET_PERIOD_CONFLICT", `Pet ${busy.id} already has a booking in this period.`);
+  for (let day = body.checkIn; day <= body.checkOut; day = addDays(day, 1)) {
+    const weekday = WEEKDAYS[new Date(`${day}T00:00:00Z`).getUTCDay()];
+    if (!listing.availableWeekdays.includes(weekday))
+      return failWith(422, "BOOKING_WEEKDAY_NOT_AVAILABLE", `The listing does not receive on ${day}.`);
+  }
+  const booking = seedBooking(
+    null,
+    {
+      listingId: listing.id,
+      listing: { id: listing.id, title: listing.title, ...listing.address },
+      hostId: listing.hostId,
+      host: { id: listing.host.id, name: listing.host.name, avatarUrl: listing.host.avatarUrl },
+      ownerId: user.id,
+      owner: { id: user.id, name: user.fullName, avatarUrl: null },
+      pets: pets.map(({ id, name, species, size }) => ({ id, name, species, size })),
+      checkIn: body.checkIn,
+      checkOut: body.checkOut,
+      petCount: pets.length,
+      nightlyRate: listing.nightlyRate,
+      totalPrice:
+        listing.nightlyRate * pets.length * Math.round((Date.parse(body.checkOut) - Date.parse(body.checkIn)) / DAY_MS),
+    },
+    user.id,
+  );
+  return ok(booking, { status: 201 });
+}
+
+/**
+ * `/bookings*` dos dois lados (specs 050, 052, 053 e 054): o pedido do tutor; lista por status e página e detalhe para quem participa; do
  * anfitrião, aceitar (já confirma e libera o telefone do tutor), recusar, chegada e volta; cancelar dos dois lados (o
  * tutor recebe `refundPercentage` pela regra das 48 horas), com os códigos de erro da API. E `GET /pets/{id}` dos
  * pets de um pedido do anfitrião (antes do mock de pets; outros pets seguem para ele).
  * @example app.use(createMiddleware(...bookingsHandlers, ...petsHandlers));
  */
 export const bookingsHandlers = [
+  http.post(`${API}/bookings`, async ({ request }) => {
+    const user = sessionUserOf(request);
+    if (!user) return fail(401, "UNAUTHORIZED");
+    if (user.role !== "owner") return fail(404, "BOOKING_OWNER_NOT_FOUND");
+    return createRequest(user, (await request.json().catch(() => null)) ?? {});
+  }),
   http.get(`${API}/bookings/me`, ({ request }) => {
     const user = sessionUserOf(request);
     if (!user) return fail(401, "UNAUTHORIZED");

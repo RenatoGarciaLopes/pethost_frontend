@@ -356,6 +356,53 @@ Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da
 - Avatar com iniciais sem contraste (axe) na lista e no detalhe do anfitrião: coral com o texto de contraste do tema, como no shell.
 - `host-requests.spec.ts`: espera a hidratação antes de abrir o pedido e dá 60 s à primeira jornada, que compila as rotas a frio no `next dev`.
 
+## 15/10/2026 · Busca de cantinhos (spec 041)
+
+Worktree `pethost_frontend-041`, branch `feat/041-search`. Recursos, interfaces, limites e níveis N/A documentados no [design da spec](../specs/041-search/design.md). T8 (mapa) fora do escopo. Vault somente leitura por coordenação: nota e linhas de catálogo serão enviadas por maestri; o vault não foi alterado.
+
+| Verificação                                             | Resultado                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest da entrega + regressão de errorCopy              | 14 arquivos, 88 testes aprovados: 39 da 041 (16 unitários, 12 componentes, 5 integrações Node, 6 integrações DOM) e 49 regressões existentes de getErrorMessage                                                                                                                                      |
+| Comando                                                 | `npx vitest run --maxWorkers=2 src/features/search src/shared/lib/money src/shared/lib/date/stayRules.test.ts src/shared/ui/forms/DateRangeField src/shared/ui/feedback/SniffingBanner 'src/app/(account)/search' src/test/msw/searchMock.int.test.ts src/shared/api/errors/getErrorMessage.test.ts` |
+| ESLint dos arquivos alterados/criados                   | Aprovado, sem erro nem warning                                                                                                                                                                                                                                                                       |
+| `npx tsc --noEmit -p .`                                 | Aprovado                                                                                                                                                                                                                                                                                             |
+| Storybook/Chromium com axe pelo `scratchpad/stories.sh` | 7 arquivos, 19 testes aprovados, sem violação reportada                                                                                                                                                                                                                                              |
+| E2E mocked desktop/celular                              | Aguardando exclusividade das portas 3100/5099; seis jornadas por projeto escritas em `e2e/mocked/search/search.spec.ts`                                                                                                                                                                              |
+| API .NET real                                           | Não executado; MSW/E2E simulado não valida geocoder ou disponibilidade real                                                                                                                                                                                                                          |
+| BOM e whitespace                                        | Nenhum arquivo novo com BOM; `git diff --check` aprovado                                                                                                                                                                                                                                             |
+
+O primeiro ciclo unitário falhou por módulos ainda inexistentes e passou após implementar regras/parser. A story da composição falhou inicialmente pelo contexto do App Router do Storybook incompatível com Next 16.4; foi corrigida com mock de `useSearchParams` apenas na story, sem alterar produção. Uma rodada Vitest concorrente com Chromium atingiu o timeout padrão de 5 segundos em SearchBar; o mesmo conjunto completo passou com `--maxWorkers=2`. Não foi executado `npm run verify` global, conforme coordenação da máquina compartilhada.
+
+O mock E2E tem teste de contrato/autorização/paginação/filtros/erros em `src/test/msw/searchMock.int.test.ts`. A primeira lista é prefetched no servidor; testes Node conferem cache hidratável e isolamento de conta. DOM confere manter cards durante busca e depois de falha, campos 400, endereços 422, retry 503, filtros/histórico e acumulação.
+
+Em 11/10/2026, o projeto foi gerado pelo CLI `create-next-app@latest`, com TypeScript, ESLint, App Router, src-dir, npm e sem Tailwind. Next 16.4.0, React 19.3.0, MUI 9.5.0; versões completas no lockfile.
+
+A primeira checagem de TypeScript encontrou `LayoutProps`, tipo gerado pelo Next ainda indisponível antes do primeiro build. O layout foi ajustado para declarar `children: ReactNode`, permitindo checagem independente do build.
+
+`npm run lint`, `npm run typecheck` e `npm run build` passaram. O build publicou somente a home estática do scaffold e o not-found interno, conforme esperado; SSR de negócio e integração com a API aguardam implementação.
+
+Features, widgets, shared e bootstrap não contêm arquivos. As rotas planejadas também não têm páginas/handlers implementados. Metadados e idioma foram ajustados no layout gerado; nenhuma tela de produto foi criada.
+
+Após alinhar a nomenclatura à API e ao ER, a estrutura passou a ter 14 features, com `users`, `owners` e `hosts` separados. Todas as pastas de interface estão em inglês; recursos seguem plural/kebab-case, e autenticação usa `auth`, conforme o backend. A conferência de diretórios não encontrou os nomes antigos em português, os links locais da documentação são válidos e as camadas de negócio continuam com zero arquivos. TypeScript e build foram executados novamente após a reorganização.
+
+## 15/10/2026 · Pedir estadia (spec 050)
+
+| Verificação                                                                                            | Resultado                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest (`--maxWorkers=2`): `features/bookings`, rota do pedido, mock de reservas, `stayRules`, `money` | 27 arquivos, 141 testes verdes: 65 unitários, 16 de componente, 15 de integração (Node), 45 de integração (jsdom)                                                                                                                                         |
+| Vitest de `src` inteiro depois do merge com a 042                                                      | 313 arquivos, 1720 testes verdes                                                                                                                                                                                                                          |
+| ESLint, `tsc --noEmit`, Prettier                                                                       | sem erros                                                                                                                                                                                                                                                 |
+| Storybook (`RequestStayForm`, `RequestStayHostNotice`)                                                 | 5/5                                                                                                                                                                                                                                                       |
+| E2E mocked `e2e/mocked/bookings` e `e2e/mocked/search`, desktop e celular                              | request.spec 8/8; my-stays, host-requests, stay-day e search verdes (my-stays caiu uma vez no celular por lentidão de render e passou 10/10 ao repetir); `listing-page.spec` falha 2/2 pelo `component={Link}` da `ListingPageScreen` (042, em andamento) |
+
+### 16/10/2026 · 050 com a 042 corrigida e o dev (005 etapas 1 a 4, 043, 030)
+
+| Verificação                                                                                         | Resultado                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest: `features/bookings`, `features/listing-page`, rotas de `listings`, `test/msw`               | 37 arquivos, 167 testes verdes                                                                                                                                                   |
+| ESLint (inclui `no-numeric-radius`), `tsc --noEmit`, Prettier                                       | sem erros                                                                                                                                                                        |
+| E2E mocked `bookings` e `search` (jornada busca → cantinho → pedido sem `fixme`), desktop e celular | 1ª execução 41/44: compilação da primeira visita no `next dev` (cantinho e `/login`) e rótulos duplicados da busca oculta no celular; testes ajustados, 2ª execução 44/44 verdes |
+
 ## Spec 033: auditoria administrativa (15/10/2026)
 
 Validação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`.

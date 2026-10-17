@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatBRL, fromCents, toCents } from "./money";
+import { formatBRL, fromCents, toCents } from "./index";
 
 /** O Intl usa espaço não separável entre "R$" e o número; o teste compara com espaço comum. */
 const plain = (text: string) => text.replace(/\s/g, " ");
@@ -17,5 +17,12 @@ describe("dinheiro", () => {
     expect(toCents(10000)).toBe(1000000);
     expect(fromCents(1999)).toBe(19.99);
     expect(fromCents(toCents(57.3))).toBe(57.3);
+  });
+
+  it("REQ-SRCH-007 formata reais e faz a conta em centavos", () => {
+    expect(plain(formatBRL(60))).toBe("R$ 60,00");
+    expect(toCents(10.29)).toBe(1029);
+    expect(fromCents(1029)).toBe(10.29);
+    expect(plain(formatBRL(fromCents(toCents(60.1) * 5 * 2)))).toBe("R$ 601,00");
   });
 });

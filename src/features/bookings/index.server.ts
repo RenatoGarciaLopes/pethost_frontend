@@ -10,4 +10,5 @@ export { HostBookingsScreen } from "./components/HostBookingsScreen";
 export { OwnerStayDetailScreen } from "./components/OwnerStayDetailScreen";
 export { OwnerStaysScreen } from "./components/OwnerStaysScreen";
 export { getBookingDetail } from "./api/server/bookings.server";
+export { RequestStayHostNotice } from "./components/RequestStayHostNotice";
 export { WaitingRequestsSummary } from "./components/WaitingRequestsSummary";
