@@ -36,7 +36,6 @@ const handlers = [
     resetHostApplications();
     resetListings();
     resetBookings();
-    resetAdminApplications();
     return HttpResponse.json({ ok: true });
   }),
   // Só no mock: semeia uma reserva entre um anfitrião e, se vier, um tutor (a 050, que cria pedidos, ainda não existe).
