@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { netEarnings } from "./netEarnings";
+import { netEarnings, splitEarnings } from "./earnings";
 
 describe("netEarnings", () => {
   it("REQ-LIST-009 o anfitrião recebe 90% de diária × pets × noites, em centavos", () => {
@@ -16,5 +16,14 @@ describe("netEarnings", () => {
   it("REQ-LIST-009 sem pets ou sem noites, nada", () => {
     expect(netEarnings(6000, 0, 10)).toBe(0);
     expect(netEarnings(6000, 2, 0)).toBe(0);
+  });
+});
+
+describe("splitEarnings", () => {
+  it("REQ-HREQ-002 separa o total da estadia na parte da PetHost e no que o anfitrião recebe, somando o total", () => {
+    expect(splitEarnings(30000)).toEqual({ feeCents: 3000, netCents: 27000 });
+    const odd = splitEarnings(1005);
+    expect(odd).toEqual({ feeCents: 101, netCents: 904 });
+    expect(odd.feeCents + odd.netCents).toBe(1005);
   });
 });

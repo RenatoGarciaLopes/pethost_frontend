@@ -73,6 +73,11 @@ export const adminReviewCopy = {
   mobile: "Pra decidir, abre num computador",
   back: "Voltar à fila",
   reviewTitle: "Conferir verificação",
+  // O escopo dá 3 tentativas por pessoa; a API conta a tentativa (attemptNumber).
+  requestLine: (date: string, attempt: number, person: string) =>
+    `Solicitação de ${date} · tentativa ${attempt} de 3 · ${person.toLowerCase()}`,
+  photosAudit:
+    "Cada foto aberta fica registrada na trilha de auditoria. O link vence em poucos minutos e some ao fechar.",
   sent: "Dados enviados",
   account: "Dados da conta",
   cpf: "CPF",

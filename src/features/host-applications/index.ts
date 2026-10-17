@@ -4,3 +4,4 @@
  * Não exporte hooks, componentes client ou recursos exclusivos do servidor.
  */
 export { verificationCopy } from "./lib/verificationCopy";
+export { documentDrawings } from "./components/DocumentDrawings";

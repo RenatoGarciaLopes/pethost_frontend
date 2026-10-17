@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
+import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { DecisionPanel } from "./DecisionPanel";
 import { adminReviewCopy as copy } from "@/features/admin-host-applications";
 
@@ -8,7 +9,9 @@ import { adminReviewCopy as copy } from "@/features/admin-host-applications";
 vi.setConfig({ testTimeout: 20_000 });
 it("REQ-AQUEUE-008/009 aprovação exige checklist inteiro e motivo", async () => {
   const decide = vi.fn();
-  const { user } = renderWithProviders(<DecisionPanel personType="pj" onDecide={decide} busy={false} />);
+  const { user } = renderWithProviders(<DecisionPanel personType="pj" onDecide={decide} busy={false} />, {
+    theme: quintalTheme,
+  });
   const approve = screen.getByRole("button", { name: "Aprovar" });
   expect(approve).toBeDisabled();
   await user.click(screen.getByRole("textbox", { name: copy.reason }));
@@ -22,7 +25,9 @@ it("REQ-AQUEUE-008/009 aprovação exige checklist inteiro e motivo", async () =
 });
 it("REQ-AQUEUE-010/011 recusa mostra frase e fraude exige confirmação separada", async () => {
   const decide = vi.fn();
-  const { user } = renderWithProviders(<DecisionPanel personType="pf" onDecide={decide} busy={false} />);
+  const { user } = renderWithProviders(<DecisionPanel personType="pf" onDecide={decide} busy={false} />, {
+    theme: quintalTheme,
+  });
   await user.click(screen.getByRole("textbox", { name: copy.reason }));
   await user.paste("Nota interna");
   await user.click(screen.getByRole("button", { name: "Documento ilegível" }));
@@ -34,4 +39,14 @@ it("REQ-AQUEUE-010/011 recusa mostra frase e fraude exige confirmação separada
   await user.click(screen.getByRole("checkbox", { name: copy.fraudConfirm }));
   await user.click(screen.getByRole("button", { name: "Confirmar recusa final" }));
   expect(decide).toHaveBeenLastCalledWith({ reason: "Nota interna", rejectionReason: "suspected_fraud" });
+});
+it("REQ-AQUEUE-010 REQ-UIC-002 aprovar é grama e a frase da recusa vem em caixa de orientação gema", async () => {
+  const { user } = renderWithProviders(<DecisionPanel personType="pf" onDecide={vi.fn()} busy={false} />, {
+    theme: quintalTheme,
+  });
+  expect(screen.getByRole("button", { name: "Aprovar" })).toHaveClass("MuiButton-colorSuccess");
+  await user.click(screen.getByRole("button", { name: "Selfie não confere" }));
+  const preview = screen.getByRole("status");
+  expect(preview).toHaveAttribute("data-tone", "atencao");
+  expect(preview).toHaveTextContent(copy.recipient.selfie_mismatch);
 });

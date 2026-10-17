@@ -2,6 +2,7 @@
 
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import { toneIcon, type FeedbackTone } from "../feedbackIcons";
 import { toneSurface } from "../toneStyles";
 
@@ -16,10 +17,25 @@ export interface StatusPillProps {
   size?: "sm" | "md";
 }
 
+/** Selo das pranchas: `ok` grama cheio, `info` (espera) céu cheio, `atencao` tracejado, `neutro` contorno de tinta. */
+function pillSurface(theme: Theme, tone: StatusPillTone) {
+  const ink = `2px solid ${theme.palette.quintal.tinta}`;
+  switch (tone) {
+    case "neutro":
+      return { background: theme.palette.background.paper, border: ink, icon: "" };
+    case "ok":
+      return { background: theme.palette.grama.main, border: ink, icon: theme.palette.quintal.tinta };
+    case "info":
+      return { background: theme.palette.ceu.main, border: ink, icon: theme.palette.quintal.tinta };
+    default:
+      return toneSurface(theme, tone);
+  }
+}
+
 /**
- * Pílula de status (REQ-DS-014): texto + ícone + cor do tom. Não é interativa.
+ * Pílula de status (REQ-DS-014): texto + ícone + cor do tom, do tamanho do texto e sem sombra (não é botão).
  *
- * @example <StatusPill tone="atencao" label="Em análise" />
+ * @example <StatusPill tone="info" label="Em análise" />
  */
 export function StatusPill({ label, tone = "neutro", size = "md" }: StatusPillProps) {
   const Icon = tone === "neutro" ? undefined : toneIcon[tone];
@@ -28,17 +44,12 @@ export function StatusPill({ label, tone = "neutro", size = "md" }: StatusPillPr
       component="span"
       data-tone={tone}
       sx={(theme) => {
-        const surface =
-          tone === "neutro"
-            ? {
-                background: theme.palette.background.paper,
-                border: `2px solid ${theme.palette.quintal.tinta}`,
-                icon: "",
-              }
-            : toneSurface(theme, tone);
+        const surface = pillSurface(theme, tone);
         return {
           display: "inline-flex",
           alignItems: "center",
+          alignSelf: "flex-start",
+          width: "fit-content",
           gap: 0.75,
           borderRadius: `${quintalRadii.pill}px`,
           padding: size === "sm" ? "2px 10px" : "4px 12px",

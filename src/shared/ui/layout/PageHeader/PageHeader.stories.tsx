@@ -14,3 +14,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Simples: Story = {};
 export const ComAcao: Story = { args: { actions: <Button variant="contained">Ver pedidos</Button> } };
+export const ComSobretitulo: Story = {
+  args: {
+    eyebrow: "Pedido de Camila · responda até amanhã às 16h50",
+    title: "Pipoca quer passar 5 noites aqui.",
+    subtitle: undefined,
+  },
+};

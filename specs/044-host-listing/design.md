@@ -26,7 +26,7 @@ api/server/*.server.ts  prefetch + getListingDetail (cache())
 api/client/listingMutations.client.ts  create, update, deactivate, reactivate, addPhoto, replacePhoto, removePhoto, reorderPhotos
 hooks/                  useCreateListing, useUpdateListing, usePauseListing, useListingPhotoMutations (uma por vez, como usePetPhotoMutations)
 schemas/listingSchema.ts  um schema por seção + listingSchema (ficha inteira; regras PF × PJ por parâmetro)
-lib/netEarnings.ts      centavos inteiros, 90%; formatBRL de shared
+lib/ (netEarnings em shared/lib/money/earnings.ts desde a 005, junto do splitEarnings dos pedidos)
 lib/listingDraft.ts     chave por conta, schema do rascunho (sem fotos)
 lib/listingCopy.ts
 components/client/ListingSectionsPanel.tsx   painel com check por seção (rascunho e edição)
@@ -61,7 +61,7 @@ As seções seguem o padrão da 022: recebem `values` e `accept` de um anfitriã
 
 | REQ                         | Nível              | Arquivo                                                                                                              |
 | --------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| 009                         | Unitário           | `netEarnings.test.ts` (arredondamento em centavos, 90%)                                                              |
+| 009                         | Unitário           | `shared/lib/money/earnings.test.ts` (arredondamento em centavos, 90%)                                                |
 | 005/007/010                 | Unitário           | `listingSchema.test.ts` (PF × PJ, portes só com cão ou gato, faixas)                                                 |
 | 013/016                     | Unitário           | `toUpdateListingRequest.test.ts` (lista substitui, endereço parcial, `""` limpa)                                     |
 | 002                         | Integração (Node)  | gate da página com `payoutsEnabled` e PF com cantinho                                                                |

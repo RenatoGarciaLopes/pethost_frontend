@@ -38,12 +38,27 @@ function setup(overrides: Record<string, unknown> = {}) {
 describe("HostBookingDetail", { timeout: 15000 }, () => {
   it("REQ-HREQ-002 REQ-HREQ-003 o pedido com tutor, período, total, prazo, trilha e as fichas dos pets", () => {
     setup();
-    expect(screen.getByRole("heading", { level: 1, name: "Pedido de Camila Souza" })).toBeInTheDocument();
-    expect(screen.getByText("Esperando resposta")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Pipoca quer passar 5 noites aqui." })).toBeInTheDocument();
+    expect(screen.getByText("Pedido de Camila Souza")).toBeInTheDocument();
+    expect(screen.getByText("Esperando resposta")).toHaveAttribute("data-tone", "info");
     expect(screen.getByText("20 a 25 de dez. · 5 noites")).toBeInTheDocument();
     expect(screen.getByText("Responda até amanhã às 9h")).toBeInTheDocument();
     expect(screen.getByRole("list", { name: bookingCopy.detail.trail })).toBeInTheDocument();
     expect(screen.getByText("fichas dos pets aqui")).toBeInTheDocument();
+  });
+
+  it("REQ-HREQ-002 REQ-HREQ-004 REQ-UIC-002 a caixa 'Sua resposta' mostra a conta, a taxa, o líquido e as decisões", () => {
+    setup();
+    const answer = screen.getByRole("complementary", { name: bookingCopy.answer.title });
+    expect(within(answer).getByText(/R\$\s60,00 × 5 noites × 1 pet/)).toBeInTheDocument();
+    expect(within(answer).getByText(/^R\$\s300,00$/)).toBeInTheDocument();
+    expect(within(answer).getByText(bookingCopy.answer.fee)).toBeInTheDocument();
+    expect(within(answer).getByText(/^− R\$\s30,00$/)).toBeInTheDocument();
+    expect(within(answer).getByText(bookingCopy.answer.net)).toBeInTheDocument();
+    expect(within(answer).getByText(/^R\$\s270,00$/)).toBeInTheDocument();
+    expect(within(answer).getByRole("button", { name: bookingCopy.accept.open })).toBeInTheDocument();
+    expect(within(answer).getByRole("button", { name: bookingCopy.decline.open })).toBeInTheDocument();
+    expect(within(answer).getByText(bookingCopy.answer.afterAccept("Camila Souza"))).toBeInTheDocument();
   });
 
   it("REQ-HREQ-004 REQ-HREQ-008 aceitar confirma com o que acontece e mostra o telefone do tutor", async () => {

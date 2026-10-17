@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
-import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Divider, FormControlLabel, Link, Stack, Typography } from "@mui/material";
+import { Notice } from "@/shared/ui/feedback/Notice";
 import { ReasonField } from "@/shared/ui/forms/ReasonField";
 import { ChipPicker } from "@/shared/ui/forms/ChipPicker";
+import { Surface } from "@/shared/ui/layout/Surface";
 import {
   adminReviewCopy as copy,
   approveSchema,
@@ -20,7 +22,9 @@ interface DecisionPanelProps {
   }) => void;
   fieldErrors?: Record<string, string[]>;
 }
-/** Checklist efêmero e decisão explícita. O pai só deve montar em submitted e tela >=900px.
+/** Caixa de decisão (spec 005, REQ-UIC-002): checklist efêmero, motivo, "Aprovar" em grama, recusa por motivo com a
+ * frase que a pessoa vai ler numa caixa de orientação e a fraude separada, em vermelho de erro e com confirmação.
+ * O pai só deve montar em submitted e tela >=900px.
  * @example <DecisionPanel personType="pf" busy={decision.isPending} onDecide={decision.mutate} />
  */
 export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: DecisionPanelProps) {
@@ -32,8 +36,8 @@ export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: Decis
   const items: readonly string[] = personType === "pj" ? [...copy.checklist, ...copy.companyChecklist] : copy.checklist;
   const validReason = approveSchema.safeParse({ reason }).success;
   return (
-    <Stack spacing={2} component="section" aria-label={copy.decision}>
-      <Typography component="h2" variant="h5">
+    <Surface component="aside" aria-label={copy.decision} elevation="md" sx={{ p: 3, display: "grid", gap: 2 }}>
+      <Typography component="h2" variant="overline">
         {copy.checklistTitle}
       </Typography>
       <Box>
@@ -55,9 +59,9 @@ export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: Decis
         ))}
       </Box>
       {personType === "pj" && (
-        <a href={copy.registryUrl} target="_blank" rel="noopener noreferrer">
+        <Link href={copy.registryUrl} target="_blank" rel="noopener noreferrer">
           {copy.registry}
-        </a>
+        </Link>
       )}
       <ReasonField
         label={copy.reason}
@@ -67,9 +71,13 @@ export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: Decis
         disabled={busy}
         error={fieldErrors?.reason?.join(" ")}
       />
-      <Typography>{copy.checklistHelp}</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {copy.checklistHelp}
+      </Typography>
       <Button
         variant="contained"
+        color="success"
+        fullWidth
         disabled={busy || !validReason || checked.length !== items.length}
         onClick={() => onDecide(approveSchema.parse({ reason }))}
       >
@@ -84,10 +92,9 @@ export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: Decis
       />
       {fieldErrors?.rejectionReason && <Typography role="alert">{fieldErrors.rejectionReason.join(" ")}</Typography>}
       {rejection && (
-        <Box>
-          <Typography>{copy.recipientLabel}</Typography>
-          <Typography>{copy.recipient[rejection]}</Typography>
-        </Box>
+        <Notice tone="atencao" title={copy.recipientLabel}>
+          {copy.recipient[rejection]}
+        </Notice>
       )}
       <Button
         disabled={busy || !validReason || !rejection}
@@ -95,8 +102,11 @@ export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: Decis
       >
         {copy.reject}
       </Button>
-      <Box component="section" sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
+      <Divider />
+      <Box component="section">
         <Button
+          variant="quiet"
+          sx={{ color: "error.main", textDecoration: "underline", px: 1 }}
           disabled={busy}
           onClick={() => {
             setFraud((value) => !value);
@@ -121,6 +131,6 @@ export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: Decis
           </Stack>
         )}
       </Box>
-    </Stack>
+    </Surface>
   );
 }
