@@ -20,7 +20,7 @@ import * as zod from 'zod';
  * BOOKING_PET_SIZE_NOT_ACCEPTED. Pet já em outra reserva no período: 409
  * BOOKING_PET_PERIOD_CONFLICT. Algum dia do período fora dos dias em que o cantinho
  * recebe: 422 BOOKING_WEEKDAY_NOT_AVAILABLE. Sem vaga em alguma noite: 422
- * BOOKING_CAPACITY_EXCEEDED.
+ * BOOKING_CAPACITY_EXCEEDED. Tutor com parcela em atraso: 422 BOOKING_OWNER_PAYMENT_OVERDUE.
  * @summary O tutor pede uma estadia num cantinho para um ou mais pets dele.
  */
 export const PostApiV1BookingsBody = zod.object({
@@ -69,13 +69,14 @@ export const PostApiV1BookingsResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedOutAt": zod.string().datetime({"offset":true}).nullish(),
   "expiredAt": zod.string().datetime({"offset":true}).nullish(),
   "cancelledAt": zod.string().datetime({"offset":true}).nullish(),
-  "cancelledBy": zod.string().nullish().describe('`owner` ou `host`.'),
+  "cancelledBy": zod.string().nullish().describe('`owner`, `host` ou `platform` (parcela não paga antes do check-in).'),
   "cancellationReason": zod.string().nullish(),
   "declineReason": zod.string().nullish(),
   "refundPercentage": zod.number().int().nullish().describe('Quanto volta para o tutor no cancelamento de reserva paga (100 ou 50).'),
@@ -155,13 +156,14 @@ export const GetApiV1BookingsMeResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedOutAt": zod.string().datetime({"offset":true}).nullish(),
   "expiredAt": zod.string().datetime({"offset":true}).nullish(),
   "cancelledAt": zod.string().datetime({"offset":true}).nullish(),
-  "cancelledBy": zod.string().nullish().describe('`owner` ou `host`.'),
+  "cancelledBy": zod.string().nullish().describe('`owner`, `host` ou `platform` (parcela não paga antes do check-in).'),
   "cancellationReason": zod.string().nullish(),
   "declineReason": zod.string().nullish(),
   "refundPercentage": zod.number().int().nullish().describe('Quanto volta para o tutor no cancelamento de reserva paga (100 ou 50).'),
@@ -240,13 +242,14 @@ export const GetApiV1BookingsBookingIdResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedOutAt": zod.string().datetime({"offset":true}).nullish(),
   "expiredAt": zod.string().datetime({"offset":true}).nullish(),
   "cancelledAt": zod.string().datetime({"offset":true}).nullish(),
-  "cancelledBy": zod.string().nullish().describe('`owner` ou `host`.'),
+  "cancelledBy": zod.string().nullish().describe('`owner`, `host` ou `platform` (parcela não paga antes do check-in).'),
   "cancellationReason": zod.string().nullish(),
   "declineReason": zod.string().nullish(),
   "refundPercentage": zod.number().int().nullish().describe('Quanto volta para o tutor no cancelamento de reserva paga (100 ou 50).'),
@@ -274,8 +277,9 @@ export const GetApiV1BookingsBookingIdResponse = zod.object({
 }).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
 
 /**
- * Só `requested` e dentro de 24h do pedido (e antes do dia de chegada passar). Enquanto o
- * pagamento não existe, aceitar já confirma: vai para `confirmed` e ocupa vaga. Sem vaga
+ * Só `requested` e dentro de 24h do pedido (e antes do dia de chegada passar). Vai para
+ * `accepted`: segura a vaga e o tutor tem 24h para pagar a 1ª parcela (`paymentDeadline`);
+ * quem confirma é o pagamento (`/bookings/{id}/payment`). Sem vaga
  * em alguma noite: 422 `BOOKING_CAPACITY_EXCEEDED`. Prazo vencido: a reserva expira e
  * volta 422 `BOOKING_RESPONSE_EXPIRED`. Outro status: 422 `BOOKING_NOT_AWAITING_RESPONSE`.
  * Tutor suspenso ou inativo desde o pedido: 422 `BOOKING_OWNER_INACTIVE` (recuse ou deixe expirar).
@@ -324,13 +328,14 @@ export const PostApiV1BookingsBookingIdAcceptanceResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedOutAt": zod.string().datetime({"offset":true}).nullish(),
   "expiredAt": zod.string().datetime({"offset":true}).nullish(),
   "cancelledAt": zod.string().datetime({"offset":true}).nullish(),
-  "cancelledBy": zod.string().nullish().describe('`owner` ou `host`.'),
+  "cancelledBy": zod.string().nullish().describe('`owner`, `host` ou `platform` (parcela não paga antes do check-in).'),
   "cancellationReason": zod.string().nullish(),
   "declineReason": zod.string().nullish(),
   "refundPercentage": zod.number().int().nullish().describe('Quanto volta para o tutor no cancelamento de reserva paga (100 ou 50).'),
@@ -409,13 +414,14 @@ export const PostApiV1BookingsBookingIdRefusalResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedOutAt": zod.string().datetime({"offset":true}).nullish(),
   "expiredAt": zod.string().datetime({"offset":true}).nullish(),
   "cancelledAt": zod.string().datetime({"offset":true}).nullish(),
-  "cancelledBy": zod.string().nullish().describe('`owner` ou `host`.'),
+  "cancelledBy": zod.string().nullish().describe('`owner`, `host` ou `platform` (parcela não paga antes do check-in).'),
   "cancellationReason": zod.string().nullish(),
   "declineReason": zod.string().nullish(),
   "refundPercentage": zod.number().int().nullish().describe('Quanto volta para o tutor no cancelamento de reserva paga (100 ou 50).'),
@@ -445,10 +451,13 @@ export const PostApiV1BookingsBookingIdRefusalResponse = zod.object({
 /**
  * Vale até o check-in (`requested`, `accepted` ou `confirmed`); depois que o pet
  * chegou: 422 `BOOKING_CANNOT_CANCEL_AFTER_CHECK_IN`. Reserva confirmada (paga) leva o
- * reembolso em `refundPercentage`: 100 se o anfitrião cancela ou se o tutor cancela com 48h
- * ou mais de antecedência da chegada; 50 depois disso. Já cancelada: 422
+ * reembolso em `refundPercentage`, sobre o que já foi pago: 100 se o anfitrião ou o admin
+ * cancela ou se o tutor cancela com 48h ou mais de antecedência da chegada; 50 depois disso. O
+ * pagamento devolve o dinheiro e cancela as parcelas em aberto. Motivo opcional para tutor e
+ * anfitrião; o <b>admin</b> cancela qualquer reserva (`cancelledBy = platform`) e o motivo é
+ * obrigatório (vai para a trilha e para o e-mail dos dois lados). Já cancelada: 422
  * `BOOKING_ALREADY_CANCELLED`; recusada ou expirada: 422 `BOOKING_ALREADY_CLOSED`.
- * @summary O tutor ou o anfitrião cancela a reserva, com um motivo opcional.
+ * @summary O tutor, o anfitrião ou o admin cancela a reserva.
  */
 export const PostApiV1BookingsBookingIdCancellationParams = zod.object({
   "bookingId": zod.string().uuid()
@@ -497,13 +506,14 @@ export const PostApiV1BookingsBookingIdCancellationResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedOutAt": zod.string().datetime({"offset":true}).nullish(),
   "expiredAt": zod.string().datetime({"offset":true}).nullish(),
   "cancelledAt": zod.string().datetime({"offset":true}).nullish(),
-  "cancelledBy": zod.string().nullish().describe('`owner` ou `host`.'),
+  "cancelledBy": zod.string().nullish().describe('`owner`, `host` ou `platform` (parcela não paga antes do check-in).'),
   "cancellationReason": zod.string().nullish(),
   "declineReason": zod.string().nullish(),
   "refundPercentage": zod.number().int().nullish().describe('Quanto volta para o tutor no cancelamento de reserva paga (100 ou 50).'),
@@ -579,13 +589,14 @@ export const PostApiV1BookingsBookingIdCheckInResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedOutAt": zod.string().datetime({"offset":true}).nullish(),
   "expiredAt": zod.string().datetime({"offset":true}).nullish(),
   "cancelledAt": zod.string().datetime({"offset":true}).nullish(),
-  "cancelledBy": zod.string().nullish().describe('`owner` ou `host`.'),
+  "cancelledBy": zod.string().nullish().describe('`owner`, `host` ou `platform` (parcela não paga antes do check-in).'),
   "cancellationReason": zod.string().nullish(),
   "declineReason": zod.string().nullish(),
   "refundPercentage": zod.number().int().nullish().describe('Quanto volta para o tutor no cancelamento de reserva paga (100 ou 50).'),
@@ -614,12 +625,19 @@ export const PostApiV1BookingsBookingIdCheckInResponse = zod.object({
 
 /**
  * Só `in_progress` (senão 422 `BOOKING_NOT_IN_PROGRESS`); pode ser antes do dia de
- * saída (o tutor buscou mais cedo). Vai para `completed`.
- * @summary O anfitrião marca "voltou pra casa": o pet está de novo com o tutor.
+ * saída (o tutor buscou mais cedo). Vai para `completed` e libera o repasse. O <b>admin</b>
+ * encerra a estadia de qualquer reserva — o anfitrião suspenso não entra mais — com motivo
+ * obrigatório no corpo (`{ "reason": "..." }`, vai para a trilha); para o anfitrião o corpo
+ * é ignorado.
+ * @summary O anfitrião (ou o admin) marca "voltou pra casa": o pet está de novo com o tutor.
  */
 export const PostApiV1BookingsBookingIdCheckOutParams = zod.object({
   "bookingId": zod.string().uuid()
 })
+
+export const PostApiV1BookingsBookingIdCheckOutBody = zod.union([zod.null(),zod.object({
+  "reason": zod.string().nullish().describe('Opcional, até 500 caracteres.')
+}).describe('Corpo opcional da recusa e do cancelamento. Pode ser omitido.')])
 
 export const PostApiV1BookingsBookingIdCheckOutResponse = zod.object({
   "success": zod.boolean(),
@@ -660,13 +678,14 @@ export const PostApiV1BookingsBookingIdCheckOutResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedOutAt": zod.string().datetime({"offset":true}).nullish(),
   "expiredAt": zod.string().datetime({"offset":true}).nullish(),
   "cancelledAt": zod.string().datetime({"offset":true}).nullish(),
-  "cancelledBy": zod.string().nullish().describe('`owner` ou `host`.'),
+  "cancelledBy": zod.string().nullish().describe('`owner`, `host` ou `platform` (parcela não paga antes do check-in).'),
   "cancellationReason": zod.string().nullish(),
   "declineReason": zod.string().nullish(),
   "refundPercentage": zod.number().int().nullish().describe('Quanto volta para o tutor no cancelamento de reserva paga (100 ou 50).'),

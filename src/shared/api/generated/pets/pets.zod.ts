@@ -587,3 +587,66 @@ export const DeleteApiV1PetsPetIdPhotosPhotoIdResponse = zod.object({
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
 
+/**
+ * Corpo: `{ "photoIds": [...] }` com <b>todas</b> as fotos do pet, cada uma uma vez, na
+ * ordem nova (vaga 1 até a 3). Para só trocar a capa, mande a escolhida primeiro. Id que não é
+ * foto deste pet: 404 `PET_PHOTO_NOT_FOUND`. Lista incompleta ou com repetição: 400 no
+ * campo `photoIds`. Pet de outra conta: 404 `PET_NOT_FOUND`.
+ * @summary Reordena as fotos do pet: a primeira da lista vira a capa.
+ */
+export const PutApiV1PetsPetIdPhotosOrderParams = zod.object({
+  "petId": zod.string().uuid()
+})
+
+export const PutApiV1PetsPetIdPhotosOrderBody = zod.object({
+  "photoIds": zod.array(zod.string().uuid()).nullish().describe('Todas as fotos do pet, cada uma uma vez, na ordem nova. A primeira é a capa.')
+}).describe('Corpo de `PUT /pets/{petId}/photos/order`.')
+
+export const PutApiV1PetsPetIdPhotosOrderResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.union([zod.null(),zod.object({
+  "id": zod.string().uuid(),
+  "ownerId": zod.string().uuid().nullish().describe('Id do tutor dono do pet. Omitido quando o pet é de um anfitrião, e nas listas.'),
+  "hostId": zod.string().uuid().nullish().describe('Id do anfitrião dono do pet. Omitido quando o pet é de um tutor, e nas listas.'),
+  "keeper": zod.union([zod.null(),zod.object({
+  "id": zod.string().uuid().describe('Id do tutor ou do anfitrião — nunca o da conta.'),
+  "type": zod.string().describe('`owner` ou `host`.'),
+  "name": zod.string().describe('Nome da conta; anfitrião empresa mostra o nome fantasia.'),
+  "avatarUrl": zod.string().nullish()
+}).describe('Nome e foto do dono. Omitido nas listas.')]).optional(),
+  "species": zod.string().describe('Ex.: `dog`, `guinea_pig`, `exotic`.'),
+  "speciesDescription": zod.string().nullish(),
+  "name": zod.string(),
+  "breed": zod.string().nullish(),
+  "size": zod.string().nullish().describe('`small`, `medium` ou `large`. Só cachorro e gato.'),
+  "birthDate": zod.string().date().nullish(),
+  "sex": zod.string().describe('`male`, `female` ou `unknown`.'),
+  "isNeutered": zod.boolean(),
+  "isVaccinated": zod.boolean(),
+  "medicationNotes": zod.string().nullish(),
+  "feedingNotes": zod.string().nullish(),
+  "goodWithDogs": zod.boolean(),
+  "goodWithCats": zod.boolean(),
+  "goodWithKids": zod.boolean(),
+  "vetContact": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "weightKg": zod.number().nullish().describe('Peso aproximado em kg, até 3 casas.'),
+  "microchip": zod.string().nullish().describe('15 dígitos.'),
+  "allergies": zod.string().nullish(),
+  "photos": zod.array(zod.object({
+  "id": zod.string().uuid().describe('Para tirar a foto: `DELETE /pets/{petId}/photos/{id}`.'),
+  "url": zod.string().describe('URL pública da imagem; abre direto no navegador.')
+}).describe('Uma foto do pet.')).describe('Até 3 fotos, pela vaga: a primeira é a capa. Lista vazia se não há foto.'),
+  "isActive": zod.boolean(),
+  "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}).describe('O pet com a ficha inteira e quem é o dono. Nas listas (KeeperPetsResponse)\no dono vem uma vez no topo, e os três campos do dono saem omitidos de cada pet.')]).optional(),
+  "error": zod.union([zod.null(),zod.object({
+  "code": zod.string(),
+  "message": zod.string(),
+  "details": zod.unknown().optional()
+}).describe('Estrutura padronizada de erro.')]).optional(),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+
