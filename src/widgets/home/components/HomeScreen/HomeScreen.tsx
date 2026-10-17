@@ -156,6 +156,8 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
                 maxWidth: { xs: 390, md: 560 },
                 mx: "auto",
                 mb: -1,
+                // O chão da cena fica acima do fundo do viewBox; no computador ela desce até pousar no gramado.
+                transform: { md: "translateY(11%)" },
                 position: "relative",
                 zIndex: 1,
               }}
@@ -324,6 +326,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
                     </FormLabel>
                     {isPetList ? (
                       <Select<string[]>
+                        variant="standard"
                         id={`${ids}-pet`}
                         labelId={`${ids}-pet-label`}
                         multiple
@@ -351,6 +354,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
                       </Select>
                     ) : isHost ? (
                       <Select<number>
+                        variant="standard"
                         id={`${ids}-pet`}
                         labelId={`${ids}-pet-label`}
                         value={petCount}
@@ -366,6 +370,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
                       </Select>
                     ) : (
                       <Select<HomePetSpecies | "">
+                        variant="standard"
                         id={`${ids}-pet`}
                         labelId={`${ids}-pet-label`}
                         value={species}
