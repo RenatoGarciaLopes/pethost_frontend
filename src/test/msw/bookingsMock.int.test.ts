@@ -7,6 +7,8 @@ import {
   GetApiV1BookingsMeResponse,
 } from "@/shared/api/generated/bookings/bookings.zod";
 import { GetApiV1PetsPetIdResponse } from "@/shared/api/generated/pets/pets.zod";
+import { LISTING_ID } from "../../../e2e/support/handlers/listingPage.mjs";
+import { resetPets } from "../../../e2e/support/handlers/pets.mjs";
 import { server } from "./server";
 
 const API = "http://localhost:5099/api/v1";
@@ -90,5 +92,71 @@ describe("mock de reservas do tutor", () => {
     });
     expect((await call(`/bookings/${near.id}/cancellation`, "POST")).body.data.refundPercentage).toBe(50);
     expect((await call(`/bookings/${far.id}/cancellation`, "POST")).body.error.code).toBe("BOOKING_ALREADY_CANCELLED");
+  });
+});
+
+describe("mock do pedido de estadia", () => {
+  const LUNA = "0199d2a0-0000-7000-8000-0000000000e1";
+  const THOR = "0199d2a0-0000-7000-8000-0000000000e2";
+  const MEL = "0199d2a0-0000-7000-8000-0000000000e3";
+  /** A próxima segunda-feira com pelo menos 2 dias de folga, em Brasília. */
+  const monday = (() => {
+    let day = new Date(Date.now() - 3 * 60 * 60 * 1000 + 2 * 86_400_000);
+    while (day.getUTCDay() !== 1) day = new Date(day.getTime() + 86_400_000);
+    return day.toISOString().slice(0, 10);
+  })();
+  const plus = (date: string, days: number) =>
+    new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
+  const request = (petIds: string[], checkIn = monday, checkOut = plus(monday, 2)) => ({
+    listingId: LISTING_ID,
+    petIds,
+    checkIn,
+    checkOut,
+  });
+
+  afterEach(resetPets);
+
+  it("REQ-REQST-005 o tutor pede: o pedido nasce esperando resposta, com a conta e o prazo, e aparece nas estadias", async () => {
+    const call = caller(owner);
+    const created = await call("/bookings", "POST", request([LUNA, THOR]));
+    expect(created.status).toBe(201);
+    expect(GetApiV1BookingsBookingIdResponse.parse(created.body).data).toMatchObject({
+      status: "requested",
+      nights: 2,
+      petCount: 2,
+      nightlyRate: 60,
+      totalPrice: 240,
+    });
+    expect(created.body.data.responseDeadline).toBeTruthy();
+    expect((await call("/bookings/me?status=requested")).body.data.items).toHaveLength(1);
+  });
+
+  it("REQ-REQST-007 regras na ordem da API: campos, pet fora da lista, outro pedido nas mesmas noites, dia fechado", async () => {
+    const call = caller(owner);
+    const invalid = await call("/bookings", "POST", { listingId: LISTING_ID, petIds: [], checkIn: "", checkOut: "" });
+    expect(invalid.status).toBe(400);
+    expect(invalid.body.error.details.map((item: { field: string }) => item.field)).toEqual([
+      "petIds",
+      "checkIn",
+      "checkOut",
+    ]);
+    expect((await call("/bookings", "POST", request([MEL]))).body.error.code).toBe("BOOKING_PET_INACTIVE");
+    await call("/bookings", "POST", request([LUNA]));
+    const conflict = await call("/bookings", "POST", request([LUNA]));
+    expect(conflict.body.error).toMatchObject({
+      code: "BOOKING_PET_PERIOD_CONFLICT",
+      message: expect.stringContaining(LUNA),
+    });
+    const sunday = await call("/bookings", "POST", request([THOR], plus(monday, 5), plus(monday, 7)));
+    expect(sunday.body.error).toMatchObject({
+      code: "BOOKING_WEEKDAY_NOT_AVAILABLE",
+      message: expect.stringContaining(plus(monday, 6)),
+    });
+  });
+
+  it("REQ-REQST-001 só a conta de tutor pede; cantinho desconhecido é 404", async () => {
+    expect((await caller()("/bookings", "POST", request([LUNA]))).body.error.code).toBe("BOOKING_OWNER_NOT_FOUND");
+    const unknown = { ...request([LUNA]), listingId: "0199d2a0-0000-7000-8000-0000000000ff" };
+    expect((await caller(owner)("/bookings", "POST", unknown)).body.error.code).toBe("BOOKING_LISTING_NOT_FOUND");
   });
 });

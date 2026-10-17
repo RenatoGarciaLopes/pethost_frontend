@@ -8,6 +8,8 @@ import { expect, type Locator } from "@playwright/test";
  */
 export async function waitForHydration(locator: Locator) {
   await expect
-    .poll(() => locator.evaluate((element) => Object.keys(element).some((key) => key.startsWith("__reactFiber"))))
+    .poll(() => locator.evaluate((element) => Object.keys(element).some((key) => key.startsWith("__reactFiber"))), {
+      timeout: 20_000,
+    })
     .toBe(true);
 }

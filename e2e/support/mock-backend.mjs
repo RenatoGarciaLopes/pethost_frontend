@@ -11,6 +11,8 @@ import { passwordHandlers } from "./handlers/password.mjs";
 import { petsHandlers, resetPets } from "./handlers/pets.mjs";
 import { stripeAccountHandlers, resetStripeAccounts, seedStripeAccount } from "./handlers/stripeAccount.mjs";
 import { usersHandlers } from "./handlers/users.mjs";
+import { searchHandlers } from "./handlers/search.mjs";
+import { listingPageHandlers } from "./handlers/listingPage.mjs";
 import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 import { adminApplicationsHandlers, resetAdminApplications } from "./handlers/adminApplications.mjs";
 import { adminAccountsHandlers, resetAdminAccounts } from "./handlers/adminAccounts.mjs";
@@ -71,6 +73,8 @@ const handlers = [
   ...stripeAccountHandlers,
   ...hostApplicationsHandlers,
   ...listingsHandlers,
+  ...searchHandlers,
+  ...listingPageHandlers,
   ...adminApplicationsHandlers,
   ...adminAccountsHandlers,
   ...auditEntriesHandlers,

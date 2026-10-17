@@ -1,11 +1,20 @@
 import { bffClient } from "@/shared/api/client/bffClient";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
+import type { RequestBookingBody } from "../../lib/requestStay";
 import { bookingDtoSchema, type BookingDto } from "../contracts";
 
 const bookingPath = (bookingId: string) => `/bookings/${encodeURIComponent(bookingId)}`;
 
 function post(bookingId: string, action: string, transport: HttpTransport, body?: unknown): Promise<BookingDto> {
   return transport.request({ method: "POST", path: `${bookingPath(bookingId)}/${action}`, body }, bookingDtoSchema);
+}
+
+/**
+ * O tutor pede a estadia (REQ-REQST-005). O pedido não segura vaga: o anfitrião tem 24 horas pra responder.
+ * @example await requestBooking(toRequestBookingBody(listing.id, values));
+ */
+export function requestBooking(body: RequestBookingBody, transport: HttpTransport = bffClient): Promise<BookingDto> {
+  return transport.request({ method: "POST", path: "/bookings", body }, bookingDtoSchema);
 }
 
 /** Motivo opcional (até 500): vazio não vai. */

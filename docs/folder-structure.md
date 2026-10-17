@@ -6,6 +6,57 @@
 
 `src/shared/ui/brand/DoorScene/HouseScene.tsx` implementa somente a variante house do DoorScene existente; o default dos formulários permanece. `src/widgets/home/lib/homeDateLabel.ts` apresenta datas sem alterar a URL. TrustList ganha cards no próprio módulo. Testes/stories continuam próximos dos recursos. Não há feature/pasta nova de busca nem cópia da 041. Contratos, responsabilidades, catálogo provisório e validação: [implementação T7](../specs/005-ui-conformance/home-fidelity-implementation.md).
 
+## Busca de cantinhos (spec 041, worktree pethost_frontend-041)
+
+Inventário e interfaces: [design da 041](../specs/041-search/design.md). Implementado nesta branch; mapa T8 fora do escopo. O vault é somente leitura nesta entrega e recebe nota/linhas de catálogo pelo relatório de coordenação.
+
+```text
+src/app/(account)/search/             rota privada e teste de auth
+src/features/search/
+  index.ts, index.client.ts, index.server.ts
+  types.ts                           URL e pets de composição
+  api/                               schemas e query infinite
+    server/                          prefetch exclusivo do servidor
+  lib/                               parser, tradução API, copy, selos e erros
+  hooks/                             URL, histórico e query
+  components/
+    SearchScreen.tsx                 RSC + HydrationBoundary
+    client/
+      SearchExperience.tsx            composição interativa
+      SearchBar/                     formulário e painel móvel
+      FilterChips/                   filtros na URL
+      ListingCard/                   link público e preço
+      SearchResults/                 lista, feedback e paginação
+src/shared/lib/money/                reais/centavos e formatação
+src/shared/lib/date/stayRules.ts     datas de estadia de calendário
+src/shared/ui/forms/DateRangeField/  chegada e saída controladas
+src/shared/ui/feedback/SniffingBanner/ atualização não bloqueante
+src/test/fixtures/search.ts          fixtures sintéticas
+src/test/msw/searchMock.int.test.ts  contrato do mock E2E
+e2e/support/handlers/search.mjs      busca simulada
+e2e/mocked/search/search.spec.ts     jornadas desktop e celular
+```
+
+Testes/stories ao lado dos componentes; funções e regras ficam em lib, E/S na API, coordenação no hook. `pets/index.ts` apenas expõe `petQueries` existente para a página compor os pets ativos, sem import entre features. `shared` não conhece os contratos da busca.
+
+## Página do cantinho (spec 042)
+
+`src/app/(account)/listings/[listingId]/` contém a rota autenticada e os controles que reutilizam a busca 041. `features/listing-page/components/ListingPageScreen.tsx` é a composição server; os links do MUI ficam no `components/client/ListingPageActions.tsx`, que mantém `next/link` dentro do limite client. A rota hidrata `HouseResidents` pela API pública `features/pets/index.client` e prefetch `index.server`, sem duplicar a vitrine.
+
+```text
+src/app/(account)/listings/[listingId]/
+  page.tsx                              auth, metadata, prefetch/hydration
+  page.test.tsx                         metadata e preservação da busca no login
+  ListingSearchControls.tsx              adaptação client da SearchBar 041
+  ListingSearchControls.stories.tsx      controles com router simulado
+src/features/listing-page/
+  api/                                   contrato, query e carregamento server
+  lib/                                   compatibilidade, total e copy
+  components/ListingPageScreen.tsx        detalhe RSC com slot de residentes
+  components/client/ListingPageActions.tsx links Next em MUI Button
+e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
+```
+
 ## Início público (spec 040, 15/10/2026)
 
 ```text

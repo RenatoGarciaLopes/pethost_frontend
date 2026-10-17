@@ -7,7 +7,8 @@ export { petsCopy } from "./lib/petsCopy";
 export { petWizardCopy } from "./lib/petWizardCopy";
 export { petEditCopy } from "./lib/petEditCopy";
 export { isPetId } from "./lib/petId";
-export { petSpeciesSchema } from "./api/contracts";
+export { petSpeciesSchema, myPetsSchema } from "./api/contracts";
+// A busca (041) e a página do cantinho (042) compõem os pets sem acoplar duas features.
 export { petQueries } from "./api/queries";
 export { coexistenceSummary } from "./lib/coexistenceSummary";
 export type { HouseResident } from "./types";

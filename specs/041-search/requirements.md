@@ -1,6 +1,6 @@
 ---
 spec: 041-search
-status: draft
+status: in-progress
 updated: 2026-10-15
 area: SRCH
 ---

@@ -72,6 +72,8 @@ export const errorCopy: Record<string, CopyEntry> = {
   AUTH_PASSWORD_RESET_TOKEN_INVALID: "Esse link já venceu. Pede outro, leva um minuto.",
 
   // Pets
+  LISTING_SEARCH_ADDRESS_REQUIRED: "Pra procurar perto de casa, a gente precisa do seu endereço.",
+  LISTING_SEARCH_ADDRESS_NOT_LOCATED: "Não achamos seu endereço no mapa. Confere ele ou procura por cidade.",
   PET_PHOTO_LIMIT_REACHED: "Já tem 3 fotos. Tira uma pra colocar outra.",
   PET_PHOTO_ALREADY_EXISTS: "Essa foto já está na ficha.",
   PET_MICROCHIP_ALREADY_REGISTERED: "Esse microchip já está em outro pet. Se é o seu, fala com o suporte.",
