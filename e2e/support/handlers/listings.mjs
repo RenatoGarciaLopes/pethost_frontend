@@ -147,9 +147,10 @@ export const listingsHandlers = [
     listingsOf(user.id).push(listing);
     return ok(sorted(listing), { status: 201 });
   }),
+  // Só o cantinho do próprio anfitrião; os outros (o tutor vendo um cantinho) seguem para o mock da página pública.
   http.get(`${API}/listings/:listingId`, ({ request, params }) => {
     const result = ownedListing(request, params.listingId);
-    return result.error ?? ok(sorted(result.listing));
+    return result.error ? undefined : ok(sorted(result.listing));
   }),
   http.patch(`${API}/listings/:listingId`, async ({ request, params }) => {
     const result = ownedListing(request, params.listingId);

@@ -8,10 +8,12 @@ import {
   checkInBooking,
   checkOutBooking,
   declineBooking,
+  requestBooking,
 } from "../api/client/bookingMutations.client";
 import type { BookingDto } from "../api/contracts";
 import { toBooking } from "../api/mappers";
 import { bookingQueries } from "../api/queries";
+import type { RequestBookingBody } from "../lib/requestStay";
 
 /** Erros que querem dizer "a reserva mudou": recarregar mostra o status de agora. */
 const STALE_CODES = [
@@ -41,6 +43,23 @@ function useBookingCallbacks(accountId: string, bookingId: string) {
       if (STALE_CODES.some((code) => hasErrorCode(error, code))) await refresh();
     },
   };
+}
+
+/**
+ * "Pedir estadia" (REQ-REQST-005 e 009): sem nova tentativa automática (o pedido não pode sair duas vezes); grava o
+ * pedido no detalhe e invalida todas as estadias da conta.
+ * @example useRequestBooking(user.id).mutateAsync(toRequestBookingBody(listing.id, values))
+ */
+export function useRequestBooking(accountId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (body: RequestBookingBody) => requestBooking(body),
+    retry: false,
+    onSuccess: async (dto) => {
+      client.setQueryData(bookingQueries.detail(accountId, dto.id).queryKey, toBooking(dto));
+      await client.invalidateQueries({ queryKey: bookingQueries.all(accountId) });
+    },
+  });
 }
 
 /**

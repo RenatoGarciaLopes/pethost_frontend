@@ -1,6 +1,6 @@
 ---
 spec: 042-listing-page
-status: draft
+status: in-progress
 updated: 2026-10-15
 area: LPAGE
 ---
@@ -15,7 +15,7 @@ O tutor decide se confia: fotos de casa de verdade, quem cuida, quem mora lá, o
 
 - **Design:** canvas → `Fluxo-Reserva` → "Página do cantinho". Vault: `design/04-confianca.md`, `design/11-busca-e-cards.md` (anatomia do card e selos), `design/15-estados-com-e-sem-pet.md`.
 - **API:** `GET /api/v1/listings/{id}` (logado; visão pública para quem não é o dono; `404 LISTING_NOT_FOUND` se inativo, de anfitrião indisponível ou inexistente; traz `badges` e `host`); `GET /api/v1/hosts/{hostId}/pets` (pets da casa, só ativos).
-- **Depende de:** 041 (datas e pets na URL, `ListingCard` para coerência visual, `stayRules`), 023 (vitrine dos pets da casa), 044 (`formatBRL`).
+- **Depende de:** 041 (parser de datas e pets na URL e contexto visual de `ListingCard`), 023 (`HouseResidents`, composto pela página), `shared/lib/date/stayRules` e `shared/lib/money/formatBRL` já existentes.
 - **Usada por:** 050 (botão "Pedir estadia").
 
 ## Critérios de aceite

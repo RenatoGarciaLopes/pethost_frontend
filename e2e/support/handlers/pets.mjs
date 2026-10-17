@@ -66,6 +66,10 @@ function petsFor(user) {
   }
   return petsByAccount.get(user.id);
 }
+/** Os pets de uma conta, para o pedido de estadia (spec 050) conferir dono e regras. @example petsOfAccount(user) */
+export function petsOfAccount(user) {
+  return petsFor(user);
+}
 /** Restaura pets e fotos sintéticos entre jornadas. @example resetPets(); */
 export function resetPets() {
   petsByAccount.clear();

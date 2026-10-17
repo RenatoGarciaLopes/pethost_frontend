@@ -10,7 +10,14 @@ import { createTestQueryClient } from "@/test/render";
 import { bookingDtoSchema } from "../api/contracts";
 import { toBooking } from "../api/mappers";
 import { bookingQueries } from "../api/queries";
-import { useAcceptBooking, useCancelBooking, useCheckIn, useCheckOut, useDeclineBooking } from "./useBookingMutations";
+import {
+  useAcceptBooking,
+  useCancelBooking,
+  useCheckIn,
+  useCheckOut,
+  useDeclineBooking,
+  useRequestBooking,
+} from "./useBookingMutations";
 
 const ACCOUNT = "account-1";
 const path = `*/api/bookings/${BOOKING_ID}`;
@@ -87,5 +94,54 @@ describe("useBookingMutations", () => {
     expect(client.getQueryData(detailKey)?.status).toBe("completed");
     await act(() => result.current.cancel.mutateAsync("Imprevisto"));
     expect(client.getQueryData(detailKey)?.status).toBe("cancelled");
+  });
+});
+
+describe("useRequestBooking", () => {
+  it("REQ-REQST-005 REQ-REQST-009 um POST só, o pedido no detalhe e as estadias invalidadas", async () => {
+    const bodies: unknown[] = [];
+    server.use(
+      http.post("*/api/bookings", async ({ request }) => {
+        bodies.push(await request.json());
+        return HttpResponse.json(apiOk(bookingDto()), { status: 201 });
+      }),
+    );
+    const { client, requestedKey } = setup();
+    const { result } = renderHook(() => useRequestBooking(ACCOUNT), {
+      wrapper: ({ children }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>,
+    });
+    const body = {
+      listingId: bookingDto().listingId,
+      petIds: [bookingDto().pets[0]!.id],
+      checkIn: "2026-12-20",
+      checkOut: "2026-12-25",
+    };
+    await act(() => result.current.mutateAsync(body));
+    expect(bodies).toEqual([body]);
+    expect(client.getQueryData(bookingQueries.detail(ACCOUNT, BOOKING_ID).queryKey)).toMatchObject({
+      status: "requested",
+    });
+    expect(client.getQueryState(requestedKey)?.isInvalidated).toBe(true);
+  });
+
+  it("REQ-REQST-005 erro não tenta de novo sozinho", async () => {
+    let calls = 0;
+    server.use(
+      http.post("*/api/bookings", () => {
+        calls += 1;
+        return HttpResponse.json(apiFail("BOOKING_CAPACITY_EXCEEDED"), { status: 422 });
+      }),
+    );
+    const { client } = setup();
+    const { result } = renderHook(() => useRequestBooking(ACCOUNT), {
+      wrapper: ({ children }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>,
+    });
+    await act(async () => {
+      await result.current
+        .mutateAsync({ listingId: "l", petIds: [], checkIn: "", checkOut: "" })
+        .catch(() => undefined);
+    });
+    expect(calls).toBe(1);
+    expect(result.current.error).toMatchObject({ code: "BOOKING_CAPACITY_EXCEEDED" });
   });
 });
