@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { loginAccount, resetAccountMock } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
+import { openSearch } from "../../support/search";
 
 // Navegação no cliente: no `next dev` a primeira visita compila a rota (como em `new-pet.spec.ts`).
 const NAVIGATION = { timeout: 15_000 };
@@ -73,12 +74,7 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   const from = nextMonday();
   const to = plus(from, 2);
   await page.goto("/search");
-  const pill = page.getByRole("button", { name: "Onde, datas e pet" });
-  if (await pill.isVisible()) {
-    await waitForHydration(pill);
-    await pill.click();
-  }
-  await waitForHydration(page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }));
+  await openSearch(page);
   await page.getByLabel("Chegada", { exact: true }).filter({ visible: true }).fill(from);
   await page.getByLabel("Saída", { exact: true }).filter({ visible: true }).fill(to);
   await page.getByLabel("Luna", { exact: true }).filter({ visible: true }).check();

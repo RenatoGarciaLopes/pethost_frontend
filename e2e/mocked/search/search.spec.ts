@@ -1,15 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { loginAccount } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
-
-async function openSearch(page: Page) {
-  const pill = page.getByRole("button", { name: "Onde, datas e pet" });
-  if (await pill.isVisible()) {
-    await waitForHydration(pill);
-    await pill.click();
-  }
-  await waitForHydration(page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }));
-}
+import { openSearch } from "../../support/search";
 
 test("REQ-SRCH-001 visitante preserva a busca no login", async ({ page }) => {
   await page.goto("/search?where=Maring%C3%A1&hasKids=false");
@@ -25,6 +17,7 @@ test("REQ-SRCH-002/005/006/009/010 filtros, mais resultados, histórico e recarg
   await page.goto("/search");
   const list = page.getByRole("list", { name: "Buscar cantinhos" });
   await expect(list.getByRole("link")).toHaveCount(12);
+  await waitForHydration(page.getByRole("button", { name: "Mostrar mais cantinhos" }));
   await page.getByRole("button", { name: "Mostrar mais cantinhos" }).click();
   await expect(list.getByRole("link")).toHaveCount(13);
   await page.getByRole("button", { name: "Casa com quintal", exact: true }).click();
