@@ -1,5 +1,11 @@
 # Estrutura real do frontend
 
+## Fidelidade da home (005, T7, primeiro lote)
+
+`src/widgets/app-shell/components/AppHeader.tsx` extrai o cabeçalho comum; `src/widgets/app-shell/index.ts` oferece sua API síncrona à rota pública, enquanto index.server mantém a casca dos layouts. Home e casca compartilham header sem um widget importar outro. `src/app/HomeFidelity.stories.tsx` compõe os dois widgets como a rota; o HomeScreen continua responsável por um único main.
+
+`src/shared/ui/brand/DoorScene/HouseScene.tsx` implementa somente a variante house do DoorScene existente; o default dos formulários permanece. `src/widgets/home/lib/homeDateLabel.ts` apresenta datas sem alterar a URL. TrustList ganha cards no próprio módulo. Testes/stories continuam próximos dos recursos. Não há feature/pasta nova de busca nem cópia da 041. Contratos, responsabilidades, catálogo provisório e validação: [implementação T7](../specs/005-ui-conformance/home-fidelity-implementation.md).
+
 ## Busca de cantinhos (spec 041, worktree pethost_frontend-041)
 
 Inventário e interfaces: [design da 041](../specs/041-search/design.md). Implementado nesta branch; mapa T8 fora do escopo. O vault é somente leitura nesta entrega e recebe nota/linhas de catálogo pelo relatório de coordenação.

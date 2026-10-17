@@ -54,3 +54,6 @@ export const ComFormulario: Story = {
     </Stack>
   ),
 };
+
+/** REQ-UIC-009: casa completa, cerca e travessia em quatro segundos; hover abre a folha. */
+export const Casa: Story = { args: { variant: "house" }, name: "REQ-UIC-009 Casa e turma" };

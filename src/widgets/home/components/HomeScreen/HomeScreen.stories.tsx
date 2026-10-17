@@ -50,5 +50,5 @@ export const PetsIndisponiveis: Story = {
 export const Celular: Story = {
   name: "REQ-HOME-006 Celular",
   args: { viewer: "visitor" },
-  parameters: { viewport: { defaultViewport: "mobile1" } },
+  globals: { viewport: { value: "celular", isRotated: false } },
 };

@@ -66,11 +66,43 @@ it("REQ-HOME-004 anfitrião escolhe quantidade sem consultar pets da casa", asyn
 
 it("REQ-HOME-006 no celular a pílula expande e anuncia os campos", async () => {
   const { user } = renderHome();
-  const openSearch = screen.getByRole("button", { name: "Abrir busca" });
+  const openSearch = screen.getByRole("button", { name: "Onde, datas e pet" });
   expect(openSearch).toHaveAttribute("aria-expanded", "false");
   await user.click(openSearch);
   expect(screen.getByRole("button", { name: "Fechar busca" })).toHaveAttribute("aria-expanded", "true");
   expect(screen.getByRole("textbox", { name: "Onde" })).toBeInTheDocument();
+});
+
+it("REQ-UIC-007 faixa única mostra datas legíveis e mantém quatro controles rotulados", () => {
+  renderHome();
+  const from = screen.getByLabelText("Chegada");
+  const to = screen.getByLabelText("Saída");
+  fireEvent.change(from, { target: { value: "2026-12-20" } });
+  fireEvent.change(to, { target: { value: "2026-12-25" } });
+  expect(screen.getByText("20 dez, a partir das 14h")).toBeVisible();
+  expect(screen.getByText("25 dez · 5 noites")).toBeVisible();
+  expect(from).toHaveValue("2026-12-20");
+  expect(to).toHaveValue("2026-12-25");
+  expect(screen.getByRole("textbox", { name: "Onde" })).toBeEnabled();
+  expect(screen.getByRole("combobox", { name: "Pet" })).toBeEnabled();
+});
+
+it("REQ-UIC-007 pergunta de quantidade do anfitrião fica fora da faixa de busca", () => {
+  renderHome({ viewer: "host" });
+  expect(screen.getByRole("form", { name: "Busca de cantinhos" })).not.toContainElement(
+    screen.getByText("Quantos pets viajam com você?"),
+  );
+});
+
+it("REQ-UIC-007 teclado alcança as quatro células sem controles nativos de seleção extras", async () => {
+  const { user } = renderHome();
+  screen.getByRole("textbox", { name: "Onde" }).focus();
+  await user.tab();
+  expect(screen.getByLabelText("Chegada")).toHaveFocus();
+  await user.tab();
+  expect(screen.getByLabelText("Saída")).toHaveFocus();
+  await user.tab();
+  expect(screen.getByRole("combobox", { name: "Pet" })).toHaveFocus();
 });
 
 it("REQ-HOME-009 falha ao carregar pets mantém espécie e alternativa de busca", () => {

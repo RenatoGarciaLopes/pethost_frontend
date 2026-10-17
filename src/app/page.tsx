@@ -7,6 +7,7 @@ import { getQueryClient } from "@/shared/api/query/queryClient";
 import { getSession } from "@/shared/auth/server/getSession";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { HomeScreen, homeCopy, type HomePetOption } from "@/widgets/home";
+import { AppHeader } from "@/widgets/app-shell";
 
 export const metadata: Metadata = { title: homeCopy.pageTitle };
 
@@ -57,5 +58,10 @@ async function HomeContent({ searchParams }: HomePageProps) {
     petsUnavailable = Boolean(queryClient.getQueryState(query.queryKey)?.error);
   }
 
-  return <HomeScreen viewer={viewer} pets={pets} petsUnavailable={petsUnavailable} />;
+  return (
+    <>
+      <AppHeader variant="home" user={viewer === "visitor" ? null : user} />
+      <HomeScreen viewer={viewer} pets={pets} petsUnavailable={petsUnavailable} />
+    </>
+  );
 }

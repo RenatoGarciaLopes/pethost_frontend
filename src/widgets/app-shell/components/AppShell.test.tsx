@@ -83,8 +83,8 @@ describe("atalhos na casca", () => {
     setup("host");
     const header = screen.getByRole("banner");
     const injectedCss = [...document.querySelectorAll("style")].map((style) => style.textContent).join(" ");
-    expect(injectedCss).toMatch(/height:56px/);
-    expect(injectedCss).toMatch(/height:64px/);
+    expect(injectedCss).toMatch(/min-height:74px/);
+    expect(injectedCss).toMatch(/min-height:80px/);
     expect(within(header).getAllByRole("link", { name: "PetHost" })).toHaveLength(1);
   });
   it("REQ-AQUEUE-001 admin tem atalho para a fila de verificação", () => {

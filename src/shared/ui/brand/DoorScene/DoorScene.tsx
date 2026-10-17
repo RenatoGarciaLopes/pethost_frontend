@@ -7,10 +7,13 @@ import { EASE_AMBIENTE, MOTION_ACOLHER, MOTION_ASSENTAR } from "@/shared/theme/t
 import { DaisyGlyph, type DaisyPetal } from "../Daisy";
 import { useDoorTarget } from "./useDoorTarget";
 import { usePointerParallax } from "./usePointerParallax";
+import { HouseScene } from "./HouseScene";
 
 export type DoorSceneState = "auto" | "closed" | "open" | "wide";
 
 export interface DoorSceneProps {
+  /** `house` compõe o quintal completo da home; `door` mantém a cena dos formulários. */
+  variant?: "door" | "house";
   /**
    * `auto` (padrão) reage ao formulário marcado com `DOOR_TARGET_ATTR` na mesma página.
    * Os outros fixam um estado (stories, telas estáticas).
@@ -81,7 +84,11 @@ const flowerHeightAt = (y: number) => 30 + ((y - GROUND_Y) / (300 - GROUND_Y)) *
  * <DoorScene />
  * <form {...{ [DOOR_TARGET_ATTR]: "" }}>…<Button {...{ [DOOR_WARM_ATTR]: "" }}>Entrar</Button></form>
  */
-export function DoorScene({ state = "auto" }: DoorSceneProps) {
+export function DoorScene({ state = "auto", variant = "door" }: DoorSceneProps) {
+  return variant === "house" ? <HouseScene /> : <DoorOnlyScene state={state} />;
+}
+
+function DoorOnlyScene({ state }: { state: DoorSceneState }) {
   const { palette } = useTheme();
   const ink = palette.quintal.tinta;
   const light = palette.scene.doorLight;

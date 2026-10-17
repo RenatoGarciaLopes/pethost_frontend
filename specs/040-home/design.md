@@ -6,6 +6,10 @@ updated: 2026-10-15
 
 # 040 · Design técnico
 
+## Atualização visual T7 (17/10/2026)
+
+O primeiro lote da 005/T7 extrai AppHeader da casca, compõe-o na rota acima do HomeScreen e estende DoorScene/TrustList sem duplicá-los. A busca mantém seu contrato; `homeDateLabel` apresenta datas legíveis sem alterar ISO. Contratos, dependências, matriz de cobertura e limites em [implementação T7](../005-ui-conformance/home-fidelity-implementation.md). Consulta de casas próximas foi autorizada para tutor com endereço e pet, mas será implementada em segundo commit após o PR #21 entrar no dev; **a regra sem busca descrita abaixo ainda vale para este primeiro lote**. Visitante/host continuarão sem consulta; vazio/falha ocultarão a seção no segundo lote.
+
 ## Renovação na home — revisão do PR 18 (2026-10-16)
 
 `src/app/page.tsx` recebe `searchParams` do Next, preserva valores repetidos e chama `getSession(currentPath)` com a raiz e seus parâmetros, depois de `connection()`. Não lê claims para definir o papel. Sem sessão continua visitante; sessão renovável passa pelo handler de refresh e volta ao mesmo destino; sessão válida mantém o fluxo existente. Os parâmetros são serializados por `URLSearchParams`, sem log ou cache persistido.
@@ -28,13 +32,14 @@ Validação funcional e de integração em `src/app/page.int.test.tsx`: access v
 
 ```text
 src/app/page.tsx (RSC; sessão opcional, pets do tutor e metadata)
-└─ src/widgets/home/components/HomeScreen/HomeScreen.tsx (client; texto, cena, busca e confiança)
-   ├─ DoorScene (shared, quintal/porta/parallax existente)
-   ├─ TurmaWalker (shared, turma existente)
-   └─ TrustList (shared, garantias existentes)
+├─ AppHeader (widget app-shell; mesmo cabeçalho dos layouts)
+└─ HomeScreen (widget home; único main, texto, cena, busca e confiança)
+   ├─ DoorScene variant="house" (shared; casa, cerca, parallax e TurmaWalker)
+   ├─ GroundLine (shared; gramado de borda a borda)
+   └─ TrustList variant="cards" (shared; três garantias ilustradas)
 ```
 
-Não se cria uma feature `home`: a home não possui domínio/API própria. O widget apenas compõe a página pública. Os componentes compartilhados são importados por seus índices públicos; não se altera nenhum deles.
+Não se cria uma feature `home`: a home não possui domínio/API própria. O widget apenas compõe a página pública. Os componentes compartilhados são importados por seus índices públicos; a T7 acrescenta variantes ao DoorScene/TrustList, mantendo os modos usados por auth/registration.
 
 ## Contrato e montagem da busca
 
@@ -74,4 +79,4 @@ Falha em `/pets/me` não impede a home: a página sinaliza `petsUnavailable` sem
 | todos          | Storybook       | `HomeScreen.stories.tsx`                                     | Visitante, tutor sem pet, tutor com pets, anfitrião, indisponível e celular.              |
 | 001 a 009      | E2E simulado    | `e2e/mocked/home/home.spec.ts`                               | Entrada pública, seleção, redirect de visitante com query preservada e envio autenticado. |
 
-E2E real não se aplica nesta entrega: a rota `/search` pertence à spec 041 e ainda não está presente no `dev` desta worktree. Storybook e Playwright serão escritos, não executados, conforme o fluxo do proprietário da spec. A API de busca é deliberadamente N/A na home.
+Neste primeiro lote da T7 a rota `/search` da 041 ainda não está no dev desta worktree. Stories Chromium/axe são executadas; Playwright e comparação dos prints aguardam a liberação das portas. Integração com API real não foi validada. A consulta de casas próximas autorizada pertence ao segundo lote, depois do merge do PR #21, sem implementar um cliente alternativo.
