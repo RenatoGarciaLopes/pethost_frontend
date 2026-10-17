@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { documentDrawings } from "@/features/host-applications";
 import { SignedDocumentViewer } from "./SignedDocumentViewer";
 // Somente PNG sintético da story; nenhuma imagem real de documento.
 const image =
@@ -9,6 +10,7 @@ const meta = {
   parameters: { design: { board: "Fluxo-Admin" } },
   args: {
     label: "Frente do documento",
+    illustration: documentDrawings.front,
     load: async () => ({ url: image, expiresAt: Math.floor(Date.now() / 1000) + 300 }),
   },
 } satisfies Meta<typeof SignedDocumentViewer>;

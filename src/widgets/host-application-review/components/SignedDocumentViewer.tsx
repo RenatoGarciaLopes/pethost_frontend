@@ -1,6 +1,19 @@
 "use client";
-import { useEffect, useEffectEvent, useId, useState } from "react";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Typography } from "@mui/material";
+import { useEffect, useEffectEvent, useId, useState, type ReactNode } from "react";
+import {
+  Box,
+  Button,
+  ButtonBase,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Skeleton,
+  Typography,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { Surface } from "@/shared/ui/layout/Surface";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import { adminReviewCopy as copy } from "@/features/admin-host-applications";
@@ -8,14 +21,16 @@ const MAX_TIMEOUT_MS = 2_147_483_647;
 
 interface SignedDocumentViewerProps {
   label: string;
+  /** Desenho do que se espera na foto (decorativo): o cartão mostra o desenho, nunca a foto, até a abertura explícita. */
+  illustration: ReactNode;
   /** Não busque antes de abrir; respeite o signal para cancelar ao fechar. */
   load: (signal: AbortSignal) => Promise<{ url: string; expiresAt: number }>;
 }
-/** Foto temporária somente em memória local, descartada ao fechar, vencer ou falhar.
- * Não usa Query, storage ou prefetch; o servidor de imagens deve responder no-store.
- * @example <SignedDocumentViewer label="Frente" load={signal => getDocumentLink(id, "front", undefined, signal)} />
+/** Cartão com o desenho da vaga que abre a foto temporária, somente em memória local, descartada ao fechar, vencer ou
+ * falhar. Não usa Query, storage ou prefetch; o servidor de imagens deve responder no-store.
+ * @example <SignedDocumentViewer label="Frente" illustration={documentDrawings.front} load={signal => getDocumentLink(id, "front", undefined, signal)} />
  */
-export function SignedDocumentViewer({ label, load }: SignedDocumentViewerProps) {
+export function SignedDocumentViewer({ label, illustration, load }: SignedDocumentViewerProps) {
   const titleId = useId();
   const [open, setOpen] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -77,9 +92,39 @@ export function SignedDocumentViewer({ label, load }: SignedDocumentViewerProps)
   }
   return (
     <>
-      <Button onClick={start} aria-label={`${copy.open}: ${label}`}>
-        {label}
-      </Button>
+      <Surface
+        component={ButtonBase}
+        interactive
+        onClick={start}
+        aria-label={`${copy.open}: ${label}`}
+        sx={{
+          display: "grid",
+          gap: 1,
+          p: { xs: 1, sm: 1.5 },
+          width: "100%",
+          justifyItems: "stretch",
+          textAlign: "left",
+        }}
+      >
+        <Box
+          aria-hidden="true"
+          sx={(theme) => ({
+            display: "grid",
+            placeItems: "center",
+            aspectRatio: "3 / 2",
+            p: { xs: 1, sm: 2 },
+            borderRadius: `${quintalRadii.media}px`,
+            bgcolor: alpha(theme.palette.ceu.main, 0.25),
+            color: "text.primary",
+            "& svg": { width: "100%", height: "100%" },
+          })}
+        >
+          {illustration}
+        </Box>
+        <Typography component="span" sx={{ fontWeight: 800, fontSize: { xs: "0.85rem", sm: "1rem" }, lineHeight: 1.3 }}>
+          {label}
+        </Typography>
+      </Surface>
       <Dialog open={open} onClose={close} aria-labelledby={titleId} maxWidth="md" fullWidth>
         <DialogTitle id={titleId}>{label}</DialogTitle>
         <DialogContent>

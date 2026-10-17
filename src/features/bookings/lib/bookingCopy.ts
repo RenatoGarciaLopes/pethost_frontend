@@ -1,3 +1,5 @@
+import { PLATFORM_FEE_PERCENT } from "@/shared/lib/money";
+
 /** Textos de pedidos e estadias (specs 053 e 054, lado do anfitrião), na voz da PetHost. Sem gênero presumido. */
 export const bookingCopy = {
   pageTitles: {
@@ -52,11 +54,12 @@ export const bookingCopy = {
   detail: {
     back: "Pedidos e estadias",
     heading: (owner: string) => `Pedido de ${owner}`,
+    // Título do pedido em aberto: o pet na frente, como na prancha; depois de respondido, só a estadia.
+    headline: (pets: string, many: boolean, nights: string) =>
+      `${pets} ${many ? "querem" : "quer"} passar ${nights} aqui.`,
+    stayOf: (pets: string) => `Estadia de ${pets}`,
     trail: "Andamento da estadia",
-    period: "Período",
-    pets: "Pets",
     total: "Total",
-    perNight: (value: string) => `${value} por noite, por pet`,
     closed: {
       declined: "Você não pôde receber esse pedido.",
       expired: "O prazo de 24 horas passou e o pedido expirou.",
@@ -66,8 +69,18 @@ export const bookingCopy = {
     phone: (phone: string) => `Telefone: ${phone}`,
     noPhone: "O tutor não deixou telefone na conta.",
   },
+  answer: {
+    title: "Sua resposta",
+    stay: "A estadia",
+    line: (nightly: string, nights: number, pets: number) =>
+      `${nightly} × ${nights === 1 ? "1 noite" : `${nights} noites`} × ${pets === 1 ? "1 pet" : `${pets} pets`}`,
+    fee: `Taxa PetHost (${PLATFORM_FEE_PERCENT}%)`,
+    minus: (value: string) => `− ${value}`,
+    net: "Você recebe",
+    afterAccept: (owner: string) => `Se aceitar, ${owner} recebe seu endereço e seu telefone.`,
+  },
   accept: {
-    open: "Aceitar",
+    open: "Aceitar o pedido",
     title: "Aceitar o pedido?",
     // O período pode terminar em abreviação ("dez."): não repete o ponto.
     message: (pets: string, period: string) =>

@@ -1,11 +1,11 @@
 import { Suspense } from "react";
-import { Container } from "@mui/material";
 import { z } from "zod";
 import { notFound } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireRole } from "@/shared/auth/server/requireRole";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { prefetchAdminApplication } from "@/features/admin-host-applications/index.server";
 import { HostApplicationReview } from "@/widgets/host-application-review/index.client";
 
@@ -25,10 +25,10 @@ async function ReviewContent({ params }: { params: Promise<{ applicationId: stri
   const client = getQueryClient();
   await prefetchAdminApplication(client, user.id, applicationId);
   return (
-    <Container maxWidth="lg">
+    <PageContainer>
       <HydrationBoundary state={dehydrate(client)}>
         <HostApplicationReview accountId={user.id} applicationId={applicationId} />
       </HydrationBoundary>
-    </Container>
+    </PageContainer>
   );
 }

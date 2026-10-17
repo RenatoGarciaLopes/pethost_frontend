@@ -9,7 +9,9 @@ it("REQ-AQUEUE-006/007/016 pede foto sob clique, vence e fecha com Esc", async (
     .fn()
     .mockResolvedValue({ url: "https://private.test/front", expiresAt: Math.floor(Date.now() / 1000) + 2 });
   vi.useFakeTimers();
-  renderWithProviders(<SignedDocumentViewer label="Frente" load={load} />);
+  renderWithProviders(<SignedDocumentViewer label="Frente" illustration={<svg />} load={load} />, {
+    theme: quintalTheme,
+  });
   expect(load).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Abrir foto: Frente" }));
   await act(async () => {
@@ -29,6 +31,7 @@ it("REQ-AQUEUE-006 exibe falha sem manter imagem e permite repetir", async () =>
   const { user } = renderWithProviders(
     <SignedDocumentViewer
       label="Verso"
+      illustration={<svg />}
       load={async () => {
         throw new Error("falha");
       }}
@@ -48,7 +51,12 @@ it("REQ-AQUEUE-007/016 fecha sem cache, cancela pedido pendente e prende foco no
       resolve = done;
     });
   });
-  const { user, queryClient } = renderWithProviders(<SignedDocumentViewer label="Frente" load={load} />);
+  const { user, queryClient } = renderWithProviders(
+    <SignedDocumentViewer label="Frente" illustration={<svg />} load={load} />,
+    {
+      theme: quintalTheme,
+    },
+  );
   const opener = screen.getByRole("button", { name: "Abrir foto: Frente" });
   await user.click(opener);
   await user.tab();
@@ -65,7 +73,9 @@ it("REQ-AQUEUE-007/016 fecha sem cache, cancela pedido pendente e prende foco no
 });
 it("REQ-AQUEUE-006 imagem com erro é descartada e nova abertura pede outro link", async () => {
   const load = vi.fn().mockResolvedValue({ url: "https://private.test/front", expiresAt: 2_000_000_000 });
-  const { user } = renderWithProviders(<SignedDocumentViewer label="Frente" load={load} />);
+  const { user } = renderWithProviders(<SignedDocumentViewer label="Frente" illustration={<svg />} load={load} />, {
+    theme: quintalTheme,
+  });
   await user.click(screen.getByRole("button", { name: "Abrir foto: Frente" }));
   fireEvent.error(await screen.findByRole("img"));
   expect(screen.queryByRole("img")).not.toBeInTheDocument();

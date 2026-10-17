@@ -1,7 +1,7 @@
-import { Container } from "@mui/material";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { getQueryClient } from "@/shared/api/query/queryClient";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { bookingQueries } from "../api/queries";
 import { getBookingDetail } from "../api/server/bookings.server";
 import { HostBookingDetail } from "./client/HostBookingDetail";
@@ -28,10 +28,10 @@ export async function HostBookingDetailScreen({
     await getBookingDetail(accountId, bookingId),
   );
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <HostBookingDetail accountId={accountId} bookingId={bookingId} petProfiles={petProfiles} />
       </HydrationBoundary>
-    </Container>
+    </PageContainer>
   );
 }

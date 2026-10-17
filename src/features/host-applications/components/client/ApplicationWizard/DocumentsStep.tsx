@@ -15,7 +15,7 @@ import type { DocumentFiles } from "../../../api/client/myApplication.client";
 import { useUploadDocuments } from "../../../hooks/useApplicationMutations";
 import { documentKindLabel, verificationCopy } from "../../../lib/verificationCopy";
 import type { DocumentKind, HostApplication } from "../../../types";
-import { documentDrawings } from "./DocumentDrawings";
+import { documentDrawings } from "../../DocumentDrawings";
 
 const copy = verificationCopy.photos;
 const list = new Intl.ListFormat("pt-BR", { type: "conjunction" });

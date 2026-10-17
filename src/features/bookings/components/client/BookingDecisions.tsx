@@ -31,7 +31,7 @@ export function AcceptDialog({ accountId, booking, onAccepted }: DecisionProps &
   const pets = names.format(booking.pets.map((pet) => pet.name ?? bookingCopy.unknownPet));
   return (
     <>
-      <Button variant="contained" onClick={() => setOpen(true)}>
+      <Button variant="contained" color="success" fullWidth onClick={() => setOpen(true)}>
         {copy.open}
       </Button>
       <ConfirmDialog

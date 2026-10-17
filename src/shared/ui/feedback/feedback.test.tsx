@@ -129,3 +129,15 @@ it("REQ-DS-014 ErrorState oferece retry, código e ação secundária", async ()
   expect(screen.getByRole("link", { name: "Ajuda" })).toHaveAttribute("href", "/help");
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
+it("REQ-DS-014 REQ-UIC-007 StatusPill é selo do tamanho do texto: grama cheio no ok, céu na espera, sem sombra", () => {
+  renderWithProviders(
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <StatusPill tone="ok" label="Confirmada" />
+      <StatusPill tone="info" label="Esperando resposta" />
+    </div>,
+    { theme: quintalTheme },
+  );
+  const ok = screen.getByText("Confirmada");
+  expect(ok).toHaveStyle({ width: "fit-content", alignSelf: "flex-start", backgroundColor: "rgb(197, 219, 79)" });
+  expect(screen.getByText("Esperando resposta")).toHaveStyle({ backgroundColor: "rgb(127, 196, 224)" });
+});
