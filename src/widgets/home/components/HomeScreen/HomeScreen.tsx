@@ -106,8 +106,6 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
         sx={(theme) => ({
           position: "relative",
           overflow: "hidden",
-          borderBottom: "2px solid",
-          borderColor: "divider",
           backgroundImage: `url('/brand/paper-grain.png'), linear-gradient(180deg, ${theme.palette.scene.skyTop}, ${theme.palette.scene.skyMiddle} 65%, ${theme.palette.scene.skyBottom})`,
           backgroundSize: "256px 256px, cover",
           backgroundBlendMode: "multiply, normal",
@@ -163,11 +161,22 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
             </Box>
           </Box>
         </PageContainer>
-        <Box sx={{ position: "relative", mt: { xs: -1, md: 0 }, bgcolor: "scene.ground" }}>
-          <Box sx={{ position: "absolute", top: -33, left: 0, right: 0 }}>
-            <GroundLine height={56} />
+        <Box
+          sx={{
+            position: "relative",
+            mt: { xs: -1, md: 0 },
+            bgcolor: "scene.ground",
+            borderBottom: "2px solid",
+            borderColor: "text.primary",
+          }}
+        >
+          <Box sx={{ position: "absolute", top: -40, left: 0, right: 0 }}>
+            <GroundLine variant="wave" height={56} />
           </Box>
-          <PageContainer width="page" sx={{ py: { xs: 2, md: 3 }, position: "relative", zIndex: 2 }}>
+          <PageContainer
+            width="page"
+            sx={{ pt: { xs: 2, md: 2 }, pb: { xs: 4, md: 4 }, position: "relative", zIndex: 2 }}
+          >
             {petsUnavailable && (
               <Box sx={{ mb: 2 }}>
                 <Notice tone="atencao">{copy.petError}</Notice>
@@ -181,6 +190,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
               {...{ [DOOR_TARGET_ATTR]: "" }}
               sx={{
                 p: { xs: 1, md: 1.25 },
+                boxShadow: "0 5px 0 var(--mui-palette-quintal-tinta)",
                 borderRadius: {
                   xs: `${mobileOpen ? quintalRadii.card : quintalRadii.pill}px`,
                   md: `${quintalRadii.card}px`,
@@ -385,7 +395,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
                 </Button>
               </Box>
             </Surface>
-            <Typography sx={{ mt: 1.5, fontSize: 14 }}>
+            <Typography sx={{ position: "absolute", bottom: 4, fontSize: 14 }}>
               {isHost
                 ? copy.hostHint
                 : viewer === "visitor"

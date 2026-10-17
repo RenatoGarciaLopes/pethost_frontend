@@ -3,6 +3,7 @@ import NextLink from "next/link";
 import type { SessionUser } from "@/shared/auth/contracts/session";
 import { homeOf } from "@/shared/config/appRoutes";
 import { navItemsFor, type NavItem } from "@/shared/config/navigation";
+import { quintalColors } from "@/shared/theme/tokens/colors";
 import { DoorMark } from "@/shared/ui/brand/DoorMark";
 import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { AccountMenu } from "./client/AccountMenu";
@@ -40,20 +41,26 @@ export function AppHeader({ user, variant = "shell" }: AppHeaderProps) {
         component="header"
         data-account={user?.role ?? "visitor"}
         sx={{
-          height: { xs: 56, md: 64 },
+          minHeight: { xs: 74, md: 80 },
           bgcolor: `account.${user?.role ?? "visitor"}`,
           borderBottom: 2,
-          borderColor: "divider",
+          borderColor: "text.primary",
         }}
       >
         <PageContainer
           width="page"
-          sx={{ py: 0, height: "100%", display: "flex", alignItems: "center", gap: { xs: 1, md: 2 } }}
+          sx={{
+            py: { xs: 1.5, md: 1.5 },
+            minHeight: "inherit",
+            display: "flex",
+            alignItems: "center",
+            gap: { xs: 1, md: 2 },
+          }}
         >
           <NextLink
             href={home ? "/" : homeOf(user?.role ?? "owner")}
             aria-label="PetHost"
-            style={{ display: "inline-flex", flexShrink: 0 }}
+            style={{ display: "inline-flex", flexShrink: 0, textDecoration: "none", color: quintalColors.tinta }}
           >
             <DoorMark size="header" withWordmark />
           </NextLink>

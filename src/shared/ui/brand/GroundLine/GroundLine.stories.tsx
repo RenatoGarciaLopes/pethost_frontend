@@ -18,3 +18,6 @@ export const Default: Story = { name: "REQ-DS-015 Chão" };
 
 /** Sem tufinhos, mais baixo. */
 export const Liso: Story = { name: "REQ-DS-015 Chão liso", args: { tufts: false, height: 16 } };
+
+/** Topo aberto, sem linha reta intermediária, para prolongar o gramado da home. */
+export const Ondulado: Story = { name: "REQ-UIC-007 Gramado ondulado", args: { variant: "wave", height: 56 } };

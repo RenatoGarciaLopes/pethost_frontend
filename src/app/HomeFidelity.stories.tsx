@@ -44,10 +44,26 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** Regressão do corte causado por altura fixa e padding responsivo herdado. */
+async function checkHeader(canvasElement: HTMLElement) {
+  const canvas = within(canvasElement);
+  await canvasElement.ownerDocument.fonts.ready;
+  const header = canvas.getByRole("banner").getBoundingClientRect();
+  const brand = canvas.getByRole("link", { name: "PetHost" });
+  await expect(getComputedStyle(brand).textDecorationLine).toBe("none");
+  await expect(getComputedStyle(brand).color).toBe("rgb(31, 26, 23)");
+  for (const element of [brand.querySelector("svg")!, canvas.getByRole("link", { name: "Entrar" })]) {
+    const bounds = element.getBoundingClientRect();
+    await expect(bounds.top - header.top).toBeGreaterThanOrEqual(8);
+    await expect(header.bottom - bounds.bottom).toBeGreaterThanOrEqual(10);
+  }
+}
+
 export const Visitante: Story = {
   name: "REQ-UIC-003/007/009 Visitante · 1440",
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await checkHeader(canvasElement);
     await expect(canvas.getByRole("banner")).toBeVisible();
     await canvasElement.ownerDocument.fonts.ready;
     const title = canvas.getByRole("heading", { level: 1 });
@@ -83,6 +99,7 @@ export const Celular: Story = {
   globals: { viewport: { value: "celular", isRotated: false } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await checkHeader(canvasElement);
     const open = canvas.getByRole("button", { name: "Onde, datas e pet" });
     await expect(open).toBeVisible();
     await expect(open).toHaveAttribute("aria-expanded", "false");

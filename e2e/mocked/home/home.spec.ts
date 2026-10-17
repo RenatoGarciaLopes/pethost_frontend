@@ -88,6 +88,16 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
   await expect(main).toHaveCount(1);
   await expect(main.getByRole("heading", { level: 1 })).toHaveCount(1);
   await expect(page.getByRole("banner")).toHaveCSS("border-bottom-width", "2px");
+  await expect(page.getByRole("banner")).toHaveCSS("border-bottom-color", "rgb(31, 26, 23)");
+  const brandLink = page.getByRole("link", { name: "PetHost", exact: true });
+  await expect(brandLink).toHaveCSS("text-decoration-line", "none");
+  await expect(brandLink).toHaveCSS("color", "rgb(31, 26, 23)");
+  const header = await page.getByRole("banner").boundingBox();
+  for (const content of [brandLink.locator("svg"), page.getByRole("link", { name: "Entrar", exact: true })]) {
+    const bounds = await content.boundingBox();
+    expect(bounds!.y - header!.y).toBeGreaterThanOrEqual(8);
+    expect(header!.y + header!.height - (bounds!.y + bounds!.height)).toBeGreaterThanOrEqual(10);
+  }
   const scene = main.locator('svg[viewBox="0 0 520 300"]');
   await expect(scene).toBeVisible();
   await expect(scene.locator("canvas")).toHaveCount(2);
@@ -103,6 +113,13 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
     )
     .toBe(true);
   const form = page.getByRole("form", { name: "Busca de cantinhos" });
+  await expect(form).toHaveCSS("box-shadow", "rgb(31, 26, 23) 0px 5px 0px 0px");
+  const lawn = form.locator("../..");
+  await expect(lawn).toHaveCSS("background-color", "rgb(207, 227, 160)");
+  await expect(lawn).toHaveCSS("border-bottom-color", "rgb(31, 26, 23)");
+  const wave = lawn.locator("svg").first();
+  const outline = wave.locator('path[fill="none"]').first();
+  await expect(outline).toHaveAttribute("d", /^M0 .*C.*[^Z]$/);
   if (mobile) await page.getByRole("button", { name: "Onde, datas e pet" }).click();
   await page.getByRole("textbox", { name: "Onde" }).fill("Zona 7, Maringá");
   await page.getByLabel("Chegada").fill("2026-12-20");
@@ -126,6 +143,12 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
     page.viewportSize()!.width,
   );
+  const searchBounds = await form.boundingBox();
+  const lawnBounds = await lawn.boundingBox();
+  const waveBounds = await wave.boundingBox();
+  expect(searchBounds!.y - (waveBounds!.y + (waveBounds!.height * 12) / 28)).toBeGreaterThanOrEqual(24);
+  expect(lawnBounds!.y + lawnBounds!.height - (searchBounds!.y + searchBounds!.height + 5)).toBeGreaterThanOrEqual(24);
+  await page.getByRole("heading", { level: 1 }).click();
   await page.screenshot({
     path: `test-results/home-fidelity/${mobile ? "mobile" : "desktop"}.png`,
     fullPage: true,

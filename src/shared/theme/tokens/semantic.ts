@@ -33,7 +33,8 @@ export const sceneColors = {
   skyTop: "#D7ECF1",
   skyMiddle: "#EAF2E6",
   skyBottom: "#F5F0DD",
-  ground: c.grama,
+  /** Gramado amplo e suave da prancha; seleção/feedback conserva quintal.grama. */
+  ground: "#CFE3A0",
 } as const;
 
 /** Mapeamento de feedback do MUI para a paleta (aviso nunca é vermelho; erro tem cor própria). */
