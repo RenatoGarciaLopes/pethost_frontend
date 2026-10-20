@@ -25,6 +25,16 @@ src/shared/theme/
 - O grão de papel entra como fundo no `CssBaseline`, a partir de um PNG local.
 - As fontes ficam em `src/assets/fonts`, carregadas em `app/layout.tsx` com `next/font/local`; as variáveis CSS vão para a `typography` do tema.
 
+## Ajuste dos campos em 19/10/2026
+
+A pedido do Renato, `shared/theme/overrides/surfaces.ts` deixa de aplicar o contorno azul externo ao `MuiOutlinedInput` focado. A mudança compartilhada alcança `TextField`, senha e demais campos outlined; mantém borda, sombra e borda de erro. Não cria componente ou recurso reutilizável novo.
+
+Regressão de componente em `OutlinedInput.test.tsx`: foco, digitação e borda normal/de erro. Regressão Playwright em `e2e/mocked/design-system.spec.ts`: e-mail e senha com clique e teclado, nos projetos desktop e celular. Unitários e integração com API não se aplicam, pois a mudança é apenas de estilo e não altera lógica ou contratos.
+
+As políticas e o catálogo do vault referenciados em `AGENTS.md` não foram encontrados nos caminhos indicados neste ambiente. Este registro local documenta a alteração; a atualização do Obsidian permanece pendente de acesso ao vault.
+
+Validação: quatro testes de componente aprovados (OutlinedInput e FormLabel), lint e formatação aprovados. A regressão Playwright passou em desktop e celular usando o Chrome instalado e o servidor existente na porta 3000, com configuração temporária fora do repositório; o Chromium gerenciado pelo Playwright não está instalado.
+
 ## Primitivos (`shared/ui`)
 
 | Componente                                                                 | Base MUI                      | Responsabilidade (uma)                                                       |

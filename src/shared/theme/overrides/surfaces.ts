@@ -16,7 +16,6 @@ export const inputStyles = {
   boxShadow: hardShadow(3),
   "& .MuiOutlinedInput-notchedOutline": { border: `2px solid ${c.tinta}` },
   "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: c.tinta },
-  "&.Mui-focused": { outline: `3px solid ${c.foco}`, outlineOffset: "3px" },
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: c.tinta },
   "&.Mui-error .MuiOutlinedInput-notchedOutline": { borderColor: c.erro },
 };
