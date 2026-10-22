@@ -25,3 +25,17 @@ it("REQ-NEARBY-006 a chave separa quem vê e o ponto, para os selos não vazarem
     searchQueries.nearby("visitor", { ...point, latitude: -25 }).queryKey,
   );
 });
+
+it("REQ-NEARBY-007 a reserva pede só a página fixa, sem lugar nem raio, e separa o cache por quem vê", async () => {
+  const request = vi.fn().mockResolvedValue(page);
+  const query = searchQueries.all("visitor", { request });
+  await query.queryFn!({ signal: new AbortController().signal } as never);
+  expect(request).toHaveBeenCalledWith(
+    expect.objectContaining({ method: "GET", path: "/listings", query: { pageSize: NEARBY_PAGE_SIZE } }),
+    expect.anything(),
+  );
+  expect(searchQueries.all("visitor").queryKey).not.toEqual(searchQueries.all("owner-1").queryKey);
+  expect(searchQueries.all("visitor").queryKey).not.toEqual(
+    searchQueries.nearby("visitor", { latitude: 0, longitude: 0 }).queryKey,
+  );
+});

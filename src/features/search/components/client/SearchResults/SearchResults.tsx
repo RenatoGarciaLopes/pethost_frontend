@@ -6,7 +6,7 @@ import type { ListingSummary } from "../../../api/contracts";
 import type { SearchQuery } from "../../../types";
 import type { SearchError } from "../../../lib/searchErrors";
 import { searchCopy as copy } from "../../../lib/searchCopy";
-import { ListingCard } from "../ListingCard";
+import { ListingCard, type ListingCardCompatibility } from "../ListingCard";
 
 /** Estado de apresentação e ações do consumidor. @example { query, items, totalCount, petCount, onMore, onRetry, onExpand } */
 export interface SearchResultsProps {
@@ -14,6 +14,8 @@ export interface SearchResultsProps {
   items: ListingSummary[];
   totalCount: number;
   petCount: number;
+  /** Conta e pets escolhidos, para o chip de compatibilidade dos cards; sem isso, sem chip. */
+  compatibility?: ListingCardCompatibility;
   isFetching?: boolean;
   hasNextPage?: boolean;
   error?: SearchError | null;
@@ -27,6 +29,7 @@ export function SearchResults({
   items,
   totalCount,
   petCount,
+  compatibility,
   isFetching,
   hasNextPage,
   error,
@@ -77,7 +80,7 @@ export function SearchResults({
       >
         {items.map((listing) => (
           <Box component="li" key={listing.id}>
-            <ListingCard listing={listing} query={query} petCount={petCount} />
+            <ListingCard listing={listing} query={query} petCount={petCount} compatibility={compatibility} />
           </Box>
         ))}
       </Box>

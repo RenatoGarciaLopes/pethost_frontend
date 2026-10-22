@@ -28,6 +28,7 @@ export function listingFixture(overrides: Partial<ListingSummary> = {}): Listing
     availableWeekdays: ["monday"],
     coverPhotoUrl: null,
     distanceKm: 1.4,
+    approximateLocation: { latitude: -23.425, longitude: -51.938, radiusMeters: 500 },
     badges: ["neighbor", "yard", "fast_responder", "experienced"],
     ...overrides,
   };

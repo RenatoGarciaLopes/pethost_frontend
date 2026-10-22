@@ -49,6 +49,7 @@ export function SearchExperience({
           items={items}
           totalCount={data?.pages[0]?.totalCount ?? 0}
           petCount={selected.length || query.count || 0}
+          compatibility={selected.length ? { accountId, pets: selected } : undefined}
           isFetching={result.isFetching}
           hasNextPage={!result.isPlaceholderData && result.hasNextPage}
           error={error}

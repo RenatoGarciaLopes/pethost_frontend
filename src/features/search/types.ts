@@ -28,3 +28,9 @@ export interface SearchQuery {
   maxNightlyRate?: number;
   minCapacity?: number;
 }
+
+/** Pet escolhido pelo tutor; os cards conferem a compatibilidade dele com cada cantinho. @example { id, name: "Pipoca" } */
+export interface CompatibilityPet {
+  id: string;
+  name: string;
+}

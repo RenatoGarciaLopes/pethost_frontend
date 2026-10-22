@@ -418,7 +418,12 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
       <PageContainer width="page" id="como-funciona" sx={{ py: { xs: 3, md: 4 }, scrollMarginTop: 80 }}>
         <TrustList variant="cards" items={copy.trust} />
       </PageContainer>
-      <NearbyListings scope={accountId ?? "visitor"} />
+      <NearbyListings
+        scope={accountId ?? "visitor"}
+        pets={personalized ? selectedPets.map(({ id, name }) => ({ id, name })) : undefined}
+        from={from}
+        to={to}
+      />
     </Box>
   );
 }

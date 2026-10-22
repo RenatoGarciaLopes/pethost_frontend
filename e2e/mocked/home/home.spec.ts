@@ -171,4 +171,18 @@ test.describe("vitrine perto de você", () => {
     await hideDevIndicator(page);
     await page.screenshot({ path: "test-results/home-fidelity/nearby.png", fullPage: true });
   });
+
+  test("REQ-SRCH-020 tutor com pet vê nos cards se o cantinho combina com ele", async ({ page, baseURL }) => {
+    await loginAccount(page, baseURL!);
+    await page.goto("/");
+    await waitForHydration(page.getByRole("main"));
+    await expect(page.getByRole("heading", { level: 2, name: /casas com vaga perto de você$/ })).toBeVisible({
+      timeout: 45_000,
+    });
+    await expect(page.getByText("✓ Combina com a Luna").first()).toBeVisible();
+    await expect(page.getByText("! Tem gato em casa").first()).toBeVisible();
+    await expect(page.getByText("★ 4,8 (9)").first()).toBeVisible();
+    await hideDevIndicator(page);
+    await page.screenshot({ path: "test-results/home-fidelity/nearby-owner.png", fullPage: true });
+  });
 });

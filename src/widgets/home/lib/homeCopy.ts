@@ -55,6 +55,14 @@ export const homeCopy = {
     signIn: "Entre para ver os cantinhos disponíveis.",
     signInAction: "Entrar",
     empty: "Ainda não achamos cantinhos num raio de 10 km. Tente outra cidade na busca.",
+    allTitle: (total: number) => `${total} ${total === 1 ? "casa com vaga" : "casas com vaga"} para conhecer`,
+    allReason: {
+      empty: "Ainda não achamos cantinhos num raio de 10 km, então mostramos outras casas.",
+      denied:
+        "Sem a sua localização, mostramos outras casas. Para olhar por perto, escreva a cidade ou o bairro na busca, no topo da página.",
+      unavailable: "Este navegador não informa a localização, então mostramos outras casas.",
+      failed: "Não conseguimos saber onde você está agora, então mostramos outras casas.",
+    },
     error: "Não conseguimos carregar os cantinhos agora.",
   },
 } as const;
