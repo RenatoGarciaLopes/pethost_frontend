@@ -14,7 +14,7 @@ export interface AppShellProps {
  * Casca das áreas logadas (spec 004), Server Component: "Pular para o conteúdo", cabeçalho no tom da conta
  * (REQ-SHELL-001: tutor papel, anfitrião gramado claro, admin areia), logo levando à casa do papel, menu da
  * conta, os atalhos do papel (`NAV_ITEMS`; gaveta no celular), o `<main id="conteudo">` e o `GrassFooter`
- * (rodapé de gramado que desce para a terra, só desenho).
+ * (rodapé de gramado que desce para a terra, só desenho; fora do admin: orçamento de personalidade zero).
  *
  * @example <RoleGate roles="host">{(user) => <AppShell user={user}>{children}</AppShell>}</RoleGate>
  */
@@ -25,7 +25,7 @@ export function AppShell({ user, children }: AppShellProps) {
       <Box component="main" id="conteudo" tabIndex={-1} sx={{ outline: "none", flexGrow: 1 }}>
         {children}
       </Box>
-      <GrassFooter />
+      {user.role !== "admin" && <GrassFooter />}
     </Box>
   );
 }

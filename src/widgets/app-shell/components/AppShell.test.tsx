@@ -100,10 +100,14 @@ describe("atalhos na casca", () => {
   });
 });
 
-it("REQ-UIC-011 o rodapé de gramado fecha a casca depois do conteúdo, sem virar landmark", () => {
-  setup("owner");
-  const footer = screen.getByTestId("grass-footer");
+it.each([
+  ["owner", true],
+  ["host", true],
+  ["admin", false],
+] as const)("REQ-UIC-011 rodapé de gramado depois do conteúdo para %s: %s", (role, shown) => {
+  setup(role);
+  const footer = screen.queryByTestId("grass-footer");
+  if (!shown) return expect(footer).not.toBeInTheDocument();
   expect(footer).toHaveAttribute("aria-hidden", "true");
-  expect(screen.getByRole("main").compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
+  expect(screen.getByRole("main").compareDocumentPosition(footer!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 });

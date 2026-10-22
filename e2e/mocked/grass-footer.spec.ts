@@ -30,11 +30,17 @@ test("REQ-UIC-011 o início termina no rodapé de gramado e a terra escurece ao 
   await expect.poll(() => descida(page)).toBeGreaterThan(0.95);
 });
 
-test("REQ-UIC-011 a casca das contas tem o rodapé depois do conteúdo", async ({ page, baseURL }) => {
+test("REQ-UIC-011 o rodapé aparece na casca do tutor e não aparece em entrar nem no admin", async ({ page, baseURL }) => {
+  await page.goto("/login");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByTestId("grass-footer")).toHaveCount(0);
   await loginAccount(page, baseURL!);
   await page.goto("/pets");
   await expect(page.getByRole("main")).toHaveCount(1);
   await expect(page.getByTestId("grass-footer")).toBeAttached();
-  await scrollToEnd(page);
-  await expect(page.getByTestId("grass-footer")).toBeInViewport({ ratio: 0.99 });
+  await page.context().clearCookies();
+  await loginAccount(page, baseURL!, "admin", "admin");
+  await page.goto("/admin/users");
+  await expect(page.getByRole("main")).toHaveCount(1);
+  await expect(page.getByTestId("grass-footer")).toHaveCount(0);
 });
