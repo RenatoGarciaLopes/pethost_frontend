@@ -5,6 +5,7 @@ import { petQueries } from "@/features/pets";
 import { prefetchMyPets } from "@/features/pets/index.server";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { getSession } from "@/shared/auth/server/getSession";
+import { GrassFooter } from "@/shared/ui/brand/GrassFooter";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { HomeScreen, homeCopy, type HomePetOption } from "@/widgets/home";
 import { AppHeader } from "@/widgets/app-shell";
@@ -62,6 +63,7 @@ async function HomeContent({ searchParams }: HomePageProps) {
     <>
       <AppHeader variant="home" user={viewer === "visitor" ? null : user} />
       <HomeScreen viewer={viewer} pets={pets} petsUnavailable={petsUnavailable} accountId={user?.id ?? null} />
+      <GrassFooter />
     </>
   );
 }

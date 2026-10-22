@@ -99,3 +99,11 @@ describe("atalhos na casca", () => {
     expect(screen.getByRole("link", { name: "Contas" })).toHaveAttribute("href", "/admin/users");
   });
 });
+
+it("REQ-UIC-011 o rodapé de gramado fecha a casca depois do conteúdo, sem virar landmark", () => {
+  setup("owner");
+  const footer = screen.getByTestId("grass-footer");
+  expect(footer).toHaveAttribute("aria-hidden", "true");
+  expect(screen.getByRole("main").compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
+});
