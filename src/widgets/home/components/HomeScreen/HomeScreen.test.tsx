@@ -111,3 +111,12 @@ it("REQ-HOME-009 falha ao carregar pets mantém espécie e alternativa de busca"
   expect(screen.getByRole("combobox", { name: "Pet" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Achar um cantinho" })).toBeEnabled();
 });
+
+it("REQ-HOME-010 os campos de pet não repassam atributos inválidos ao DOM", () => {
+  const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+  for (const props of [{ viewer: "visitor" }, { viewer: "owner", pets: petOptions }, { viewer: "host" }] as const) {
+    renderHome(props).unmount();
+  }
+  expect(error.mock.calls.flat().join(" ")).not.toMatch(/non-boolean attribute/);
+  error.mockRestore();
+});

@@ -61,7 +61,7 @@ async function HomeContent({ searchParams }: HomePageProps) {
   return (
     <>
       <AppHeader variant="home" user={viewer === "visitor" ? null : user} />
-      <HomeScreen viewer={viewer} pets={pets} petsUnavailable={petsUnavailable} />
+      <HomeScreen viewer={viewer} pets={pets} petsUnavailable={petsUnavailable} accountId={user?.id ?? null} />
     </>
   );
 }

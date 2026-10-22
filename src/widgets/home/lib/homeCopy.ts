@@ -39,4 +39,22 @@ export const homeCopy = {
     },
   ],
   loading: "Preparando seu quintal",
+  nearby: {
+    askTitle: "Casas com vaga perto de você",
+    askBody:
+      "Deixe o navegador dizer onde você está e a gente procura cantinhos por perto. Sua posição não fica guardada.",
+    useLocation: "Usar minha localização",
+    asking: "Esperando o navegador",
+    finding: "Farejando cantinhos",
+    title: (total: number) => `${total} ${total === 1 ? "casa com vaga" : "casas com vaga"} perto de você`,
+    seeAll: "Ver todos os cantinhos",
+    denied: "Sem a localização não dá para olhar por perto. Escreva a cidade ou o bairro na busca, no topo da página.",
+    unavailable: "Este navegador não informa a localização. Escreva a cidade ou o bairro na busca, no topo da página.",
+    failed: "Não conseguimos saber onde você está agora.",
+    retry: "Tentar de novo",
+    signIn: "Entre para ver os cantinhos disponíveis.",
+    signInAction: "Entrar",
+    empty: "Ainda não achamos cantinhos num raio de 10 km. Tente outra cidade na busca.",
+    error: "Não conseguimos carregar os cantinhos agora.",
+  },
 } as const;

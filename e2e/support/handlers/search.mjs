@@ -39,8 +39,10 @@ export function searchListing(listingId) {
 /** Busca sintética determinística, filtros observáveis e paginação; não simula geocodificação real. @example server.use(...searchHandlers); */
 export const searchHandlers = [
   http.get(`${API}/listings`, ({ request }) => {
-    if (!sessionUserOf(request)) return fail(401, "UNAUTHORIZED");
     const params = new URL(request.url).searchParams;
+    // Visitante só busca por coordenada (a vitrine "perto de você" da home); sem ela a API continua pedindo conta.
+    const byCoordinates = params.has("latitude") && params.has("longitude");
+    if (!sessionUserOf(request) && !byCoordinates) return fail(401, "UNAUTHORIZED");
     const city = params.get("city");
     if (city === "Sem endereço") return fail(422, "LISTING_SEARCH_ADDRESS_REQUIRED");
     if (city === "Fora do mapa") return fail(422, "LISTING_SEARCH_ADDRESS_NOT_LOCATED");

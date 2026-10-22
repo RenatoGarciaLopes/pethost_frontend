@@ -12,6 +12,7 @@ import { Notice } from "@/shared/ui/feedback/Notice";
 import { TrustList } from "@/shared/ui/data-display/TrustList";
 import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { Surface } from "@/shared/ui/layout/Surface";
+import { NearbyListings } from "../NearbyListings";
 import { buildHomeSearchPath, type HomePetSpecies } from "../../lib/homeSearchPath";
 import { homeDateLabel } from "../../lib/homeDateLabel";
 import { homeCopy as copy } from "../../lib/homeCopy";
@@ -28,6 +29,8 @@ export interface HomeScreenProps {
   /** Só id/nome/espécie dos pets ativos, sem dados privados. */
   pets: readonly HomePetOption[];
   petsUnavailable: boolean;
+  /** Id da conta logada; `null` para visitante. Separa o cache da vitrine "perto de você". */
+  accountId?: string | null;
 }
 
 const PET_COUNTS = [1, 2, 3, 4, 5, 6] as const;
@@ -66,7 +69,7 @@ const control = {
  * Visitante passa pelo login com next seguro; tutor seleciona ids; host informa quantidade fora da faixa.
  * @example <HomeScreen viewer="visitor" pets={[]} petsUnavailable={false} />
  */
-export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
+export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: HomeScreenProps) {
   const router = useRouter();
   const ids = useId();
   const [where, setWhere] = useState("");
@@ -153,6 +156,8 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
                 maxWidth: { xs: 390, md: 560 },
                 mx: "auto",
                 mb: -1,
+                // O chão da cena fica acima do fundo do viewBox; no computador ela desce até pousar no gramado.
+                transform: { md: "translateY(11%)" },
                 position: "relative",
                 zIndex: 1,
               }}
@@ -321,6 +326,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
                     </FormLabel>
                     {isPetList ? (
                       <Select<string[]>
+                        variant="standard"
                         id={`${ids}-pet`}
                         labelId={`${ids}-pet-label`}
                         multiple
@@ -348,6 +354,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
                       </Select>
                     ) : isHost ? (
                       <Select<number>
+                        variant="standard"
                         id={`${ids}-pet`}
                         labelId={`${ids}-pet-label`}
                         value={petCount}
@@ -363,6 +370,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
                       </Select>
                     ) : (
                       <Select<HomePetSpecies | "">
+                        variant="standard"
                         id={`${ids}-pet`}
                         labelId={`${ids}-pet-label`}
                         value={species}
@@ -410,6 +418,7 @@ export function HomeScreen({ viewer, pets, petsUnavailable }: HomeScreenProps) {
       <PageContainer width="page" id="como-funciona" sx={{ py: { xs: 3, md: 4 }, scrollMarginTop: 80 }}>
         <TrustList variant="cards" items={copy.trust} />
       </PageContainer>
+      <NearbyListings scope={accountId ?? "visitor"} />
     </Box>
   );
 }
