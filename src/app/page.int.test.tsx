@@ -103,7 +103,7 @@ it("access vencido sem refresh continua visitante", async () => {
 it("REQ-HOME-001 home pública tem metadata e não consulta sessão sem cookie", async () => {
   expect(metadata.title).toBe("Início · PetHost");
   renderWithProviders(await resolveHomeContent(), { theme: quintalTheme });
-  expect(screen.getByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja" })).toBeVisible();
   expect(requestState.events).toEqual(["connection"]);
   expect(requestState.connection).toHaveBeenCalledOnce();
 });

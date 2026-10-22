@@ -1,10 +1,10 @@
 /**
  * Textos visíveis do Início, alinhados ao tom de vizinhança aprovado no design.
- * @example homeCopy.genericTitle // "Um quintal pro seu pet enquanto você viaja."
+ * @example homeCopy.genericTitle // "Um quintal pro seu pet enquanto você viaja"
  */
 export const homeCopy = {
   pageTitle: "Início · PetHost",
-  genericTitle: "Um quintal pro seu pet enquanto você viaja.",
+  genericTitle: "Um quintal pro seu pet enquanto você viaja",
   petsTitle: (names: readonly string[]) =>
     names.length === 1
       ? `Um quintal pra ${names[0]} enquanto você viaja.`

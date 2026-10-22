@@ -21,7 +21,7 @@ test("REQ-HOME-001/002 visitante vê o início e volta à busca depois de entrar
   await page.goto("/");
   await expect(page).toHaveTitle("Início · PetHost");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Um quintal pro seu pet enquanto você viaja." }),
+    page.getByRole("heading", { level: 1, name: "Um quintal pro seu pet enquanto você viaja" }),
   ).toBeVisible();
   await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Zona 7");

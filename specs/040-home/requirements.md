@@ -31,7 +31,7 @@ area: HOME
 | ID           | Critério                                                                                                                                                                                                                                                                                                                    |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | REQ-HOME-001 | QUANDO uma pessoa abre `/`, autenticada ou não, O SISTEMA DEVE renderizar a página pública de Início em vez de 404; a metadata identifica “Início · PetHost”.                                                                                                                                                               |
-| REQ-HOME-002 | ENQUANTO visitante ou tutor não tiver pet ativo, O SISTEMA DEVE mostrar “Um quintal pro seu pet enquanto você viaja.”, explicar que vizinhos recebem cães e gatos e permitir selecionar cão ou gato sem pedir cadastro.                                                                                                     |
+| REQ-HOME-002 | ENQUANTO visitante ou tutor não tiver pet ativo, O SISTEMA DEVE mostrar “Um quintal pro seu pet enquanto você viaja”, explicar que vizinhos recebem cães e gatos e permitir selecionar cão ou gato sem pedir cadastro.                                                                                                     |
 | REQ-HOME-003 | SE um tutor tiver pets ativos, O SISTEMA DEVE iniciar com o pet mais recente selecionado, usar o nome dele sem inferir gênero, permitir escolher um ou mais pets e atualizar a chamada conforme a seleção. Pets inativos não aparecem.                                                                                      |
 | REQ-HOME-004 | QUANDO anfitrião abrir a busca, O SISTEMA DEVE oferecer quantidade de pets; a home não deve buscar nem carregar pets da casa.                                                                                                                                                                                               |
 | REQ-HOME-005 | QUANDO uma pessoa enviar a busca, O SISTEMA DEVE levar para `/search`, preservando `where`, `from`, `to` e os parâmetros de pets/espécie/quantidade aplicáveis. Com sessão, navega direto; sem sessão, navega a `/login?next=` cujo valor decodificado é o destino completo de `/search`. A home não chama `GET /listings`. |
@@ -54,7 +54,7 @@ area: HOME
 
 ## Microcopy
 
-- “Um quintal pro seu pet enquanto você viaja.”
+- “Um quintal pro seu pet enquanto você viaja”
 - “Um quintal pra {nome} enquanto você viaja.”
 - “Um quintal pros seus pets enquanto você viaja.”
 - “Vizinhos de Maringá que recebem cães e gatos na própria casa.”

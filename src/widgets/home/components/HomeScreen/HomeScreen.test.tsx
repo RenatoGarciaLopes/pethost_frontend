@@ -21,7 +21,7 @@ function renderHome(overrides: Partial<HomeScreenProps> = {}) {
 
 it("REQ-HOME-002 visitante prepara a busca por espécie e segue pelo login com os parâmetros", async () => {
   const { user } = renderHome();
-  expect(screen.getByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja" })).toBeVisible();
   expect(screen.getByText("Entre para ver os cantinhos disponíveis.")).toBeVisible();
 
   await user.type(screen.getByRole("textbox", { name: "Onde" }), "Zona 7");
