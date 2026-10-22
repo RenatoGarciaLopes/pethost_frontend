@@ -79,6 +79,10 @@ export const bffRoutes: readonly BffRoute[] = [
   route("PUT", "/listings/{listingId}/photos/order"),
   route("PATCH", "/listings/{listingId}/photos/{photoId}"),
   route("DELETE", "/listings/{listingId}/photos/{photoId}"),
+  route("GET", "/listings/{listingId}/compatibility"),
+  route("GET", "/listings/{listingId}/availability-blocks"),
+  route("POST", "/listings/{listingId}/availability-blocks"),
+  route("DELETE", "/listings/{listingId}/availability-blocks/{blockId}"),
 
   // Estadias (bookings)
   route("POST", "/bookings"),
@@ -90,6 +94,31 @@ export const bffRoutes: readonly BffRoute[] = [
   route("POST", "/bookings/{bookingId}/check-in"),
   route("POST", "/bookings/{bookingId}/check-out"),
 
+  // Pagamento da reserva e ganhos do anfitrião (payments)
+  route("GET", "/bookings/{bookingId}/payment"),
+  route("PUT", "/bookings/{bookingId}/payment"),
+  route("POST", "/bookings/{bookingId}/payment/installments/{installmentNumber}/payment-session"),
+  route("POST", "/bookings/{bookingId}/payment/synchronization"),
+  route("GET", "/payments/payouts/me"),
+
+  // Conversas (a escrita é REST; o aviso em tempo real é o hub, fora do proxy)
+  route("POST", "/conversations"),
+  route("GET", "/conversations/me"),
+  route("GET", "/conversations/me/unread-count"),
+  route("GET", "/conversations/me/notification-settings"),
+  route("PUT", "/conversations/me/notification-settings"),
+  route("GET", "/conversations/{conversationId}"),
+  route("GET", "/conversations/{conversationId}/messages"),
+  route("POST", "/conversations/{conversationId}/messages"),
+  route("POST", "/conversations/{conversationId}/messages/photo"),
+  route("POST", "/conversations/{conversationId}/messages/{messageId}/report"),
+  route("PUT", "/conversations/{conversationId}/read-marker"),
+  route("PUT", "/conversations/{conversationId}/block"),
+  route("DELETE", "/conversations/{conversationId}/block"),
+
+  // Contato do suporte (público)
+  route("GET", "/support"),
+
   // Pets
   route("POST", "/pets"),
   route("GET", "/pets/me"),
@@ -100,6 +129,7 @@ export const bffRoutes: readonly BffRoute[] = [
   route("POST", "/pets/{petId}/photos"),
   route("PATCH", "/pets/{petId}/photos/{photoId}"),
   route("DELETE", "/pets/{petId}/photos/{photoId}"),
+  route("PUT", "/pets/{petId}/photos/order"),
 
   // Admin
   route("GET", "/audit-entries"),
@@ -119,6 +149,11 @@ export const bffRoutes: readonly BffRoute[] = [
   route("POST", "/owners/{ownerId}/suspension"),
   route("DELETE", "/owners/{ownerId}/suspension"),
   route("POST", "/owners/{ownerId}/cpf-release"),
+  route("GET", "/payments/issues"),
+  route("GET", "/conversations/reports"),
+  route("GET", "/conversations/reports/{reportId}"),
+  route("PUT", "/conversations/reports/{reportId}/resolution"),
+  route("DELETE", "/conversations/{conversationId}/moderation-block"),
 ];
 
 /** Parâmetro de rota: ids e palavras simples. Recusa `..`, espaço e barra codificada. */

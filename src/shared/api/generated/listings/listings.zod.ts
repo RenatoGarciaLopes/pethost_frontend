@@ -127,8 +127,13 @@ export const PostApiV1ListingsResponse = zod.object({
  * badges (neighbor, fast_responder, yard, experienced).
  *             Só aparecem cantinhos ativos de anfitrião ativo. Cada item traz bairro, cidade e distância —
  *             nunca o endereço nem a coordenada. Paginado: `page` a partir de 1, `pageSize` até
- *             100. Busca por raio com conta sem endereço: 422 `LISTING_SEARCH_ADDRESS_REQUIRED`.
- * @summary Busca cantinhos com filtros que se somam. Qualquer conta logada.
+ *             100. Sem coordenada, a origem é o endereço de quem busca: o da empresa para o anfitrião
+ *             empresa, senão o da conta (também é a base do selo `neighbor`). Busca por raio sem
+ *             endereço: 422 `LISTING_SEARCH_ADDRESS_REQUIRED`.
+ *             Sem login: não há endereço, então sem coordenada nem estado/cidade/bairro lista todos os
+ * cantinhos, do mais novo ao mais antigo (sem selo neighbor); radiusKm sem
+ * coordenada dá 422 LISTING_SEARCH_ADDRESS_REQUIRED.
+ * @summary Busca cantinhos com filtros que se somam. Aberta: qualquer pessoa, logada ou não.
  */
 export const GetApiV1ListingsQueryParams = zod.object({
   "Latitude": zod.number().optional(),
@@ -452,8 +457,63 @@ export const PatchApiV1ListingsListingIdResponse = zod.object({
 }).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
 
 /**
+ * `petId` obrigatório (pet ativo do tutor logado). Compara o que o pet aceita
+ *         (`goodWithDogs`, `goodWithCats`, `goodWithKids`) com quem mora na casa e o tipo
+ *         e o porte do pet com o que o cantinho aceita. Com `checkIn` e `checkOut`
+ *         (`yyyy-MM-dd`, juntos; mesmas regras da busca), cruza também com os pets de outros tutores
+ *         hospedados no período (estadias aceitas, confirmadas e em andamento), que vêm em `guests`
+ *         só com nome, tipo e porte. `matches` = nenhum aviso. Códigos dos avisos:
+ *         `species_not_accepted`, `size_not_accepted`, `home_has_dogs`,
+ *         `home_has_cats`, `home_has_kids`, `guest_is_dog`, `guest_is_cat`,
+ *         `guest_dislikes_dogs`, `guest_dislikes_cats`, `guest_large_dog` (os de hóspede
+ *         trazem o `guest`). Cantinho que o tutor não veria no detalhe: 404 `LISTING_NOT_FOUND`.
+ *         Pet inexistente, inativo ou de outro tutor: 404 `LISTING_PET_NOT_FOUND`.
+ * @summary "Combina com seu pet": cruza um pet do tutor logado com o cantinho. Só avisa, não bloqueia.
+ */
+export const GetApiV1ListingsListingIdCompatibilityParams = zod.object({
+  "listingId": zod.string().uuid()
+})
+
+export const GetApiV1ListingsListingIdCompatibilityQueryParams = zod.object({
+  "petId": zod.string().uuid().optional(),
+  "checkIn": zod.string().optional(),
+  "checkOut": zod.string().optional()
+})
+
+export const GetApiV1ListingsListingIdCompatibilityResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.union([zod.null(),zod.object({
+  "listingId": zod.string().uuid(),
+  "petId": zod.string().uuid(),
+  "petName": zod.string(),
+  "matches": zod.boolean().describe('Nenhum aviso: "A Pipoca combina com essa casa".'),
+  "warnings": zod.array(zod.object({
+  "code": zod.string().describe('`species_not_accepted`, `size_not_accepted`, `home_has_dogs`, `home_has_cats`,\n        `home_has_kids`, `guest_is_dog`, `guest_is_cat`, `guest_dislikes_dogs`,\n        `guest_dislikes_cats` ou `guest_large_dog`.'),
+  "guest": zod.union([zod.null(),zod.object({
+  "name": zod.string(),
+  "species": zod.string(),
+  "size": zod.string().nullish()
+}).describe('O hóspede que gerou o aviso; omitido nos avisos sobre o cantinho e a casa.')]).optional()
+}).describe('Um aviso. O app monta o texto a partir do código e dos nomes.')).describe('Avisos na ordem: cantinho e casa primeiro, depois cada hóspede do período.'),
+  "guests": zod.array(zod.object({
+  "name": zod.string(),
+  "species": zod.string(),
+  "size": zod.string().nullish()
+}).describe('Outro pet hospedado no período: nome, tipo e porte. Nada do tutor dele.')).nullish().describe('Os outros pets hospedados no período (de outros tutores), na ordem de chegada. Nulo (omitido)\nquando não vêm as datas.')
+}).describe('"Combina com seu pet": os avisos do pet no cantinho. Só avisa, não bloqueia o pedido.')]).optional(),
+  "error": zod.union([zod.null(),zod.object({
+  "code": zod.string(),
+  "message": zod.string(),
+  "details": zod.unknown().optional()
+}).describe('Estrutura padronizada de erro.')]).optional(),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+
+/**
  * Inativo, some da busca e de quem não é o dono, e pode voltar com `DELETE` nesta rota.
- * Cantinho de outro anfitrião: 404 `LISTING_NOT_FOUND`.
+ * Cantinho de outro anfitrião: 404 `LISTING_NOT_FOUND`. Com reserva em aberto
+ * (solicitada, aceita, confirmada ou em andamento): 422 `LISTING_HAS_OPEN_BOOKING` —
+ * responda, cancele ou faça o check-out antes.
  * @summary Inativa um cantinho do anfitrião logado. Idempotente.
  */
 export const PostApiV1ListingsListingIdDeactivationParams = zod.object({
@@ -887,6 +947,104 @@ export const DeleteApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "updatedAt": zod.string().datetime({"offset":true}),
   "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
 }).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
+  "error": zod.union([zod.null(),zod.object({
+  "code": zod.string(),
+  "message": zod.string(),
+  "details": zod.unknown().optional()
+}).describe('Estrutura padronizada de erro.')]).optional(),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+
+/**
+ * Por padrão tudo está disponível; cada item fecha os dias de `startDate` a
+ * `endDate` (inclusive). Quem vê é quem vê o cantinho: o dono e o admin, com o
+ * `reason`; qualquer outra conta, só as datas, de cantinho ativo e disponível. Fora isso:
+ * 404 `LISTING_NOT_FOUND`.
+ * @summary A agenda do cantinho: os períodos fechados pelo anfitrião que ainda não acabaram.
+ */
+export const GetApiV1ListingsListingIdAvailabilityBlocksParams = zod.object({
+  "listingId": zod.string().uuid()
+})
+
+export const GetApiV1ListingsListingIdAvailabilityBlocksResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "listingId": zod.string().uuid(),
+  "startDate": zod.string().date().describe('Primeiro dia bloqueado (`yyyy-MM-dd`).'),
+  "endDate": zod.string().date().describe('Último dia bloqueado, inclusive.'),
+  "days": zod.number().int().describe('Quantos dias o bloqueio fecha.'),
+  "reason": zod.string().nullish().describe('Motivo — só para o anfitrião dono e o admin; para os outros, omitido.'),
+  "createdAt": zod.string().datetime({"offset":true})
+}).describe('Um período fechado na agenda do cantinho.')).nullish(),
+  "error": zod.union([zod.null(),zod.object({
+  "code": zod.string(),
+  "message": zod.string(),
+  "details": zod.unknown().optional()
+}).describe('Estrutura padronizada de erro.')]).optional(),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+
+/**
+ * Corpo: `{ "startDate": "2026-12-20", "endDate": "2026-12-26", "reason": "Viagem" }`
+ * (`reason` opcional, até 120 caracteres, só para o anfitrião). Início a partir de hoje
+ * (Brasília), fim não antes do início, até 365 dias à frente — todos os erros num só 400.
+ * Nenhum pedido de reserva passa por esses dias (422 `BOOKING_DATES_BLOCKED`) e o
+ * cantinho some da busca com essas datas. Reservas já pedidas ou aceitas continuam. Período
+ * que sobrepõe outro bloqueio: 422 `LISTING_AVAILABILITY_BLOCK_OVERLAP`; mais de 50 em
+ * aberto: 422 `LISTING_AVAILABILITY_BLOCK_LIMIT_REACHED`. Cantinho de outro anfitrião:
+ * 404 `LISTING_NOT_FOUND`.
+ * @summary Fecha datas na agenda do cantinho do anfitrião logado.
+ */
+export const PostApiV1ListingsListingIdAvailabilityBlocksParams = zod.object({
+  "listingId": zod.string().uuid()
+})
+
+export const PostApiV1ListingsListingIdAvailabilityBlocksBody = zod.object({
+  "startDate": zod.string().nullish().describe('Primeiro dia bloqueado, `yyyy-MM-dd`.'),
+  "endDate": zod.string().nullish().describe('Último dia bloqueado, inclusive (pode ser o mesmo do início).'),
+  "reason": zod.string().nullish().describe('Opcional, até 120 caracteres, só para o anfitrião.')
+}).describe('Corpo de `POST /listings/{listingId}/availability-blocks`.')
+
+export const PostApiV1ListingsListingIdAvailabilityBlocksResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.union([zod.null(),zod.object({
+  "id": zod.string().uuid(),
+  "listingId": zod.string().uuid(),
+  "startDate": zod.string().date().describe('Primeiro dia bloqueado (`yyyy-MM-dd`).'),
+  "endDate": zod.string().date().describe('Último dia bloqueado, inclusive.'),
+  "days": zod.number().int().describe('Quantos dias o bloqueio fecha.'),
+  "reason": zod.string().nullish().describe('Motivo — só para o anfitrião dono e o admin; para os outros, omitido.'),
+  "createdAt": zod.string().datetime({"offset":true})
+}).describe('Um período fechado na agenda do cantinho.')]).optional(),
+  "error": zod.union([zod.null(),zod.object({
+  "code": zod.string(),
+  "message": zod.string(),
+  "details": zod.unknown().optional()
+}).describe('Estrutura padronizada de erro.')]).optional(),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+
+/**
+ * Bloqueio que não é do cantinho: 404 `LISTING_AVAILABILITY_BLOCK_NOT_FOUND`.
+ * @summary Reabre as datas de um bloqueio da agenda. Devolve a agenda como ficou.
+ */
+export const DeleteApiV1ListingsListingIdAvailabilityBlocksBlockIdParams = zod.object({
+  "listingId": zod.string().uuid(),
+  "blockId": zod.string().uuid()
+})
+
+export const DeleteApiV1ListingsListingIdAvailabilityBlocksBlockIdResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "listingId": zod.string().uuid(),
+  "startDate": zod.string().date().describe('Primeiro dia bloqueado (`yyyy-MM-dd`).'),
+  "endDate": zod.string().date().describe('Último dia bloqueado, inclusive.'),
+  "days": zod.number().int().describe('Quantos dias o bloqueio fecha.'),
+  "reason": zod.string().nullish().describe('Motivo — só para o anfitrião dono e o admin; para os outros, omitido.'),
+  "createdAt": zod.string().datetime({"offset":true})
+}).describe('Um período fechado na agenda do cantinho.')).nullish(),
   "error": zod.union([zod.null(),zod.object({
   "code": zod.string(),
   "message": zod.string(),
