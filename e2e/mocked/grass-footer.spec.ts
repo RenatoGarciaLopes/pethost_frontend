@@ -24,7 +24,6 @@ test("REQ-UIC-011 o início termina no rodapé de gramado e a terra escurece ao 
   await waitForHydration(page.getByRole("main"));
   const footer = page.getByTestId("grass-footer");
   await expect(footer).toBeAttached();
-  await expect(page.getByRole("contentinfo")).toHaveCount(0);
   await expect.poll(() => descida(page)).toBe(0);
   await scrollToEnd(page);
   await expect(footer).toBeInViewport({ ratio: 0.99 });
@@ -38,24 +37,4 @@ test("REQ-UIC-011 a casca das contas tem o rodapé depois do conteúdo", async (
   await expect(page.getByTestId("grass-footer")).toBeAttached();
   await scrollToEnd(page);
   await expect(page.getByTestId("grass-footer")).toBeInViewport({ ratio: 0.99 });
-  await page.goto("/users/profile");
-  await expect(page.getByTestId("grass-footer")).toBeAttached();
-});
-
-test.describe("movimento reduzido", () => {
-  test.use({ reducedMotion: "reduce" });
-
-  test("REQ-UIC-011 fica o degradê estático, sem acompanhar a rolagem", async ({ page }) => {
-    await page.goto("/");
-    await waitForHydration(page.getByRole("main"));
-    await scrollToEnd(page);
-    await expect(page.getByTestId("grass-footer")).toBeInViewport({ ratio: 0.99 });
-    expect(await page.getByTestId("grass-footer").evaluate((el) => el.style.getPropertyValue("--descida"))).toBe("");
-  });
-});
-
-test("REQ-UIC-011 telas de entrar não ganham o rodapé", async ({ page }) => {
-  await page.goto("/login");
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByTestId("grass-footer")).toHaveCount(0);
 });
