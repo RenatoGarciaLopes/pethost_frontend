@@ -21,8 +21,8 @@ export const GetApiV1BookingsBookingIdPaymentParams = zod.object({
 })
 
 export const GetApiV1BookingsBookingIdPaymentResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().nullish().describe('Nulo enquanto o tutor não escolheu as parcelas (`status = not_started`).'),
   "bookingId": zod.string().uuid(),
   "status": zod.string().describe('`not_started`, `pending`, `active`, `paid` ou `cancelled`.'),
@@ -77,14 +77,9 @@ export const GetApiV1BookingsBookingIdPaymentResponse = zod.object({
 }).describe('O repasse ao anfitrião — só para o anfitrião e o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}).nullish(),
   "updatedAt": zod.string().datetime({"offset":true}).nullish()
-}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Corpo: `{ "installmentCount": 3 }` (1 = à vista, até 6). Só reserva `accepted` e
@@ -104,8 +99,8 @@ export const PutApiV1BookingsBookingIdPaymentBody = zod.object({
 }).describe('Corpo da escolha do parcelamento.')
 
 export const PutApiV1BookingsBookingIdPaymentResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().nullish().describe('Nulo enquanto o tutor não escolheu as parcelas (`status = not_started`).'),
   "bookingId": zod.string().uuid(),
   "status": zod.string().describe('`not_started`, `pending`, `active`, `paid` ou `cancelled`.'),
@@ -160,14 +155,9 @@ export const PutApiV1BookingsBookingIdPaymentResponse = zod.object({
 }).describe('O repasse ao anfitrião — só para o anfitrião e o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}).nullish(),
   "updatedAt": zod.string().datetime({"offset":true}).nullish()
-}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * O app chama `stripe.elements({ clientSecret })` com a `publishableKey`; no Pix, o QR
@@ -185,8 +175,8 @@ export const PostApiV1BookingsBookingIdPaymentInstallmentsInstallmentNumberPayme
 })
 
 export const PostApiV1BookingsBookingIdPaymentInstallmentsInstallmentNumberPaymentSessionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "bookingId": zod.string().uuid(),
   "installmentNumber": zod.number().int(),
   "installmentCount": zod.number().int(),
@@ -197,14 +187,9 @@ export const PostApiV1BookingsBookingIdPaymentInstallmentsInstallmentNumberPayme
   "pixExpiresAt": zod.number().int().describe('Até quando o QR code do Pix vale (Unix, segundos, UTC).'),
   "paymentMethods": zod.array(zod.string()).describe('Os meios aceitos: `card` e `pix`.'),
   "lateFee": zod.number().describe('Multa e juros por atraso incluídos em Amount (zero em dia).')
-}).describe('O que o app precisa para o checkout transparente de uma parcela: abrir o Payment Element do\nStripe (`stripe.elements({ clientSecret })`) com cartão e Pix, sem sair do PetHost.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('O que o app precisa para o checkout transparente de uma parcela: abrir o Payment Element do\nStripe (`stripe.elements({ clientSecret })`) com cartão e Pix, sem sair do PetHost.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * O app chama ao voltar do Payment Element; o admin, para conferir. Confirma a reserva se a 1ª
@@ -217,8 +202,8 @@ export const PostApiV1BookingsBookingIdPaymentSynchronizationParams = zod.object
 })
 
 export const PostApiV1BookingsBookingIdPaymentSynchronizationResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().nullish().describe('Nulo enquanto o tutor não escolheu as parcelas (`status = not_started`).'),
   "bookingId": zod.string().uuid(),
   "status": zod.string().describe('`not_started`, `pending`, `active`, `paid` ou `cancelled`.'),
@@ -273,12 +258,7 @@ export const PostApiV1BookingsBookingIdPaymentSynchronizationResponse = zod.obje
 }).describe('O repasse ao anfitrião — só para o anfitrião e o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}).nullish(),
   "updatedAt": zod.string().datetime({"offset":true}).nullish()
-}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

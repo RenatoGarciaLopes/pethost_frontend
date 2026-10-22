@@ -33,8 +33,8 @@ export const PostApiV1OwnersRegisterBody = zod.object({
 }).describe('Cadastro de tutor num pedido só: a conta (Auth) e o perfil de tutor (Owners).\nO papel é sempre `owner`, por isso não vem na request.')
 
 export const PostApiV1OwnersRegisterResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "accessToken": zod.string(),
   "refreshToken": zod.string(),
   "expiresAt": zod.number().int().describe('Expiração do access token em Unix time (segundos).'),
@@ -68,22 +68,17 @@ export const PostApiV1OwnersRegisterResponse = zod.object({
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
 }).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')
-}).describe('Sessão aberta no cadastro mais o tutor completo (CPF e dados da conta): o cadastro\njá entra na conta.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Sessão aberta no cadastro mais o tutor completo (CPF e dados da conta): o cadastro\njá entra na conta.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * 404 só para conta de tutor antiga, de antes do cadastro unificado, sem CPF.
  * @summary Perfil de tutor da conta logada.
  */
 export const GetApiV1OwnersMeResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
   "cpf": zod.string().nullish().describe('Só dígitos (`52998224725`), sem máscara. Nulo se o admin liberou o CPF.'),
@@ -112,14 +107,9 @@ export const GetApiV1OwnersMeResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Só muda o que vier no corpo (PATCH); o endereço também pode vir pela metade. Para
@@ -149,8 +139,8 @@ export const PatchApiV1OwnersMeBody = zod.object({
 }).describe('Corpo do `PATCH /owners/me`: só o que vier muda. O id vem do token, não daqui.')
 
 export const PatchApiV1OwnersMeResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
   "cpf": zod.string().nullish().describe('Só dígitos (`52998224725`), sem máscara. Nulo se o admin liberou o CPF.'),
@@ -179,14 +169,9 @@ export const PatchApiV1OwnersMeResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * `multipart/form-data` com a imagem na parte `file`: JPG/JPEG, PNG ou WebP, até
@@ -200,8 +185,8 @@ export const PutApiV1OwnersMeAvatarBody = zod.object({
 })
 
 export const PutApiV1OwnersMeAvatarResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
   "cpf": zod.string().nullish().describe('Só dígitos (`52998224725`), sem máscara. Nulo se o admin liberou o CPF.'),
@@ -230,22 +215,17 @@ export const PutApiV1OwnersMeAvatarResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * A imagem é apagada do bucket.
  * @summary Tira a foto de perfil do tutor logado. Idempotente.
  */
 export const DeleteApiV1OwnersMeAvatarResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
   "cpf": zod.string().nullish().describe('Só dígitos (`52998224725`), sem máscara. Nulo se o admin liberou o CPF.'),
@@ -274,14 +254,9 @@ export const DeleteApiV1OwnersMeAvatarResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Todas as sessões da conta caem na hora. A conta de anfitrião da mesma pessoa não é
@@ -291,17 +266,33 @@ export const DeleteApiV1OwnersMeAvatarResponse = zod.object({
  * @summary Inativa o tutor logado: o perfil de tutor e a conta, juntos.
  */
 export const PostApiV1OwnersMeDeactivateResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
 
-}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
+
+/**
+ * Pede a senha atual (`currentPassword`; faltando ou errada, 400 no campo). Apaga ou
+ * anonimiza nome, e-mail, telefone, nascimento, endereço, CPF, a foto de perfil, as fotos dos
+ * pets e as conversas; ficam as reservas, os pagamentos, as avaliações (com "Conta excluída" no
+ * lugar do nome) e a trilha de auditoria. Todas as sessões caem na hora e o e-mail fica livre
+ * para um cadastro novo. A conta de anfitrião da mesma pessoa não é afetada. Com reserva em
+ * aberto: 422 `OWNER_HAS_OPEN_BOOKING`.
+ * @summary Exclui a conta de tutor logada, sem volta (LGPD: eliminação a pedido do titular).
+ */
+export const PostApiV1OwnersMeDeletionBody = zod.object({
+  "currentPassword": zod.string().nullish()
+}).describe('Corpo da exclusão da conta: a senha atual, para confirmar. O id vem do token.')
+
+export const PostApiV1OwnersMeDeletionResponse = zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
+
+}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).'),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Resposta de sucesso.')
 
 /**
  * Pede e-mail e senha da conta de tutor, porque conta inativa não consegue entrar
@@ -314,8 +305,8 @@ export const PostApiV1OwnersReactivateBody = zod.object({
 }).describe('Reativa o tutor: a conta e o perfil de tutor. Pede as credenciais do login, porque\nconta inativa não consegue entrar para pedir isso logada. Já devolve a sessão.')
 
 export const PostApiV1OwnersReactivateResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "accessToken": zod.string(),
   "refreshToken": zod.string(),
   "expiresAt": zod.number().int().describe('Expiração do access token em Unix time (segundos).'),
@@ -349,14 +340,9 @@ export const PostApiV1OwnersReactivateResponse = zod.object({
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
 }).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')
-}).describe('Sessão aberta no cadastro mais o tutor completo (CPF e dados da conta): o cadastro\njá entra na conta.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Sessão aberta no cadastro mais o tutor completo (CPF e dados da conta): o cadastro\njá entra na conta.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * @summary Um tutor, com os dados da conta. Só admin.
@@ -366,8 +352,8 @@ export const GetApiV1OwnersOwnerIdParams = zod.object({
 })
 
 export const GetApiV1OwnersOwnerIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
   "cpf": zod.string().nullish().describe('Só dígitos (`52998224725`), sem máscara. Nulo se o admin liberou o CPF.'),
@@ -396,14 +382,9 @@ export const GetApiV1OwnersOwnerIdResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Todas as sessões do tutor caem na hora; login responde `403 AUTH_ACCOUNT_SUSPENDED`
@@ -420,8 +401,8 @@ export const PostApiV1OwnersOwnerIdSuspensionBody = zod.object({
 }).describe('Corpo das ações do admin que exigem motivo. Vai para a trilha de auditoria.')
 
 export const PostApiV1OwnersOwnerIdSuspensionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
   "cpf": zod.string().nullish().describe('Só dígitos (`52998224725`), sem máscara. Nulo se o admin liberou o CPF.'),
@@ -450,14 +431,9 @@ export const PostApiV1OwnersOwnerIdSuspensionResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * O tutor volta ao status que tinha (ativo ou inativo) e precisa entrar de novo.
@@ -469,8 +445,8 @@ export const DeleteApiV1OwnersOwnerIdSuspensionParams = zod.object({
 })
 
 export const DeleteApiV1OwnersOwnerIdSuspensionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
   "cpf": zod.string().nullish().describe('Só dígitos (`52998224725`), sem máscara. Nulo se o admin liberou o CPF.'),
@@ -499,14 +475,9 @@ export const DeleteApiV1OwnersOwnerIdSuspensionResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Para quando alguém cadastrou o CPF de outra pessoa: depois de conferir o documento,
@@ -524,8 +495,8 @@ export const PostApiV1OwnersOwnerIdCpfReleaseBody = zod.object({
 }).describe('Corpo das ações do admin que exigem motivo. Vai para a trilha de auditoria.')
 
 export const PostApiV1OwnersOwnerIdCpfReleaseResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
   "cpf": zod.string().nullish().describe('Só dígitos (`52998224725`), sem máscara. Nulo se o admin liberou o CPF.'),
@@ -554,20 +525,15 @@ export const PostApiV1OwnersOwnerIdCpfReleaseResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * @summary Todos os tutores, com os dados da conta. Só admin; sem paginação nem filtro no MVP.
  */
 export const GetApiV1OwnersResponse = zod.object({
-  "success": zod.boolean(),
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.array(zod.object({
   "id": zod.string().uuid().describe('Id do tutor.'),
   "userId": zod.string().uuid().describe('Id da conta do tutor (o mesmo de `user.id`).'),
@@ -598,11 +564,6 @@ export const GetApiV1OwnersResponse = zod.object({
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
 }).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')).nullish(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
