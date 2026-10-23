@@ -20,13 +20,13 @@ export interface SearchSummaryBarProps {
 
 const segment = {
   minWidth: 0,
-  minHeight: 44,
-  px: { xs: 1.5, md: 2 },
+  minHeight: 48,
+  px: { xs: 1.5, md: 2.5 },
   border: 0,
   bgcolor: "transparent",
   color: "text.primary",
   font: "inherit",
-  fontSize: 14,
+  fontSize: { xs: 15, md: 17 },
   fontWeight: 600,
   textAlign: "left",
   whiteSpace: "nowrap",
@@ -60,11 +60,13 @@ export function SearchSummaryBar({ pets, quantityMode = false }: SearchSummaryBa
   ];
   return (
     <Box
+      id="search-fields"
       role="group"
       aria-label={copy.summary}
       sx={{
         order: { xs: 3, md: 0 },
-        flex: { xs: "1 1 100%", md: "0 1 600px" },
+        flex: { xs: "1 1 100%", md: "0 1 auto" },
+        maxWidth: { md: 680 },
         minWidth: 0,
         display: "flex",
         alignItems: "center",
@@ -72,10 +74,10 @@ export function SearchSummaryBar({ pets, quantityMode = false }: SearchSummaryBa
         border: 2,
         borderColor: "text.primary",
         borderRadius: `${quintalRadii.pill}px`,
-        boxShadow: "0 3px 0 var(--mui-palette-quintal-tinta)",
+        boxShadow: "0 4px 0 var(--mui-palette-quintal-tinta)",
         pl: 0.5,
-        pr: 0.75,
-        py: 0.5,
+        pr: 1,
+        py: 0.75,
       }}
     >
       {segments.map(([field, text], index) => (
@@ -87,7 +89,7 @@ export function SearchSummaryBar({ pets, quantityMode = false }: SearchSummaryBa
           onClick={() => setEditing(field)}
           sx={{
             ...segment,
-            flex: index === 0 ? "1 1 40%" : "0 1 auto",
+            flex: "0 1 auto",
             borderLeft: index === 0 ? 0 : "1px dashed",
             borderColor: "divider",
           }}
@@ -103,8 +105,8 @@ export function SearchSummaryBar({ pets, quantityMode = false }: SearchSummaryBa
         sx={{
           ml: 0.5,
           flexShrink: 0,
-          width: 40,
-          height: 40,
+          width: 44,
+          height: 44,
           display: "grid",
           placeItems: "center",
           border: 2,

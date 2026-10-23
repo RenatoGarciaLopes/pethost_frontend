@@ -44,6 +44,7 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
               alignItems: "center",
               px: 1.5,
               minHeight: 44,
+              whiteSpace: "nowrap",
               fontWeight: 700,
               color: "text.primary",
               border: "2px solid",
@@ -60,7 +61,7 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
 
   return (
     <>
-      <Box component="nav" aria-label={shellCopy.nav} sx={{ display: { xs: "none", md: "block" } }}>
+      <Box component="nav" aria-label={shellCopy.nav} sx={{ display: { xs: "none", md: "block" }, flexShrink: 0 }}>
         <Stack component={List} direction="row" spacing={0.5} disablePadding>
           {links()}
         </Stack>

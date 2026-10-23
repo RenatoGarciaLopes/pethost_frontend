@@ -7,7 +7,6 @@ import type { SearchError } from "../../lib/searchErrors";
 import { mapCopy } from "../../lib/mapCopy";
 import { searchCopy as copy } from "../../lib/searchCopy";
 import { useSearch } from "../../hooks/useSearch";
-import { FilterChips } from "./FilterChips";
 import { SearchMap } from "./SearchMap";
 import { SearchResults } from "./SearchResults";
 
@@ -33,10 +32,8 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
   const [mapOpen, setMapOpen] = useState(false);
   const selected = pets.filter((pet) => query.pets.includes(pet.id));
   const items = [...new Map(data?.pages.flatMap((page) => page.items).map((item) => [item.id, item]) ?? []).values()];
-  // A barra fica fora desta seção: o erro dos campos dela aparece aqui, junto dos chips.
-  const barErrors = Object.entries(error?.fields ?? {}).filter(([key]) =>
-    ["where", "from", "to", "count"].includes(key),
-  );
+  // A barra e os chips ficam no cabeçalho: o erro de qualquer campo aparece aqui, junto da lista.
+  const fieldErrors = Object.entries(error?.fields ?? {});
   const compatibility = selected.length ? { accountId, pets: selected } : undefined;
   const hasMap = Boolean(query.where || query.state) && items.length > 0;
   const map = (
@@ -54,10 +51,10 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
       <Typography component="h1" variant="h2" id="results-title" aria-live="polite">
         {copy.heading(data?.pages[0]?.totalCount ?? 0, query)}
       </Typography>
-      <FilterChips query={query} pets={pets} onChange={update} errors={error?.fields} />
-      {barErrors.map(([key, message]) => (
+      {fieldErrors.map(([key, message]) => (
         <Typography key={key} role="alert">
-          {copy.fieldLabels[key]}: {message}
+          {copy.fieldLabels[key] ? `${copy.fieldLabels[key]}: ` : ""}
+          {message}
         </Typography>
       ))}
       {hasMap && !desktop && (

@@ -8,6 +8,7 @@ import { apiOk } from "@/test/fixtures/session";
 import { listingFixture, searchPetsFixture, searchQueryFixture } from "@/test/fixtures/search";
 import { server } from "@/test/msw/server";
 import { searchQueries } from "../../../api/queries";
+import { SearchFilterBar } from "../SearchFilterBar";
 import { SearchResultsSection } from "../SearchResultsSection";
 
 vi.mock("next/navigation", () => ({
@@ -23,14 +24,15 @@ vi.mock("next/navigation", () => ({
     ),
 }));
 
-const initialQuery = searchQueryFixture();
+const initialQuery = searchQueryFixture({ where: "Maringá" });
+const START = "/?where=Maring%C3%A1";
 const first = listingFixture();
 const second = listingFixture({ id: "0199d2a0-0000-7000-8000-000000000043", title: "Varanda da Bia" });
 function page(items = [first], number = 1, total = items.length) {
   return { items, page: number, pageSize: 1, totalCount: total };
 }
 function renderSearch(total = 1) {
-  window.history.replaceState(null, "", "/");
+  window.history.replaceState(null, "", START);
   const push = window.history.pushState.bind(window.history);
   vi.spyOn(window.history, "pushState").mockImplementation((...args) => {
     push(...args);
@@ -42,7 +44,10 @@ function renderSearch(total = 1) {
     pageParams: [1],
   });
   return renderWithProviders(
-    <SearchResultsSection accountId="owner" initialQuery={initialQuery} pets={searchPetsFixture} />,
+    <>
+      <SearchFilterBar pets={searchPetsFixture} />
+      <SearchResultsSection accountId="owner" initialQuery={initialQuery} pets={searchPetsFixture} />
+    </>,
     { queryClient: client, theme: quintalTheme },
   );
 }
@@ -137,7 +142,7 @@ it("REQ-SRCH-012 503 mantém cards e repetir busca funciona", async () => {
   expect(await screen.findByRole("link", { name: /Varanda da Bia/ })).toBeVisible();
 });
 
-it("REQ-SRCH-012 400 mostra o erro do campo Onde junto dos chips", async () => {
+it("REQ-SRCH-012 400 mostra o erro do campo Onde junto da lista", async () => {
   server.use(
     http.get("http://localhost:3000/api/listings", () =>
       HttpResponse.json(
@@ -166,7 +171,7 @@ it("REQ-SRCH-002 histórico restaura o filtro e recarregar usa o mesmo parser", 
   await user.click(screen.getByRole("button", { name: "Sem cachorro" }));
   await screen.findByRole("link", { name: /Varanda da Bia/ });
   await act(async () => {
-    window.history.replaceState(null, "", "/");
+    window.history.replaceState(null, "", START);
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
   expect(screen.getByRole("button", { name: "Sem cachorro" })).toHaveAttribute("aria-pressed", "false");

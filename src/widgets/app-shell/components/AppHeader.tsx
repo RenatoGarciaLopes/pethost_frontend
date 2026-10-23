@@ -17,6 +17,8 @@ interface AppHeaderProps {
   variant?: "shell" | "home";
   /** Busca minificada no centro do cabeçalho (resultados da home); some sozinha quando não há busca. */
   search?: ReactNode;
+  /** Faixa própria abaixo da linha principal, ainda acima da borda do cabeçalho (chips dos resultados). */
+  filters?: ReactNode;
 }
 
 const HOW: NavItem = { id: "how", label: "Como funciona", href: "#como-funciona", roles: ["owner", "host"] };
@@ -30,7 +32,7 @@ const HOME_OWNER_ITEMS = navItemsFor("owner").filter((item) => item.id === "owne
  * AccountMenu.
  * @example <AppHeader user={user} variant="home" />
  */
-export function AppHeader({ user, variant = "shell", search }: AppHeaderProps) {
+export function AppHeader({ user, variant = "shell", search, filters }: AppHeaderProps) {
   const home = variant === "home";
   const items = home
     ? user?.role === "owner"
@@ -82,6 +84,7 @@ export function AppHeader({ user, variant = "shell", search }: AppHeaderProps) {
             </Button>
           )}
         </PageContainer>
+        {filters}
       </Box>
     </>
   );

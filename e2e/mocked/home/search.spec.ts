@@ -158,25 +158,53 @@ test("REQ-SRCH-014 resultados trazem a busca minificada no cabeçalho, editável
   const mobile = testInfo.project.name.includes("mobile");
   const width = mobile ? 390 : 1440;
   await page.setViewportSize({ width, height: 900 });
-  await page.goto("/?where=Zona+7&from=2026-12-20&to=2026-12-25&pets=0199d2a0-0000-7000-8000-0000000000e1");
+  await page.goto(
+    "/?where=Zona+7%2C+Maring%C3%A1&from=2026-12-20&to=2026-12-25&pets=0199d2a0-0000-7000-8000-0000000000e1",
+  );
   const summary = page.getByRole("group", { name: "Sua busca" });
   await expect(summary).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("form", { name: "Busca de cantinhos" })).toHaveCount(0);
-  await expect(summary.getByRole("button", { name: "Editar o lugar: Zona 7" })).toBeVisible();
+  await expect(summary.getByRole("button", { name: "Editar o lugar: Zona 7, Maringá" })).toBeVisible();
   await expect(summary.getByRole("button", { name: "Editar as datas: 20 a 25 dez" })).toBeVisible();
   await expect(summary.getByRole("button", { name: "Editar o pet: Luna" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Combina com Luna" })).toHaveCSS(
     "background-color",
     "rgb(197, 219, 79)",
   );
+  // Nada no cabeçalho quebra em duas linhas, e os chips ficam na faixa dele, acima da borda.
+  await expect(
+    page
+      .getByRole("link", { name: "Minhas estadias" })
+      .or(page.getByRole("button", { name: "Abrir a navegação" }))
+      .first(),
+  ).toBeVisible();
+  const header = page.getByRole("banner");
+  await expect(header.getByRole("button", { name: "Combina com Luna" })).toBeVisible();
+  if (!mobile)
+    expect((await header.getByRole("link", { name: "Como funciona" }).boundingBox())!.height).toBeLessThan(60);
+  const map = page.getByRole("region", { name: "Mapa dos cantinhos" });
+  await expect(page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first()).toBeVisible({
+    timeout: 30_000,
+  });
+  if (!mobile) {
+    await expect(map.getByRole("button", { name: /R$/ }).first()).toBeVisible({ timeout: 30_000 });
+    await page.waitForTimeout(4000);
+  }
   await page.screenshot({ path: `test-results/home-088-${width}.png` });
+  if (mobile) {
+    await page.getByRole("button", { name: "Ver mapa" }).click();
+    await expect(map.getByRole("button", { name: /R$/ }).first()).toBeVisible({ timeout: 30_000 });
+    await page.waitForTimeout(4000);
+    await page.screenshot({ path: "test-results/home-088-mapa-390.png" });
+    await page.getByRole("button", { name: "Ver lista" }).click();
+  }
   const edit = summary.getByRole("button", { name: /^Editar o lugar/ });
   await waitForHydration(edit);
   await edit.click();
   const where = page.getByRole("textbox", { name: "Onde" });
   await expect(where).toBeFocused();
-  await where.fill("Zona 5");
+  await where.fill("Zona 5, Maringá");
   await page.getByRole("button", { name: "Achar um cantinho", exact: true }).click();
   await expect(page).toHaveURL(/where=Zona\+5/);
-  await expect(summary.getByRole("button", { name: "Editar o lugar: Zona 5" })).toBeVisible();
+  await expect(summary.getByRole("button", { name: "Editar o lugar: Zona 5, Maringá" })).toBeVisible();
 });

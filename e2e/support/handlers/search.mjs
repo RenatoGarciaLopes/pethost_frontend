@@ -88,7 +88,7 @@ export const searchHandlers = [
       byCoordinates &&
       (Math.abs(Number(params.get("latitude")) - MARINGA.latitude) > 0.5 ||
         Math.abs(Number(params.get("longitude")) - MARINGA.longitude) > 0.5);
-    let items = (city && city !== "Maringá") || offMap ? [] : listings;
+    let items = (city && !city.includes("Maringá")) || offMap ? [] : listings;
     if (params.get("hasYard") === "true") items = items.filter((item) => item.hasYard);
     if (params.get("homeType")) items = items.filter((item) => item.homeType === params.get("homeType"));
     if (Number(params.get("pets") ?? 1) > 5) items = [];
