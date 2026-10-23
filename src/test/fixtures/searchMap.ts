@@ -1,4 +1,4 @@
-import type { SearchMapListing, SearchMapOrigin } from "@/features/search/components/client/SearchMap";
+import type { SearchMapListing, SearchMapOrigin } from "@/features/search/index.client";
 
 /** Origem sintética da busca, na Zona 7 de Maringá. @example <SearchMap origin={searchMapOrigin} … /> */
 export const searchMapOrigin: SearchMapOrigin = { latitude: -23.4205, longitude: -51.9331, label: "Zona 7" };

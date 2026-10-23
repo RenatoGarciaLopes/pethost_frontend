@@ -1,4 +1,4 @@
-import type { LayerSpecification, StyleSpecification } from "maplibre-gl";
+import type { ExpressionSpecification, LayerSpecification, StyleSpecification } from "maplibre-gl";
 
 /** Cores da marca que o estilo usa (vêm de `theme.palette.quintal`, nunca hex solto aqui). */
 export interface MapStylePalette {
@@ -15,9 +15,17 @@ export const MAP_TILES_URL = "https://tiles.openfreemap.org/planet";
 const GLYPHS_URL = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf";
 const LABEL_FONT = ["Noto Sans Bold"];
 
-const zoomWidth = (low: number, high: number) => ["interpolate", ["exp", 1.5], ["zoom"], 10, low, 18, high] as const;
-const roadClass = (classes: string[]) => ["in", ["get", "class"], ["literal", classes]] as const;
-const notTunnel = ["!=", ["get", "brunnel"], "tunnel"] as const;
+const zoomWidth = (low: number, high: number): ExpressionSpecification => [
+  "interpolate",
+  ["exponential", 1.5],
+  ["zoom"],
+  10,
+  low,
+  18,
+  high,
+];
+const roadClass = (classes: string[]): ExpressionSpecification => ["in", ["get", "class"], ["literal", classes]];
+const notTunnel: ExpressionSpecification = ["!=", ["get", "brunnel"], "tunnel"];
 
 /**
  * Estilo próprio do mapa da busca, na estética Quintal (vault `marca/10-ilustracao-e-textura.md`): sem fundo
@@ -25,7 +33,7 @@ const notTunnel = ["!=", ["get", "brunnel"], "tunnel"] as const;
  * com contorno, água em céu, só nomes de bairro em versalete espaçado, sem POIs nem ruído.
  * Esquema de camadas: OpenMapTiles (OpenFreeMap).
  *
- * @example new maplibregl.Map({ container, style: buildMapStyle(theme.palette.quintal) })
+ * @example new Map({ container, style: buildMapStyle(theme.palette.quintal) })
  */
 export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
   const source = "openmaptiles";
@@ -37,7 +45,7 @@ export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
       "source-layer": "transportation",
       filter: ["all", roadClass(classes), notTunnel],
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": palette.tinta, "line-width": zoomWidth(low + 2, high + 4) as never },
+      paint: { "line-color": palette.tinta, "line-width": zoomWidth(low + 2, high + 4) },
     },
     {
       id: `${id}-fill`,
@@ -46,7 +54,7 @@ export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
       "source-layer": "transportation",
       filter: ["all", roadClass(classes), notTunnel],
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": fill, "line-width": zoomWidth(low, high) as never },
+      paint: { "line-color": fill, "line-width": zoomWidth(low, high) },
     },
   ];
   return {
@@ -67,7 +75,7 @@ export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
         type: "fill",
         source,
         "source-layer": "landcover",
-        filter: roadClass(["grass", "wood"]) as never,
+        filter: roadClass(["grass", "wood"]),
         paint: { "fill-color": palette.grama, "fill-opacity": 0.25 },
       },
       {
@@ -99,7 +107,7 @@ export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
         type: "symbol",
         source,
         "source-layer": "place",
-        filter: roadClass(["suburb", "neighbourhood", "quarter"]) as never,
+        filter: roadClass(["suburb", "neighbourhood", "quarter"]),
         layout: {
           "text-field": ["coalesce", ["get", "name:latin"], ["get", "name"]],
           "text-font": LABEL_FONT,

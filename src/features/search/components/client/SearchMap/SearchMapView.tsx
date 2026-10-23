@@ -1,6 +1,6 @@
 "use client";
 import { Box, ButtonBase, Checkbox, Chip, FormControlLabel, Typography, useTheme } from "@mui/material";
-import maplibregl, { type GeoJSONSource, type Map as MapLibreMap } from "maplibre-gl";
+import { Map as MapLibreMap, type GeoJSONSource } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -28,7 +28,7 @@ interface Pixel {
 }
 
 /** Mapa MapLibre com os pinos, círculos e cartão em React por cima. Carregado sob demanda por `SearchMap`. */
-export default function SearchMapView({
+export function SearchMapView({
   listings,
   origin,
   selectedId = null,
@@ -49,7 +49,9 @@ export default function SearchMapView({
   const [failed, setFailed] = useState(false);
   const [, setFrame] = useState(0);
   const latest = useRef({ searchOnMove, onMoveEnd, reducedMotion });
-  latest.current = { searchOnMove, onMoveEnd, reducedMotion };
+  useEffect(() => {
+    latest.current = { searchOnMove, onMoveEnd, reducedMotion };
+  });
 
   const points = useMemo<GeoPoint[]>(
     () => [...listings.map((listing) => listing.approximateLocation), ...(origin ? [origin] : [])],
@@ -93,7 +95,7 @@ export default function SearchMapView({
     const bounds = boundsOf(points);
     let instance: MapLibreMap;
     try {
-      instance = new maplibregl.Map({
+      instance = new MapLibreMap({
         container,
         style: buildMapStyle(quintal),
         ...(bounds
@@ -112,7 +114,8 @@ export default function SearchMapView({
         fadeDuration: 0,
       });
     } catch {
-      setFailed(true);
+      // Sem WebGL o construtor lança; o aviso entra fora do corpo síncrono do efeito.
+      queueMicrotask(() => setFailed(true));
       return;
     }
     instance.touchZoomRotate.disableRotation();
