@@ -41,19 +41,22 @@ Testes/stories ao lado dos componentes; funções e regras ficam em lib, E/S na 
 
 ## Página do cantinho (spec 042)
 
-`src/app/(account)/listings/[listingId]/` contém a rota autenticada e os controles que reutilizam a busca 041. `features/listing-page/components/ListingPageScreen.tsx` é a composição server; os links do MUI ficam no `components/client/ListingPageActions.tsx`, que mantém `next/link` dentro do limite client. A rota hidrata `HouseResidents` pela API pública `features/pets/index.client` e prefetch `index.server`, sem duplicar a vitrine.
+`src/app/(account)/listings/[listingId]/` contém a rota autenticada, que compõe as features: `HouseResidents` (pets) e `CompatibilityNotice` (busca) entram como slots da `ListingPageScreen`, sem import entre features. `features/listing-page/components/ListingPageScreen.tsx` é a composição server (revisão 078, fiel à prancha); a lateral do tutor é `components/client/StayBookingCard.tsx` e os recados de quem não pede ficam em `components/client/ListingPageActions.tsx`.
 
 ```text
 src/app/(account)/listings/[listingId]/
-  page.tsx                              auth, metadata, prefetch/hydration
+  page.tsx                              auth, metadata, avaliações, slots, prefetch/hydration
   page.test.tsx                         metadata e preservação da busca no login
-  ListingSearchControls.tsx              adaptação client da SearchBar 041
-  ListingSearchControls.stories.tsx      controles com router simulado
 src/features/listing-page/
-  api/                                   contrato, query e carregamento server
-  lib/                                   compatibilidade, total e copy
-  components/ListingPageScreen.tsx        detalhe RSC com slot de residentes
-  components/client/ListingPageActions.tsx links Next em MUI Button
+  api/                                   contratos (detalhe, avaliações), query e carregamento server
+  lib/                                   copy, total, fatos da casa, motivos, voltar (searchOrigin)
+  components/ListingPageScreen.tsx        detalhe RSC com slots de compatibilidade e residentes
+  components/ListingGallery.tsx           galeria com moldura, carrossel no celular e vazio
+  components/NightlyPrice.tsx             diária da lateral
+  components/client/StayBookingCard.tsx   datas, pets, conta, pedido e barra do celular
+  components/client/ListingPageActions.tsx recados do dono e da conta de anfitrião
+src/features/search/components/client/CompatibilityNotice/  caixa de compatibilidade da página
+src/test/fixtures/listingPage.ts          detalhe, fotos e avaliações sintéticos
 e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
 ```
 

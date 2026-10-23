@@ -73,8 +73,9 @@ const handlers = [
   ...stripeAccountHandlers,
   ...hostApplicationsHandlers,
   ...listingsHandlers,
-  ...searchHandlers,
+  // Antes da busca: a compatibilidade do cantinho da página responde aqui; as outras passam para a busca.
   ...listingPageHandlers,
+  ...searchHandlers,
   ...adminApplicationsHandlers,
   ...adminAccountsHandlers,
   ...auditEntriesHandlers,

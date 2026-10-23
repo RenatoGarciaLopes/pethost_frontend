@@ -102,3 +102,10 @@ Ajuste na spec 010: ela usa `toSafeInternalPath` (spec 003) e `resolvePostLoginP
 | 012 a 015           | Componente   | `loading.test.tsx`, `error.test.tsx`, `not-found.test.tsx`, `global-error.test.tsx` | status acessível; `traceId` do 5xx; link para a casa; sem tema                                                                          |
 | 001 a 008           | Storybook    | `AppShell.stories.tsx` (tutor, anfitrião, admin, visitante, celular)                | a11y sem violação                                                                                                                       |
 | 009/010/014         | E2E simulado | `e2e/mocked/shell.spec.ts` (desktop e celular)                                      | visitante em `/pets` → login → volta; tutor não entra em `/host`; 404 com link; sair                                                    |
+
+## Revisão 078: cabeçalho fiel à prancha (22/10/2026)
+
+- **Atalhos por papel (`NAV_ITEMS`):** tutor vê "Buscar" (home, que vira a página de resultados; a rota `/search` sai na 079), "Meus pets" e "Minhas estadias"; anfitrião ganha "Pedidos" (`/host/bookings`). "Conversas", "Agenda", "Ganhos" e "Meu cantinho" da prancha esperam telas próprias (não há rota de conversas, agenda, ganhos nem índice do cantinho). Na home, o tutor continua com "Como funciona" e "Minhas estadias" (a busca está na faixa principal).
+- **Item ativo (`HeaderNav`):** contorno de tinta e fundo papel, raio `control`, como na prancha; todos os itens em negrito. Continua com `aria-current="page"` (REQ-SHELL-008: destaque não só por cor).
+- **Conta (`AccountMenu`):** sempre a pílula contornada com avatar e primeiro nome (na casca e na home); abaixo de 900 px só o avatar (REQ-SHELL-006). A prop `appearance` saiu: não havia mais quem usasse o avatar isolado.
+- **Testes:** `navigation.test.ts` (atalhos por papel), `HeaderNav.test.tsx` (`/host/bookings/123` marca "Pedidos"; `/host/payments` cai em "Painel"), `AppHeader.test.tsx` (atalhos e pílula do tutor na casca).

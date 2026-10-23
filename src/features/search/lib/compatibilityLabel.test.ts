@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { compatibilityLabel } from "./compatibilityLabel";
+import { compatibilityLabel, compatibilityWarnings } from "./compatibilityLabel";
 
 const base = { petName: "Pipoca" };
 it("REQ-SRCH-020 sem aviso combina com o pet", () => {
@@ -30,4 +30,10 @@ it("REQ-SRCH-020 mostra o primeiro aviso e conta os demais", () => {
     warnings: [{ code: "home_has_cats" }, { code: "home_has_kids" }, { code: "guest_is_dog" }],
   });
   expect(result.text).toBe("Tem gato em casa +2");
+});
+it("REQ-LPAGE-005 a caixa do cantinho lista todos os avisos, na ordem da API", () => {
+  expect(compatibilityWarnings({ ...base, warnings: [{ code: "home_has_cats" }, { code: "algo_novo" }] })).toEqual([
+    "Tem gato em casa",
+    "Vale conferir com a Pipoca",
+  ]);
 });
