@@ -482,3 +482,16 @@ e2e/mocked/admin/accounts.spec.ts                              jornada conta →
 ```
 
 As rotas compõem `AuditTable` pelo índice público `features/admin-audit/index.client.ts` e passam o nó pelo `auditTrail`; `widgets/admin-accounts` não importa a feature. O mock mantém eventos sintéticos para ids de tutor e anfitrião e registra ambos os handlers e resets em `mock-backend.mjs`. A primeira coluna do diretório de contas já traz o texto visível do nome, então não fornece `rowLabel` redundante ao `AdminDataTable` atualizado.
+
+## Avatar humano compartilhado (076)
+
+```text
+src/shared/ui/media/InitialsAvatar/
+  InitialsAvatar.tsx           foto opcional, fallback Unicode e cores AA
+  InitialsAvatar.test.tsx      erro da imagem retorna ao fallback
+  InitialsAvatar.stories.tsx   estados, tamanhos e comparação coral/café
+  index.ts                    API pública do componente e props
+src/shared/lib/text/initials.ts regra pura de extração de iniciais
+```
+
+A pasta media contém apresentação; parsing continua em shared/lib/text e cores em shared/theme/tokens/semantic.ts. AccountMenu, PublicProfileCard, HostBookingList e AvatarUploader compõem o recurso; ele não conhece conta, reserva ou API. ListingCard e ListingPageScreen aguardam migração após a 070. Detalhes: [076](../specs/076-avatar-initials/design.md).
