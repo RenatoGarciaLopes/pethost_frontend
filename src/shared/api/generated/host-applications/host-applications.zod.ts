@@ -17,7 +17,7 @@ export const GetApiV1HostApplicationsQueryParams = zod.object({
 })
 
 export const GetApiV1HostApplicationsResponse = zod.object({
-  "success": zod.boolean(),
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.array(zod.object({
   "id": zod.string().uuid(),
   "userId": zod.string().uuid(),
@@ -80,13 +80,8 @@ export const GetApiV1HostApplicationsResponse = zod.object({
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta (nome, nascimento, endereço) para comparar com o documento.')]).optional()
 }).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).')).nullish(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * @summary Uma solicitação, com os dados da conta para comparar e a rota de cada foto.
@@ -96,8 +91,8 @@ export const GetApiV1HostApplicationsApplicationIdParams = zod.object({
 })
 
 export const GetApiV1HostApplicationsApplicationIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "userId": zod.string().uuid(),
   "status": zod.string(),
@@ -158,14 +153,9 @@ export const GetApiV1HostApplicationsApplicationIdResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta (nome, nascimento, endereço) para comparar com o documento.')]).optional()
-}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Devolve uma URL assinada direto no bucket privado (`url`) e quando ela vence
@@ -180,19 +170,14 @@ export const GetApiV1HostApplicationsApplicationIdDocumentsKindParams = zod.obje
 })
 
 export const GetApiV1HostApplicationsApplicationIdDocumentsKindResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "kind": zod.string().describe('`front`, `back` ou `selfie`.'),
   "url": zod.string().describe('URL assinada direto no bucket privado: vai no `src` da imagem, sem token. Depois de\nExpiresAt o bucket responde 403 e é preciso pedir outro link.'),
   "expiresAt": zod.number().int().describe('Quando a URL vence, em Unix time (segundos, UTC) — como o `expiresAt` da sessão. Use\npara pedir outro link antes de vencer.')
-}).describe('Link temporário para o admin abrir uma foto da solicitação.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Link temporário para o admin abrir uma foto da solicitação.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Só de solicitação em análise (422 `HOST_APPLICATION_NOT_UNDER_REVIEW`). Dois admins
@@ -209,8 +194,8 @@ export const PostApiV1HostApplicationsApplicationIdApprovalBody = zod.object({
 }).describe('Corpo da aprovação: o que o admin conferiu. Vai para a nota e para a trilha.')
 
 export const PostApiV1HostApplicationsApplicationIdApprovalResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "userId": zod.string().uuid(),
   "status": zod.string(),
@@ -271,14 +256,9 @@ export const PostApiV1HostApplicationsApplicationIdApprovalResponse = zod.object
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta (nome, nascimento, endereço) para comparar com o documento.')]).optional()
-}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * `rejectionReason`: `document_illegible`, `document_expired`,
@@ -296,8 +276,8 @@ export const PostApiV1HostApplicationsApplicationIdRejectionBody = zod.object({
 }).describe('Corpo da recusa.')
 
 export const PostApiV1HostApplicationsApplicationIdRejectionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "userId": zod.string().uuid(),
   "status": zod.string(),
@@ -358,12 +338,27 @@ export const PostApiV1HostApplicationsApplicationIdRejectionResponse = zod.objec
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta (nome, nascimento, endereço) para comparar com o documento.')]).optional()
-}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
+
+/**
+ * Recusa por suspeita de fraude ou a terceira recusa bloqueiam o CPF para qualquer conta, mesmo
+ * depois de a conta ser excluída (`422 HOST_IDENTITY_BLOCKED` ao abrir). Isto libera, para
+ * quando o bloqueio pegou o dono de verdade do CPF. A conta recusada continua bloqueada. CPF que
+ * não está bloqueado: 404 `HOST_IDENTITY_BLOCK_NOT_FOUND`. A trilha guarda o CPF mascarado.
+ * @summary Libera um CPF bloqueado para solicitação de anfitrião. Só admin, com motivo.
+ */
+export const PostApiV1HostApplicationsIdentityBlocksReleaseBody = zod.object({
+  "cpf": zod.string().nullish(),
+  "reason": zod.string().nullish()
+}).describe('Corpo da liberação de CPF bloqueado: o CPF (com ou sem máscara) e o motivo.')
+
+export const PostApiV1HostApplicationsIdentityBlocksReleaseResponse = zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
+
+}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).'),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Resposta de sucesso.')
 

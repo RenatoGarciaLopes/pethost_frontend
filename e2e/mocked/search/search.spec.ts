@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { pickDates } from "../../support/calendar";
 import { loginAccount } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { openSearch } from "../../support/search";
@@ -61,11 +62,7 @@ test("REQ-SRCH-003/004/007 datas, pets e total seguem no link", async ({ page, b
   const from = tomorrow.toISOString().slice(0, 10);
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 5);
   const to = tomorrow.toISOString().slice(0, 10);
-  await page.getByLabel("Chegada", { exact: true }).filter({ visible: true }).fill(from);
-  await page.getByLabel("Saída", { exact: true }).filter({ visible: true }).fill(from);
-  await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
-  await expect(page.getByText("A saída precisa ser depois da chegada.")).toBeVisible();
-  await page.getByLabel("Saída", { exact: true }).filter({ visible: true }).fill(to);
+  await pickDates(page, page.getByLabel("Chegada", { exact: true }).filter({ visible: true }), from, to);
   await page.getByRole("combobox", { name: "Pet" }).click();
   await page.getByRole("option", { name: "Luna", exact: true }).click();
   await page.keyboard.press("Escape");

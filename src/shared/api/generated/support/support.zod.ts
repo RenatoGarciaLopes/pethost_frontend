@@ -13,15 +13,10 @@ import * as zod from 'zod';
  * @summary O e-mail do suporte, para o app mostrar quando a API manda falar com o suporte.
  */
 export const GetApiV1SupportResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "email": zod.string().nullish().describe('E-mail do suporte. Omitido quando não está configurado.')
-}).describe('Contato do suporte, público: quem precisa dele (CPF já usado) ainda não tem conta.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Contato do suporte, público: quem precisa dele (CPF já usado) ainda não tem conta.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

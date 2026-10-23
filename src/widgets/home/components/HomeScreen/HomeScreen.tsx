@@ -41,6 +41,7 @@ export interface HomeScreenProps {
 export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: HomeScreenProps) {
   const router = useRouter();
   const [petIds, setPetIds] = useState<string[]>(viewer === "owner" && pets[0] ? [pets[0].id] : []);
+  const [stay, setStay] = useState<{ from?: string; to?: string }>({});
   const selectedPets = pets.filter((pet) => petIds.includes(pet.id));
   const personalized = viewer === "owner" && selectedPets.length > 0;
   const title = personalized ? copy.petsTitle(selectedPets.map((pet) => pet.name)) : copy.genericTitle;
@@ -157,7 +158,10 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
               pets={isPetList ? pets : []}
               quantityMode={isHost}
               onSearch={handleSearch}
-              onDraftChange={(query) => setPetIds(query.pets)}
+              onDraftChange={(query) => {
+                setPetIds(query.pets);
+                setStay({ from: query.from, to: query.to });
+              }}
             />
             <Typography sx={{ position: "absolute", bottom: 4, fontSize: 14 }}>
               {isHost
@@ -174,7 +178,12 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
       <PageContainer width="page" id="como-funciona" sx={{ py: { xs: 3, md: 4 }, scrollMarginTop: 80 }}>
         <TrustList variant="cards" items={copy.trust} />
       </PageContainer>
-      <NearbyListings scope={accountId ?? "visitor"} />
+      <NearbyListings
+        scope={accountId ?? "visitor"}
+        pets={personalized ? selectedPets.map(({ id, name }) => ({ id, name })) : undefined}
+        from={stay.from}
+        to={stay.to}
+      />
     </Box>
   );
 }

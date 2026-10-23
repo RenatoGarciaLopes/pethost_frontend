@@ -14,8 +14,8 @@ import * as zod from 'zod';
  * @summary Situação do cadastro de recebimento, como está gravada (não chama o Stripe).
  */
 export const GetApiV1HostsMeStripeAccountResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\n        DisabledReason) ou `enabled` (pode receber).'),
   "detailsSubmitted": zod.boolean(),
   "chargesEnabled": zod.boolean(),
@@ -24,14 +24,9 @@ export const GetApiV1HostsMeStripeAccountResponse = zod.object({
   "onboardedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os repasses foram liberados pela primeira vez.'),
   "syncedAt": zod.string().datetime({"offset":true}).nullish().describe('Última leitura da conta no Stripe.'),
   "listingsVisible": zod.boolean().describe('Os cantinhos aparecem na busca: ativo, sem suspensão e com repasses liberados.')
-}).describe('"Meus recebimentos": em que pé está o cadastro de recebimento no Stripe.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('"Meus recebimentos": em que pé está o cadastro de recebimento no Stripe.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Na primeira vez cria a conta conectada, já preenchida com os dados conferidos na verificação.
@@ -43,8 +38,8 @@ export const GetApiV1HostsMeStripeAccountResponse = zod.object({
  * @summary Abre ou continua o cadastro com o componente <b>embutido</b> do Stripe.
  */
 export const PostApiV1HostsMeStripeAccountOnboardingSessionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "clientSecret": zod.string().describe('Segredo de uso único da sessão. Não guardar nem logar.'),
   "publishableKey": zod.string().describe('Chave publicável da plataforma (`pk_test_...`).'),
   "expiresAt": zod.number().int().describe('Quando a sessão vence, em Unix time (segundos, UTC). Vencida: peça outra.'),
@@ -58,14 +53,9 @@ export const PostApiV1HostsMeStripeAccountOnboardingSessionResponse = zod.object
   "syncedAt": zod.string().datetime({"offset":true}).nullish().describe('Última leitura da conta no Stripe.'),
   "listingsVisible": zod.boolean().describe('Os cantinhos aparecem na busca: ativo, sem suspensão e com repasses liberados.')
 }).describe('"Meus recebimentos": em que pé está o cadastro de recebimento no Stripe.')
-}).describe('Sessão do onboarding embutido: o app inicia o componente do Stripe com estes dados.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Sessão do onboarding embutido: o app inicia o componente do Stripe com estes dados.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Mesmas regras da sessão embutida. Devolve um `url` de uso único, que vence em minutos.
@@ -75,8 +65,8 @@ export const PostApiV1HostsMeStripeAccountOnboardingSessionResponse = zod.object
  * @summary Abre ou continua o cadastro pela página <b>hospedada</b> do Stripe.
  */
 export const PostApiV1HostsMeStripeAccountOnboardingLinkResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "url": zod.string().describe('Uso único. Não guardar: peça outro a cada vez.'),
   "expiresAt": zod.number().int().describe('Quando o link vence, em Unix time (segundos, UTC).'),
   "account": zod.object({
@@ -89,14 +79,9 @@ export const PostApiV1HostsMeStripeAccountOnboardingLinkResponse = zod.object({
   "syncedAt": zod.string().datetime({"offset":true}).nullish().describe('Última leitura da conta no Stripe.'),
   "listingsVisible": zod.boolean().describe('Os cantinhos aparecem na busca: ativo, sem suspensão e com repasses liberados.')
 }).describe('"Meus recebimentos": em que pé está o cadastro de recebimento no Stripe.')
-}).describe('Link do onboarding hospedado pelo Stripe: o app abre a URL; no fim o Stripe devolve para o app.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Link do onboarding hospedado pelo Stripe: o app abre a URL; no fim o Stripe devolve para o app.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Para o app chamar ao voltar do cadastro. Ainda sem conta conectada:
@@ -105,8 +90,8 @@ export const PostApiV1HostsMeStripeAccountOnboardingLinkResponse = zod.object({
  * @summary Relê a conta no Stripe agora, sem esperar o webhook.
  */
 export const PostApiV1HostsMeStripeAccountSynchronizationResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\n        DisabledReason) ou `enabled` (pode receber).'),
   "detailsSubmitted": zod.boolean(),
   "chargesEnabled": zod.boolean(),
@@ -115,12 +100,7 @@ export const PostApiV1HostsMeStripeAccountSynchronizationResponse = zod.object({
   "onboardedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os repasses foram liberados pela primeira vez.'),
   "syncedAt": zod.string().datetime({"offset":true}).nullish().describe('Última leitura da conta no Stripe.'),
   "listingsVisible": zod.boolean().describe('Os cantinhos aparecem na busca: ativo, sem suspensão e com repasses liberados.')
-}).describe('"Meus recebimentos": em que pé está o cadastro de recebimento no Stripe.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('"Meus recebimentos": em que pé está o cadastro de recebimento no Stripe.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

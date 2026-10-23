@@ -1,7 +1,7 @@
 "use client";
 import { Box, Button, Typography } from "@mui/material";
 import { ListingCard, useAllListings, useNearbyListings } from "@/features/search/index.client";
-import type { SearchQuery } from "@/features/search";
+import type { CompatibilityPet, SearchQuery } from "@/features/search";
 import { isApiError } from "@/shared/api/errors/ApiError";
 import { loginRedirectPath } from "@/shared/config/appRoutes";
 import { useGeolocation } from "@/shared/hooks/useGeolocation";
@@ -12,12 +12,17 @@ import { Surface } from "@/shared/ui/layout/Surface";
 import { homeCopy } from "../../lib/homeCopy";
 
 const copy = homeCopy.nearby;
-/** Sem datas nem pets: os cards mostram a diária. */
+/** Base dos cards: sem datas nem pets eles mostram a diária. */
 const CARD_QUERY: SearchQuery = { pets: [], species: [], sizes: [] };
 
 export interface NearbyListingsProps {
   /** `visitor` ou o id da conta: os selos dependem de quem vê, então o cache é separado. */
   scope: string;
+  /** Pets escolhidos na busca da home (só tutor logado); com eles os cards mostram a compatibilidade e o total. */
+  pets?: CompatibilityPet[];
+  /** Período da busca da home (AAAA-MM-DD); com ele e com pets os cards mostram o total da estadia. */
+  from?: string;
+  to?: string;
 }
 
 /**
@@ -28,7 +33,9 @@ export interface NearbyListingsProps {
  *
  * @example <NearbyListings scope="visitor" />
  */
-export function NearbyListings({ scope }: NearbyListingsProps) {
+export function NearbyListings({ scope, pets = [], from, to }: NearbyListingsProps) {
+  const cardQuery: SearchQuery = { ...CARD_QUERY, from: from || undefined, to: to || undefined };
+  const compatibility = scope !== "visitor" && pets.length > 0 ? { accountId: scope, pets } : undefined;
   const location = useGeolocation();
   const nearby = useNearbyListings(scope, location.coords);
   const failure = nearby.error;
@@ -83,7 +90,7 @@ export function NearbyListings({ scope }: NearbyListingsProps) {
           >
             {shown.items.map((listing) => (
               <Box component="li" key={listing.id}>
-                <ListingCard listing={listing} query={CARD_QUERY} petCount={0} />
+                <ListingCard listing={listing} query={cardQuery} petCount={pets.length} compatibility={compatibility} />
               </Box>
             ))}
           </Box>
@@ -96,7 +103,7 @@ export function NearbyListings({ scope }: NearbyListingsProps) {
           <Typography component="h2" variant="h3" id="nearby-title" sx={{ mb: 1 }}>
             {copy.askTitle}
           </Typography>
-          {((located && nearby.isPending) || waitingAll) && <SniffLoader label={copy.finding} scale={0.8} />}
+          {((located && nearby.isPending) || waitingAll) && <SniffLoader label={copy.finding} />}
           {nearbyEmpty && !waitingAll && <Notice tone="info">{copy.empty}</Notice>}
           {located && needsLogin && (
             <Notice

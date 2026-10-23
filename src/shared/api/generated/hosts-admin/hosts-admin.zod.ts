@@ -19,12 +19,12 @@ export const GetApiV1HostsQueryParams = zod.object({
 })
 
 export const GetApiV1HostsResponse = zod.object({
-  "success": zod.boolean(),
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.array(zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -70,13 +70,8 @@ export const GetApiV1HostsResponse = zod.object({
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
 }).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')).nullish(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * @summary Um anfitrião, pelo <b>id do anfitrião</b>, com os dados da conta.
@@ -86,12 +81,12 @@ export const GetApiV1HostsHostIdParams = zod.object({
 })
 
 export const GetApiV1HostsHostIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -136,14 +131,9 @@ export const GetApiV1HostsHostIdResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * As sessões caem na hora; login responde 403 `AUTH_ACCOUNT_SUSPENDED` e a pessoa não
@@ -159,12 +149,12 @@ export const PostApiV1HostsHostIdSuspensionBody = zod.object({
 }).describe('Corpo das ações do admin que exigem motivo. Vai para a trilha de auditoria.')
 
 export const PostApiV1HostsHostIdSuspensionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -209,14 +199,9 @@ export const PostApiV1HostsHostIdSuspensionResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Anfitrião com CPF/CNPJ liberado não volta: 422 `HOST_IDENTITY_RELEASED`.
@@ -227,12 +212,12 @@ export const DeleteApiV1HostsHostIdSuspensionParams = zod.object({
 })
 
 export const DeleteApiV1HostsHostIdSuspensionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -277,14 +262,9 @@ export const DeleteApiV1HostsHostIdSuspensionResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Pessoa física: o CPF. Empresa: o CNPJ e o CPF do representante. Os valores ficam no perfil
@@ -301,12 +281,12 @@ export const PostApiV1HostsHostIdIdentityReleaseBody = zod.object({
 }).describe('Corpo das ações do admin que exigem motivo. Vai para a trilha de auditoria.')
 
 export const PostApiV1HostsHostIdIdentityReleaseResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -351,14 +331,9 @@ export const PostApiV1HostsHostIdIdentityReleaseResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Para recusa por engano ou por dado digitado errado (`rejected.other`, por exemplo). Fraude
@@ -377,12 +352,12 @@ export const PostApiV1HostsHostIdStripeAccountResetBody = zod.object({
 }).describe('Corpo das ações do admin que exigem motivo. Vai para a trilha de auditoria.')
 
 export const PostApiV1HostsHostIdStripeAccountResetResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -427,12 +402,7 @@ export const PostApiV1HostsHostIdStripeAccountResetResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
