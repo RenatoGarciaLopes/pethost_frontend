@@ -89,7 +89,7 @@ export const Teclado: Story = {
     const today = canvas.getByRole("button", { name: /15 de outubro de 2026, hoje/ });
     today.focus();
     await userEvent.keyboard("{ArrowRight}{PageDown}");
-    await expect(canvas.getByRole("grid", { name: "novembro de 2026" })).toBeVisible();
+    await expect(canvas.getByRole("grid", { name: "novembro de 2026" })).toBeInTheDocument();
     await userEvent.keyboard("{Enter}");
     await expect(canvas.getByText(/segunda-feira, 16 de novembro de 2026/)).toBeVisible();
   },

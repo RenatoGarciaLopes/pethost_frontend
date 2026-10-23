@@ -98,7 +98,7 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     expect(screen.getByLabelText("Saída")).toHaveValue("23/12/2026");
     const summary = screen.getByRole("region", { name: copy.summary });
     expect(summary).toHaveTextContent("21 a 23 de dez. · 2 noites");
-    expect(summary.textContent).toMatch(/R$s60,50 × 2 noites × 2 pets = R$ 242,00/);
+    expect(summary.textContent).toMatch(/R\$\s60,50 × 2 noites × 2 pets = R\$ 242,00/);
   });
 
   it("REQ-REQST-002 pet que não combina vindo da URL não fica marcado; mudar pets refaz a conta", async () => {

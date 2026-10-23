@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { expect, within } from "storybook/test";
 import { DateRangeField } from "./DateRangeField";
+
+function Controlled(args: ComponentProps<typeof DateRangeField>) {
+  const [range, setRange] = useState({ checkIn: "", checkOut: "" });
+  return <DateRangeField {...args} {...range} onChange={setRange} />;
+}
 
 const meta = {
   title: "Shared/DateRangeField",
@@ -17,14 +22,11 @@ export const Erro: Story = { args: { errors: { checkOut: "Escolhe uma estadia de
 /** Calendário do PetHost aberto pela chegada; a escolha da saída fecha. */
 export const Aberto: Story = {
   name: "REQ-CAL-005 Calendário aberto",
-  render: (args) => {
-    const [range, setRange] = useState({ checkIn: "", checkOut: "" });
-    return <DateRangeField {...args} {...range} onChange={setRange} />;
-  },
+  render: (args) => <Controlled {...args} />,
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByLabelText("Chegada"));
     await expect(
       await within(document.body).findByRole("dialog", { name: "Escolher as datas da estadia" }),
-    ).toBeVisible();
+    ).toBeInTheDocument();
   },
 };

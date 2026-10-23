@@ -19,7 +19,7 @@ describe("calendarDates (REQ-CAL-001 mês e grade)", () => {
   it("monta as semanas começando no domingo, com null nos dias de fora", () => {
     const weeks = buildMonth({ year: 2026, month: 10 });
     expect(weeks[0]).toEqual([null, null, null, null, "2026-10-01", "2026-10-02", "2026-10-03"]);
-    expect(weeks.at(-1)!.at(-1)).toBeNull();
+    expect(weeks.at(-1)!.at(-1)).toBe("2026-10-31");
     expect(weeks.flat().filter(Boolean)).toHaveLength(31);
     expect(weeks.every((week) => week.length === 7)).toBe(true);
   });

@@ -39,7 +39,7 @@ export function DateField({ onChange, onBlur, clearable = false, min, max, today
   }
   return (
     <>
-      <CalendarInput {...input} open={Boolean(anchor)} onOpen={setAnchor} />
+      <CalendarInput {...input} onOpen={setAnchor} />
       <CalendarPopover open={Boolean(anchor)} anchorEl={anchor} onClose={close} label={calendarCopy.dateDialog}>
         {() => (
           <Calendar

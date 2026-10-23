@@ -40,7 +40,6 @@ export function DateRangeField({ checkIn, checkOut, today, onChange, errors = {}
       <CalendarInput
         label={label}
         value={value}
-        open={open?.edge === edge}
         onOpen={(anchor) => setOpen({ edge, anchor })}
         error={Boolean(error)}
         helperText={error}

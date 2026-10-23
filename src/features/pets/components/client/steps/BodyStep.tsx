@@ -120,7 +120,7 @@ export function BodyStep() {
                 name={field.name}
                 inputRef={field.ref}
                 onBlur={field.onBlur}
-                value={field.value ?? ""}
+                value={String(field.value ?? "")}
                 onChange={field.onChange}
                 max={brasiliaToday()}
                 label={copy.birthDate}
