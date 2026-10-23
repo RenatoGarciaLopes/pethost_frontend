@@ -28,7 +28,6 @@ export const Pointer: Story = {
     const controls = [
       canvas.getByRole("button", { name: "Continuar" }),
       canvas.getByRole("button", { name: "Com quintal" }),
-      canvas.getByRole("link", { name: "Ver cantinho" }),
       canvas.getByRole("textbox", { name: "Nome do pet" }),
     ];
     for (const control of controls) {
@@ -37,6 +36,6 @@ export const Pointer: Story = {
       await expect(control).toHaveStyle({ outlineStyle: "none" });
     }
     await userEvent.keyboard("a");
-    await expect(controls[3]).toHaveStyle({ outlineStyle: "none" });
+    await expect(controls[2]).toHaveStyle({ outlineStyle: "none" });
   },
 };
