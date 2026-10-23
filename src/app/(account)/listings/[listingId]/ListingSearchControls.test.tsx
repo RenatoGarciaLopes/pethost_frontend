@@ -18,7 +18,7 @@ it("REQ-LPAGE-004 abre os campos existentes da busca e preserva datas e pets na 
     />,
   );
   fireEvent.click(screen.getByRole("button", { name: "Escolher datas e pets" }));
-  await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-10-16", "2026-10-17");
+  await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-10-16", "2026-10-17");
   fireEvent.mouseDown(screen.getByRole("combobox", { name: "Pet" }));
   fireEvent.click(screen.getByRole("option", { name: "Luna" }));
   fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });

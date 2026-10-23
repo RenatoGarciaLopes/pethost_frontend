@@ -2,12 +2,13 @@
 import { InputAdornment, TextField, type TextFieldProps } from "@mui/material";
 import type { KeyboardEvent, Ref } from "react";
 import { calendarCopy } from "./calendarCopy";
-import { formatDisplayDate } from "./calendarDates";
 
 export interface CalendarInputProps {
   label: string;
-  /** Data ISO `yyyy-MM-dd` ou vazio. */
+  /** O que o campo mostra (data formatada, período) ou vazio. */
   value: string;
+  /** Texto do campo vazio; padrão "Escolhe o dia". */
+  placeholder?: string;
   onOpen: (anchor: HTMLElement) => void;
   inputRef?: Ref<HTMLInputElement>;
   name?: string;
@@ -17,7 +18,8 @@ export interface CalendarInputProps {
   fullWidth?: boolean;
 }
 
-function CalendarGlyph() {
+/** Ícone de calendário do campo e da célula de datas da barra de busca. */
+export function CalendarGlyph() {
   return (
     <svg
       width="22"
@@ -36,14 +38,15 @@ function CalendarGlyph() {
 }
 
 /**
- * Campo de leitura que mostra a data (dd/mm/aaaa) e abre o calendário por toque, Enter, Espaço ou seta para baixo.
+ * Campo de leitura que mostra a data ou o período e abre o calendário por toque, Enter, Espaço ou seta para baixo.
  * Quem usa decide o calendário; este campo só guarda a aparência e o aria do botão de abrir.
  *
- * @example <CalendarInput label="Chegada" value={checkIn} onOpen={(anchor) => { setAnchor(anchor); setOpen(true); }} />
+ * @example <CalendarInput label="Nascimento" value="12/05/2020" onOpen={(anchor) => { setAnchor(anchor); setOpen(true); }} />
  */
 export function CalendarInput({
   label,
   value,
+  placeholder = calendarCopy.placeholder,
   onOpen,
   inputRef,
   name,
@@ -62,7 +65,7 @@ export function CalendarInput({
     <TextField
       label={label}
       name={name}
-      value={formatDisplayDate(value)}
+      value={value}
       error={error}
       helperText={helperText}
       onBlur={onBlur}
@@ -74,7 +77,7 @@ export function CalendarInput({
         inputLabel: { shrink: true },
         htmlInput: {
           readOnly: true,
-          placeholder: calendarCopy.placeholder,
+          placeholder,
           "aria-haspopup": "dialog",
           sx: { cursor: "pointer" },
         },

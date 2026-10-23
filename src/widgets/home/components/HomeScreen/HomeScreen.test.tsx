@@ -30,7 +30,7 @@ it("REQ-HOME-002 visitante prepara a busca por espécie e segue pelo login com o
   expect(screen.getByText("Entre para ver os cantinhos disponíveis.")).toBeVisible();
 
   await user.type(screen.getByRole("textbox", { name: "Onde" }), "Zona 7");
-  await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-11-01", "2026-11-05");
+  await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-11-01", "2026-11-05");
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "Cão" }));
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
@@ -77,11 +77,10 @@ it("REQ-HOME-006 no celular a pílula expande e anuncia os campos", async () => 
   expect(screen.getByRole("textbox", { name: "Onde" })).toBeInTheDocument();
 });
 
-it("REQ-UIC-007 faixa única mostra datas legíveis e mantém quatro controles rotulados", async () => {
+it("REQ-UIC-007 faixa única mostra datas legíveis e mantém três controles rotulados", async () => {
   const { user } = renderHome();
-  await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-12-20", "2026-12-25");
-  expect(screen.getByText("20 dez, a partir das 14h")).toBeVisible();
-  expect(screen.getByText("25 dez · 5 noites")).toBeVisible();
+  await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-12-20", "2026-12-25");
+  expect(screen.getByText("20 a 25 dez · 5 noites")).toBeVisible();
   expect(screen.getByRole("textbox", { name: "Onde" })).toBeEnabled();
   expect(screen.getByRole("combobox", { name: "Pet" })).toBeEnabled();
 });
@@ -93,13 +92,11 @@ it("REQ-UIC-007 pergunta de quantidade do anfitrião fica fora da faixa de busca
   );
 });
 
-it("REQ-UIC-007 teclado alcança as quatro células sem controles nativos de seleção extras", async () => {
+it("REQ-UIC-007 teclado alcança as três células sem controles nativos de seleção extras", async () => {
   const { user } = renderHome();
   screen.getByRole("textbox", { name: "Onde" }).focus();
   await user.tab();
-  expect(screen.getByLabelText("Chegada")).toHaveFocus();
-  await user.tab();
-  expect(screen.getByLabelText("Saída")).toHaveFocus();
+  expect(screen.getByLabelText("Chegada e saída")).toHaveFocus();
   await user.tab();
   expect(screen.getByRole("combobox", { name: "Pet" })).toHaveFocus();
 });

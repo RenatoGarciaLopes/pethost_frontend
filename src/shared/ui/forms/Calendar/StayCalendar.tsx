@@ -4,11 +4,8 @@ import { Calendar } from "./Calendar";
 import { calendarCopy } from "./calendarCopy";
 import { CalendarPopover } from "./CalendarPopover";
 
-export type StayEdge = "checkIn" | "checkOut";
-
 export interface StayCalendarProps {
-  /** Qual data o campo tocado edita; `null` com o calendário fechado. */
-  edge: StayEdge | null;
+  open: boolean;
   /** Campo ou célula que abriu o calendário. */
   anchorEl: HTMLElement | null;
   /** O que o calendário não pode cobrir (a barra de busca); sem ele, o `anchorEl`. */
@@ -25,10 +22,10 @@ export interface StayCalendarProps {
  * O calendário de estadia (chegada de hoje a 365 dias, até 30 noites) no popover ou folha de baixo, para qualquer
  * campo ou célula que abra as datas: `DateRangeField` e a barra de busca. Quem usa guarda o estado de aberto.
  *
- * @example <StayCalendar edge={open} anchorEl={anchor} checkIn={from} checkOut={to} today={today} onChange={setRange} onClose={close} />
+ * @example <StayCalendar open={open} anchorEl={anchor} checkIn={from} checkOut={to} today={today} onChange={setRange} onClose={close} />
  */
 export function StayCalendar({
-  edge,
+  open,
   anchorEl,
   clearEl,
   checkIn,
@@ -39,7 +36,7 @@ export function StayCalendar({
 }: StayCalendarProps) {
   return (
     <CalendarPopover
-      open={Boolean(edge)}
+      open={open}
       anchorEl={anchorEl}
       clearEl={clearEl}
       onClose={() => onClose(false)}
@@ -51,7 +48,6 @@ export function StayCalendar({
           autoFocus
           months={compact ? 1 : 2}
           value={{ start: checkIn, end: checkOut }}
-          editing={edge === "checkOut" ? "end" : "start"}
           min={today}
           max={addDays(today, 365)}
           today={today}

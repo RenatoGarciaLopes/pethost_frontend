@@ -8,10 +8,10 @@ import { accountQueryKey } from "@/shared/api/query/queryClient";
 import { AppHeader } from "@/widgets/app-shell";
 import { HomeScreen, type HomeScreenProps } from "@/widgets/home";
 
-/** Abre o calendário pela célula Chegada e escolhe o 2º e o 7º dia livres do mês: sempre cinco noites, qualquer que seja o hoje. */
+/** Abre o calendário pela célula Chegada e saída e escolhe o 2º e o 7º dia livres do mês: sempre cinco noites, qualquer que seja o hoje. */
 async function pickFiveNights(canvasElement: HTMLElement) {
   const body = within(canvasElement.ownerDocument.body);
-  await userEvent.click(within(canvasElement).getByLabelText("Chegada"));
+  await userEvent.click(within(canvasElement).getByLabelText("Chegada e saída"));
   const dialog = await body.findByRole("dialog", { name: "Escolher as datas da estadia" });
   const free = [...dialog.querySelectorAll<HTMLElement>("[data-iso]:not([aria-disabled])")];
   await userEvent.click(free[1]!);
@@ -88,8 +88,7 @@ export const Visitante: Story = {
     await expect(canvas.getByRole("link", { name: "Como funciona" })).toHaveAttribute("href", "#como-funciona");
     await userEvent.type(canvas.getByRole("textbox", { name: "Onde" }), "Zona 7, Maringá");
     await pickFiveNights(canvasElement);
-    await expect(canvas.getByText(/, a partir das 14h$/)).toBeVisible();
-    await expect(canvas.getByText(/ · 5 noites$/)).toBeVisible();
+    await expect(canvas.getByText(/ a .+ · 5 noites$/)).toBeVisible();
     const form = canvas.getByRole("form", { name: "Busca de cantinhos" });
     await expect(form.scrollWidth).toBeLessThanOrEqual(form.clientWidth);
     await expect(canvas.getByRole("list", { name: "Garantias da PetHost" }).children).toHaveLength(3);

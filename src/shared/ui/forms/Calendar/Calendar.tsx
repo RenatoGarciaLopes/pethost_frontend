@@ -49,8 +49,6 @@ interface RangeProps extends CalendarBase {
   onChange: (range: RangeValue, complete: boolean) => void;
   /** Noites máximas entre chegada e saída; dias além ficam apagados, com o limite explicado no rodapé. */
   maxNights?: number;
-  /** Qual data o campo que abriu o calendário está editando. */
-  editing?: "start" | "end";
 }
 export type CalendarProps = SingleProps | RangeProps;
 
@@ -138,8 +136,7 @@ export function Calendar(props: CalendarProps) {
   const today = props.today ?? brasiliaToday();
   const range: RangeValue = props.mode === "range" ? props.value : { start: props.value, end: "" };
   const maxNights = props.mode === "range" ? props.maxNights : undefined;
-  const editingEnd = props.mode === "range" && props.editing === "end";
-  const awaitingEnd = props.mode === "range" && Boolean(range.start) && (!range.end || editingEnd);
+  const awaitingEnd = props.mode === "range" && Boolean(range.start) && !range.end;
 
   const farthestEnd = awaitingEnd && maxNights !== undefined ? addDays(range.start, maxNights) : undefined;
   const upper = max !== undefined && farthestEnd !== undefined && farthestEnd > max ? farthestEnd : max;
@@ -150,6 +147,8 @@ export function Calendar(props: CalendarProps) {
   const [view, setView] = useState<CalendarMonth>(monthOf(base));
   const [navigated, setNavigated] = useState(false);
   const [choosingYear, setChoosingYear] = useState(false);
+  // Dia sob o mouse ou o foco: com a saída pendente, vira a prévia do intervalo até ele.
+  const [pointed, setPointed] = useState("");
   const root = useRef<HTMLDivElement>(null);
   const pendingFocus = useRef(autoFocus);
 
@@ -180,7 +179,7 @@ export function Calendar(props: CalendarProps) {
     setFocusIso(iso);
     if (props.mode === "single") props.onChange(iso);
     else {
-      const { range: next, complete } = pickInRange(range, iso, editingEnd);
+      const { range: next, complete } = pickInRange(range, iso);
       props.onChange(next, complete);
     }
   }
@@ -229,10 +228,12 @@ export function Calendar(props: CalendarProps) {
   const visible = Array.from({ length: months }, (_, index) => addMonths(view, index));
   const tabIso = visible.some((month) => monthsBetween(month, monthOf(focusIso)) === 0) ? focusIso : undefined;
 
-  const summary = props.mode === "range" && Boolean(range.start && range.end);
+  const previewEnd = awaitingEnd && pointed > range.start && !isBlocked(pointed) ? pointed : "";
+  const shown: RangeValue = previewEnd ? { start: range.start, end: previewEnd } : range;
+  const summary = props.mode === "range" && Boolean(shown.start && shown.end);
   let hint: string = calendarCopy.pickStart;
   if (props.mode === "single") hint = range.start ? dayLabel(range.start) : calendarCopy.pickDay;
-  else if (summary) hint = rangeSummary(range.start, range.end);
+  else if (summary) hint = rangeSummary(shown.start, shown.end);
   else if (awaitingEnd)
     hint = farthestEnd === undefined ? calendarCopy.pickEnd : calendarCopy.pickEndLimited(maxNights!, farthestEnd);
 
@@ -246,7 +247,12 @@ export function Calendar(props: CalendarProps) {
           onPick={chooseYear}
         />
       ) : (
-        <Stack direction="row" spacing={{ xs: 0, sm: 3 }} sx={{ alignItems: "flex-start" }}>
+        <Stack
+          direction="row"
+          spacing={{ xs: 0, sm: 3 }}
+          onMouseLeave={() => setPointed("")}
+          sx={{ alignItems: "flex-start" }}
+        >
           {visible.map((month, index) => (
             <Box key={index} sx={{ flex: 1, minWidth: 0, width: { sm: months === 2 ? 308 : "auto" } }}>
               <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 0.5, mb: 1 }}>
@@ -351,12 +357,14 @@ export function Calendar(props: CalendarProps) {
                           key={iso}
                           iso={iso}
                           column={column}
-                          range={range}
+                          range={shown}
+                          previewing={Boolean(previewEnd)}
                           rangeMode={props.mode === "range"}
                           today={today}
                           blocked={isBlocked(iso)}
                           tabbable={iso === tabIso}
                           onChoose={choose}
+                          onPoint={setPointed}
                           onFocusDay={setFocusIso}
                         />
                       ) : (
@@ -404,24 +412,41 @@ export function Calendar(props: CalendarProps) {
 interface DayCellProps {
   iso: string;
   column: number;
+  /** O intervalo pintado: o escolhido ou, na prévia, até o dia apontado. */
   range: RangeValue;
+  previewing: boolean;
   rangeMode: boolean;
   today: string;
   blocked: boolean;
   tabbable: boolean;
   onChoose: (iso: string) => void;
+  onPoint: (iso: string) => void;
   onFocusDay: (iso: string) => void;
 }
 
-function DayCell({ iso, column, range, rangeMode, today, blocked, tabbable, onChoose, onFocusDay }: DayCellProps) {
+function DayCell({
+  iso,
+  column,
+  range,
+  previewing,
+  rangeMode,
+  today,
+  blocked,
+  tabbable,
+  onChoose,
+  onPoint,
+  onFocusDay,
+}: DayCellProps) {
   const complete = rangeMode && Boolean(range.start && range.end);
   const isStart = iso === range.start;
   const isEnd = rangeMode && iso === range.end;
   const inside = complete && iso > range.start && iso < range.end;
   const selected = isStart || isEnd;
-  const role = rangeMode && isStart ? calendarCopy.start : isEnd ? calendarCopy.end : null;
+  const role = rangeMode && isStart ? calendarCopy.start : isEnd && !previewing ? calendarCopy.end : null;
   const label = [dayLabel(iso), role, iso === today ? calendarCopy.today : null].filter(Boolean).join(", ");
-  const strip = quintalColors.grama;
+  // Prévia: a faixa fica mais clara e tracejada até virar cheia no toque.
+  const strip = previewing ? `${quintalColors.grama}80` : quintalColors.grama;
+  const previewEdge = previewing ? { borderBlock: "2px dashed", borderColor: "text.primary" } : undefined;
   const background = inside
     ? strip
     : complete && isStart && column !== 6
@@ -434,8 +459,15 @@ function DayCell({ iso, column, range, rangeMode, today, blocked, tabbable, onCh
   return (
     <Box
       role="gridcell"
-      aria-selected={selected || inside}
-      sx={{ height: CELL, display: "grid", placeItems: "center", background, borderRadius: edge }}
+      aria-selected={!previewing && (selected || inside)}
+      sx={{
+        height: CELL,
+        display: "grid",
+        placeItems: "center",
+        background,
+        borderRadius: edge,
+        ...(inside && previewEdge),
+      }}
     >
       <Box
         component="button"
@@ -446,7 +478,11 @@ function DayCell({ iso, column, range, rangeMode, today, blocked, tabbable, onCh
         aria-current={iso === today ? "date" : undefined}
         tabIndex={tabbable ? 0 : -1}
         onClick={() => onChoose(iso)}
-        onFocus={() => onFocusDay(iso)}
+        onMouseEnter={() => onPoint(iso)}
+        onFocus={() => {
+          onFocusDay(iso);
+          onPoint(iso);
+        }}
         sx={{
           width: CELL - 4,
           height: CELL - 4,
@@ -459,7 +495,8 @@ function DayCell({ iso, column, range, rangeMode, today, blocked, tabbable, onCh
           borderRadius: PILL,
           border: "2px solid",
           borderColor: selected ? "text.primary" : "transparent",
-          bgcolor: selected ? quintalColors.coral : "transparent",
+          ...(previewing && isEnd && { borderStyle: "dashed" }),
+          bgcolor: selected ? (previewing && isEnd ? `${quintalColors.coral}80` : quintalColors.coral) : "transparent",
           ...(iso === today && !selected && { borderStyle: "dashed", borderColor: "text.primary" }),
           "&:hover": !blocked && !selected ? { bgcolor: quintalColors.luz } : undefined,
           "&:focus-visible": { outline: `3px solid ${quintalColors.tinta}`, outlineOffset: 2 },

@@ -12,6 +12,7 @@ import {
   rangeSummary,
   shiftMonths,
   shortDate,
+  stayLabel,
   weekdayOf,
 } from "./calendarDates";
 
@@ -69,36 +70,46 @@ describe("calendarDates (REQ-CAL-002 textos em pt-BR)", () => {
 describe("pickInRange (REQ-CAL-003 seleção de intervalo)", () => {
   const none = { start: "", end: "" };
   it("o primeiro toque escolhe a chegada", () => {
-    expect(pickInRange(none, "2026-12-20", false)).toEqual({
+    expect(pickInRange(none, "2026-12-20")).toEqual({
       range: { start: "2026-12-20", end: "" },
       complete: false,
     });
   });
   it("com a chegada, um dia depois vira saída e completa", () => {
-    expect(pickInRange({ start: "2026-12-20", end: "" }, "2026-12-25", false)).toEqual({
+    expect(pickInRange({ start: "2026-12-20", end: "" }, "2026-12-25")).toEqual({
       range: { start: "2026-12-20", end: "2026-12-25" },
       complete: true,
     });
   });
   it("com a chegada, o mesmo dia ou um dia antes recomeça pela chegada", () => {
-    expect(pickInRange({ start: "2026-12-20", end: "" }, "2026-12-20", false).range).toEqual({
+    expect(pickInRange({ start: "2026-12-20", end: "" }, "2026-12-20").range).toEqual({
       start: "2026-12-20",
       end: "",
     });
-    expect(pickInRange({ start: "2026-12-20", end: "" }, "2026-12-18", false).range).toEqual({
+    expect(pickInRange({ start: "2026-12-20", end: "" }, "2026-12-18").range).toEqual({
       start: "2026-12-18",
       end: "",
     });
   });
-  it("intervalo completo recomeça, exceto quando se edita a saída", () => {
-    const full = { start: "2026-12-20", end: "2026-12-25" };
-    expect(pickInRange(full, "2026-12-28", false)).toEqual({
+  it("intervalo completo recomeça pela chegada", () => {
+    expect(pickInRange({ start: "2026-12-20", end: "2026-12-25" }, "2026-12-28")).toEqual({
       range: { start: "2026-12-28", end: "" },
       complete: false,
     });
-    expect(pickInRange(full, "2026-12-28", true)).toEqual({
-      range: { start: "2026-12-20", end: "2026-12-28" },
-      complete: true,
-    });
+  });
+});
+
+describe("stayLabel (REQ-CAL-009 período no campo único)", () => {
+  it("vazio, só a chegada e o intervalo com as noites", () => {
+    expect(stayLabel("", "")).toBe("");
+    expect(stayLabel("2026-12-20", "")).toBe("20 dez");
+    expect(stayLabel("2026-12-20", "2026-12-25")).toBe("20 a 25 dez · 5 noites");
+    expect(stayLabel("2026-12-28", "2027-01-02")).toBe("28 dez a 2 jan · 5 noites");
+    expect(stayLabel("2028-02-28", "2028-02-29")).toBe("28 a 29 fev · 1 noite");
+  });
+  it("saída que não vem depois da chegada, ou data impossível, não vira intervalo", () => {
+    expect(stayLabel("2026-12-20", "2026-12-20")).toBe("20 dez");
+    expect(stayLabel("2026-12-20", "2026-12-19")).toBe("20 dez");
+    expect(stayLabel("2026-02-30", "2026-03-02")).toBe("");
   });
 });

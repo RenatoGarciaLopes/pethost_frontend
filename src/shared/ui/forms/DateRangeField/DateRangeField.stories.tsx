@@ -24,7 +24,7 @@ export const Aberto: Story = {
   name: "REQ-CAL-005 Calendário aberto",
   render: (args) => <Controlled {...args} />,
   play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByLabelText("Chegada"));
+    await userEvent.click(canvas.getByLabelText("Chegada e saída"));
     await expect(
       await within(document.body).findByRole("dialog", { name: "Escolher as datas da estadia" }),
     ).toBeInTheDocument();

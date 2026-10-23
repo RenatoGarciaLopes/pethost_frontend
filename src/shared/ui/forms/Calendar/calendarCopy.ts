@@ -31,4 +31,6 @@ export const calendarCopy = {
   rangeDialog: "Escolher as datas da estadia",
   dateDialog: "Escolher a data",
   placeholder: "Escolhe o dia",
+  stayLabel: "Chegada e saída",
+  stayPlaceholder: "Selecionar datas",
 } as const;
