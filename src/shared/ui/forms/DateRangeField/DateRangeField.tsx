@@ -11,6 +11,8 @@ export interface DateRangeFieldProps {
   checkIn: string;
   checkOut: string;
   today: string;
+  /** Primeira chegada escolhível (pedido de estadia); sem ela, hoje. */
+  min?: string;
   onChange: (value: { checkIn: string; checkOut: string }) => void;
   errors?: Partial<Record<"checkIn" | "checkOut", string>>;
 }
@@ -21,7 +23,7 @@ export interface DateRangeFieldProps {
  * recebe erros de envio/API por prop (mostra o da chegada, ou o da saída se for o único).
  * @example <DateRangeField checkIn={from} checkOut={to} today={today} onChange={setRange} />
  */
-export function DateRangeField({ checkIn, checkOut, today, onChange, errors = {} }: DateRangeFieldProps) {
+export function DateRangeField({ checkIn, checkOut, today, min, onChange, errors = {} }: DateRangeFieldProps) {
   const validation = validateStay(checkIn, checkOut, today);
   const [touched, setTouched] = useState(false);
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
@@ -45,6 +47,7 @@ export function DateRangeField({ checkIn, checkOut, today, onChange, errors = {}
         checkIn={checkIn}
         checkOut={checkOut}
         today={today}
+        min={min}
         onChange={onChange}
         onClose={() => {
           setTouched(true);

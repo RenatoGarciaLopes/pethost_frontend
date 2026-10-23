@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { loginRedirectPath, switchAccountPath } from "@/shared/config/appRoutes";
-import { nightsBetween, validateStay } from "@/shared/lib/date/stayRules";
+import { earliestRequestCheckIn, nightsBetween, validateRequestStay } from "@/shared/lib/date/stayRules";
 import { formatBRL } from "@/shared/lib/money";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { PawMark } from "@/shared/ui/brand/PawMark";
@@ -88,7 +88,9 @@ export function StayBookingCard({
   function changeDates(next: typeof dates) {
     setDates(next);
     const complete =
-      next.checkIn && next.checkOut && Object.keys(validateStay(next.checkIn, next.checkOut, today)).length === 0;
+      next.checkIn &&
+      next.checkOut &&
+      Object.keys(validateRequestStay(next.checkIn, next.checkOut, today)).length === 0;
     if (complete || (!next.checkIn && !next.checkOut)) update(next, chosen);
   }
 
@@ -102,7 +104,13 @@ export function StayBookingCard({
     <>
       <Stack spacing={2.5}>
         <NightlyPrice nightlyRate={nightlyRate} />
-        <DateRangeField checkIn={dates.checkIn} checkOut={dates.checkOut} today={today} onChange={changeDates} />
+        <DateRangeField
+          checkIn={dates.checkIn}
+          checkOut={dates.checkOut}
+          today={today}
+          min={earliestRequestCheckIn(today)}
+          onChange={changeDates}
+        />
         {account === "owner" && (
           <Box component="fieldset" sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
             <Typography component="legend" sx={{ fontWeight: 700, fontSize: "0.95rem", mb: 1 }}>
