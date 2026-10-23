@@ -6,18 +6,22 @@ import { WizardProgress } from "./WizardProgress";
 
 const steps = [
   { id: "you", label: "Você" },
-  { id: "address", label: "Endereço" },
+  { id: "address", label: "Endereço", description: "Pra achar cantinhos perto" },
   { id: "done", label: "Confirmar" },
 ];
 afterEach(() => vi.unstubAllGlobals());
 it("REQ-DS-012 trilha descreve concluído, atual e futuro sem navegar", () => {
-  const { rerender } = renderWithProviders(<WizardProgress steps={steps} currentIndex={1} variant="trail" />, {
-    theme: quintalTheme,
-  });
+  const { rerender } = renderWithProviders(
+    <WizardProgress steps={steps} currentIndex={1} variant="trail" appearance="cards" />,
+    {
+      theme: quintalTheme,
+    },
+  );
   const items = within(screen.getByRole("navigation", { name: "Etapas" })).getAllByRole("listitem");
   expect(items[0]).toHaveTextContent("Você (concluído)");
   expect(items[1]).toHaveTextContent("Endereço (passo atual)");
   expect(items[1]).toHaveAttribute("aria-current", "step");
+  expect(items[1]).toHaveTextContent("Pra achar cantinhos perto");
   expect(items[2]).toHaveTextContent("Confirmar (a fazer)");
   expect(items[2]).not.toHaveAttribute("aria-current");
   expect(screen.queryByRole("button")).not.toBeInTheDocument();

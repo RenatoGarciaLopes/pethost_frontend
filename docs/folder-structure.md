@@ -498,3 +498,7 @@ src/shared/hooks/useInputModality.test.tsx cleanup do efeito
 ThemeProviders instala o hook no topo do app; o decorator existente de .storybook/preview.ts instala o mesmo efeito nas stories. Nenhum provider/contexto/store novo. Overrides e consumidores usam o helper do tema; o antigo export focusRing de overrides/Button.ts foi movido para theme/focus.ts com todos os imports migrados. Detalhes e validação: [081](../specs/081-keyboard-only-focus/design.md).
 
 GlobalError, fronteira alternativa que substitui o layout sem MUI/providers, instala o mesmo hook e usa o helper/geometry para CSS nativo. Não há segundo tracker simultâneo na árvore normal; detalhes em frontend-input-modality.
+
+## Revisão 074 do cadastro
+
+RegisterChoiceScreen foi removido; /register compõe RegistrationScreen owner diretamente. RegisterChoice permanece interno ao wizard como cartões de troca de papel. Stories de RegistrationScreen cobrem composição do wizard/PersonStep; stories de RegisterChoice cobrem as opções. Nenhuma store/provider/pasta nova. WizardProgress e PasswordStrengthChecklist foram estendidos nas pastas existentes. Fonte técnica: [cadastro fiel](../specs/005-ui-conformance/register-fidelity-implementation.md).

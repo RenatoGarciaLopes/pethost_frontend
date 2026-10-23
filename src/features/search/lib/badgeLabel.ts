@@ -6,5 +6,6 @@ export function badgeLabel(badge: ListingSummary["badges"][number]): string {
     fast_responder: "Responde rápido",
     yard: "Casa com quintal",
     experienced: "Experiente",
+    well_rated: "Bem avaliado",
   }[badge];
 }

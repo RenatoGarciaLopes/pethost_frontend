@@ -21,8 +21,8 @@ export const GetApiV1ConversationsReportsQueryParams = zod.object({
 })
 
 export const GetApiV1ConversationsReportsResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
   "conversationId": zod.string().uuid(),
@@ -67,14 +67,9 @@ export const GetApiV1ConversationsReportsResponse = zod.object({
   "pageSize": zod.number().int(),
   "totalCount": zod.number().int(),
   "totalPages": zod.number().int().optional()
-}).describe('Página de uma lista (§13): `page` começa em 1.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Página de uma lista (§13): `page` começa em 1.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Em `reported` está quem enviou a mensagem: o id para suspender, se for o caso.
@@ -85,8 +80,8 @@ export const GetApiV1ConversationsReportsReportIdParams = zod.object({
 })
 
 export const GetApiV1ConversationsReportsReportIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "conversationId": zod.string().uuid(),
   "status": zod.string().describe('`pending`, `upheld` ou `dismissed`.'),
@@ -125,14 +120,9 @@ export const GetApiV1ConversationsReportsReportIdResponse = zod.object({
   "resolvedAt": zod.string().datetime({"offset":true}).nullish(),
   "resolvedBy": zod.string().uuid().nullish().describe('Conta do admin que analisou.'),
   "resolutionNote": zod.string().nullish()
-}).describe('Uma denúncia como o admin vê: o motivo, a mensagem denunciada e quem é quem.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma denúncia como o admin vê: o motivo, a mensagem denunciada e quem é quem.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Corpo: `outcome` e `note` (obrigatória, até 1.000 caracteres). Já analisada: 422
@@ -150,8 +140,8 @@ export const PutApiV1ConversationsReportsReportIdResolutionBody = zod.object({
 }).describe('Corpo de `PUT /api/v1/conversations/reports/{reportId}/resolution`.')
 
 export const PutApiV1ConversationsReportsReportIdResolutionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "conversationId": zod.string().uuid(),
   "status": zod.string().describe('`pending`, `upheld` ou `dismissed`.'),
@@ -190,12 +180,7 @@ export const PutApiV1ConversationsReportsReportIdResolutionResponse = zod.object
   "resolvedAt": zod.string().datetime({"offset":true}).nullish(),
   "resolvedBy": zod.string().uuid().nullish().describe('Conta do admin que analisou.'),
   "resolutionNote": zod.string().nullish()
-}).describe('Uma denúncia como o admin vê: o motivo, a mensagem denunciada e quem é quem.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma denúncia como o admin vê: o motivo, a mensagem denunciada e quem é quem.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
