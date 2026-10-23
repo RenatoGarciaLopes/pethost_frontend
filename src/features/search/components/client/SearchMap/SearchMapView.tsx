@@ -531,15 +531,21 @@ export function SearchMapView({
                 {searchCopy.noPhoto}
               </Box>
             )}
-            <Box sx={{ minWidth: 0, display: "grid", alignContent: "center", gap: 0.5, pr: 5.5 }}>
+            <Box sx={{ minWidth: 0, display: "grid", alignContent: "center", gap: 0.5 }}>
               <Typography
                 component={Link}
                 href={hrefFor(selected.id)}
-                sx={{ fontFamily: "var(--font-display)", fontSize: 17, color: "text.primary", textDecoration: "none" }}
+                sx={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: 17,
+                  color: "text.primary",
+                  textDecoration: "none",
+                  pr: 4.5,
+                }}
               >
                 {selected.title}
               </Typography>
-              <Typography sx={{ fontSize: 12.5 }}>
+              <Typography noWrap sx={{ fontSize: 12.5 }}>
                 {[
                   selected.neighborhood,
                   selected.distanceKm != null
@@ -559,7 +565,7 @@ export function SearchMapView({
                   .join(" · ")}
               </Typography>
               {compatibility?.pets.map((pet) => (
-                <Box key={pet.id}>
+                <Box key={pet.id} sx={{ "& > span": { whiteSpace: "nowrap" } }}>
                   <CompatibilityChip
                     accountId={compatibility.accountId}
                     listingId={selected.id}
