@@ -393,6 +393,10 @@ export function Calendar(props: CalendarProps) {
           aria-live="polite"
           sx={{
             fontSize: "0.95rem",
+            lineHeight: 1.5,
+            // A dica do limite ocupa duas linhas e o resumo uma: altura fixa no intervalo, senão a folha de baixo
+            // desce no hover e a célula foge do ponteiro.
+            minHeight: props.mode === "range" ? "3em" : undefined,
             fontWeight: summary ? 700 : 400,
             color: summary ? "text.primary" : "text.secondary",
           }}
