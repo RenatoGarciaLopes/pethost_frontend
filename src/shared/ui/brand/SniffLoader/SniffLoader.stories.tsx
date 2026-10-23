@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { SniffLoader } from "./SniffLoader";
 
 const meta = {
@@ -25,7 +26,16 @@ export const NoCartao: Story = {
   parameters: { layout: "padded" },
   decorators: [
     (Story) => (
-      <Box sx={{ width: { xs: "100%", sm: 640 }, height: 300, border: "2px solid", borderRadius: 3 }}>{Story()}</Box>
+      <Box
+        sx={{
+          width: { xs: "100%", sm: 640 },
+          height: 300,
+          border: "2px solid",
+          borderRadius: `${quintalRadii.card}px`,
+        }}
+      >
+        {Story()}
+      </Box>
     ),
   ],
 };
@@ -41,7 +51,7 @@ export const MovimentoReduzido: Story = {
         media: query,
         addEventListener: () => {},
         removeEventListener: () => {},
-      }) as MediaQueryList;
+      }) as unknown as MediaQueryList;
     return () => {
       window.matchMedia = original;
     };
