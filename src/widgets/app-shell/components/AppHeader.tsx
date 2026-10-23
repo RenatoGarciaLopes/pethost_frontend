@@ -2,7 +2,7 @@ import { Box, Button } from "@mui/material";
 import type { ReactNode } from "react";
 import NextLink from "next/link";
 import type { SessionUser } from "@/shared/auth/contracts/session";
-import { homeOf } from "@/shared/config/appRoutes";
+import { homeOf, loginRedirectPath } from "@/shared/config/appRoutes";
 import { navItemsFor, type NavItem } from "@/shared/config/navigation";
 import { quintalColors } from "@/shared/theme/tokens/colors";
 import { DoorMark } from "@/shared/ui/brand/DoorMark";
@@ -19,6 +19,8 @@ interface AppHeaderProps {
   search?: ReactNode;
   /** Faixa própria abaixo da linha principal, ainda acima da borda do cabeçalho (chips dos resultados). */
   filters?: ReactNode;
+  /** Página aberta de onde o visitante sai para entrar: o login volta para ela. */
+  returnTo?: string;
 }
 
 const HOW: NavItem = { id: "how", label: "Como funciona", href: "#como-funciona", roles: ["owner", "host"] };
@@ -32,7 +34,7 @@ const HOME_OWNER_ITEMS = navItemsFor("owner").filter((item) => item.id === "owne
  * AccountMenu.
  * @example <AppHeader user={user} variant="home" />
  */
-export function AppHeader({ user, variant = "shell", search, filters }: AppHeaderProps) {
+export function AppHeader({ user, variant = "shell", search, filters, returnTo }: AppHeaderProps) {
   const home = variant === "home";
   const items = home
     ? user?.role === "owner"
@@ -79,7 +81,7 @@ export function AppHeader({ user, variant = "shell", search, filters }: AppHeade
           {user ? (
             <AccountMenu user={{ ...user, avatarUrl: user.avatarUrl ?? null }} />
           ) : (
-            <Button href="/login" variant="outlined" sx={{ minHeight: 48 }}>
+            <Button href={loginRedirectPath(returnTo)} variant="outlined" sx={{ minHeight: 48 }}>
               Entrar
             </Button>
           )}

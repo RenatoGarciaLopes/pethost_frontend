@@ -11,6 +11,8 @@ export interface AppShellProps {
    */
   user: SessionUser | null;
   children: ReactNode;
+  /** Página aberta (o cantinho): o Entrar do visitante volta para ela depois do login. */
+  returnTo?: string;
 }
 
 /**
@@ -21,10 +23,10 @@ export interface AppShellProps {
  *
  * @example <RoleGate roles="host">{(user) => <AppShell user={user}>{children}</AppShell>}</RoleGate>
  */
-export function AppShell({ user, children }: AppShellProps) {
+export function AppShell({ user, children, returnTo }: AppShellProps) {
   return (
     <Box sx={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
-      <AppHeader user={user} />
+      <AppHeader user={user} returnTo={returnTo} />
       <Box component="main" id="conteudo" tabIndex={-1} sx={{ outline: "none", flexGrow: 1 }}>
         {children}
       </Box>

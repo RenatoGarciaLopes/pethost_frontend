@@ -42,3 +42,11 @@ it("REQ-SHELL-002 REQ-UIC-003 na casca o tutor vê Buscar (home), Meus pets e Mi
   expect(nav.queryByRole("link", { name: "Conversas" })).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Menu da conta de Camila Souza/ })).toHaveTextContent("Camila");
 });
+
+it("REQ-LPAGE-012 o Entrar do visitante volta para a página aberta que ele estava vendo", () => {
+  renderWithProviders(<AppHeader returnTo="/listings/abc?from=2026-11-10" />, { theme: quintalTheme });
+  expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute(
+    "href",
+    "/login?next=%2Flistings%2Fabc%3Ffrom%3D2026-11-10",
+  );
+});

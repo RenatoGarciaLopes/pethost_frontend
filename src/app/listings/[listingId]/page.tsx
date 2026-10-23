@@ -55,7 +55,8 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
   if (!isPetId(listingId)) notFound();
   const query = searchParamsToQuery(rawSearch);
   const search = queryToSearchParams(query).toString();
-  const user = await personalSession(pathWithQuery(listingId, search));
+  const path = pathWithQuery(listingId, search);
+  const user = await personalSession(path);
   const [{ listing, isOwner }, ownerPets, reviews] = await Promise.all([
     getListingPageContext(user?.id ?? "visitor", user?.role ?? "visitor", listingId),
     user?.role === "owner" ? getQueryClient().fetchQuery(petQueries.mine(user.id, await backendForRequest())) : null,
@@ -74,7 +75,7 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
       ...selectedPets.map((pet) => prefetchCompatibility(queryClient, user.id, listing.id, pet.id, stay)),
     ]);
   return (
-    <AppShell user={user}>
+    <AppShell user={user} returnTo={path}>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ListingPageScreen
           listing={listing}
