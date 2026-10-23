@@ -34,7 +34,7 @@ export function listingFixture(overrides: Partial<ListingSummary> = {}): Listing
 }
 /** Estado mínimo da URL. @example searchQueryFixture({ where: "Curitiba" }) */
 export function searchQueryFixture(overrides: Partial<SearchQuery> = {}): SearchQuery {
-  return { pets: [], species: [], sizes: [], weekdays: [], ...overrides };
+  return { pets: [], species: [], sizes: [], ...overrides };
 }
 /** Pets ativos sintéticos para formulário e derivação. @example <SearchBar pets={searchPetsFixture} {...props} /> */
 export const searchPetsFixture: SearchPet[] = [

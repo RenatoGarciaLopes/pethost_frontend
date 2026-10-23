@@ -11,9 +11,9 @@ function calendarTimestamp(value: string): number | null {
 /**
  * Valor legível da célula de datas da home (REQ-UIC-007), sem converter o ISO enviado à busca.
  * Calendário em UTC evita mudar o dia/noites por fuso ou horário de verão. Não valida a reserva.
- * @example homeDateLabel("2026-12-25", "departure", "2026-12-20") // "25 dez · 5 noites"
+ * @example searchDateLabel("2026-12-25", "departure", "2026-12-20") // "25 dez · 5 noites"
  */
-export function homeDateLabel(value: string, edge: "arrival" | "departure", from?: string): string {
+export function searchDateLabel(value: string, edge: "arrival" | "departure", from?: string): string {
   const timestamp = calendarTimestamp(value);
   if (timestamp === null) return edge === "arrival" ? "Quando chega?" : "Quando volta?";
   const label = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", timeZone: "UTC" })

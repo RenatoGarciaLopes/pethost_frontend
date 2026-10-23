@@ -74,7 +74,7 @@ A tela resolve isso com a escolha "Sou tutor / Sou anfitrião" no topo e mensage
 
 ## Microcopy
 
-- **Título:** "Entra que a porta tá aberta." · **Linha de apoio (computador):** "Que bom te ver".
+- **Título:** "Entra que a porta tá aberta" · **Linha de apoio (computador):** "Que bom te ver".
 - **Rótulos:** "Você entra como", "E-mail", "Senha"; botão "Entrar"; envio "Entrando…".
 - **Erros de campo:** "Falta o e-mail.", "Esse e-mail parece incompleto.", "Falta a senha."
 - **Erros da API:** conforme o REQ-AUTH-007 a 011 (fonte: `produto/contrato-api.md`).

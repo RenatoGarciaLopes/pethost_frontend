@@ -21,7 +21,7 @@ export const Sequencia: Story = {
   render: () => (
     <Stack spacing={2} sx={{ maxWidth: 360 }}>
       <Reveal order={0}>
-        <Typography variant="h1">Entra que a porta tá aberta.</Typography>
+        <Typography variant="h1">Entra que a porta tá aberta</Typography>
       </Reveal>
       <Reveal order={1}>
         <Paper sx={{ p: 3 }}>

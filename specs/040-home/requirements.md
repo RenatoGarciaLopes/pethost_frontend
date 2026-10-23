@@ -55,8 +55,8 @@ area: HOME
 ## Microcopy
 
 - “Um quintal pro seu pet enquanto você viaja”
-- “Um quintal pra {nome} enquanto você viaja.”
-- “Um quintal pros seus pets enquanto você viaja.”
+- “Um quintal pra {nome} enquanto você viaja”
+- “Um quintal pros seus pets enquanto você viaja”
 - “Vizinhos de Maringá que recebem cães e gatos na própria casa.”
 - “Onde” · “Perto de casa ou cidade” · “Chegada” · “Saída” · “Pet” · “Cão ou gato?” · “Achar um cantinho”
 - Tutor com pet: “Escolha quem vai viajar com você.”

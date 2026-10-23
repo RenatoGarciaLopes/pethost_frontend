@@ -13,3 +13,6 @@ type Story = StoryObj<typeof meta>;
 export const Padrao: Story = {};
 export const SemPets: Story = { args: { pets: [] } };
 export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };
+
+export const Erros: Story = { args: { errors: { where: "Confere a cidade.", from: "Confere a chegada." } } };
+export const SemPetsPorEspecie: Story = { args: { pets: [], quantityMode: false } };

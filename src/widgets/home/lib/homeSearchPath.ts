@@ -34,7 +34,7 @@ export function buildHomeSearchPath({
   if (from) params.set("from", from);
   if (to) params.set("to", to);
 
-  if (petCount !== undefined) params.set("pets", String(petCount));
+  if (petCount !== undefined) params.set("count", String(petCount));
   else petIds.filter(Boolean).forEach((petId) => params.append("pets", petId));
   species.filter(Boolean).forEach((item) => params.append("species", item));
 

@@ -1,8 +1,13 @@
-import { fireEvent, screen } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
+import { screen } from "@testing-library/react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { pickCalendarDays } from "@/test/calendar";
 import { renderWithProviders } from "@/test/render";
 import { HomeScreen, type HomeScreenProps } from "./HomeScreen";
+
+// O calendário nasce em "hoje": só a data é fixada, os temporizadores seguem reais.
+beforeEach(() => vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-22T12:00:00Z") }));
+afterEach(() => vi.useRealTimers());
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
@@ -25,8 +30,7 @@ it("REQ-HOME-002 visitante prepara a busca por espécie e segue pelo login com o
   expect(screen.getByText("Entre para ver os cantinhos disponíveis.")).toBeVisible();
 
   await user.type(screen.getByRole("textbox", { name: "Onde" }), "Zona 7");
-  fireEvent.change(screen.getByLabelText("Chegada"), { target: { value: "2026-11-01" } });
-  fireEvent.change(screen.getByLabelText("Saída"), { target: { value: "2026-11-05" } });
+  await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-11-01", "2026-11-05");
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "Cão" }));
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
@@ -47,11 +51,11 @@ it("REQ-HOME-002 tutor sem pet pode escolher espécie e vai direto à busca", as
 
 it("REQ-HOME-003 tutor com pets começa personalizado e manda só os ids selecionados", async () => {
   const { user } = renderHome({ viewer: "owner", pets: petOptions });
-  expect(screen.getByRole("heading", { name: "Um quintal pra Pipoca enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pra Pipoca enquanto você viaja" })).toBeVisible();
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "Tico" }));
   await user.keyboard("{Escape}");
-  expect(screen.getByRole("heading", { name: "Um quintal pros seus pets enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pros seus pets enquanto você viaja" })).toBeVisible();
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
   expect(navigation.push).toHaveBeenCalledWith("/search?pets=pet-pipoca&pets=pet-tico");
 });
@@ -61,7 +65,7 @@ it("REQ-HOME-004 anfitrião escolhe quantidade sem consultar pets da casa", asyn
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "3 pets" }));
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
-  expect(navigation.push).toHaveBeenCalledWith("/search?pets=3");
+  expect(navigation.push).toHaveBeenCalledWith("/search?count=3");
 });
 
 it("REQ-HOME-006 no celular a pílula expande e anuncia os campos", async () => {
@@ -73,16 +77,11 @@ it("REQ-HOME-006 no celular a pílula expande e anuncia os campos", async () => 
   expect(screen.getByRole("textbox", { name: "Onde" })).toBeInTheDocument();
 });
 
-it("REQ-UIC-007 faixa única mostra datas legíveis e mantém quatro controles rotulados", () => {
-  renderHome();
-  const from = screen.getByLabelText("Chegada");
-  const to = screen.getByLabelText("Saída");
-  fireEvent.change(from, { target: { value: "2026-12-20" } });
-  fireEvent.change(to, { target: { value: "2026-12-25" } });
+it("REQ-UIC-007 faixa única mostra datas legíveis e mantém quatro controles rotulados", async () => {
+  const { user } = renderHome();
+  await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-12-20", "2026-12-25");
   expect(screen.getByText("20 dez, a partir das 14h")).toBeVisible();
   expect(screen.getByText("25 dez · 5 noites")).toBeVisible();
-  expect(from).toHaveValue("2026-12-20");
-  expect(to).toHaveValue("2026-12-25");
   expect(screen.getByRole("textbox", { name: "Onde" })).toBeEnabled();
   expect(screen.getByRole("combobox", { name: "Pet" })).toBeEnabled();
 });
