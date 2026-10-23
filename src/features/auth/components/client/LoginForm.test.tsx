@@ -205,7 +205,7 @@ describe("LoginForm", { timeout: 15000 }, () => {
       http.post(endpoint, () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "x", [
-            { field: "email", messages: ["Email recusado"], errors: [{ code: "FIELD_INVALID_FORMAT" }] },
+            { field: "email", messages: ["Email recusado"], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
           ]),
           {
             status: 400,
@@ -216,7 +216,7 @@ describe("LoginForm", { timeout: 15000 }, () => {
     const { user } = setup();
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Entrar" }));
-    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeVisible();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeVisible();
     expect(screen.getByLabelText(/^E-mail/)).toHaveAttribute("aria-invalid", "true");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });

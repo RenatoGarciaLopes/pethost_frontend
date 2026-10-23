@@ -9,4 +9,7 @@ export const petErrorCopy = {
   PET_MICROCHIP_ALREADY_REGISTERED: "Esse microchip já está em outro pet. Se é o seu, fala com o suporte.",
   PET_KEEPER_NOT_FOUND: "Os pets da casa entram depois que sua verificação for aprovada.",
   PET_HOST_NOT_FOUND: "Não achamos os pets dessa casa agora.",
+  PET_HAS_OPEN_BOOKING: "Esse pet tem estadia pedida, marcada ou acontecendo. Resolve ela antes.",
+  PET_NOT_FOUND: "Não achamos esse pet.",
+  PET_PHOTO_NOT_FOUND: "Não achamos essa foto.",
 } satisfies CopyCatalog;

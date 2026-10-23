@@ -39,4 +39,9 @@ export const bookingErrorCopy = {
   },
   BOOKING_CARE_TERMS_NOT_ACCEPTED:
     "Confirma que você vai levar a comida do pet e entregar os remédios dele ao anfitrião.",
+  BOOKING_DATES_BLOCKED: "O anfitrião não recebe em alguma dessas datas. Tenta outras.",
+  BOOKING_LISTING_NOT_BOOKABLE: "Esse cantinho não está recebendo pedidos agora.",
+  BOOKING_NOT_AWAITING_PAYMENT: "Essa estadia não está esperando pagamento.",
+  BOOKING_OWNER_PAYMENT_OVERDUE: "Tem um pagamento seu em atraso. Regulariza pra pedir outra estadia.",
+  BOOKING_OWN_LISTING: "Você não pode pedir estadia no seu próprio cantinho.",
 } satisfies CopyCatalog;

@@ -203,7 +203,7 @@ export const GetApiV1ConversationsConversationIdMessagesParams = zod.object({
 })
 
 export const GetApiV1ConversationsConversationIdMessagesQueryParams = zod.object({
-  "Before": zod.string().optional().describe('Id de uma mensagem da conversa: só as anteriores a ela. Vazio = as mais recentes. Lido como\ntexto: id mal formado volta como erro do campo.'),
+  "Before": zod.string().optional().describe('Id de uma mensagem da conversa: só as anteriores a ela. Vazio = as mais recentes. Lido como\r\ntexto: id mal formado volta como erro do campo.'),
   "PageSize": zod.number().int().optional().describe('De 1 a 100.')
 })
 
@@ -221,7 +221,7 @@ export const GetApiV1ConversationsConversationIdMessagesResponse = zod.object({
 }).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.')),
   "pageSize": zod.number().int(),
   "hasMore": zod.boolean().describe('Há mensagens mais antigas que as desta página.')
-}).describe('Uma página de mensagens, da mais nova para a mais antiga. Para a página seguinte (mais\nantiga), o cliente manda o id da última mensagem desta em `before`.'),
+}).describe('Uma página de mensagens, da mais nova para a mais antiga. Para a página seguinte (mais\r\nantiga), o cliente manda o id da última mensagem desta em `before`.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

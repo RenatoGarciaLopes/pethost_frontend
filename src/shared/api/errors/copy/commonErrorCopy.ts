@@ -11,4 +11,9 @@ export const commonErrorCopy = {
       ? "Muitas tentativas seguidas. Respira e tenta de novo daqui a pouco."
       : `Muitas tentativas seguidas. Respira e tenta de novo em ${seconds} ${seconds === 1 ? "segundo" : "segundos"}.`,
   UNEXPECTED_ERROR: GENERIC_ERROR_MESSAGE,
+  BUSINESS_RULE_VIOLATION: "Isso não dá pra fazer agora. Confere os dados e tenta de novo.",
+  CONFLICT: "A tela estava desatualizada. Recarrega e tenta de novo.",
+  METHOD_NOT_ALLOWED: "Essa ação não está disponível.",
+  NOT_FOUND: "Não achamos o que você procurou.",
+  STRIPE_WEBHOOK_UNAVAILABLE: GENERIC_ERROR_MESSAGE,
 } satisfies CopyCatalog;

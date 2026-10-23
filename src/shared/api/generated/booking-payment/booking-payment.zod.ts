@@ -57,7 +57,7 @@ export const GetApiV1BookingsBookingIdPaymentResponse = zod.object({
   "disputeId": zod.string().nullish(),
   "payoutFailureCode": zod.string().nullish()
 }).describe('Os ids no Stripe, para conferir no Dashboard — só para o admin.')]).optional(),
-  "lateFee": zod.number().nullish().describe('Multa e juros por atraso: em aberto, quanto seria pagando agora; paga, quanto foi pago a mais.\nNulo quando não há acréscimo.'),
+  "lateFee": zod.number().nullish().describe('Multa e juros por atraso: em aberto, quanto seria pagando agora; paga, quanto foi pago a mais.\r\nNulo quando não há acréscimo.'),
   "amountDue": zod.number().nullish().describe('Quanto pagar agora (valor + LateFee), enquanto a parcela está em aberto.')
 }).describe('Uma parcela.')),
   "options": zod.array(zod.object({
@@ -69,7 +69,7 @@ export const GetApiV1BookingsBookingIdPaymentResponse = zod.object({
   "amount": zod.number().describe('Valor da parcela.'),
   "dueAt": zod.string().datetime({"offset":true}).describe('Vencimento: a 1ª no prazo de pagamento; as outras a cada 30 dias, no fim do dia (Brasília).')
 }).describe('Uma parcela de uma forma de parcelar, antes de o tutor escolher.')).describe('Cada parcela com o valor e o vencimento, se o tutor escolher esta forma agora.')
-}).describe('Uma forma de parcelar.')).nullish().describe('As formas de parcelar (1x a 6x, cada parcela de pelo menos R$ 50,00) — para o tutor e o admin,\nenquanto o número de parcelas ainda pode ser escolhido ou trocado.'),
+}).describe('Uma forma de parcelar.')).nullish().describe('As formas de parcelar (1x a 6x, cada parcela de pelo menos R$ 50,00) — para o tutor e o admin,\r\nenquanto o número de parcelas ainda pode ser escolhido ou trocado.'),
   "payout": zod.union([zod.null(),zod.object({
   "transferred": zod.number().describe('Já está na conta do anfitrião (menos o que foi estornado).'),
   "held": zod.number().describe('Pago pelo tutor (com acréscimo por atraso) e guardado: vai para o anfitrião no check-out (90%).'),
@@ -77,7 +77,7 @@ export const GetApiV1BookingsBookingIdPaymentResponse = zod.object({
 }).describe('O repasse ao anfitrião — só para o anfitrião e o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}).nullish(),
   "updatedAt": zod.string().datetime({"offset":true}).nullish()
-}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
+}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\r\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -135,7 +135,7 @@ export const PutApiV1BookingsBookingIdPaymentResponse = zod.object({
   "disputeId": zod.string().nullish(),
   "payoutFailureCode": zod.string().nullish()
 }).describe('Os ids no Stripe, para conferir no Dashboard — só para o admin.')]).optional(),
-  "lateFee": zod.number().nullish().describe('Multa e juros por atraso: em aberto, quanto seria pagando agora; paga, quanto foi pago a mais.\nNulo quando não há acréscimo.'),
+  "lateFee": zod.number().nullish().describe('Multa e juros por atraso: em aberto, quanto seria pagando agora; paga, quanto foi pago a mais.\r\nNulo quando não há acréscimo.'),
   "amountDue": zod.number().nullish().describe('Quanto pagar agora (valor + LateFee), enquanto a parcela está em aberto.')
 }).describe('Uma parcela.')),
   "options": zod.array(zod.object({
@@ -147,7 +147,7 @@ export const PutApiV1BookingsBookingIdPaymentResponse = zod.object({
   "amount": zod.number().describe('Valor da parcela.'),
   "dueAt": zod.string().datetime({"offset":true}).describe('Vencimento: a 1ª no prazo de pagamento; as outras a cada 30 dias, no fim do dia (Brasília).')
 }).describe('Uma parcela de uma forma de parcelar, antes de o tutor escolher.')).describe('Cada parcela com o valor e o vencimento, se o tutor escolher esta forma agora.')
-}).describe('Uma forma de parcelar.')).nullish().describe('As formas de parcelar (1x a 6x, cada parcela de pelo menos R$ 50,00) — para o tutor e o admin,\nenquanto o número de parcelas ainda pode ser escolhido ou trocado.'),
+}).describe('Uma forma de parcelar.')).nullish().describe('As formas de parcelar (1x a 6x, cada parcela de pelo menos R$ 50,00) — para o tutor e o admin,\r\nenquanto o número de parcelas ainda pode ser escolhido ou trocado.'),
   "payout": zod.union([zod.null(),zod.object({
   "transferred": zod.number().describe('Já está na conta do anfitrião (menos o que foi estornado).'),
   "held": zod.number().describe('Pago pelo tutor (com acréscimo por atraso) e guardado: vai para o anfitrião no check-out (90%).'),
@@ -155,7 +155,7 @@ export const PutApiV1BookingsBookingIdPaymentResponse = zod.object({
 }).describe('O repasse ao anfitrião — só para o anfitrião e o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}).nullish(),
   "updatedAt": zod.string().datetime({"offset":true}).nullish()
-}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
+}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\r\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -187,7 +187,7 @@ export const PostApiV1BookingsBookingIdPaymentInstallmentsInstallmentNumberPayme
   "pixExpiresAt": zod.number().int().describe('Até quando o QR code do Pix vale (Unix, segundos, UTC).'),
   "paymentMethods": zod.array(zod.string()).describe('Os meios aceitos: `card` e `pix`.'),
   "lateFee": zod.number().describe('Multa e juros por atraso incluídos em Amount (zero em dia).')
-}).describe('O que o app precisa para o checkout transparente de uma parcela: abrir o Payment Element do\nStripe (`stripe.elements({ clientSecret })`) com cartão e Pix, sem sair do PetHost.'),
+}).describe('O que o app precisa para o checkout transparente de uma parcela: abrir o Payment Element do\r\nStripe (`stripe.elements({ clientSecret })`) com cartão e Pix, sem sair do PetHost.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -238,7 +238,7 @@ export const PostApiV1BookingsBookingIdPaymentSynchronizationResponse = zod.obje
   "disputeId": zod.string().nullish(),
   "payoutFailureCode": zod.string().nullish()
 }).describe('Os ids no Stripe, para conferir no Dashboard — só para o admin.')]).optional(),
-  "lateFee": zod.number().nullish().describe('Multa e juros por atraso: em aberto, quanto seria pagando agora; paga, quanto foi pago a mais.\nNulo quando não há acréscimo.'),
+  "lateFee": zod.number().nullish().describe('Multa e juros por atraso: em aberto, quanto seria pagando agora; paga, quanto foi pago a mais.\r\nNulo quando não há acréscimo.'),
   "amountDue": zod.number().nullish().describe('Quanto pagar agora (valor + LateFee), enquanto a parcela está em aberto.')
 }).describe('Uma parcela.')),
   "options": zod.array(zod.object({
@@ -250,7 +250,7 @@ export const PostApiV1BookingsBookingIdPaymentSynchronizationResponse = zod.obje
   "amount": zod.number().describe('Valor da parcela.'),
   "dueAt": zod.string().datetime({"offset":true}).describe('Vencimento: a 1ª no prazo de pagamento; as outras a cada 30 dias, no fim do dia (Brasília).')
 }).describe('Uma parcela de uma forma de parcelar, antes de o tutor escolher.')).describe('Cada parcela com o valor e o vencimento, se o tutor escolher esta forma agora.')
-}).describe('Uma forma de parcelar.')).nullish().describe('As formas de parcelar (1x a 6x, cada parcela de pelo menos R$ 50,00) — para o tutor e o admin,\nenquanto o número de parcelas ainda pode ser escolhido ou trocado.'),
+}).describe('Uma forma de parcelar.')).nullish().describe('As formas de parcelar (1x a 6x, cada parcela de pelo menos R$ 50,00) — para o tutor e o admin,\r\nenquanto o número de parcelas ainda pode ser escolhido ou trocado.'),
   "payout": zod.union([zod.null(),zod.object({
   "transferred": zod.number().describe('Já está na conta do anfitrião (menos o que foi estornado).'),
   "held": zod.number().describe('Pago pelo tutor (com acréscimo por atraso) e guardado: vai para o anfitrião no check-out (90%).'),
@@ -258,7 +258,7 @@ export const PostApiV1BookingsBookingIdPaymentSynchronizationResponse = zod.obje
 }).describe('O repasse ao anfitrião — só para o anfitrião e o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}).nullish(),
   "updatedAt": zod.string().datetime({"offset":true}).nullish()
-}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
+}).describe('O pagamento da reserva, como o tutor, o anfitrião e o admin o veem. Valores em reais (como a\r\nreserva), datas em ISO 8601 UTC. Nulos são omitidos.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

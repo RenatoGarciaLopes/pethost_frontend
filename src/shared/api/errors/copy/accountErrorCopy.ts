@@ -53,4 +53,11 @@ export const accountErrorCopy = {
   HOST_APPLICATION_DOCUMENT_NOT_FOUND: "Essa foto não está mais disponível. Recarregue a verificação.",
   AUTH_LINKED_ACCOUNT_NOT_FOUND: "Não deu pra abrir a outra conta. Confere a senha dela.",
   AUTH_PASSWORD_RESET_TOKEN_INVALID: "Esse link já venceu. Pede outro, leva um minuto.",
+  AUTH_ACCOUNT_ERASED: "Essa conta foi apagada.",
+  AUTH_ADMIN_DEACTIVATION_FORBIDDEN: "Conta de admin não pode ser pausada.",
+  AUTH_ADMIN_ERASURE_FORBIDDEN: "Conta de admin não pode ser apagada.",
+  AUTH_ADMIN_REGISTRATION_FORBIDDEN: "Conta de admin não se cria por aqui.",
+  AUTH_PASSWORD_HASH_INVALID: GENERIC_ERROR_MESSAGE,
+  AUTH_REFRESH_TOKEN_INVALID: "Sua sessão terminou. Entra de novo pra continuar.",
+  AUTH_USER_NOT_FOUND: "Não achamos essa conta.",
 } satisfies CopyCatalog;

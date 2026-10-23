@@ -128,7 +128,8 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 /** Campos do corpo de `POST /bookings` (400 com todos juntos), sem as regras de negócio. */
 function requestFieldErrors(body) {
   const errors = [];
-  const reject = (field, message) => errors.push({ field, messages: [message] });
+  const reject = (field, message, code = "AUTH_EMAIL_INVALID_FORMAT", params) =>
+    errors.push({ field, messages: [message], errors: [{ code, ...(params ? { params } : {}) }] });
   const petIds = Array.isArray(body.petIds) ? body.petIds : [];
   if (petIds.length < 1 || petIds.length > 10 || new Set(petIds).size !== petIds.length)
     reject("petIds", "Escolhe de 1 a 10 pets, sem repetir.");
@@ -139,11 +140,17 @@ function requestFieldErrors(body) {
     reject(
       "checkIn",
       "Check-in must be at least 72 hours ahead: the host answers in up to 24 hours and can only accept up to 48 hours before the stay.",
+      "BOOKING_CHECK_IN_TOO_SOON",
+      { minimumHours: 72, responseHours: 24, acceptHours: 48 },
     );
   if (!DATE.test(body.checkOut ?? "") || (DATE.test(body.checkIn ?? "") && body.checkOut <= body.checkIn))
     reject("checkOut", "A saída precisa ser depois da chegada.");
   if (body.careTermsAccepted !== true)
-    reject("careTermsAccepted", "Confirm that you will bring the pet's food and hand over its medicines to the host.");
+    reject(
+      "careTermsAccepted",
+      "Confirm that you will bring the pet's food and hand over its medicines to the host.",
+      "BOOKING_CARE_TERMS_NOT_ACCEPTED",
+    );
   return errors;
 }
 

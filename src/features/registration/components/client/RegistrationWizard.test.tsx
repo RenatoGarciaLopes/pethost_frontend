@@ -183,7 +183,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
             {
               field: "address.zipCode",
               messages: ["CEP inválido na API."],
-              errors: [{ code: "FIELD_INVALID_FORMAT" }],
+              errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
             },
           ]),
           { status: 400 },
@@ -194,7 +194,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
     await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
-    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeInTheDocument();
     expect(heading()).toHaveTextContent(steps.address.title);
     await waitFor(() => expect(field("CEP")).toHaveFocus());
   });
@@ -204,7 +204,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
       http.post(REGISTER_URL, () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "inválido", [
-            { field: "email", messages: ["E-mail recusado pela API."], errors: [{ code: "FIELD_INVALID_FORMAT" }] },
+            { field: "email", messages: ["E-mail recusado pela API."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
           ]),
           { status: 400 },
         ),
@@ -215,7 +215,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
     await user.click(submitButton());
 
     expect(await screen.findByRole("heading", { level: 1, name: steps.person.title })).toBeInTheDocument();
-    expect(screen.getByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
+    expect(screen.getByText("Confere o e-mail: o formato não é válido.")).toBeInTheDocument();
     await waitFor(() => expect(field(fields.email)).toHaveFocus());
   });
 

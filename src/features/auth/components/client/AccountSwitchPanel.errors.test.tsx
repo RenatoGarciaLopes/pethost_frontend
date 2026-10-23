@@ -147,7 +147,7 @@ describe("falhas e envio da troca", () => {
       http.post("*/api/auth/sessions/switch", () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "Inválido", [
-            { field: "password", messages: ["Confira a senha informada."], errors: [{ code: "FIELD_INVALID_FORMAT" }] },
+            { field: "password", messages: ["Confira a senha informada."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
           ]),
           { status: 400 },
         ),
@@ -158,7 +158,7 @@ describe("falhas e envio da troca", () => {
     await user.click(field());
     await user.paste("senha existente");
     await user.click(screen.getByRole("button", { name: "Entrar na conta de anfitrião" }));
-    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeVisible();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeVisible();
     expect(field()).toHaveValue("senha existente");
     expect(field()).toHaveFocus();
   });

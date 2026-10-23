@@ -11,4 +11,7 @@ export const hostApplicationErrorCopy = {
   HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED: "Dados de empresa só valem pra verificação de empresa.",
   HOST_ALREADY_VERIFIED: "Sua verificação já foi aprovada.",
   HOST_IDENTITY_LOCKED: "Esses dados foram conferidos na verificação. Pra mudar, fala com o suporte.",
+  HOST_APPLICATION_CLOSED: "Essa verificação já foi encerrada.",
+  HOST_IDENTITY_BLOCKED: "Não foi possível confirmar sua identidade. Fala com o suporte.",
+  HOST_IDENTITY_BLOCK_NOT_FOUND: "Não achamos esse bloqueio de identidade.",
 } satisfies CopyCatalog;

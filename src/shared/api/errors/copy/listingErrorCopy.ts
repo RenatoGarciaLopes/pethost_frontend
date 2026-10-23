@@ -11,4 +11,11 @@ export const listingErrorCopy = {
   LISTING_PHOTO_LIMIT_REACHED: "Já tem 5 fotos. Tira uma pra colocar outra.",
   LISTING_PHOTO_ALREADY_EXISTS: "Essa foto já está no cantinho.",
   LISTING_NOT_FOUND: "Não achamos esse cantinho.",
+  LISTING_AVAILABILITY_BLOCK_LIMIT_REACHED: "Já tem bloqueios demais no calendário. Remove algum pra criar outro.",
+  LISTING_AVAILABILITY_BLOCK_NOT_FOUND: "Não achamos esse bloqueio.",
+  LISTING_AVAILABILITY_BLOCK_OVERLAP: "Já existe um bloqueio nessas datas.",
+  LISTING_HAS_OPEN_BOOKING: "Tem estadia pedida, marcada ou acontecendo nesse cantinho. Resolve ela antes.",
+  LISTING_OWNER_NOT_FOUND: "Não achamos o seu perfil de tutor.",
+  LISTING_PET_NOT_FOUND: "Não achamos esse pet.",
+  LISTING_PHOTO_NOT_FOUND: "Não achamos essa foto.",
 } satisfies CopyCatalog;

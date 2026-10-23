@@ -52,7 +52,7 @@ it.each([
     http.patch("*/api/owners/me", () =>
       HttpResponse.json(
         apiFail("VALIDATION_ERROR", "Inválido", [
-          { field: name, messages: ["Confira esse dado."], errors: [{ code: "FIELD_INVALID_FORMAT" }] },
+          { field: name, messages: ["Confira esse dado."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
         ]),
         {
           status: 400,
@@ -64,8 +64,8 @@ it.each([
   await user.clear(field(label));
   await user.type(field(label), "Outro valor");
   await user.click(saveButton());
-  await screen.findByText("Esse formato não é válido. Confere o que foi digitado.");
-  expect(field(label)).toHaveAccessibleDescription("Esse formato não é válido. Confere o que foi digitado.");
+  await screen.findByText("Confere o e-mail: o formato não é válido.");
+  expect(field(label)).toHaveAccessibleDescription("Confere o e-mail: o formato não é válido.");
   expect(field(label)).toHaveFocus();
   expect(field(label)).toHaveValue("Outro valor");
 });
@@ -77,7 +77,7 @@ it("REQ-ACC-008 senha atual inválida é apagada e mantém o novo CPF", async ()
           {
             field: "currentPassword",
             messages: ["Confere sua senha atual."],
-            errors: [{ code: "FIELD_INVALID_FORMAT" }],
+            errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
           },
         ]),
         { status: 400 },
@@ -90,7 +90,7 @@ it("REQ-ACC-008 senha atual inválida é apagada e mantém o novo CPF", async ()
   await user.type(field("CPF"), "16899535009");
   await user.type(field("Sua senha atual"), "errada");
   await user.click(saveButton());
-  await screen.findByText("Esse formato não é válido. Confere o que foi digitado.");
+  await screen.findByText("Confere o e-mail: o formato não é válido.");
   expect(field("Sua senha atual")).toHaveValue("");
   expect(field("Sua senha atual")).toHaveFocus();
   expect(field("CPF")).toHaveValue("168.995.350-09");

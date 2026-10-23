@@ -110,7 +110,7 @@ describe("ResetPasswordFlow", () => {
                 {
                   field: "newPassword",
                   messages: ["Escolha outra senha forte."],
-                  errors: [{ code: "FIELD_INVALID_FORMAT" }],
+                  errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
                 },
               ]),
               { status: 400 },
@@ -123,7 +123,7 @@ describe("ResetPasswordFlow", () => {
     await user.click(passwordField());
     await user.paste("Abcdef1!");
     await user.click(screen.getByRole("button", { name: reset.submit }));
-    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeVisible();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeVisible();
     expect(passwordField()).toHaveAttribute("aria-invalid", "true");
     expect(passwordField()).toHaveValue("Abcdef1!");
     expect(passwordField()).toHaveFocus();
@@ -142,7 +142,7 @@ describe("ResetPasswordFlow", () => {
     [
       400,
       "VALIDATION_ERROR",
-      [{ field: "token", messages: ["Token ausente."], errors: [{ code: "FIELD_INVALID_FORMAT" }] }],
+      [{ field: "token", messages: ["Token ausente."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] }],
       reset.incomplete,
     ],
     [401, "AUTH_PASSWORD_RESET_TOKEN_INVALID", undefined, reset.expired],

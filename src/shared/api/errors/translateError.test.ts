@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "../generated/errorCodes";
 import { ApiError, type FieldIssue } from "./ApiError";
 import { errorCopy } from "./errorCopy";
 import {
@@ -192,7 +193,7 @@ describe("translateFieldIssue", () => {
     expect(translateFieldIssue(issue("BOOKING_CHECK_IN_TOO_SOON", { minimumHours: 72, responseHours: 24 }))).toBe(
       "A chegada precisa ser com pelo menos 72 horas de antecedência. O anfitrião tem até 24 horas pra responder.",
     );
-    expect(translateFieldIssue(issue("FIELD_TOO_LONG", { max: 1500 }))).toBe("Cabe até 1.500 caracteres.");
+    expect(translateFieldIssue(issue("PET_NAME_TOO_LONG", { max: 1500 }))).toBe("O nome aceita até 1.500 caracteres.");
     expect(translateFieldIssue(issue("BOOKING_CARE_TERMS_NOT_ACCEPTED"))).toMatch(/comida do pet/);
   });
 
@@ -242,14 +243,47 @@ describe("translateFieldErrors", () => {
           messages: ["a"],
           errors: [{ code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72 } }],
         },
-        { field: "name", messages: ["a", "b"], errors: [{ code: "FIELD_REQUIRED" }, { code: "FIELD_REQUIRED" }] },
+        {
+          field: "name",
+          messages: ["a", "b"],
+          errors: [{ code: "AUTH_EMAIL_REQUIRED" }, { code: "AUTH_EMAIL_REQUIRED" }],
+        },
       ],
     });
 
     expect(translateFieldErrors(error)).toEqual({
       checkIn: "A chegada precisa ser com pelo menos 72 horas de antecedência.",
-      name: "Esse campo é obrigatório.",
+      name: "Falta o e-mail.",
     });
     expect(translateFieldErrors(new Error("x"))).toEqual({});
+  });
+});
+
+describe("exaustividade do catálogo", () => {
+  it("REQ-HTTP-005 todo código do enum ApiErrorCode tem frase e nenhuma frase é de código que não existe", () => {
+    const local = ["NETWORK_ERROR", "SESSION_EXPIRED", "CSRF_REJECTED"];
+    expect(API_ERROR_CODES.filter((code) => !(code in errorCopy))).toEqual([]);
+    expect(
+      Object.keys(errorCopy).filter(
+        (code) => !(API_ERROR_CODES as readonly string[]).includes(code) && !local.includes(code),
+      ),
+    ).toEqual([]);
+  });
+
+  it("REQ-HTTP-005 toda frase de campo, com seus params, sai sem sobras de modelo", () => {
+    const params = {
+      max: 80,
+      min: 8,
+      digits: 8,
+      minimumHours: 72,
+      responseHours: 24,
+      acceptHours: 48,
+      maxMegabytes: 5,
+    };
+    const bad = API_ERROR_CODES.filter((code) => {
+      const phrase = translateCode(code, {}, params);
+      return !phrase || /undefined|NaN|{|}/.test(phrase);
+    });
+    expect(bad).toEqual([]);
   });
 });

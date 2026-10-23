@@ -16,12 +16,12 @@ const validationError = new ApiError({
   code: "VALIDATION_ERROR",
   message: "Validation failed",
   fieldIssues: {
-    email: [{ code: "FIELD_REQUIRED", params: {}, message: "Email is required." }],
+    email: [{ code: "AUTH_EMAIL_REQUIRED", params: {}, message: "Email is required." }],
     "address.zipCode": [
-      { code: "FIELD_INVALID_FORMAT", params: {}, message: "Zip code is invalid." },
-      { code: "FIELD_REQUIRED", params: {}, message: "Zip code is required." },
+      { code: "AUTH_ZIP_CODE_INVALID", params: { digits: 8 }, message: "Zip code is invalid." },
+      { code: "AUTH_CITY_REQUIRED", params: {}, message: "City is required." },
     ],
-    unknownField: [{ code: "FIELD_TOO_LONG", params: { max: 80 }, message: "ignored" }],
+    unknownField: [{ code: "PET_NAME_TOO_LONG", params: { max: 80 }, message: "ignored" }],
   },
 });
 
@@ -63,11 +63,9 @@ describe("applyFieldErrors", () => {
 
     await user.click(screen.getByRole("button", { name: "aplicar" }));
 
-    expect(screen.getByTestId("email-error")).toHaveTextContent("Esse campo é obrigatório.");
+    expect(screen.getByTestId("email-error")).toHaveTextContent("Falta o e-mail.");
     expect(screen.getByTestId("email-error")).not.toHaveTextContent("Email is required.");
-    expect(screen.getByTestId("zip-error")).toHaveTextContent(
-      "Esse formato não é válido. Confere o que foi digitado. Esse campo é obrigatório.",
-    );
+    expect(screen.getByTestId("zip-error")).toHaveTextContent("O CEP precisa ter 8 dígitos. Falta a cidade.");
     expect(screen.getByTestId("password-error")).toBeEmptyDOMElement();
     expect(screen.getByLabelText("E-mail")).toHaveFocus();
     expect(onApplied).toHaveBeenCalledWith(["email", "address.zipCode"]);
@@ -78,7 +76,7 @@ describe("applyFieldErrors", () => {
 
     await user.click(screen.getByRole("button", { name: "aplicar" }));
 
-    expect(screen.getByTestId("root-error")).toHaveTextContent("Cabe até 80 caracteres.");
+    expect(screen.getByTestId("root-error")).toHaveTextContent("O nome aceita até 80 caracteres.");
   });
 
   it("REQ-HTTP-006 erro sem motivos de campo não mexe no formulário", async () => {

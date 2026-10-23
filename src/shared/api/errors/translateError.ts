@@ -52,7 +52,7 @@ export function translateError(error: unknown, context: ErrorCopyContext = {}): 
  * Frase de um motivo de validação de campo, por `code` e `params`. Sem código (API antiga) ou sem tradução cai em
  * "Confere esse campo.", nunca no texto cru da API.
  *
- * @example translateFieldIssue({ code: "FIELD_TOO_LONG", params: { max: 80 }, message: "..." }) // "Cabe até 80 caracteres."
+ * @example translateFieldIssue({ code: "PET_NAME_TOO_LONG", params: { max: 80 }, message: "..." }) // "O nome aceita até 80 caracteres."
  */
 export function translateFieldIssue(issue: FieldIssue, context: ErrorCopyContext = {}): string {
   const phrase = issue.code === null ? undefined : resolve(issue.code, { params: issue.params, context });

@@ -71,7 +71,7 @@ describe("trocar a senha", () => {
             {
               field: "currentPassword",
               messages: ["A senha atual não confere."],
-              errors: [{ code: "FIELD_INVALID_FORMAT" }],
+              errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
             },
           ]),
           { status: 400 },
@@ -83,7 +83,7 @@ describe("trocar a senha", () => {
     await user.type(next(), STRONG);
     await user.click(submit());
 
-    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeInTheDocument();
     expect(current()).toHaveValue("");
     expect(next()).toHaveValue(STRONG);
     await waitFor(() => expect(current()).toHaveFocus());
@@ -97,7 +97,7 @@ describe("trocar a senha", () => {
             {
               field: "newPassword",
               messages: ["A senha nova não pode ser igual à atual."],
-              errors: [{ code: "FIELD_INVALID_FORMAT" }],
+              errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
             },
           ]),
           { status: 400 },
@@ -109,7 +109,7 @@ describe("trocar a senha", () => {
     await user.type(next(), STRONG);
     await user.click(submit());
 
-    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeInTheDocument();
     expect(current()).toHaveValue(STRONG);
   });
 

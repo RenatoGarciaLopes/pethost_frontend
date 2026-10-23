@@ -123,7 +123,7 @@ describe("ForgotPasswordFlow", () => {
       http.post("*/api/auth/password/forgot", () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "Inválido", [
-            { field: "email", messages: ["Confira o endereço informado."], errors: [{ code: "FIELD_INVALID_FORMAT" }] },
+            { field: "email", messages: ["Confira o endereço informado."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
           ]),
           { status: 400 },
         ),
@@ -133,7 +133,7 @@ describe("ForgotPasswordFlow", () => {
     await user.click(emailField());
     await user.paste("pessoa@exemplo.test");
     await user.click(screen.getByRole("button", { name: forgot.submit }));
-    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeVisible();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeVisible();
     expect(emailField()).toHaveAttribute("aria-invalid", "true");
     expect(emailField()).toHaveValue("pessoa@exemplo.test");
     expect(emailField()).toHaveFocus();
@@ -165,7 +165,7 @@ describe("ForgotPasswordFlow", () => {
             {
               field: "role",
               messages: ["Essa conta não permite este pedido."],
-              errors: [{ code: "FIELD_INVALID_FORMAT" }],
+              errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
             },
           ]),
           { status: 400 },
@@ -176,7 +176,7 @@ describe("ForgotPasswordFlow", () => {
     await user.click(emailField());
     await user.paste("pessoa@exemplo.test");
     await user.click(screen.getByRole("button", { name: forgot.submit }));
-    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeVisible();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeVisible();
     expect(emailField()).toHaveValue("pessoa@exemplo.test");
     expect(screen.getByRole("radio", { name: "Tutor" })).toHaveAttribute("aria-checked", "true");
   });

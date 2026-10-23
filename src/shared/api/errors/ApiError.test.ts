@@ -64,7 +64,7 @@ describe("ApiError.fromEnvelope", () => {
     const error = ApiError.fromEnvelope(400, {
       code: "VALIDATION_ERROR",
       message: "x",
-      details: [{ field: "a", messages: ["x", "y"], errors: [{ code: "FIELD_REQUIRED" }] }],
+      details: [{ field: "a", messages: ["x", "y"], errors: [{ code: "AUTH_EMAIL_REQUIRED" }] }],
     });
 
     expect(error.fieldIssues.a?.map((issue) => issue.code)).toEqual([null, null]);
