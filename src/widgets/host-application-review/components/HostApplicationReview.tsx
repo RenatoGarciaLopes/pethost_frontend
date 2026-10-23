@@ -184,7 +184,7 @@ function ExistingHostLinks({
   const matches = hosts.filter(
     (host) =>
       !host.identityReleasedAt &&
-      (host.cpf.replace(/\D/g, "") === cpf || Boolean(cnpj && host.company?.cnpj.replace(/\D/g, "") === cnpj)),
+      ((host.cpf ?? "").replace(/\D/g, "") === cpf || Boolean(cnpj && host.company?.cnpj.replace(/\D/g, "") === cnpj)),
   );
   if (loading) return <Typography>{copy.loading}</Typography>;
   return (

@@ -1,6 +1,7 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { listingFixture, searchQueryFixture } from "@/test/fixtures/search";
+import type { ListingSummary } from "../../../api/contracts";
 import { searchQueries } from "../../../api/queries";
 import { ListingCard } from "./ListingCard";
 
@@ -10,10 +11,11 @@ const STAY = { checkIn: "2026-12-20", checkOut: "2026-12-25" };
 
 /** Cliente com a resposta de compatibilidade já no cache, para a story não depender da API. */
 function withCompatibility(warnings: { code: string }[], stay: typeof STAY | object = {}): Decorator {
-  return (Story, { args }) => {
+  return function CompatibilityCache(Story, context) {
+    const { listing } = context.args as { listing: ListingSummary };
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    client.setQueryData(searchQueries.compatibility(ACCOUNT, args.listing.id, PET.id, stay).queryKey, {
-      listingId: args.listing.id,
+    client.setQueryData(searchQueries.compatibility(ACCOUNT, listing.id, PET.id, stay).queryKey, {
+      listingId: listing.id,
       petId: PET.id,
       petName: PET.name,
       matches: warnings.length === 0,

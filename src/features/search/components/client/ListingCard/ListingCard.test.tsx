@@ -12,7 +12,15 @@ const pet = { id: searchPetsFixture[0]!.id, name: "Pipoca" };
 const render = (ui: React.ReactElement) => renderWithProviders(ui, { theme: quintalTheme });
 const compat = (data: { matches: boolean; warnings: { code: string }[] }) =>
   http.get("*/api/listings/:id/compatibility", () =>
-    HttpResponse.json(apiOk({ listingId: "l", petId: pet.id, petName: "Pipoca", guests: null, ...data })),
+    HttpResponse.json(
+      apiOk({
+        listingId: "0199d2a0-0000-7000-8000-000000000041",
+        petId: pet.id,
+        petName: "Pipoca",
+        guests: null,
+        ...data,
+      }),
+    ),
   );
 
 it("REQ-SRCH-007 link único preserva datas/pets e mostra total, diária, bairro com distância e atributos", () => {
@@ -106,7 +114,13 @@ it("REQ-SRCH-020 pet sem avisos mostra o chip verde Combina e manda pet e datas 
     http.get("*/api/listings/:id/compatibility", ({ request }) => {
       seen = new URL(request.url).searchParams;
       return HttpResponse.json(
-        apiOk({ listingId: "l", petId: pet.id, petName: "Pipoca", matches: true, warnings: [] }),
+        apiOk({
+          listingId: "0199d2a0-0000-7000-8000-000000000041",
+          petId: pet.id,
+          petName: "Pipoca",
+          matches: true,
+          warnings: [],
+        }),
       );
     }),
   );

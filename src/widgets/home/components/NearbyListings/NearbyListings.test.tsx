@@ -226,8 +226,8 @@ it("REQ-SRCH-020 tutor com pet e datas vê o total e a compatibilidade nos cards
       asked.push(new URL(request.url).searchParams);
       return HttpResponse.json(
         apiOk({
-          listingId: "l",
-          petId: "pet-1",
+          listingId: "0199d2a0-0000-7000-8000-000000000041",
+          petId: "0199d2a0-0000-7000-8000-0000000000e1",
           petName: "Pipoca",
           matches: false,
           warnings: [{ code: "home_has_cats" }],
@@ -237,11 +237,16 @@ it("REQ-SRCH-020 tutor com pet e datas vê o total e a compatibilidade nos cards
   );
   geo.state = { status: "granted", coords: point };
   renderWithProviders(
-    <NearbyListings scope="owner-1" pets={[{ id: "pet-1", name: "Pipoca" }]} from="2026-12-20" to="2026-12-25" />,
+    <NearbyListings
+      scope="owner-1"
+      pets={[{ id: "0199d2a0-0000-7000-8000-0000000000e1", name: "Pipoca" }]}
+      from="2026-12-20"
+      to="2026-12-25"
+    />,
     { theme: quintalTheme },
   );
   expect(await screen.findByText("! Tem gato em casa")).toBeVisible();
   expect(screen.getByRole("link", { name: /Quintal da Cida/ }).textContent).toMatch(/R\$\s300,50 as 5 noites/);
-  expect(asked[0]?.get("petId")).toBe("pet-1");
+  expect(asked[0]?.get("petId")).toBe("0199d2a0-0000-7000-8000-0000000000e1");
   expect(asked[0]?.get("checkIn")).toBe("2026-12-20");
 });

@@ -103,7 +103,7 @@ export function NearbyListings({ scope, pets = [], from, to }: NearbyListingsPro
           <Typography component="h2" variant="h3" id="nearby-title" sx={{ mb: 1 }}>
             {copy.askTitle}
           </Typography>
-          {((located && nearby.isPending) || waitingAll) && <SniffLoader label={copy.finding} scale={0.8} />}
+          {((located && nearby.isPending) || waitingAll) && <SniffLoader label={copy.finding} />}
           {nearbyEmpty && !waitingAll && <Notice tone="info">{copy.empty}</Notice>}
           {located && needsLogin && (
             <Notice
