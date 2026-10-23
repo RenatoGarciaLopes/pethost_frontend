@@ -229,7 +229,7 @@ export function Calendar(props: CalendarProps) {
   const visible = Array.from({ length: months }, (_, index) => addMonths(view, index));
   const tabIso = visible.some((month) => monthsBetween(month, monthOf(focusIso)) === 0) ? focusIso : undefined;
 
-  const summary = props.mode === "range" && Boolean(range.start && range.end) && !editingEnd;
+  const summary = props.mode === "range" && Boolean(range.start && range.end);
   let hint: string = calendarCopy.pickStart;
   if (props.mode === "single") hint = range.start ? dayLabel(range.start) : calendarCopy.pickDay;
   else if (summary) hint = rangeSummary(range.start, range.end);
