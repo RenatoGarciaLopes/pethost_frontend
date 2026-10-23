@@ -1,10 +1,10 @@
 "use client";
 
-import { Box, Button, Paper, Typography } from "@mui/material";
+import { Box, Button, Link, Typography } from "@mui/material";
 import { motion } from "motion/react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { FormProvider, get, useForm, type FieldErrors } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
@@ -13,6 +13,7 @@ import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { loginRedirectPath, registerPath } from "@/shared/config/appRoutes";
 import { useCountdown } from "@/shared/hooks/useCountdown";
 import { MOTION_ASSENTAR } from "@/shared/theme/tokens/springs";
+import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { FormActions } from "@/shared/ui/forms/FormActions";
 import { Reveal } from "@/shared/ui/motion/Reveal";
@@ -24,6 +25,7 @@ import { stepIndexOf, type RegistrationField } from "../../lib/registrationSteps
 import { REGISTRATION_VARIANTS } from "../../lib/registrationVariants";
 import type { RegistrationInput } from "../../schemas/registrationSchemas";
 import { AddressStep } from "./AddressStep";
+import { RegisterChoice } from "./RegisterChoice";
 import { PersonStep } from "./PersonStep";
 import { RegistrationSuccess } from "./RegistrationSuccess";
 import { ServerFormError } from "./ServerFormError";
@@ -33,8 +35,6 @@ export interface RegistrationWizardProps {
   role: PersonalRole;
   /** Destino pedido na URL; validado antes de virar link (REQ-OREG-013). */
   next: string | null;
-  /** Faixa lateral do computador ("o que a gente faz com cada dado"), renderizada no servidor. */
-  aside: ReactNode;
 }
 
 /** Aviso do topo do passo: qual situação e a frase pronta. */
@@ -62,11 +62,11 @@ const { actions } = registrationCopy;
  * passo inteiro no "Continuar" (REQ-OREG-003); envia uma vez só (REQ-OREG-008) e leva os erros da API
  * ao passo e ao campo certos (REQ-OREG-009 a 012). Senha e CPF só existem em memória (REQ-OREG-014).
  *
- * O componente não assina valores do formulário: cada campo re-renderiza só a si mesmo ao digitar.
+ * Só assina isDirty para confirmar a troca de papel; valores, senha e CPF ficam em memória no RHF.
  *
- * @example <RegistrationWizard role="host" next={null} aside={<DataUseAside role="host" />} />
+ * @example <RegistrationWizard role="host" next={null} />
  */
-export function RegistrationWizard({ role, next, aside }: RegistrationWizardProps) {
+export function RegistrationWizard({ role, next }: RegistrationWizardProps) {
   const variant = REGISTRATION_VARIANTS[role];
   const router = useRouter();
   const form = useForm<RegistrationInput, unknown, RegisterBody>({
@@ -74,9 +74,11 @@ export function RegistrationWizard({ role, next, aside }: RegistrationWizardProp
     mode: "onTouched",
     defaultValues: EMPTY_VALUES,
   });
+  const { isDirty } = form.formState;
   const mutation = useRegisterMutation(variant.path);
   const countdown = useCountdown();
   const [stepIndex, setStepIndex] = useState(0);
+  const [pendingRole, setPendingRole] = useState<PersonalRole | null>(null);
   const [notice, setNotice] = useState<RegistrationNotice | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);
@@ -157,7 +159,19 @@ export function RegistrationWizard({ role, next, aside }: RegistrationWizardProp
     return <RegistrationSuccess role={role} fullName={mutation.data.user.fullName} next={next} />;
   }
 
+  const progressSteps =
+    role === "owner"
+      ? [
+          ...variant.steps,
+          { id: "pet", label: registrationCopy.progress.pet, description: registrationCopy.progress.petDescription },
+        ]
+      : variant.steps;
   const step = variant.steps[stepIndex];
+  function chooseRole(chosen: PersonalRole) {
+    if (chosen === role) return;
+    if (isDirty) setPendingRole(chosen);
+    else router.push(registerPath(chosen, next));
+  }
   const isLastStep = stepIndex === variant.steps.length - 1;
   const blocked = countdown.isRunning;
   // Fim da contagem do limite: o aviso some e o envio volta.
@@ -167,18 +181,32 @@ export function RegistrationWizard({ role, next, aside }: RegistrationWizardProp
     <Box
       sx={{
         display: "grid",
-        gap: { xs: 2, md: 5 },
-        gridTemplateColumns: { xs: "1fr", md: "180px minmax(0, 560px) minmax(0, 280px)" },
+        gap: { xs: 3, md: 6 },
+        gridTemplateColumns: { xs: "1fr", md: "272px minmax(0, 720px)" },
         justifyContent: "center",
         alignItems: "start",
+        "& .MuiOutlinedInput-root": { boxShadow: "none" },
       }}
     >
       <Reveal order={0}>
-        <WizardProgress steps={variant.steps} currentIndex={stepIndex} />
+        <Typography
+          sx={{
+            display: { xs: "none", md: "block" },
+            textTransform: "uppercase",
+            fontSize: 13,
+            fontWeight: 800,
+            letterSpacing: ".06em",
+            mb: 1.5,
+            px: 1.5,
+          }}
+        >
+          {registrationCopy.progress.label}
+        </Typography>
+        <WizardProgress steps={progressSteps} currentIndex={stepIndex} appearance="cards" />
       </Reveal>
 
       <Reveal order={1}>
-        <Paper sx={{ p: { xs: 2.5, md: 4 } }}>
+        <Box>
           <motion.div
             key={step.id}
             initial={{ opacity: 0, x: stepIndex === 0 ? -16 : 16 }}
@@ -186,13 +214,22 @@ export function RegistrationWizard({ role, next, aside }: RegistrationWizardProp
             transition={MOTION_ASSENTAR}
           >
             <Typography
+              sx={{ textTransform: "uppercase", fontSize: 13, fontWeight: 800, letterSpacing: ".06em", mb: 1 }}
+            >
+              {registrationCopy.progress.position(stepIndex + 1, progressSteps.length)}
+            </Typography>
+            <Typography
               ref={headingRef}
               variant="h1"
               tabIndex={-1}
-              sx={{ fontSize: { xs: 28, md: 36 }, mb: 3, "&:focus": { outline: "none" } }}
+              sx={{ fontSize: { xs: 32, md: 40 }, mb: 1, "&:focus": { outline: "none" } }}
             >
               {step.title}
             </Typography>
+
+            {stepIndex === 0 && (
+              <Typography sx={{ mb: 3, color: "text.secondary" }}>{registrationCopy.steps.person.intro}</Typography>
+            )}
 
             {visibleNotice && (
               <Box sx={{ mb: 3 }}>
@@ -218,9 +255,14 @@ export function RegistrationWizard({ role, next, aside }: RegistrationWizardProp
 
             <FormProvider {...form}>
               <Box component="form" noValidate onSubmit={isLastStep ? submit : continueToAddress}>
+                {stepIndex === 0 && (
+                  <Box sx={{ mb: 3 }}>
+                    <RegisterChoice role={role} onChoose={chooseRole} />
+                  </Box>
+                )}
                 {isLastStep ? <AddressStep variant={variant} /> : <PersonStep variant={variant} />}
                 <ServerFormError />
-                <Box sx={{ mt: 4 }}>
+                <Box sx={{ mt: 4, pt: 3, borderTop: "1px dashed", borderColor: "divider" }}>
                   <FormActions
                     backLabel={actions.back}
                     nextLabel={
@@ -229,20 +271,33 @@ export function RegistrationWizard({ role, next, aside }: RegistrationWizardProp
                     nextType="submit"
                     busy={mutation.isPending}
                     disabledReason={blocked ? actions.countdown(countdown.remaining) : undefined}
-                    onBack={() =>
-                      stepIndex === 0 ? router.push(registerPath(undefined, next)) : goToStep(0, "heading")
-                    }
+                    onBack={() => (stepIndex === 0 ? router.back() : goToStep(0, "heading"))}
                   />
                 </Box>
               </Box>
             </FormProvider>
+            <Typography sx={{ mt: 3, pb: { xs: 10, md: 0 } }}>
+              {registrationCopy.choice.hasAccount}{" "}
+              <Link component={NextLink} href={loginRedirectPath(next, role)}>
+                {registrationCopy.choice.login}
+              </Link>
+            </Typography>
           </motion.div>
-        </Paper>
+        </Box>
       </Reveal>
 
-      <Reveal order={2} sx={{ display: { xs: "none", md: "block" } }}>
-        {aside}
-      </Reveal>
+      <ConfirmDialog
+        open={pendingRole !== null}
+        title={registrationCopy.switchRole.title}
+        message={registrationCopy.switchRole.message}
+        confirmLabel={registrationCopy.switchRole.confirm}
+        cancelLabel={registrationCopy.switchRole.cancel}
+        onCancel={() => setPendingRole(null)}
+        onConfirm={() => {
+          if (pendingRole) router.push(registerPath(pendingRole, next));
+          setPendingRole(null);
+        }}
+      />
     </Box>
   );
 }

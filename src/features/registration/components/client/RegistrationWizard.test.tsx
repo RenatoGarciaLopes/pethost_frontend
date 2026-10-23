@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { delay, http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
@@ -19,7 +19,13 @@ import {
   viaCepHandler,
 } from "./registrationWizardTestHelpers";
 
-const router = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }));
+const router = vi.hoisted(() => ({
+  push: vi.fn(),
+  back: vi.fn(),
+  replace: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+}));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 const { fields, fieldErrors, actions, steps } = registrationCopy;
@@ -32,7 +38,7 @@ beforeEach(() => {
 });
 
 function renderWizard(next: string | null = null) {
-  return renderWithProviders(<RegistrationWizard role="owner" next={next} aside={<p>faixa lateral</p>} />, {
+  return renderWithProviders(<RegistrationWizard role="owner" next={next} />, {
     theme: quintalTheme,
   });
 }
@@ -41,12 +47,14 @@ function renderWizard(next: string | null = null) {
 vi.setConfig({ testTimeout: 30_000 });
 
 describe("RegistrationWizard: caminho feliz", () => {
-  it("REQ-OREG-002 abre no passo 1 com a trilha de 2 passos e a faixa lateral", () => {
+  it("074 abre no passo 1 com três etapas visuais e os cartões de papel", () => {
     renderWizard();
     expect(heading()).toHaveTextContent(steps.person.title);
     expect(screen.getAllByText(steps.person.label).length).toBeGreaterThan(0);
     expect(screen.getAllByText(steps.address.label).length).toBeGreaterThan(0);
-    expect(screen.getByText("faixa lateral")).toBeInTheDocument();
+    expect(screen.getByText("Passo 1 de 3")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Tenho pet e vou viajar/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByText("O que a gente faz com cada dado")).not.toBeInTheDocument();
   });
 
   it("REQ-OREG-003 valida o campo ao sair dele", async () => {
@@ -94,10 +102,10 @@ describe("RegistrationWizard: caminho feliz", () => {
     expect(field("Rua")).toHaveValue("Avenida Brasil");
   });
 
-  it("REQ-OREG-001 voltar no passo 1 leva à escolha de conta, com o next", async () => {
+  it("074 voltar no passo 1 volta ao histórico anterior", async () => {
     const { user } = renderWizard("/hosts/42");
     await user.click(screen.getByRole("button", { name: actions.back }));
-    expect(router.push).toHaveBeenCalledWith("/register?next=%2Fhosts%2F42");
+    expect(router.back).toHaveBeenCalled();
   });
 
   it("REQ-OREG-006 explica por que pede CPF e nascimento no próprio campo", () => {
@@ -214,7 +222,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("Esse e-mail já tem conta de tutor. Quer entrar?");
     expect(heading()).toHaveTextContent(steps.person.title);
-    expect(screen.getByRole("link", { name: actions.login })).toHaveAttribute(
+    expect(within(screen.getByRole("alert")).getByRole("link", { name: actions.login })).toHaveAttribute(
       "href",
       "/login?as=owner&next=%2Fhosts%2F42",
     );
@@ -268,4 +276,21 @@ describe("RegistrationWizard: envio e erros da API", () => {
     expect(field("Número")).toHaveValue("120");
     expect(field("CEP")).toHaveValue("87020-000");
   });
+});
+
+it("074 troca de papel vazia navega direto e com dados exige confirmar, cancelar preserva", async () => {
+  const { user } = renderWizard("/search");
+  await user.click(screen.getByRole("button", { name: /Quero receber pets em casa/ }));
+  expect(router.push).toHaveBeenLastCalledWith("/register/host?next=%2Fsearch");
+  router.push.mockClear();
+  await fill(user, fields.fullName, "Pessoa de teste");
+  await user.click(screen.getByRole("button", { name: /Quero receber pets em casa/ }));
+  expect(screen.getByRole("dialog", { name: "Trocar o tipo de conta?" })).toBeVisible();
+  expect(router.push).not.toHaveBeenCalled();
+  await user.click(screen.getByRole("button", { name: "Continuar preenchendo" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(field(fields.fullName)).toHaveValue("Pessoa de teste");
+  await user.click(screen.getByRole("button", { name: /Quero receber pets em casa/ }));
+  await user.click(screen.getByRole("button", { name: "Trocar de conta" }));
+  expect(router.push).toHaveBeenCalledWith("/register/host?next=%2Fsearch");
 });

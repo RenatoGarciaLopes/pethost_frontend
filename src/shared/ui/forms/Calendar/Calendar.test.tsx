@@ -101,6 +101,22 @@ describe("Calendar (REQ-CAL-005 intervalo)", () => {
     expect(screen.queryByText(/noites ·/)).not.toBeInTheDocument();
   });
 
+  it("com o intervalo completo o rodapé mostra o resumo, também ao abrir pela saída", () => {
+    renderWithProviders(
+      <Calendar
+        mode="range"
+        months={2}
+        value={{ start: "2026-10-24", end: "2026-10-30" }}
+        onChange={vi.fn()}
+        editing="end"
+        today="2026-10-15"
+        maxNights={30}
+      />,
+    );
+    expect(screen.getByText("6 noites · 24 a 30 out")).toBeInTheDocument();
+    expect(screen.queryByText(/Agora a saída/)).not.toBeInTheDocument();
+  });
+
   it("editando a saída, um dia depois da chegada troca só a saída e completa", async () => {
     const onChange = vi.fn();
     const { user } = renderWithProviders(

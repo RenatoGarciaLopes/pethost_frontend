@@ -20,7 +20,7 @@ test("REQ-SHELL-009/010 visitante entra e volta ao perfil que tentou abrir", asy
   // Entrar e abrir o perfil compilam rotas na primeira visita do `next dev` ("Entrando…" ainda na tela aos 5 s).
   await expect(page).toHaveURL(/\/users\/profile$/, { timeout: 15_000 });
   await expect(page.getByRole("main")).toHaveCount(1);
-  await expect(page.getByLabel(/^Seu nome completo/)).toBeVisible();
+  await expect(page.getByLabel(/^Nome completo/)).toBeVisible();
   await expect(page.getByRole("banner")).toBeVisible();
 });
 
