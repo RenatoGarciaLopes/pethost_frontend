@@ -19,3 +19,5 @@ export const Empty: Story = { name: "REQ-DS-018 Empty" };
 export const Partial: Story = { name: "REQ-DS-018 Partial", args: { password: "abc" } };
 /** Board state: Complete. */
 export const Complete: Story = { name: "REQ-DS-018 Complete", args: { password: "Abcdef1!" } };
+
+export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };

@@ -14,9 +14,7 @@ import {
 import { registrationCopy } from "./registrationCopy";
 import { registrationSteps, type RegistrationField, type RegistrationStep } from "./registrationSteps";
 
-const { steps, fields, dataUse, success } = registrationCopy;
-
-type DataUseItem = (typeof dataUse.items)[keyof typeof dataUse.items];
+const { steps, fields, success } = registrationCopy;
 
 /** Um jeito de criar conta de pessoa: o que muda entre tutor (spec 011) e anfitrião (spec 012). */
 export interface RegistrationVariant {
@@ -32,13 +30,11 @@ export interface RegistrationVariant {
   intro: { person?: string; address: string };
   /** Ajuda do campo de senha. */
   passwordHelp?: string;
-  /** Faixa "o que a gente faz com cada dado". */
-  dataUse: readonly DataUseItem[];
   /** Tela de sucesso: a frase e o próximo passo principal; "Fazer isso depois" leva à casa do papel. */
   success: { message: string; nextStep: { label: string; href: string }; laterHref: string };
 }
 
-const PERSON_FIELDS = ["fullName", "email", "password", "phone", "birthDate"] as const;
+const PERSON_FIELDS = ["fullName", "email", "phone", "birthDate", "password"] as const;
 
 function variant(
   config: Omit<RegistrationVariant, "fields" | "steps"> & { personFields: readonly RegistrationField[] },
@@ -59,9 +55,8 @@ export const REGISTRATION_VARIANTS: Readonly<Record<PersonalRole, RegistrationVa
     role: "owner",
     path: "/owners/register",
     resolver: zodResolver(ownerRegistrationSchema.transform(toOwnerRegisterBody)),
-    personFields: [...PERSON_FIELDS, "cpf"],
+    personFields: ["fullName", "email", "phone", "birthDate", "cpf", "password"],
     intro: { address: steps.address.why },
-    dataUse: [dataUse.items.contact, dataUse.items.cpf, dataUse.items.address, dataUse.items.password],
     success: {
       message: success.owner,
       nextStep: { label: success.addPet, href: "/pets/new" },
@@ -76,7 +71,6 @@ export const REGISTRATION_VARIANTS: Readonly<Record<PersonalRole, RegistrationVa
     personFields: PERSON_FIELDS,
     intro: { person: steps.person.hostIntro, address: steps.address.hostWhy },
     passwordHelp: fields.hostPasswordHelp,
-    dataUse: [dataUse.items.hostContact, dataUse.items.hostAddress, dataUse.items.password],
     success: {
       message: success.host,
       nextStep: { label: success.startVerification, href: "/host/application" },
