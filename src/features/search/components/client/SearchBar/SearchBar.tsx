@@ -5,7 +5,8 @@ import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { focusRing } from "@/shared/theme/overrides/Button";
 import { DOOR_TARGET_ATTR, DOOR_WARM_ATTR } from "@/shared/ui/brand/DoorScene";
 import { Surface } from "@/shared/ui/layout/Surface";
-import { validateStay } from "@/shared/lib/date/stayRules";
+import { brasiliaToday, validateStay } from "@/shared/lib/date/stayRules";
+import { StayCalendar, type StayEdge } from "@/shared/ui/forms/Calendar";
 import { searchDateLabel } from "../../../lib/searchDateLabel";
 import type { SearchPet, SearchQuery } from "../../../types";
 import { searchCopy as copy } from "../../../lib/searchCopy";
@@ -30,6 +31,17 @@ const cell = {
   "&:has(:focus-visible)": { ...focusRing, borderRadius: `${quintalRadii.control}px` },
   // The cell owns this indicator; don't draw a second rectangle through its label.
   "& .MuiInputBase-root .MuiInputBase-input:focus-visible": { outline: "none" },
+} as const;
+const dateButton = {
+  position: "absolute",
+  inset: 0,
+  opacity: 0,
+  width: "100%",
+  height: "100%",
+  p: 0,
+  border: 0,
+  cursor: "pointer",
+  fontSize: 16,
 } as const;
 const separator = { borderRight: { xs: "none", md: "1px dashed" }, borderColor: "divider" } as const;
 const dateCell = { ...cell, ...separator } as const;
@@ -63,6 +75,7 @@ export function SearchBar({
   const ids = useId();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [draft, setDraft] = useState(query);
+  const [calendar, setCalendar] = useState<{ edge: StayEdge; anchor: HTMLElement; bar: HTMLElement } | null>(null);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
   const fieldErrors = { ...errors, ...localErrors };
   const where = draft.where ?? "",
@@ -78,8 +91,6 @@ export function SearchBar({
     onDraftChange?.(next);
   }
   const setWhere = (where: string) => change({ ...draft, where, radius: undefined });
-  const setFrom = (from: string) => change({ ...draft, from });
-  const setTo = (to: string) => change({ ...draft, to });
   const setPetIds = (pets: string[]) => change({ ...draft, pets });
   const setSpecies = (species: string) => change({ ...draft, species: species ? [species] : [] });
   const setPetCount = (count: number) => change({ ...draft, count });
@@ -166,55 +177,46 @@ export function SearchBar({
             <FormLabel htmlFor={`${ids}-from`} sx={label}>
               {copy.checkIn}
             </FormLabel>
-            <Typography aria-hidden="true" sx={{ fontSize: 14, lineHeight: "28px", whiteSpace: "nowrap" }}>
+            <Typography id={`${ids}-from-value`} sx={{ fontSize: 14, lineHeight: "28px", whiteSpace: "nowrap" }}>
               {searchDateLabel(from, "arrival")}
             </Typography>
             <Box
-              component="input"
+              component="button"
+              type="button"
               id={`${ids}-from`}
-              aria-invalid={Boolean(fieldErrors.from)}
-              aria-describedby={fieldErrors.from ? `${ids}-from-error` : undefined}
-              type="date"
-              value={from}
-              onClick={(event) => event.currentTarget.showPicker?.()}
-              onChange={(event) => setFrom(event.target.value)}
-              sx={{
-                position: "absolute",
-                inset: 0,
-                opacity: 0,
-                width: "100%",
-                height: "100%",
-                cursor: "pointer",
-                fontSize: 16,
-              }}
+              aria-haspopup="dialog"
+              aria-describedby={`${ids}-from-value${fieldErrors.from ? ` ${ids}-from-error` : ""}`}
+              onClick={(event) =>
+                setCalendar({
+                  edge: "checkIn",
+                  anchor: event.currentTarget.parentElement!,
+                  bar: event.currentTarget.closest("form")!,
+                })
+              }
+              sx={dateButton}
             />
           </Box>
           <Box sx={dateCell}>
             <FormLabel htmlFor={`${ids}-to`} sx={label}>
               {copy.checkOut}
             </FormLabel>
-            <Typography aria-hidden="true" sx={{ fontSize: 14, lineHeight: "28px", whiteSpace: "nowrap" }}>
+            <Typography id={`${ids}-to-value`} sx={{ fontSize: 14, lineHeight: "28px", whiteSpace: "nowrap" }}>
               {searchDateLabel(to, "departure", from)}
             </Typography>
             <Box
-              component="input"
+              component="button"
+              type="button"
               id={`${ids}-to`}
-              aria-invalid={Boolean(fieldErrors.to)}
-              aria-describedby={fieldErrors.to ? `${ids}-to-error` : undefined}
-              type="date"
-              value={to}
-              onClick={(event) => event.currentTarget.showPicker?.()}
-              min={from || undefined}
-              onChange={(event) => setTo(event.target.value)}
-              sx={{
-                position: "absolute",
-                inset: 0,
-                opacity: 0,
-                width: "100%",
-                height: "100%",
-                cursor: "pointer",
-                fontSize: 16,
-              }}
+              aria-haspopup="dialog"
+              aria-describedby={`${ids}-to-value${fieldErrors.to ? ` ${ids}-to-error` : ""}`}
+              onClick={(event) =>
+                setCalendar({
+                  edge: "checkOut",
+                  anchor: event.currentTarget.parentElement!,
+                  bar: event.currentTarget.closest("form")!,
+                })
+              }
+              sx={dateButton}
             />
           </Box>
           <Box sx={{ ...cell, display: "flex", alignItems: "center", gap: 1 }}>
@@ -317,6 +319,16 @@ export function SearchBar({
             {message}
           </Typography>
         ))}
+      <StayCalendar
+        edge={calendar?.edge ?? null}
+        anchorEl={calendar?.anchor ?? null}
+        clearEl={calendar?.bar}
+        checkIn={from}
+        checkOut={to}
+        today={today ?? brasiliaToday()}
+        onChange={({ checkIn, checkOut }) => change({ ...draft, from: checkIn, to: checkOut })}
+        onClose={() => setCalendar(null)}
+      />
     </>
   );
 }

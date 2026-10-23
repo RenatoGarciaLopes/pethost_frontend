@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { pickDates } from "../../support/calendar";
 import { loginAccount } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { hideDevIndicator } from "../../support/devIndicator";
@@ -13,7 +14,7 @@ async function expandSearchOnMobile(page: Page) {
 
 async function submitSearch(page: Page) {
   const desktopSearch = page.getByRole("button", { name: "Achar um cantinho", exact: true });
-  const mobileSearch = page.getByRole("button", { name: "Buscar cantinhos", exact: true });
+  const mobileSearch = page.getByRole("button", { name: "Achar um cantinho", exact: true });
   await ((await desktopSearch.isVisible()) ? desktopSearch : mobileSearch).click();
 }
 
@@ -68,7 +69,7 @@ test("REQ-HOME-006 celular abre a busca pela pílula acessível", async ({ page 
   await open.click();
   await expect(page.getByRole("button", { name: "Fechar busca" })).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByRole("textbox", { name: "Onde" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Buscar cantinhos" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Achar um cantinho" })).toBeVisible();
 });
 
 test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composição responsiva", async ({
@@ -122,10 +123,21 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
   await expect(outline).toHaveAttribute("d", /^M0 .*C.*[^Z]$/);
   if (mobile) await page.getByRole("button", { name: "Onde, datas e pet" }).click();
   await page.getByRole("textbox", { name: "Onde" }).fill("Zona 7, Maringá");
-  await page.getByLabel("Chegada").fill("2026-12-20");
-  await page.getByLabel("Saída").fill("2026-12-25");
-  await expect(page.getByText("20 dez, a partir das 14h")).toBeVisible();
-  await expect(page.getByText("25 dez · 5 noites")).toBeVisible();
+  const arrival = new Date(Date.now() + 30 * 86_400_000);
+  const departure = new Date(arrival.getTime() + 5 * 86_400_000);
+  const shortDay = (date: Date) =>
+    new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", timeZone: "UTC" })
+      .format(date)
+      .replace(" de ", " ")
+      .replace(".", "");
+  await pickDates(
+    page,
+    page.getByLabel("Chegada", { exact: true }),
+    arrival.toISOString().slice(0, 10),
+    departure.toISOString().slice(0, 10),
+  );
+  await expect(page.getByText(`${shortDay(arrival)}, a partir das 14h`)).toBeVisible();
+  await expect(page.getByText(`${shortDay(departure)} · 5 noites`)).toBeVisible();
   await expect(form.locator("fieldset")).toHaveCount(0);
   const guarantees = page.getByRole("list", { name: "Garantias da PetHost" }).getByRole("listitem");
   await expect(guarantees).toHaveCount(3);

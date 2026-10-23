@@ -96,7 +96,7 @@ it("REQ-PNEW-009 gramas e faixa de idade ficam convertidos ao voltar", async () 
   await user.click(next());
   await user.click(screen.getByRole("button", { name: "Voltar" }));
   expect(screen.getByLabelText("Peso aproximado (g)")).toHaveValue("35");
-  expect(screen.getByLabelText("Data de nascimento")).toHaveValue(ageBucketToBirthDate("puppy", new Date()));
+  expect(screen.getByLabelText("Data de nascimento")).toHaveValue(ageBucketToBirthDate("puppy", new Date()).split("-").reverse().join("/"));
 }, 15_000);
 it("REQ-PNEW-010 Sim/Não são obrigatórios e toggles revelam e apagam os textos", async () => {
   const { user } = setup(4, { species: "cat", name: "Mel", sex: "female" });
