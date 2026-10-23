@@ -1,13 +1,7 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import type { SearchQuery } from "../types";
-import { queryToSearchParams, searchParamsToQuery } from "../lib/searchParams";
-
-/** Endereço da home com a busca na URL; busca vazia é a própria `/`. @example searchHref({ ...query, where: "Zona 7" }) // "/?where=Zona+7" */
-export function searchHref(query: SearchQuery): string {
-  const params = queryToSearchParams(query);
-  return params.size ? `/?${params}` : "/";
-}
+import { searchHref, searchParamsToQuery } from "../lib/searchParams";
 
 /**
  * A busca vive na URL da home: lê os filtros dela e escreve o próximo estado pelo histórico nativo, sem refazer o RSC.

@@ -2,6 +2,7 @@
 export { SearchResultsSection } from "./components/client/SearchResultsSection";
 export { SearchBar } from "./components/client/SearchBar";
 export { ListingCard } from "./components/client/ListingCard";
+export { CompatibilityNotice } from "./components/client/CompatibilityNotice";
 export { useNearbyListings } from "./hooks/useNearbyListings";
 export { useAllListings } from "./hooks/useAllListings";
 export { useSearchUrl } from "./hooks/useSearchUrl";

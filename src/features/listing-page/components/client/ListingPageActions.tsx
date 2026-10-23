@@ -2,60 +2,41 @@
 
 import { Alert, Button, Stack } from "@mui/material";
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { listingPageCopy as copy } from "../../lib/listingPageCopy";
 
-/** Ações de navegação do detalhe; isoladas no cliente porque o tema ainda não integra Button com Next Link. */
+/**
+ * Recados de quem não pede estadia, com o link de cada um; no cliente porque o tema ainda não integra Button com
+ * Next Link. `owner-notice`: o anfitrião vendo o próprio cantinho (REQ-LPAGE-006); `host-switch`: outra conta de
+ * anfitrião, que precisa trocar para a de tutor (REQ-LPAGE-007).
+ * @example <ListingPageActions listingId={listing.id} variant="host-switch" />
+ */
 export function ListingPageActions({
   listingId,
-  requestHref,
-  isOwnerView,
-  accountRole,
-  hasTotal,
-  selectionControl,
-  placement = "actions",
+  variant,
 }: {
   listingId: string;
-  requestHref: string;
-  isOwnerView: boolean;
-  accountRole: "owner" | "host";
-  hasTotal: boolean;
-  selectionControl?: ReactNode;
-  placement?: "notice" | "actions";
+  variant: "owner-notice" | "host-switch";
 }) {
-  if (isOwnerView && placement === "notice")
+  if (variant === "owner-notice")
     return (
       <Alert
         severity="info"
         role="status"
         action={
           <Button component={Link} href={`/host/listings/${listingId}/edit`} color="inherit">
-            Editar
+            {copy.edit}
           </Button>
         }
       >
-        É assim que os tutores veem seu cantinho (sem a rua)
+        {copy.ownListing}
       </Alert>
     );
 
-  if (isOwnerView) return null;
-
-  if (accountRole === "host")
-    return (
-      <Stack spacing={1.5}>
-        <Alert severity="info">Pra pedir uma estadia, entra com a conta de tutor.</Alert>
-        <Button component={Link} href="/users/switch" variant="outlined">
-          Trocar de conta
-        </Button>
-      </Stack>
-    );
-
-  if (!hasTotal && selectionControl) return <>{selectionControl}</>;
-
   return (
     <Stack spacing={1.5}>
-      <Button component={Link} href={requestHref} variant="contained">
-        {hasTotal ? copy.request : copy.choose}
+      <Alert severity="info">{copy.hostAccount}</Alert>
+      <Button component={Link} href="/users/switch" variant="outlined">
+        {copy.switchAccount}
       </Button>
     </Stack>
   );

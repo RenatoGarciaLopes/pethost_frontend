@@ -1,7 +1,7 @@
 ---
 spec: 042-listing-page
 status: in-progress
-updated: 2026-10-15
+updated: 2026-10-22
 ---
 
 # 042 · Design técnico
@@ -19,9 +19,39 @@ updated: 2026-10-15
 | ----------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 005                     | Unitário                 | `lib/petFitsListing.test.ts`                                                                                                                                                               |
 | 004                     | Unitário                 | `lib/stayTotal.test.ts`, com `formatBRL` e `nightsBetween`                                                                                                                                 |
-| 001/003/004/006/007     | Componente               | `components/ListingPageScreen.test.tsx`                                                                                                                                                    |
+| 001/003/005/006/007/010/011 | Componente           | `components/ListingPageScreen.test.tsx`                                                                                                                                                    |
 | 001/008                 | Integração (Node/MSW)    | `api/server/listingPage.server.int.test.ts`                                                                                                                                                |
 | 009                     | Integração da rota       | `app/(account)/listings/[listingId]/page.test.tsx`                                                                                                                                         |
-| 004                     | Componente               | `app/(account)/listings/[listingId]/ListingSearchControls.test.tsx`                                                                                                                        |
+| 004                     | Componente               | `components/client/StayBookingCard.test.tsx` (conta, total, pílulas de pet, URL)                                                                                                           |
+| 001/010/011             | Unitário                 | `lib/listingFacts.test.ts`, `lib/searchOrigin.test.ts`                                                                                                                                     |
+| 005                     | Componente               | `features/search/components/client/CompatibilityNotice/CompatibilityNotice.test.tsx`; `features/search/lib/compatibilityLabel.test.ts`                                                    |
+| 010                     | Integração (Node/MSW)    | `api/server/listingPage.server.int.test.ts` (avaliações e falha silenciosa)                                                                                                                |
 | 001                     | Contrato/consulta        | `api/queries.test.ts`                                                                                                                                                                      |
-| 001/002/003/004/006/007 | Storybook + E2E simulado | Stories do detalhe, ações, controles e `HouseResidents`; `e2e/mocked/search/listing-page.spec.ts` cobre o estado sem pets residentes; a integração/story de 023 cobre residentes presentes |
+| 001/002/003/004/006/007 | Storybook + E2E simulado | Stories do detalhe (`TutorCompativel`, `ComAviso`, `SemFotos`, `SemAvaliacao`, `TutorSemEscolha`, `AnfitriaoVisitante`, `DonoDoCantinho`, `Celular`), da lateral, das ações, de `CompatibilityNotice` e `HouseResidents`; `e2e/mocked/search/listing-page.spec.ts` cobre conta, compatibilidade, avaliações, voltar e troca de pet (sem residentes); a integração/story de 023 cobre residentes presentes |
+
+## Revisão 078: página fiel à prancha (22/10/2026)
+
+Pedido do Renato: fonte, itens, chips, selos, tons e cabeçalho estavam longe do planejado. Sem mudança no backend: o que a prancha mostra e a API não manda vira lacuna, não dado inventado.
+
+- **Composição:** `ListingPageScreen` (servidor) monta "voltar", `ListingGallery`, título display, linha da casa (`houseLine`), selos (`StatusPill` do shared; nota em pílula gema clara), o slot `compatibility`, as seções (`Section` interna, divisória tracejada) e a lateral em `Surface` com sombra dura. Grade com áreas: no computador `head | aside` e `body | aside` (lateral fixa com `sticky`); no celular `head`, `aside`, `body`.
+- **`ListingGallery`:** capa grande + duas empilhadas (as fotos 4 e 5 só no carrossel do celular); moldura de tinta, raio `media`, `hardShadow(5)`; "Vizinho" com `Sticker`; sem foto, estado vazio com `DoorMark` no fundo cartão.
+- **`StayBookingCard` (client):** `NightlyPrice`, `DateRangeField` (desde a dev ec50ec7 é o calendário próprio da 075; a interface não mudou e o teste usa `pickCalendarDays`), pílulas de pet com `aria-pressed`, conta `stayTotal`, "Pedir estadia" e o recado de pagamento + privacidade do endereço. Datas e pets vão para a URL por `router.replace` (só datas que formam estadia válida); `stayParams` troca apenas `from`, `to` e `pets` e preserva o resto da busca. No celular o botão vai para a barra fixa.
+- **`ListingPageActions`:** ficou só com os recados de quem não pede (dono e outra conta de anfitrião).
+- **Compatibilidade:** `CompatibilityNotice` mora na feature search (dona de `searchQueries.compatibility`, `compatibilityWarnings` e da copy dos avisos) e reaproveita `Notice` do shared; a rota compõe uma por pet escolhido, com os motivos de `compatibilityReasons` (listing-page), e pré-carrega cada resposta com `prefetchCompatibility` (search `index.server`) no mesmo `QueryClient` dos residentes, para a caixa chegar hidratada. Feature não importa feature: a rota é o ponto de encontro, como já era com `HouseResidents`.
+- **Avaliações:** `getListingReviews` lê `GET /reviews` no servidor (pública, fora do BFF), as 4 mais novas; erro vira lista vazia. Mês da estadia por `formatMemberSince`.
+- **Voltar:** `searchOriginHref` é o único ponto que sabe onde ficam os resultados (home com os parâmetros da busca). Se o destino mudar, muda só lá.
+- **Selos:** códigos e rótulos num ponto só, `shared/config/listingBadges.ts` (`LISTING_BADGES`, `listingBadgeLabel`, `isListingBadge`), lidos pelo `ListingCard`, pelo contrato da busca e pela página; código novo da API fica de fora até ganhar rótulo. Substitui `features/search/lib/badgeLabel.ts` (removido) e o `badges` da copy da página.
+- **Removidos:** `ListingSearchControls` (rota) e seus teste/story; copy sem uso (`choose`, `fit`, `mismatch*`, `weekdays`, `property`, `description`, `host`); a seção "Combina com" local por `petFitsListing` (a função segue no pedido, spec 050).
+
+### Lacunas da prancha (a API não manda)
+
+| Prancha | Hoje | Por quê |
+| --- | --- | --- |
+| "2,1 km de você" | linha sem distância | o detalhe não traz `distanceKm` (só a busca) |
+| "6 casas perto da Zona 7" | "← Casas perto de {onde}" ou "← Voltar pra busca" | o card da busca não leva a contagem nem sempre o lugar |
+| "No PetHost desde outubro · já criou três cachorros" | só nome (e "Empresa parceira") | `listing.host` público só tem nome, foto e empresa; `GET /hosts/{id}` é do admin |
+| Fala do anfitrião | a descrição do cantinho entre aspas | não há campo de fala; a descrição é o texto do anfitrião |
+| "Puxar conversa" | ausente | Conversas (055) não tem tela na dev; decisão do coordenador em 22/10: fica fora até a tela existir |
+| "Marina · Thor" | só o primeiro nome de quem avaliou | avaliação do tutor não traz o pet |
+| "casa com quintal murado" | "casa com quintal" | não há campo de muro |
+| "R$ 60" | "R$ 60,00" | `formatBRL` é o padrão do app em todo valor |

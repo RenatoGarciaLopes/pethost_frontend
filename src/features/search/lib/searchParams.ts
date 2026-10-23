@@ -112,3 +112,9 @@ export function toApiSearch(query: SearchQuery, pets: SearchPet[], page: number)
     pageSize: 12,
   };
 }
+
+/** Endereço da home com a busca na URL; busca vazia é a própria `/`. @example searchHref({ ...query, where: "Zona 7" }) // "/?where=Zona+7" */
+export function searchHref(query: SearchQuery): string {
+  const params = queryToSearchParams(query);
+  return params.size ? `/?${params}` : "/";
+}
