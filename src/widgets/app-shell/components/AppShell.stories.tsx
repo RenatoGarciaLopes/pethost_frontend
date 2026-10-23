@@ -52,7 +52,9 @@ type Story = StoryObj<typeof meta>;
 export const Tutor: Story = {
   name: "REQ-SHELL-001/003/004 Tutor",
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "CS Camila Menu da conta de Camila Souza" }),
+    );
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de tutor")).toBeVisible());
     await expect(body.getByRole("menuitem", { name: "Trocar pra conta de anfitrião" })).toHaveAttribute(
@@ -67,7 +69,9 @@ export const Anfitriao: Story = {
   name: "REQ-SHELL-001/003 Anfitrião",
   args: { role: "host" },
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "CS Camila Menu da conta de Camila Souza" }),
+    );
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de anfitrião")).toBeVisible());
     await expect(body.getByRole("menuitem", { name: "Trocar pra conta de tutor" })).toBeVisible();
@@ -78,7 +82,9 @@ export const Admin: Story = {
   name: "REQ-SHELL-001/011 Admin",
   args: { role: "admin" },
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "CS Camila Menu da conta de Camila Souza" }),
+    );
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de admin")).toBeVisible());
     await expect(body.queryByRole("menuitem", { name: "Minha conta" })).not.toBeInTheDocument();

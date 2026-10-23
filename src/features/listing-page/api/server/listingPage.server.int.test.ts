@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import { expect, it, vi } from "vitest";
 import { apiFail, apiOk } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
-import { getListingPageDetail } from "./listingPage.server";
+import { getListingPageDetail, getListingReviews } from "./listingPage.server";
 
 vi.mock("next/headers", () => ({
   cookies: async () => ({ get: () => ({ value: "synthetic" }) }),
@@ -42,6 +42,7 @@ it("REQ-LPAGE-001 fetches detail with the authenticated backend transport", asyn
           nightlyRate: 10,
           availableWeekdays: ["monday"],
           address: { neighborhood: "Centro", city: "Curitiba", state: "PR" },
+          approximateLocation: { latitude: -25.43, longitude: -49.27, radiusMeters: 500 },
           photos: [],
           isActive: true,
           createdAt: "2026-10-15T12:00:00Z",
@@ -53,4 +54,45 @@ it("REQ-LPAGE-001 fetches detail with the authenticated backend transport", asyn
   await expect(getListingPageDetail("account-int-2", "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c")).resolves.toMatchObject({
     title: "Quintal",
   });
+});
+
+it("REQ-LPAGE-010 reads the newest public reviews of the listing", async () => {
+  server.use(
+    http.get("http://api.test/api/v1/reviews", ({ request }) => {
+      const url = new URL(request.url);
+      expect(url.searchParams.get("ListingId")).toBe("0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c");
+      expect(url.searchParams.get("PageSize")).toBe("4");
+      return HttpResponse.json(
+        apiOk({
+          items: [
+            {
+              id: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b2a",
+              authorSide: "owner",
+              hostId: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1d",
+              listingId: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c",
+              rating: 5,
+              comment: "Recebi foto todo dia.",
+              author: { name: "Marina", avatarUrl: null },
+              stayEndedAt: "2026-11-10T12:00:00Z",
+              createdAt: "2026-11-11T12:00:00Z",
+              updatedAt: "2026-11-11T12:00:00Z",
+            },
+          ],
+          page: 1,
+          pageSize: 4,
+          totalCount: 1,
+        }),
+      );
+    }),
+  );
+  await expect(getListingReviews("0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c")).resolves.toMatchObject([
+    { author: { name: "Marina" }, rating: 5 },
+  ]);
+});
+
+it("REQ-LPAGE-010 a failing reviews call leaves the page without the section", async () => {
+  server.use(
+    http.get("http://api.test/api/v1/reviews", () => HttpResponse.json(apiFail("UNEXPECTED_ERROR"), { status: 500 })),
+  );
+  await expect(getListingReviews("0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1d")).resolves.toEqual([]);
 });

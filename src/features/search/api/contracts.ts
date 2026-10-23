@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { unwrapData } from "@/shared/api/contracts/unwrapData";
+import { LISTING_BADGES } from "@/shared/config/listingBadges";
 import {
   GetApiV1ListingsListingIdCompatibilityResponse,
   GetApiV1ListingsResponse,
@@ -25,7 +26,7 @@ export const listingSpeciesSchema = z.enum([
 export const listingSummarySchema = page.shape.items.element.extend({
   homeType: z.enum(["house", "apartment"]).nullish(),
   acceptedSpecies: z.array(listingSpeciesSchema),
-  badges: z.array(z.enum(["neighbor", "fast_responder", "yard", "experienced", "well_rated"])),
+  badges: z.array(z.enum(LISTING_BADGES)),
 });
 /** Página da busca sem envelope. @example searchPageSchema.parse(data) */
 export const searchPageSchema = page.extend({ items: z.array(listingSummarySchema) });

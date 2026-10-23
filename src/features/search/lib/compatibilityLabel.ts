@@ -19,6 +19,14 @@ export function compatibilityLabel(result: Pick<ListingCompatibility, "matches" 
   return { tone: "warning", text: rest.length ? `${text} +${rest.length}` : text };
 }
 
+/**
+ * Todos os avisos em texto, na ordem da API (casa primeiro, depois hóspedes). Para a caixa da página do cantinho.
+ * @example compatibilityWarnings({ petName: "Pipoca", warnings: [{ code: "home_has_cats" }, { code: "x" }] }) // ["Tem gato em casa", "Vale conferir com a Pipoca"]
+ */
+export function compatibilityWarnings(result: Pick<ListingCompatibility, "petName" | "warnings">): string[] {
+  return result.warnings.map((warning) => warningText(warning, result.petName));
+}
+
 function warningText(warning: Warning, petName: string): string {
   const copy = searchCopy.compat.warnings;
   const known = copy[warning.code as keyof typeof copy];

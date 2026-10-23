@@ -17,19 +17,21 @@ interface AppHeaderProps {
 }
 
 const HOW: NavItem = { id: "how", label: "Como funciona", href: "#como-funciona", roles: ["owner", "host"] };
-const STAYS: NavItem = { id: "stays", label: "Minhas estadias", href: "/owner/bookings", roles: ["owner"] };
+/** Na home o tutor já tem a busca na faixa principal: o cabeçalho só leva às estadias. */
+const HOME_OWNER_ITEMS = navItemsFor("owner").filter((item) => item.id === "owner-stays");
 
 /**
- * Cabeçalho único da casca e da home (REQ-UIC-003): largura page, linha de tinta, marca e menu reais.
- * Sem usuário oferece Entrar; home do tutor oferece estadias. Não consulta sessão nem antecipa Conversas.
- * O caller compõe um único main com id conteudo; a busca de contas só ocorre ao abrir AccountMenu.
+ * Cabeçalho único da casca e da home (REQ-UIC-003): largura page, linha de tinta, marca, atalhos do papel à
+ * direita e a pílula da conta com avatar e primeiro nome. Sem usuário oferece Entrar. Não consulta sessão nem
+ * antecipa Conversas. O caller compõe um único main com id conteudo; a busca de contas só ocorre ao abrir
+ * AccountMenu.
  * @example <AppHeader user={user} variant="home" />
  */
 export function AppHeader({ user, variant = "shell" }: AppHeaderProps) {
   const home = variant === "home";
   const items = home
     ? user?.role === "owner"
-      ? [HOW, STAYS]
+      ? [HOW, ...HOME_OWNER_ITEMS]
       : [HOW, ...(user ? navItemsFor(user.role) : [])]
     : user
       ? navItemsFor(user.role)
@@ -67,7 +69,7 @@ export function AppHeader({ user, variant = "shell" }: AppHeaderProps) {
           <Box sx={{ flexGrow: 1 }} />
           {items.length > 0 && <HeaderNav items={items} />}
           {user ? (
-            <AccountMenu user={{ ...user, avatarUrl: user.avatarUrl ?? null }} appearance={home ? "pill" : "avatar"} />
+            <AccountMenu user={{ ...user, avatarUrl: user.avatarUrl ?? null }} />
           ) : (
             <Button href="/login" variant="outlined" sx={{ minHeight: 48 }}>
               Entrar

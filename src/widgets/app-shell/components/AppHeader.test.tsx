@@ -30,3 +30,15 @@ it("REQ-UIC-003 tutor vê estadias e nome na pílula sem perder o menu da conta"
   await user.click(account);
   expect(await screen.findByRole("menuitem", { name: "Minha conta" })).toHaveAttribute("href", "/users/profile");
 });
+
+it("REQ-SHELL-002 REQ-UIC-003 na casca o tutor vê Buscar (home), Meus pets e Minhas estadias, e a pílula com o nome", () => {
+  renderWithProviders(<AppHeader user={sessionUserFixture} />, { theme: quintalTheme });
+  const nav = within(screen.getByRole("navigation", { name: "Navegação principal" }));
+  expect(nav.getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
+    ["Buscar", "/"],
+    ["Meus pets", "/pets"],
+    ["Minhas estadias", "/owner/bookings"],
+  ]);
+  expect(nav.queryByRole("link", { name: "Conversas" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /Menu da conta de Camila Souza/ })).toHaveTextContent("Camila");
+});
