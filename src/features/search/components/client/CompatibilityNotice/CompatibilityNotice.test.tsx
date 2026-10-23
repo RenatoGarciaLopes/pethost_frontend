@@ -1,6 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { expect, it } from "vitest";
+import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { apiFail } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
 import { createTestQueryClient, renderWithProviders } from "@/test/render";
@@ -30,7 +31,7 @@ function renderWith(result: object | undefined) {
       hostName="Dona Cida"
       reasons={REASONS}
     />,
-    { queryClient },
+    { queryClient, theme: quintalTheme },
   );
 }
 

@@ -42,6 +42,7 @@ it("REQ-LPAGE-001 fetches detail with the authenticated backend transport", asyn
           nightlyRate: 10,
           availableWeekdays: ["monday"],
           address: { neighborhood: "Centro", city: "Curitiba", state: "PR" },
+          approximateLocation: { latitude: -25.43, longitude: -49.27, radiusMeters: 500 },
           photos: [],
           isActive: true,
           createdAt: "2026-10-15T12:00:00Z",

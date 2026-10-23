@@ -1,4 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
+import { getRouter } from "@storybook/nextjs-vite/router.mock";
+import { fn } from "storybook/test";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import {
   listingDetailFixture,
@@ -48,6 +51,10 @@ const meta = {
   title: "Listing page/Detalhe",
   component: ListingPageScreen,
   parameters: { layout: "fullscreen", design: { board: "Página do cantinho" } },
+  // A lateral troca datas e pets pela URL: o router do Next vem do mock do Storybook.
+  beforeEach: () => {
+    useRouter.mockReturnValue({ ...getRouter(), replace: fn(), refresh: fn(), bfcacheId: "listing-page" });
+  },
   args: {
     listing: listingDetailFixture({ photos: listingPhotosFixture, rating: { average: 4.9, count: 18 } }),
     isOwner: false,

@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { focusRing } from "@/shared/theme/overrides/Button";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
 import { DoorMark } from "@/shared/ui/brand/DoorMark";
@@ -64,11 +65,16 @@ export function ListingGallery({ title, photos, neighbor }: ListingGalleryProps)
     <Box
       component="ul"
       aria-label={copy.gallery(title)}
+      // No celular a lista rola de lado: precisa receber foco para rolar pelo teclado (axe scrollable-region-focusable).
+      tabIndex={0}
       sx={{
         listStyle: "none",
         m: 0,
         p: 0,
         pb: { xs: 1, md: 0 },
+        pr: { xs: 0.75, md: 0 },
+        borderRadius: `${quintalRadii.media}px`,
+        "&:focus-visible": focusRing,
         display: { xs: "flex", md: "grid" },
         gap: 2,
         overflowX: { xs: "auto", md: "visible" },

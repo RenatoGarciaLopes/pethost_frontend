@@ -37,7 +37,7 @@ Pedido do Renato: fonte, itens, chips, selos, tons e cabeçalho estavam longe do
 - **`ListingGallery`:** capa grande + duas empilhadas (as fotos 4 e 5 só no carrossel do celular); moldura de tinta, raio `media`, `hardShadow(5)`; "Vizinho" com `Sticker`; sem foto, estado vazio com `DoorMark` no fundo cartão.
 - **`StayBookingCard` (client):** `NightlyPrice`, `DateRangeField` (o calendário da 075 entra depois do merge, sem mudar esta interface), pílulas de pet com `aria-pressed`, conta `stayTotal`, "Pedir estadia" e o recado de pagamento + privacidade do endereço. Datas e pets vão para a URL por `router.replace` (só datas que formam estadia válida); `stayParams` troca apenas `from`, `to` e `pets` e preserva o resto da busca. No celular o botão vai para a barra fixa.
 - **`ListingPageActions`:** ficou só com os recados de quem não pede (dono e outra conta de anfitrião).
-- **Compatibilidade:** `CompatibilityNotice` mora na feature search (dona de `searchQueries.compatibility`, `compatibilityWarnings` e da copy dos avisos) e reaproveita `Notice` do shared; a rota compõe uma por pet escolhido, com os motivos de `compatibilityReasons` (listing-page). Feature não importa feature: a rota é o ponto de encontro, como já era com `HouseResidents`.
+- **Compatibilidade:** `CompatibilityNotice` mora na feature search (dona de `searchQueries.compatibility`, `compatibilityWarnings` e da copy dos avisos) e reaproveita `Notice` do shared; a rota compõe uma por pet escolhido, com os motivos de `compatibilityReasons` (listing-page), e pré-carrega cada resposta com `prefetchCompatibility` (search `index.server`) no mesmo `QueryClient` dos residentes, para a caixa chegar hidratada. Feature não importa feature: a rota é o ponto de encontro, como já era com `HouseResidents`.
 - **Avaliações:** `getListingReviews` lê `GET /reviews` no servidor (pública, fora do BFF), as 4 mais novas; erro vira lista vazia. Mês da estadia por `formatMemberSince`.
 - **Voltar:** `searchOriginHref` é o único ponto que sabe onde ficam os resultados (home com os parâmetros da busca). Se o destino mudar, muda só lá.
 - **Removidos:** `ListingSearchControls` (rota) e seus teste/story; copy sem uso (`choose`, `fit`, `mismatch*`, `weekdays`, `property`, `description`, `host`); a seção "Combina com" local por `petFitsListing` (a função segue no pedido, spec 050).
@@ -50,7 +50,7 @@ Pedido do Renato: fonte, itens, chips, selos, tons e cabeçalho estavam longe do
 | "6 casas perto da Zona 7" | "← Casas perto de {onde}" ou "← Voltar pra busca" | o card da busca não leva a contagem nem sempre o lugar |
 | "No PetHost desde outubro · já criou três cachorros" | só nome (e "Empresa parceira") | `listing.host` público só tem nome, foto e empresa; `GET /hosts/{id}` é do admin |
 | Fala do anfitrião | a descrição do cantinho entre aspas | não há campo de fala; a descrição é o texto do anfitrião |
-| "Puxar conversa" | ausente | Conversas (055) não tem tela no front |
+| "Puxar conversa" | ausente | Conversas (055) não tem tela na dev; decisão do coordenador em 22/10: fica fora até a tela existir |
 | "Marina · Thor" | só o primeiro nome de quem avaliou | avaliação do tutor não traz o pet |
 | "casa com quintal murado" | "casa com quintal" | não há campo de muro |
 | "R$ 60" | "R$ 60,00" | `formatBRL` é o padrão do app em todo valor |

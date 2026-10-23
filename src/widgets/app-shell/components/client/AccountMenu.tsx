@@ -74,7 +74,7 @@ export function AccountMenu({ user }: AccountMenuProps) {
         </Avatar>{" "}
         <Typography component="span" sx={{ fontWeight: 700, display: { xs: "none", md: "inline" } }}>
           {user.fullName.split(" ")[0]}
-        </Typography>
+        </Typography>{" "}
         <Box component="span" sx={visuallyHidden}>
           {shellCopy.menu(user.fullName)}
         </Box>
