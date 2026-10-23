@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import openApi from "../../../../openapi/pethost.v1.json";
-import { apiOnlyRoutes, bffRoutes, matchBffRoute, sessionOnlyRoutes } from "./bffRoutes";
+import { apiOnlyRoutes, bffRoutes, deniedRoutes, matchBffRoute, sessionOnlyRoutes } from "./bffRoutes";
 
 const API_PREFIX = "/api/v1";
 const operations = Object.entries(openApi.paths as Record<string, Record<string, unknown>>).flatMap(([path, methods]) =>
@@ -43,10 +43,20 @@ describe("lista permitida × OpenAPI (teste de contrato)", () => {
     expect(missing).toEqual([]);
   });
 
-  it("REQ-HTTP-009 toda operação da API é proxy ou handler de sessão (nada esquecido)", () => {
-    const covered = new Set([...bffRoutes, ...sessionOnlyRoutes, ...apiOnlyRoutes].map(key));
+  it("REQ-HTTP-009 toda operação da API é proxy, handler de sessão, só da API ou negada com motivo (nada esquecido)", () => {
+    const covered = new Set([...bffRoutes, ...sessionOnlyRoutes, ...apiOnlyRoutes, ...deniedRoutes].map(key));
 
     expect(operations.filter((operation) => !covered.has(operation))).toEqual([]);
+  });
+
+  it("REQ-HTTP-009 rota negada existe na API, tem motivo e nunca passa pelo proxy nem repete a lista permitida", () => {
+    expect(deniedRoutes.map(key).filter((route) => !operations.includes(route))).toEqual([]);
+    expect(deniedRoutes.filter((route) => !route.reason.trim())).toEqual([]);
+    expect(deniedRoutes.map(key).filter((route) => bffRoutes.map(key).includes(route))).toEqual([]);
+    for (const route of deniedRoutes) {
+      // Com um id de verdade no lugar de `{param}`, senão o casamento falharia de qualquer jeito.
+      expect(matchBffRoute(route.method, route.pattern.replace(/{[^}]+}/g, "abc"))).toBeUndefined();
+    }
   });
 
   it("REQ-HTTP-009 o webhook do Stripe nunca passa pelo proxy do navegador", () => {
