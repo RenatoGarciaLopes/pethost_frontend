@@ -47,7 +47,7 @@ export const MovimentoReduzido: Story = {
         media: query,
         addEventListener: () => {},
         removeEventListener: () => {},
-      }) as MediaQueryList;
+      }) as unknown as MediaQueryList;
     return () => {
       window.matchMedia = original;
     };

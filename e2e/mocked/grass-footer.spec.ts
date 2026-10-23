@@ -30,7 +30,10 @@ test("REQ-UIC-011 o início termina no rodapé de gramado e a terra escurece ao 
   await expect.poll(() => descida(page)).toBeGreaterThan(0.95);
 });
 
-test("REQ-UIC-011 o rodapé aparece na casca do tutor e não aparece em entrar nem no admin", async ({ page, baseURL }) => {
+test("REQ-UIC-011 o rodapé aparece na casca do tutor e não aparece em entrar nem no admin", async ({
+  page,
+  baseURL,
+}) => {
   await page.goto("/login");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByTestId("grass-footer")).toHaveCount(0);

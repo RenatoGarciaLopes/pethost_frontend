@@ -4,8 +4,17 @@ import { useEffect, useRef } from "react";
 import { usePrefersReducedMotion } from "@/shared/lib/motion/usePrefersReducedMotion";
 import { GroundLine } from "../GroundLine";
 
-/** Quanto a terra escurece, no máximo, quando o rodapé aparece inteiro (fim da rolagem). */
+/** Quanto a terra escurece (brilho), no máximo, quando o rodapé aparece inteiro (fim da rolagem). */
 const MAX_DARKEN = 0.3;
+
+/** Só a terra escurece (a grama não): o filtro vai nos dois svgs de terra, lido de `--descida`. */
+const soilLayer = {
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  filter: `brightness(calc(1 - var(--descida) * ${MAX_DARKEN}))`,
+} as const;
 
 /** Quanto do rodapé já subiu na tela: 0 antes de aparecer, 1 com ele inteiro à vista. */
 function descentProgress(rect: DOMRect, viewportHeight: number) {
@@ -72,13 +81,7 @@ export function GrassFooter() {
           "--stone": theme.palette.scene.stone,
         })}
       >
-        <Box
-          component="svg"
-          viewBox="0 0 1440 300"
-          preserveAspectRatio="none"
-          focusable="false"
-          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        >
+        <Box component="svg" viewBox="0 0 1440 300" preserveAspectRatio="none" focusable="false" sx={soilLayer}>
           <path
             d="M0 70C180 52 330 92 520 72S860 48 1040 76 1320 66 1440 74V300H0Z"
             fill="var(--soil-light)"
@@ -106,7 +109,7 @@ export function GrassFooter() {
           viewBox="0 0 1440 300"
           preserveAspectRatio="xMidYMid slice"
           focusable="false"
-          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+          sx={soilLayer}
         >
           <g fill="none" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity=".55">
             <path d="M210 70C206 96 224 110 216 138S196 168 204 196" />
@@ -123,15 +126,6 @@ export function GrassFooter() {
             <ellipse cx="96" cy="214" rx="20" ry="12" />
           </g>
         </Box>
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            bgcolor: "quintal.tinta",
-            opacity: `calc(var(--descida) * ${MAX_DARKEN})`,
-            pointerEvents: "none",
-          }}
-        />
       </Box>
     </Box>
   );
