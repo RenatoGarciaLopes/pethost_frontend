@@ -115,7 +115,7 @@ export const Celular: Story = {
     await userEvent.click(open);
     await expect(canvas.getByRole("textbox", { name: "Onde" })).toBeVisible();
     await expect(canvas.getByRole("button", { name: "Fechar busca" })).toHaveAttribute("aria-expanded", "true");
-    await expect(canvas.getByRole("button", { name: "Buscar cantinhos" })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Achar um cantinho" })).toBeVisible();
     await expect(canvasElement.ownerDocument.documentElement.scrollWidth).toBeLessThanOrEqual(
       canvasElement.ownerDocument.defaultView!.innerWidth,
     );

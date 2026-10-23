@@ -14,7 +14,7 @@ async function expandSearchOnMobile(page: Page) {
 
 async function submitSearch(page: Page) {
   const desktopSearch = page.getByRole("button", { name: "Achar um cantinho", exact: true });
-  const mobileSearch = page.getByRole("button", { name: "Buscar cantinhos", exact: true });
+  const mobileSearch = page.getByRole("button", { name: "Achar um cantinho", exact: true });
   await ((await desktopSearch.isVisible()) ? desktopSearch : mobileSearch).click();
 }
 
@@ -69,7 +69,7 @@ test("REQ-HOME-006 celular abre a busca pela pílula acessível", async ({ page 
   await open.click();
   await expect(page.getByRole("button", { name: "Fechar busca" })).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByRole("textbox", { name: "Onde" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Buscar cantinhos" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Achar um cantinho" })).toBeVisible();
 });
 
 test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composição responsiva", async ({

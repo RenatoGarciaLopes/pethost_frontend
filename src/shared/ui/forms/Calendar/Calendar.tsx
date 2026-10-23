@@ -424,9 +424,9 @@ function DayCell({ iso, column, range, rangeMode, today, blocked, tabbable, onCh
   const strip = quintalColors.grama;
   const background = inside
     ? strip
-    : complete && isStart
+    : complete && isStart && column !== 6
       ? `linear-gradient(to right, transparent 50%, ${strip} 50%)`
-      : complete && isEnd
+      : complete && isEnd && column !== 0
         ? `linear-gradient(to left, transparent 50%, ${strip} 50%)`
         : undefined;
   const edge =

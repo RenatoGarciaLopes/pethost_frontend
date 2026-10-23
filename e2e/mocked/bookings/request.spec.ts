@@ -80,9 +80,11 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   await page.goto("/search");
   await openSearch(page);
   await pickDates(page, page.getByLabel("Chegada", { exact: true }).filter({ visible: true }), from, to);
-  await page.getByLabel("Luna", { exact: true }).filter({ visible: true }).check();
-  await page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cantinhos que recebem Luna", NAVIGATION);
+  await page.getByRole("combobox", { name: "Pet" }).click();
+  await page.getByRole("option", { name: "Luna", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("casas com vaga perto", NAVIGATION);
 
   const card = page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first();
   const title = (await card.getByRole("heading").first().textContent())?.trim() ?? "";
