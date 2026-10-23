@@ -36,6 +36,7 @@ export function listingDto(overrides: Record<string, unknown> = {}) {
     availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
     address: listingAddressDto,
     location: { latitude: -23.42, longitude: -51.93 },
+    approximateLocation: { latitude: -23.42, longitude: -51.93, radiusMeters: 500 },
     photos: [],
     isActive: true,
     deactivatedAt: null,

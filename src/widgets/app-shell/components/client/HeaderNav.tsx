@@ -5,6 +5,7 @@ import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { NavItem } from "@/shared/config/navigation";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { shellCopy } from "../../lib/shellCopy";
 
 /** A página do atalho ou uma de dentro dela (`/pets/123` marca "Meus pets"). */
@@ -15,7 +16,7 @@ function matchesPath(pathname: string, href: string) {
 /**
  * Atalhos do papel (REQ-SHELL-002, 006, 008). No computador, em linha no cabeçalho; abaixo de 900 px, botão
  * que abre a gaveta com os mesmos atalhos (a gaveta do MUI prende o foco, fecha com Esc e devolve o foco ao
- * botão). A página atual leva `aria-current="page"` e sublinhado grosso, não só cor.
+ * botão). A página atual leva `aria-current="page"` e contorno de tinta, como na prancha, não só cor.
  *
  * @example <HeaderNav items={navItemsFor(user.role)} />
  */
@@ -39,14 +40,17 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
             aria-current={current ? "page" : undefined}
             underline="none"
             sx={{
-              display: "inline-block",
-              px: 1,
-              py: 1.25,
+              display: "inline-flex",
+              alignItems: "center",
+              px: 1.5,
               minHeight: 44,
-              fontWeight: current ? 700 : 400,
+              whiteSpace: "nowrap",
+              fontWeight: 700,
               color: "text.primary",
-              borderBottom: 3,
-              borderColor: current ? "primary.main" : "transparent",
+              border: "2px solid",
+              borderColor: current ? "text.primary" : "transparent",
+              borderRadius: `${quintalRadii.control}px`,
+              bgcolor: current ? "background.paper" : "transparent",
             }}
           >
             {item.label}
@@ -57,8 +61,8 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
 
   return (
     <>
-      <Box component="nav" aria-label={shellCopy.nav} sx={{ display: { xs: "none", md: "block" } }}>
-        <Stack component={List} direction="row" spacing={2} disablePadding>
+      <Box component="nav" aria-label={shellCopy.nav} sx={{ display: { xs: "none", md: "block" }, flexShrink: 0 }}>
+        <Stack component={List} direction="row" spacing={0.5} disablePadding>
           {links()}
         </Stack>
       </Box>

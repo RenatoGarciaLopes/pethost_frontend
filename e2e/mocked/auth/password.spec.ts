@@ -36,7 +36,7 @@ test("REQ-PWD-002, REQ-PWD-005 e REQ-PWD-011 pede link, limpa token e troca a se
   await expect(page.getByText("Por segurança, saímos da sua conta em todos os aparelhos.")).toBeVisible();
   await page.getByRole("link", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/, { timeout: 15_000 });
-  await expect(page.getByRole("heading", { name: "Entra que a porta tá aberta." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Entra que a porta tá aberta" })).toBeVisible();
 });
 
 test("REQ-PWD-010 link vencido retira o formulário e oferece outro pedido", async ({ page }) => {

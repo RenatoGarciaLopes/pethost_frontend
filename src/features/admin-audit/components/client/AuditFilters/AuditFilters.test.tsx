@@ -1,5 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { brasiliaToday } from "@/shared/lib/date/stayRules";
+import { pickCalendarDays } from "@/test/calendar";
 import { renderWithProviders } from "@/test/render";
 import { AuditFilters } from "./AuditFilters";
 
@@ -12,8 +14,9 @@ describe("REQ-AUDIT-002 a REQ-AUDIT-004 filtros", () => {
       <AuditFilters filters={filters} invalidFields={[]} onApply={onApply} onClear={vi.fn()} />,
     );
     await user.type(screen.getByRole("textbox", { name: "ID do alvo" }), "nao-uuid");
-    fireEvent.change(screen.getByLabelText("De"), { target: { value: "2026-10-16" } });
-    fireEvent.change(screen.getByLabelText("Até"), { target: { value: "2026-10-15" } });
+    const month = brasiliaToday().slice(0, 7);
+    await pickCalendarDays(user, screen.getByLabelText("De"), `${month}-20`);
+    await pickCalendarDays(user, screen.getByLabelText("Até"), `${month}-10`);
     await user.click(screen.getByRole("button", { name: "Buscar registros" }));
 
     expect(onApply).not.toHaveBeenCalled();

@@ -21,8 +21,8 @@ export const PostApiV1AuthSessionsLoginBody = zod.object({
 }).describe('Login: abre uma sessão.')
 
 export const PostApiV1AuthSessionsLoginResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "accessToken": zod.string(),
   "refreshToken": zod.string(),
   "expiresAt": zod.number().int().describe('Instante em que o access token expira, em Unix time (segundos desde 1970-01-01 UTC) —\no mesmo valor do claim `exp` do JWT. É o campo que o cliente usa para agendar o refresh.'),
@@ -45,14 +45,9 @@ export const PostApiV1AuthSessionsLoginResponse = zod.object({
 }).describe('Endereço como vem na request e como sai na resposta.')]).optional(),
   "isActive": zod.boolean()
 }).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\nSão os dados da própria pessoa, então o endereço vai completo.')
-}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\nRetorno de cadastro, login e refresh — o cliente trata os três igual.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\nRetorno de cadastro, login e refresh — o cliente trata os três igual.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * O refresh token é de uso único: o token enviado é invalidado nesta chamada,
@@ -64,8 +59,8 @@ export const PostApiV1AuthSessionsRefreshBody = zod.object({
 }).describe('Troca um refresh token válido por um par novo de tokens.')
 
 export const PostApiV1AuthSessionsRefreshResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "accessToken": zod.string(),
   "refreshToken": zod.string(),
   "expiresAt": zod.number().int().describe('Instante em que o access token expira, em Unix time (segundos desde 1970-01-01 UTC) —\no mesmo valor do claim `exp` do JWT. É o campo que o cliente usa para agendar o refresh.'),
@@ -88,14 +83,9 @@ export const PostApiV1AuthSessionsRefreshResponse = zod.object({
 }).describe('Endereço como vem na request e como sai na resposta.')]).optional(),
   "isActive": zod.boolean()
 }).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\nSão os dados da própria pessoa, então o endereço vai completo.')
-}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\nRetorno de cadastro, login e refresh — o cliente trata os três igual.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\nRetorno de cadastro, login e refresh — o cliente trata os três igual.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Idempotente: revogar um token que já não vale devolve 200. O access token
@@ -108,17 +98,12 @@ export const PostApiV1AuthSessionsLogoutBody = zod.object({
 }).describe('Logout: invalida o refresh token apresentado.')
 
 export const PostApiV1AuthSessionsLogoutResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
 
-}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Pede a senha da conta de destino: enquanto o e-mail não é verificado, ter o
@@ -131,8 +116,8 @@ export const PostApiV1AuthSessionsSwitchBody = zod.object({
 }).describe('Corpo do `POST /sessions/switch`.')
 
 export const PostApiV1AuthSessionsSwitchResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "accessToken": zod.string(),
   "refreshToken": zod.string(),
   "expiresAt": zod.number().int().describe('Instante em que o access token expira, em Unix time (segundos desde 1970-01-01 UTC) —\no mesmo valor do claim `exp` do JWT. É o campo que o cliente usa para agendar o refresh.'),
@@ -155,12 +140,7 @@ export const PostApiV1AuthSessionsSwitchResponse = zod.object({
 }).describe('Endereço como vem na request e como sai na resposta.')]).optional(),
   "isActive": zod.boolean()
 }).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\nSão os dados da própria pessoa, então o endereço vai completo.')
-}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\nRetorno de cadastro, login e refresh — o cliente trata os três igual.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\nRetorno de cadastro, login e refresh — o cliente trata os três igual.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

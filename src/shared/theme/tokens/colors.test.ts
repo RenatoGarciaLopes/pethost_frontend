@@ -1,7 +1,7 @@
-import { expect, it } from "vitest";
+﻿import { expect, it } from "vitest";
 import { quintalColors } from "./colors";
 
-it("REQ-DS-001 preserva os doze tokens oficiais", () => {
+it("REQ-DS-001 preserva os onze tokens oficiais, sem azul de foco", () => {
   expect(quintalColors).toEqual({
     papel: "#FEFAF3",
     tinta: "#1F1A17",
@@ -14,6 +14,5 @@ it("REQ-DS-001 preserva os doze tokens oficiais", () => {
     cartao: "#FFF6E6",
     linha: "#E3D6C2",
     erro: "#A8323E",
-    foco: "#2F5A86",
   });
 });

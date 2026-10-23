@@ -3,10 +3,20 @@ import { usePathname, useRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
-import { expect, fireEvent, fn, userEvent, within } from "storybook/test";
+import { expect, fn, userEvent, within } from "storybook/test";
 import { accountQueryKey } from "@/shared/api/query/queryClient";
 import { AppHeader } from "@/widgets/app-shell";
 import { HomeScreen, type HomeScreenProps } from "@/widgets/home";
+
+/** Abre o calendário pela célula Chegada e saída e escolhe o 2º e o 7º dia livres do mês: sempre cinco noites, qualquer que seja o hoje. */
+async function pickFiveNights(canvasElement: HTMLElement) {
+  const body = within(canvasElement.ownerDocument.body);
+  await userEvent.click(within(canvasElement).getByLabelText("Chegada e saída"));
+  const dialog = await body.findByRole("dialog", { name: "Escolher as datas da estadia" });
+  const free = [...dialog.querySelectorAll<HTMLElement>("[data-iso]:not([aria-disabled])")];
+  await userEvent.click(free[1]!);
+  await userEvent.click(dialog.querySelector<HTMLElement>(`[data-iso="${free[6]!.dataset.iso}"]`)!);
+}
 
 /** Composição real da rota sem sessão HTTP: cache só da story e mesmos widgets, sem layout paralelo. */
 function HomePreview(props: HomeScreenProps) {
@@ -77,10 +87,8 @@ export const Visitante: Story = {
     await expect(canvas.getAllByRole("main")).toHaveLength(1);
     await expect(canvas.getByRole("link", { name: "Como funciona" })).toHaveAttribute("href", "#como-funciona");
     await userEvent.type(canvas.getByRole("textbox", { name: "Onde" }), "Zona 7, Maringá");
-    fireEvent.change(canvas.getByLabelText("Chegada"), { target: { value: "2026-12-20" } });
-    fireEvent.change(canvas.getByLabelText("Saída"), { target: { value: "2026-12-25" } });
-    await expect(canvas.getByText("20 dez, a partir das 14h")).toBeVisible();
-    await expect(canvas.getByText("25 dez · 5 noites")).toBeVisible();
+    await pickFiveNights(canvasElement);
+    await expect(canvas.getByText(/ a .+ · 5 noites$/)).toBeVisible();
     const form = canvas.getByRole("form", { name: "Busca de cantinhos" });
     await expect(form.scrollWidth).toBeLessThanOrEqual(form.clientWidth);
     await expect(canvas.getByRole("list", { name: "Garantias da PetHost" }).children).toHaveLength(3);
@@ -89,7 +97,7 @@ export const Visitante: Story = {
 
 export const Tutor: Story = {
   name: "REQ-UIC-003/009 Tutor com Pipoca",
-  args: { viewer: "owner", pets: [{ id: "story-pipoca", name: "Pipoca", species: "dog" }] },
+  args: { viewer: "owner", pets: [{ id: "story-pipoca", name: "Pipoca", species: "dog", size: "small" }] },
 };
 
 export const Anfitriao: Story = { name: "REQ-HOME-004 Anfitrião", args: { viewer: "host" } };
@@ -106,7 +114,7 @@ export const Celular: Story = {
     await userEvent.click(open);
     await expect(canvas.getByRole("textbox", { name: "Onde" })).toBeVisible();
     await expect(canvas.getByRole("button", { name: "Fechar busca" })).toHaveAttribute("aria-expanded", "true");
-    await expect(canvas.getByRole("button", { name: "Buscar cantinhos" })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Achar um cantinho" })).toBeVisible();
     await expect(canvasElement.ownerDocument.documentElement.scrollWidth).toBeLessThanOrEqual(
       canvasElement.ownerDocument.defaultView!.innerWidth,
     );
@@ -118,7 +126,7 @@ export const Celular: Story = {
 /** A pílula com nome e o menu da casca também precisam caber no celular, não só a entrada anônima. */
 export const TutorCelular: Story = {
   name: "REQ-UIC-003/009 Tutor · 390",
-  args: { viewer: "owner", pets: [{ id: "story-pipoca", name: "Pipoca", species: "dog" }] },
+  args: { viewer: "owner", pets: [{ id: "story-pipoca", name: "Pipoca", species: "dog", size: "small" }] },
   globals: { viewport: { value: "celular", isRotated: false } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

@@ -28,13 +28,14 @@ export function listingFixture(overrides: Partial<ListingSummary> = {}): Listing
     availableWeekdays: ["monday"],
     coverPhotoUrl: null,
     distanceKm: 1.4,
+    approximateLocation: { latitude: -23.425, longitude: -51.938, radiusMeters: 500 },
     badges: ["neighbor", "yard", "fast_responder", "experienced"],
     ...overrides,
   };
 }
 /** Estado mínimo da URL. @example searchQueryFixture({ where: "Curitiba" }) */
 export function searchQueryFixture(overrides: Partial<SearchQuery> = {}): SearchQuery {
-  return { pets: [], species: [], sizes: [], weekdays: [], ...overrides };
+  return { pets: [], species: [], sizes: [], ...overrides };
 }
 /** Pets ativos sintéticos para formulário e derivação. @example <SearchBar pets={searchPetsFixture} {...props} /> */
 export const searchPetsFixture: SearchPet[] = [

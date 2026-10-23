@@ -22,5 +22,19 @@ it("REQ-SRCH-006/007/009 mock autenticado respeita contrato, filtros e páginas"
   expect((await call("city=Inv%C3%A1lida")).status).toBe(400);
   expect((await call("city=Sem+endere%C3%A7o")).status).toBe(422);
   expect((await call("city=Indispon%C3%ADvel")).status).toBe(503);
-  expect((await fetch("http://localhost:5099/api/v1/listings")).status).toBe(401);
+});
+
+it("REQ-NEARBY-018 mock do visitante segue a API real: sem filtro lista todos, raio fora do mapa vem vazio", async () => {
+  server.use(...searchHandlers);
+  const anonymous = async (query: string) => fetch(`http://localhost:5099/api/v1/listings?${query}`);
+  const all = await (await anonymous("pageSize=6")).json();
+  expect(GetApiV1ListingsResponse.safeParse(all).success).toBe(true);
+  expect(all.data.totalCount).toBe(13);
+  expect(all.data.items).toHaveLength(6);
+  expect(all.data.items.every((item: { distanceKm?: number }) => item.distanceKm === undefined)).toBe(true);
+  const near = await (await anonymous("latitude=-23.43&longitude=-51.94&radiusKm=10")).json();
+  expect(near.data.totalCount).toBe(13);
+  expect(near.data.items[0].distanceKm).toBeTypeOf("number");
+  expect((await (await anonymous("latitude=-3.73&longitude=-38.52&radiusKm=10")).json()).data.totalCount).toBe(0);
+  expect((await anonymous("radiusKm=10")).status).toBe(422);
 });

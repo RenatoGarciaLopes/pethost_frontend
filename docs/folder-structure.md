@@ -4,7 +4,7 @@
 
 `src/widgets/app-shell/components/AppHeader.tsx` extrai o cabeçalho comum; `src/widgets/app-shell/index.ts` oferece sua API síncrona à rota pública, enquanto index.server mantém a casca dos layouts. Home e casca compartilham header sem um widget importar outro. `src/app/HomeFidelity.stories.tsx` compõe os dois widgets como a rota; o HomeScreen continua responsável por um único main.
 
-`src/shared/ui/brand/DoorScene/HouseScene.tsx` implementa somente a variante house do DoorScene existente; o default dos formulários permanece. `src/widgets/home/lib/homeDateLabel.ts` apresenta datas sem alterar a URL. TrustList ganha cards no próprio módulo. Testes/stories continuam próximos dos recursos. Não há feature/pasta nova de busca nem cópia da 041. Contratos, responsabilidades, catálogo provisório e validação: [implementação T7](../specs/005-ui-conformance/home-fidelity-implementation.md).
+`src/shared/ui/brand/DoorScene/HouseScene.tsx` implementa somente a variante house do DoorScene existente; o default dos formulários permanece. `src/features/search/lib/searchDateLabel.ts` apresenta datas sem alterar a URL. TrustList ganha cards no próprio módulo. Testes/stories continuam próximos dos recursos. Não há feature/pasta nova de busca nem cópia da 041. Contratos, responsabilidades, catálogo provisório e validação: [implementação T7](../specs/005-ui-conformance/home-fidelity-implementation.md).
 
 ## Busca de cantinhos (spec 041, worktree pethost_frontend-041)
 
@@ -41,19 +41,24 @@ Testes/stories ao lado dos componentes; funções e regras ficam em lib, E/S na 
 
 ## Página do cantinho (spec 042)
 
-`src/app/(account)/listings/[listingId]/` contém a rota autenticada e os controles que reutilizam a busca 041. `features/listing-page/components/ListingPageScreen.tsx` é a composição server; os links do MUI ficam no `components/client/ListingPageActions.tsx`, que mantém `next/link` dentro do limite client. A rota hidrata `HouseResidents` pela API pública `features/pets/index.client` e prefetch `index.server`, sem duplicar a vitrine.
+`src/app/listings/[listingId]/` contém a rota aberta ao visitante (087; só o pedido, em `(account)/listings/[listingId]/request`, exige conta), que compõe a casca (`AppShell`, com `user` nulo para o visitante) e as features: `HouseResidents` (pets) e `CompatibilityNotice` (busca) entram como slots da `ListingPageScreen`, sem import entre features. `features/listing-page/components/ListingPageScreen.tsx` é a composição server (revisão 078, fiel à prancha); a lateral do tutor é `components/client/StayBookingCard.tsx` e os recados de quem não pede ficam em `components/client/ListingPageActions.tsx`.
 
 ```text
-src/app/(account)/listings/[listingId]/
-  page.tsx                              auth, metadata, prefetch/hydration
-  page.test.tsx                         metadata e preservação da busca no login
-  ListingSearchControls.tsx              adaptação client da SearchBar 041
-  ListingSearchControls.stories.tsx      controles com router simulado
+src/app/listings/[listingId]/
+  page.tsx                              sessão opcional, casca, metadata, avaliações, slots, prefetch/hydration
+  page.test.tsx                         metadata e escopo do visitante
+  page.int.test.tsx                     visitante sem cookie: só o que é aberto, pedido pelo login
 src/features/listing-page/
-  api/                                   contrato, query e carregamento server
-  lib/                                   compatibilidade, total e copy
-  components/ListingPageScreen.tsx        detalhe RSC com slot de residentes
-  components/client/ListingPageActions.tsx links Next em MUI Button
+  api/                                   contratos (detalhe, avaliações), query e carregamento server
+  lib/                                   copy, total, fatos da casa, motivos, voltar (searchOrigin)
+  components/ListingPageScreen.tsx        detalhe RSC com slots de compatibilidade e residentes
+  components/ListingGallery.tsx           galeria com moldura, carrossel no celular e vazio
+  components/NightlyPrice.tsx             diária da lateral
+  components/client/StayBookingCard.tsx   datas, pets, conta, pedido e barra do celular
+  components/client/ListingPageActions.tsx recados do dono e da conta de anfitrião
+src/features/search/components/client/CompatibilityNotice/  caixa de compatibilidade da página
+src/shared/config/listingBadges.ts        selos do cantinho (códigos e rótulos), fonte única do card e da página
+src/test/fixtures/listingPage.ts          detalhe, fotos e avaliações sintéticos
 e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
 ```
 
@@ -482,3 +487,23 @@ e2e/mocked/admin/accounts.spec.ts                              jornada conta →
 ```
 
 As rotas compõem `AuditTable` pelo índice público `features/admin-audit/index.client.ts` e passam o nó pelo `auditTrail`; `widgets/admin-accounts` não importa a feature. O mock mantém eventos sintéticos para ids de tutor e anfitrião e registra ambos os handlers e resets em `mock-backend.mjs`. A primeira coluna do diretório de contas já traz o texto visível do nome, então não fornece `rowLabel` redundante ao `AdminDataTable` atualizado.
+
+## Revisão 071 da busca
+
+SearchBar em features/search/components/client/SearchBar centraliza a faixa usada por home, /search e detalhe. searchDateLabel e seus testes migram de widgets/home/lib para features/search/lib; não há pasta vazia ou cópia residual. HomeScreen compõe o recurso pelo index.client público.
+
+## Modalidade de entrada e foco (081)
+
+```text
+src/shared/theme/focus.ts                  seletor keyboardFocus, geometria focusRing e atributo
+src/shared/hooks/useInputModality.ts       listeners documentais sem estado React
+src/shared/hooks/useInputModality.test.tsx cleanup do efeito
+```
+
+ThemeProviders instala o hook no topo do app; o decorator existente de .storybook/preview.ts instala o mesmo efeito nas stories. Nenhum provider/contexto/store novo. Overrides e consumidores usam o helper do tema; o antigo export focusRing de overrides/Button.ts foi movido para theme/focus.ts com todos os imports migrados. Detalhes e validação: [081](../specs/081-keyboard-only-focus/design.md).
+
+GlobalError, fronteira alternativa que substitui o layout sem MUI/providers, instala o mesmo hook e usa o helper/geometry para CSS nativo. Não há segundo tracker simultâneo na árvore normal; detalhes em frontend-input-modality.
+
+## Revisão 074 do cadastro
+
+RegisterChoiceScreen foi removido; /register compõe RegistrationScreen owner diretamente. RegisterChoice permanece interno ao wizard como cartões de troca de papel. Stories de RegistrationScreen cobrem composição do wizard/PersonStep; stories de RegisterChoice cobrem as opções. Nenhuma store/provider/pasta nova. WizardProgress e PasswordStrengthChecklist foram estendidos nas pastas existentes. Fonte técnica: [cadastro fiel](../specs/005-ui-conformance/register-fidelity-implementation.md).

@@ -11,12 +11,11 @@ const TAKEN_EMAIL = "tutora@pethost.test";
 
 test.beforeEach(async ({ page }) => mockViaCep(page));
 
-test("escolha → dois passos sem CPF → conta criada e convite para a verificação", async ({ page }) => {
+test("074 escolha no passo 1 → dois passos sem CPF → conta criada e convite para a verificação", async ({ page }) => {
   await page.goto("/register");
-  const role = page.getByRole("radio", { name: /Quero receber pets em casa/ });
+  const role = page.getByRole("button", { name: /Quero receber pets em casa/ });
   await waitForHydration(role);
-  await role.check();
-  await page.getByRole("link", { name: "Continuar como anfitrião" }).click();
+  await role.click();
   await expect(page).toHaveURL(/\/register\/host$/);
   await expect(page).toHaveTitle("Criar conta de anfitrião · PetHost");
 
@@ -50,9 +49,9 @@ test("e-mail que já tem conta volta ao passo 1 com o link para entrar como anfi
   await fillAddress(page);
   await page.getByRole("button", { name: "Criar minha conta" }).click();
 
-  await expect(page.getByRole("heading", { level: 1, name: "Primeiro, você" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Bora se conhecer." })).toBeVisible();
   await expect(page.getByText("Esse e-mail já tem conta de anfitrião. Quer entrar?")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login?as=host");
+  await expect(page.getByRole("alert").getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login?as=host");
 });
 
 test("com sessão, /register/host vai direto para a casa do anfitrião", async ({ page, baseURL }) => {

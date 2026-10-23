@@ -39,3 +39,15 @@ export const UltimoPasso: Story = {
     currentIndex: 1,
   },
 };
+
+export const Cadastro: Story = {
+  args: {
+    appearance: "cards",
+    currentIndex: 0,
+    steps: [
+      { id: "person", label: "Você", description: "Nome, contato e CPF" },
+      { id: "address", label: "Onde você mora", description: "Pra achar cantinhos perto" },
+      { id: "pet", label: "Seu pet", description: "Depois, com calma" },
+    ],
+  },
+};

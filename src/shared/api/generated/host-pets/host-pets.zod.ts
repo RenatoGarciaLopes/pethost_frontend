@@ -17,8 +17,8 @@ export const GetApiV1HostsHostIdPetsParams = zod.object({
 })
 
 export const GetApiV1HostsHostIdPetsResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "keeper": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid().describe('Id do tutor ou do anfitrião — nunca o da conta.'),
   "type": zod.string().describe('`owner` ou `host`.'),
@@ -63,12 +63,7 @@ export const GetApiV1HostsHostIdPetsResponse = zod.object({
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 }).describe('O pet com a ficha inteira e quem é o dono. Nas listas (KeeperPetsResponse)\no dono vem uma vez no topo, e os três campos do dono saem omitidos de cada pet.')).describe('Do mais novo para o mais antigo. Lista vazia quando não há pets.')
-}).describe('Os pets de um tutor ou anfitrião. O dono vem <b>uma vez</b>, no topo — todos os pets da\nlista são dele —, e cada pet sai sem `ownerId`, `hostId` e `keeper`.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Os pets de um tutor ou anfitrião. O dono vem <b>uma vez</b>, no topo — todos os pets da\nlista são dele —, e cada pet sai sem `ownerId`, `hostId` e `keeper`.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

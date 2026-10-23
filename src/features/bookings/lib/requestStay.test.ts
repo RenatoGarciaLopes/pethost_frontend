@@ -10,25 +10,72 @@ const pets = [
   { id: OTHER, name: "Thor" },
 ];
 
+const CARE = { food: true, meds: true };
 const apiError = (code: string, message = "", status = 422) => new ApiError({ status, code, message });
 
 describe("requestStaySchema", () => {
   const schema = requestStaySchema(TODAY);
 
   it("REQ-REQST-002 aceita período dentro das regras e de 1 a 10 pets", () => {
-    expect(schema.safeParse({ checkIn: "2026-12-20", checkOut: "2026-12-25", petIds: [PET] }).success).toBe(true);
+    expect(
+      schema.safeParse({ checkIn: "2026-12-20", checkOut: "2026-12-25", petIds: [PET], careTermsAccepted: CARE })
+        .success,
+    ).toBe(true);
   });
 
   it("REQ-REQST-002 as datas seguem o stayRules, com o erro no campo", () => {
-    const result = schema.safeParse({ checkIn: "2026-12-20", checkOut: "2026-12-20", petIds: [PET] });
+    const result = schema.safeParse({
+      checkIn: "2026-12-20",
+      checkOut: "2026-12-20",
+      petIds: [PET],
+      careTermsAccepted: CARE,
+    });
     expect(result.success).toBe(false);
     expect(result.error?.flatten().fieldErrors.checkOut).toEqual(["A saída precisa ser depois da chegada."]);
-    const past = schema.safeParse({ checkIn: "2026-12-01", checkOut: "2026-12-03", petIds: [PET] });
+    const past = schema.safeParse({
+      checkIn: "2026-12-01",
+      checkOut: "2026-12-03",
+      petIds: [PET],
+      careTermsAccepted: CARE,
+    });
     expect(past.error?.flatten().fieldErrors.checkIn).toEqual(["A chegada pode ser de hoje até 365 dias à frente."]);
   });
 
+  it("REQ-REQST-010 a chegada precisa de 72 h: hoje + 4 dias passa, + 3 não", () => {
+    const soon = schema.safeParse({
+      checkIn: "2026-12-13",
+      checkOut: "2026-12-15",
+      petIds: [PET],
+      careTermsAccepted: CARE,
+    });
+    expect(soon.error?.flatten().fieldErrors.checkIn).toEqual([
+      "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.",
+    ]);
+    expect(
+      schema.safeParse({ checkIn: "2026-12-14", checkOut: "2026-12-15", petIds: [PET], careTermsAccepted: CARE })
+        .success,
+    ).toBe(true);
+  });
+
+  it("REQ-REQST-004 as duas caixas do cuidado são obrigatórias, com o erro no grupo", () => {
+    for (const careTermsAccepted of [
+      { food: true, meds: false },
+      { food: false, meds: true },
+    ]) {
+      const result = schema.safeParse({
+        checkIn: "2026-12-20",
+        checkOut: "2026-12-25",
+        petIds: [PET],
+        careTermsAccepted,
+      });
+      expect(result.error?.flatten().fieldErrors.careTermsAccepted).toEqual([
+        "Marca os dois pra confirmar que a ração e os remédios vão junto.",
+      ]);
+    }
+  });
+
   it("REQ-REQST-002 pede as duas datas", () => {
-    const result = schema.safeParse({ checkIn: "", checkOut: "", petIds: [PET] });
+    const result = schema.safeParse({ checkIn: "", checkOut: "", petIds: [PET], careTermsAccepted: CARE });
     expect(result.error?.flatten().fieldErrors).toMatchObject({
       checkIn: ["Escolhe uma data de chegada válida."],
       checkOut: ["Escolhe uma data de saída válida."],
@@ -37,24 +84,37 @@ describe("requestStaySchema", () => {
 
   it("REQ-REQST-002 de 1 a 10 pets", () => {
     expect(
-      schema.safeParse({ checkIn: "2026-12-20", checkOut: "2026-12-25", petIds: [] }).error?.flatten().fieldErrors
-        .petIds,
+      schema
+        .safeParse({ checkIn: "2026-12-20", checkOut: "2026-12-25", petIds: [], careTermsAccepted: CARE })
+        .error?.flatten().fieldErrors.petIds,
     ).toEqual(["Escolhe pelo menos um pet."]);
     const eleven = Array.from(
       { length: 11 },
       (_, n) => `0199f0a0-0000-7000-8000-0000000001${String(n).padStart(2, "0")}`,
     );
     expect(
-      schema.safeParse({ checkIn: "2026-12-20", checkOut: "2026-12-25", petIds: eleven }).error?.flatten().fieldErrors
-        .petIds,
+      schema
+        .safeParse({ checkIn: "2026-12-20", checkOut: "2026-12-25", petIds: eleven, careTermsAccepted: CARE })
+        .error?.flatten().fieldErrors.petIds,
     ).toEqual(["Dá pra levar até 10 pets por pedido."]);
   });
 });
 
-it("REQ-REQST-005 corpo do POST com o cantinho, os pets e as datas", () => {
+it("REQ-REQST-005 corpo do POST com o cantinho, os pets, as datas e o aceite do cuidado", () => {
   expect(
-    toRequestBookingBody("listing-1", { checkIn: "2026-12-20", checkOut: "2026-12-25", petIds: [PET, OTHER] }),
-  ).toEqual({ listingId: "listing-1", petIds: [PET, OTHER], checkIn: "2026-12-20", checkOut: "2026-12-25" });
+    toRequestBookingBody("listing-1", {
+      checkIn: "2026-12-20",
+      checkOut: "2026-12-25",
+      petIds: [PET, OTHER],
+      careTermsAccepted: CARE,
+    }),
+  ).toEqual({
+    listingId: "listing-1",
+    petIds: [PET, OTHER],
+    checkIn: "2026-12-20",
+    checkOut: "2026-12-25",
+    careTermsAccepted: true,
+  });
 });
 
 describe("requestStayErrorMessage", () => {

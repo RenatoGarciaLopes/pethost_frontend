@@ -134,8 +134,16 @@ function requestFieldErrors(body) {
     reject("petIds", "Escolhe de 1 a 10 pets, sem repetir.");
   if (!DATE.test(body.checkIn ?? "")) reject("checkIn", "Data de chegada inválida.");
   else if (body.checkIn < brasiliaToday()) reject("checkIn", "A chegada já passou.");
+  // `Booking.MinimumRequestNotice`: 72 h até a meia-noite da chegada em Brasília, ou seja, hoje + 4 dias na régua de dias.
+  else if (body.checkIn < addDays(brasiliaToday(), 4))
+    reject(
+      "checkIn",
+      "Check-in must be at least 72 hours ahead: the host answers in up to 24 hours and can only accept up to 48 hours before the stay.",
+    );
   if (!DATE.test(body.checkOut ?? "") || (DATE.test(body.checkIn ?? "") && body.checkOut <= body.checkIn))
     reject("checkOut", "A saída precisa ser depois da chegada.");
+  if (body.careTermsAccepted !== true)
+    reject("careTermsAccepted", "Confirm that you will bring the pet's food and hand over its medicines to the host.");
   return errors;
 }
 

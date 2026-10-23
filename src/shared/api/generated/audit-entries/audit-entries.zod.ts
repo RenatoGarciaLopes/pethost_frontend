@@ -30,8 +30,8 @@ export const GetApiV1AuditEntriesQueryParams = zod.object({
 })
 
 export const GetApiV1AuditEntriesResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
   "occurredAt": zod.string().datetime({"offset":true}),
@@ -49,12 +49,7 @@ export const GetApiV1AuditEntriesResponse = zod.object({
   "pageSize": zod.number().int(),
   "totalCount": zod.number().int(),
   "totalPages": zod.number().int().optional()
-}).describe('Página de uma lista (§13): `page` começa em 1.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Página de uma lista (§13): `page` começa em 1.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

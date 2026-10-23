@@ -1,2 +1,2 @@
 export { ListingCard } from "./ListingCard";
-export type { ListingCardProps } from "./ListingCard";
+export type { ListingCardCompatibility, ListingCardProps } from "./ListingCard";

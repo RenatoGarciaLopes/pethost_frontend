@@ -8,8 +8,8 @@ import { useState } from "react";
 import { accountQueryKey } from "@/shared/api/query/queryClient";
 import { AppShell } from "./AppShell";
 
-/** Cache isolado, como nas stories de AddressFields, sem chamadas ao backend. */
-function Frame({ role }: { role: "owner" | "host" | "admin" }) {
+/** Cache isolado, como nas stories de AddressFields, sem chamadas ao backend. `visitor`: sem conta (página aberta). */
+function Frame({ role }: { role: "owner" | "host" | "admin" | "visitor" }) {
   const [client] = useState(() => {
     const cache = new QueryClient();
     cache.setQueryData(accountQueryKey("story-account", "linked-accounts"), [
@@ -21,7 +21,11 @@ function Frame({ role }: { role: "owner" | "host" | "admin" }) {
   return (
     <QueryClientProvider client={client}>
       <AppShell
-        user={{ id: "story-account", fullName: "Camila Souza", email: "camila@exemplo.test", role, isActive: true }}
+        user={
+          role === "visitor"
+            ? null
+            : { id: "story-account", fullName: "Camila Souza", email: "camila@exemplo.test", role, isActive: true }
+        }
       >
         <Box sx={{ p: 3 }}>
           <Typography component="h1" variant="h4">
@@ -52,7 +56,9 @@ type Story = StoryObj<typeof meta>;
 export const Tutor: Story = {
   name: "REQ-SHELL-001/003/004 Tutor",
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "CS Camila Menu da conta de Camila Souza" }),
+    );
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de tutor")).toBeVisible());
     await expect(body.getByRole("menuitem", { name: "Trocar pra conta de anfitrião" })).toHaveAttribute(
@@ -67,7 +73,9 @@ export const Anfitriao: Story = {
   name: "REQ-SHELL-001/003 Anfitrião",
   args: { role: "host" },
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "CS Camila Menu da conta de Camila Souza" }),
+    );
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de anfitrião")).toBeVisible());
     await expect(body.getByRole("menuitem", { name: "Trocar pra conta de tutor" })).toBeVisible();
@@ -78,12 +86,25 @@ export const Admin: Story = {
   name: "REQ-SHELL-001/011 Admin",
   args: { role: "admin" },
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "CS Camila Menu da conta de Camila Souza" }),
+    );
     const body = within(canvasElement.ownerDocument.body);
     await waitFor(() => expect(body.getByText("Conta de admin")).toBeVisible());
     await expect(body.queryByRole("menuitem", { name: "Minha conta" })).not.toBeInTheDocument();
     await expect(body.queryByRole("menuitem", { name: /Trocar pra/ })).not.toBeInTheDocument();
     await expect(body.getByRole("menuitem", { name: "Sair" })).toBeVisible();
+  },
+};
+
+/** Página aberta do cantinho sem conta: sem atalhos, com Entrar. */
+export const Visitante: Story = {
+  name: "REQ-LPAGE-012 Visitante",
+  args: { role: "visitor" },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+    await expect(canvas.queryByRole("navigation", { name: "Navegação principal" })).not.toBeInTheDocument();
   },
 };
 

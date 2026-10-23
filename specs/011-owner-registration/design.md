@@ -35,21 +35,21 @@ Os pedaços **sem domínio de cadastro** que outras telas usam vão para `shared
 
 ## Rotas e renderização
 
-| Arquivo                              | Tipo         | Faz                                                                                              |
-| ------------------------------------ | ------------ | ------------------------------------------------------------------------------------------------ |
-| `app/(auth)/register/page.tsx`       | RSC dinâmico | `getSession()` → se houver, `redirect(resolvePostLoginPath(role, next))`; senão `RegisterChoice` |
-| `app/(auth)/register/owner/page.tsx` | RSC dinâmico | mesma guarda; renderiza `RegistrationScreen variant="owner" next={next}`                         |
-| `app/(auth)/layout.tsx`              | RSC (da 010) | cabeçalho simples, `robots: noindex`                                                             |
+| Arquivo                              | Tipo         | Faz                                                                                                               |
+| ------------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `app/(auth)/register/page.tsx`       | RSC dinâmico | `getSession()` → se houver, `redirect(resolvePostLoginPath(role, next))`; senão `RegistrationScreen role="owner"` |
+| `app/(auth)/register/owner/page.tsx` | RSC dinâmico | mesma guarda; renderiza `RegistrationScreen variant="owner" next={next}`                                          |
+| `app/(auth)/layout.tsx`              | RSC (da 010) | cabeçalho simples, `robots: noindex`                                                                              |
 
 Sem `'use cache'` (lê sessão). A ilha é o `RegistrationWizard`.
 
 ## Árvore de componentes
 
 ```
-RegisterChoice (features/registration · server)
-└─ ChoiceCardGroup (shared/ui/forms) como links            REQ-OREG-001
+RegisterChoice (features/registration · client)           cartões de papel dentro do passo 1
+└─ ButtonBase + RoleIllustration internos                  navegação com confirmação no wizard
 
-RegistrationScreen (features/registration · server)       título, texto lateral do computador
+RegistrationScreen (features/registration · server)       composição responsiva sem card ou coluna lateral
 └─ RegistrationWizard (features/registration · client)    estado do passo, RHF único para os 2 passos
    ├─ WizardProgress (shared/ui/navigation)               REQ-OREG-002
    ├─ PersonStep (client)                                  nome, e-mail, PasswordField + PasswordStrengthChecklist,
@@ -135,7 +135,7 @@ Sem ajuste, essas rotas respondem 502 `CONTRACT_MISMATCH`. Proposta: `createSess
 | 003                         | Unitário                | `ownerRegistrationSchema.test.ts`                             | cada limite da API; "S/N"; UF minúscula normaliza; complemento opcional                                                                                                |
 | 008                         | Unitário                | `toOwnerRegisterBody.test.ts`                                 | sem máscaras, data ISO, complemento vazio omitido, texto aparado                                                                                                       |
 | 005                         | Integração (MSW)        | `useCepLookup.int.test.tsx`                                   | CEP válido preenche; `{ erro: true }` avisa; timeout de 4 s avisa; não sobrescreve campo editado                                                                       |
-| 001                         | Componente              | `RegisterChoice.test.tsx`                                     | dois links certos, `next` preservado e sanitizado                                                                                                                      |
+| 001                         | Componente              | `RegisterChoice.test.tsx`                                     | papel atual e delegação da troca; next/confirm no wizard                                                                                                               |
 | 002/003/004/006/007/016/017 | Componente              | `RegistrationWizard.test.tsx`                                 | validação no blur e no continuar; voltar mantém; ajuda do CPF e do endereço; `autocomplete`; texto do botão                                                            |
 | 008/009/010/011/012         | Componente (MSW no BFF) | `RegistrationWizard.errors.test.tsx`                          | payload enviado; envio único; 400 de `address.zipCode` volta ao passo 2 e 400 de `email` ao passo 1 com foco; 409 de e-mail e de CPF; 429 com contagem (relógio falso) |
 | 013                         | Componente              | `RegistrationSuccess.test.tsx`                                | primeiro nome; botões com e sem `next`; movimento reduzido sem animação                                                                                                |
@@ -146,3 +146,7 @@ Sem ajuste, essas rotas respondem 502 `CONTRACT_MISMATCH`. Proposta: `createSess
 | 008/013                     | E2E real                | `e2e/real/registration/owner.spec.ts`                         | cadastro com e-mail único por execução no ambiente de teste da API (nunca produção)                                                                                    |
 | Visual                      | Storybook               | `RegistrationWizard.stories.tsx`, `AddressFields.stories.tsx` | passo 1, passo 2, CEP buscando e não achado, cada erro, sucesso, celular; a11y sem violação                                                                            |
 | 018                         | Integração (RSC)        | `app/(auth)/register/owner/page.test.ts`                      | `metadata.title` e `robots.index = false`                                                                                                                              |
+
+## Revisão 074 (22/10/2026)
+
+Código preparado, aguardando liberação de validação. /register abre o primeiro passo com cartões; tutor vê 3 etapas visuais, sendo pet opcional após criar conta; host mantém 2 sem CPF. APIs e criação da conta ao enviar endereço mantidas. Confirmação de descarte ao trocar papel, sem rascunho compartilhado existente. Detalhes, migração e plano de testes: [cadastro fiel](../005-ui-conformance/register-fidelity-implementation.md).

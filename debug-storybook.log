@@ -1,0 +1,27 @@
+[21:24:18.845] [INFO] storybook v10.6.1
+[21:24:19.442] [WARN] As of Storybook 10.0, PnP is deprecated.
+If you are using PnP, you can continue to use Storybook 10.0, but we recommend migrating to a different package manager or linker-mode.
+
+In future versions, PnP compatibility will be removed.
+[21:24:19.610] [DEBUG] Getting package.json info for /Users/renatolopes/Desktop/PetHost/pethost_frontend/package.json...
+[21:24:19.887] [DEBUG] Could not determine @babel/preset-env version in use. In case of runtime errors with @babel/preset-env, you may need to set the babelRemoveBugfixes feature flag in your `main.ts` file.
+[21:24:20.198] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
+[21:24:20.198] [INFO] Starting...
+[21:24:20.243] [ERROR] [38;2;241;97;97mError: Build failed with 5 errors:
+node_modules/@storybook/addon-a11y/dist/manager.js:49:62: ERROR: Could not resolve "storybook/highlight"
+node_modules/@storybook/addon-docs/dist/manager.js:18:7: ERROR: Could not resolve "storybook/internal/docs-tools"
+node_modules/storybook/dist/_browser-chunks/chunk-B3TL3N57.js:24:30: ERROR: Could not resolve "storybook/open-service"
+node_modules/storybook/dist/core-server/presets/common-manager.js:218:23: ERROR: Could not resolve "@storybook/global"
+node_modules/storybook/dist/core-server/presets/common-manager.js:235:38: ERROR: Could not resolve "storybook/internal/csf"[39m
+    at failureErrorWithLog (./node_modules/esbuild/lib/main.js:1752:15)
+    at ./node_modules/esbuild/lib/main.js:1211:25
+    at runOnEndCallbacks (./node_modules/esbuild/lib/main.js:1592:45)
+    at buildResponseToResult (./node_modules/esbuild/lib/main.js:1209:7)
+    at ./node_modules/esbuild/lib/main.js:1236:16
+    at responseCallbacks.<computed> (./node_modules/esbuild/lib/main.js:886:9)
+    at handleIncomingPacket (./node_modules/esbuild/lib/main.js:941:12)
+    at Socket.readFromStdout (./node_modules/esbuild/lib/main.js:864:7)
+    at Socket.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12)
+[21:24:20.245] [WARN] Broken build, fix the error above.
+You may need to refresh the browser.

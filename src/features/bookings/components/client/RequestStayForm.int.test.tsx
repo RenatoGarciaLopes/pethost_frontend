@@ -1,7 +1,9 @@
 import { screen, within } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { pickCalendarDays } from "@/test/calendar";
 import { BOOKING_ID, bookingDto, PIPOCA_ID, THOR_ID } from "@/test/fixtures/bookings";
 import { apiFail, apiOk } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
@@ -57,6 +59,13 @@ function setup(props: Partial<RequestStayFormProps> = {}) {
   return { ...view, queryClient, listKey };
 }
 
+/** Marca as duas caixas do cuidado (a API exige o aceite). */
+async function checkCare(user: UserEvent) {
+  const checklist = screen.getByRole("group", { name: copy.checklist });
+  await user.click(within(checklist).getByRole("checkbox", { name: copy.food }));
+  await user.click(within(checklist).getByRole("checkbox", { name: copy.meds }));
+}
+
 /** POST /bookings com a resposta dada; devolve os corpos recebidos. */
 function serve(response: () => Response) {
   const bodies: unknown[] = [];
@@ -72,8 +81,7 @@ function serve(response: () => Response) {
 describe("RequestStayForm", { timeout: 15000 }, () => {
   it("REQ-REQST-002 REQ-REQST-003 datas e pets da URL, cada pet com Combina ou o motivo; resumo com a conta", () => {
     setup();
-    expect(screen.getByLabelText("Chegada")).toHaveValue("2026-12-20");
-    expect(screen.getByLabelText("Saída")).toHaveValue("2026-12-25");
+    expect(screen.getByLabelText("Chegada e saída")).toHaveValue("20 a 25 dez · 5 noites");
     const who = screen.getByRole("group", { name: copy.pets });
     expect(within(who).getByRole("checkbox", { name: /Pipoca/ })).toBeChecked();
     expect(within(who).getByRole("checkbox", { name: /Thor/ })).toBeChecked();
@@ -90,6 +98,15 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     expect(summary.textContent).toMatch(/R\$\s60,50 × 5 noites × 2 pets = R\$ 605,00/);
   });
 
+  it("REQ-REQST-002 trocar as datas pelo calendário refaz o resumo e o total", async () => {
+    const { user } = setup();
+    await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-12-21", "2026-12-23");
+    expect(screen.getByLabelText("Chegada e saída")).toHaveValue("21 a 23 dez · 2 noites");
+    const summary = screen.getByRole("region", { name: copy.summary });
+    expect(summary).toHaveTextContent("21 a 23 de dez. · 2 noites");
+    expect(summary.textContent).toMatch(/R\$\s60,50 × 2 noites × 2 pets = R\$ 242,00/);
+  });
+
   it("REQ-REQST-002 pet que não combina vindo da URL não fica marcado; mudar pets refaz a conta", async () => {
     const { user } = setup({ initial: { checkIn: "2026-12-20", checkOut: "2026-12-21", petIds: [MEL_ID, PIPOCA_ID] } });
     expect(screen.getByRole("checkbox", { name: /Mel/ })).not.toBeChecked();
@@ -99,25 +116,50 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     expect(summary.textContent).toMatch(/× 1 noite × 2 pets = R\$ 121,00/);
   });
 
-  it("REQ-REQST-004 checklist só na tela e o aviso de que o pedido não segura a vaga", async () => {
+  it("REQ-REQST-004 as duas caixas do cuidado são obrigatórias: sem marcar, o erro fica no grupo e nada é enviado", async () => {
     const bodies = serve(() => HttpResponse.json(apiOk(bookingDto()), { status: 201 }));
     const { user } = setup();
     const checklist = screen.getByRole("group", { name: copy.checklist });
-    expect(within(checklist).getByRole("checkbox", { name: copy.food })).not.toBeChecked();
-    await user.click(within(checklist).getByRole("checkbox", { name: copy.meds }));
+    await user.click(within(checklist).getByRole("checkbox", { name: copy.food }));
     expect(
       screen.getByText("O pedido não segura a vaga: Aparecida Souza tem até 24 horas pra responder."),
     ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: copy.submit }));
+    expect(await screen.findByText(copy.careTerms)).toBeInTheDocument();
+    expect(bodies).toHaveLength(0);
+    await user.click(within(checklist).getByRole("checkbox", { name: copy.meds }));
+    await user.click(screen.getByRole("button", { name: copy.submit }));
     await screen.findByRole("heading", { name: copy.sent });
     expect(bodies).toEqual([
-      { listingId: LISTING_ID, petIds: [PIPOCA_ID, THOR_ID], checkIn: "2026-12-20", checkOut: "2026-12-25" },
+      {
+        listingId: LISTING_ID,
+        petIds: [PIPOCA_ID, THOR_ID],
+        checkIn: "2026-12-20",
+        checkOut: "2026-12-25",
+        careTermsAccepted: true,
+      },
     ]);
+  });
+
+  it("REQ-REQST-010 chegada com menos de 72 h dá a frase no campo e o calendário não deixa escolher", async () => {
+    const bodies = serve(() => HttpResponse.json(apiOk(bookingDto())));
+    const { user } = setup({ initial: { checkIn: "2026-12-12", checkOut: "2026-12-15", petIds: [PIPOCA_ID] } });
+    await checkCare(user);
+    await user.click(screen.getByRole("button", { name: copy.submit }));
+    expect(screen.getByLabelText("Chegada e saída")).toHaveAccessibleDescription(
+      "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.",
+    );
+    expect(bodies).toHaveLength(0);
+    await user.click(screen.getByLabelText("Chegada e saída"));
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog.querySelector('[data-iso="2026-12-13"]')).toHaveAttribute("aria-disabled", "true");
+    expect(dialog.querySelector('[data-iso="2026-12-14"]')).not.toHaveAttribute("aria-disabled");
   });
 
   it("REQ-REQST-005 REQ-REQST-006 REQ-REQST-009 envia uma vez só, mostra Pedido enviado com o prazo e invalida as estadias", async () => {
     const bodies = serve(() => HttpResponse.json(apiOk(bookingDto()), { status: 201 }));
     const { user, queryClient, listKey } = setup();
+    await checkCare(user);
     const submit = screen.getByRole("button", { name: copy.submit });
     await user.dblClick(submit);
     const heading = await screen.findByRole("heading", { name: copy.sent });
@@ -125,7 +167,7 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     expect(bodies).toHaveLength(1);
     expect(screen.getByText("Aparecida Souza responde até amanhã às 9h.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: copy.seeStays })).toHaveAttribute("href", "/owner/bookings");
-    expect(screen.getByRole("link", { name: copy.backToSearch })).toHaveAttribute("href", "/search");
+    expect(screen.getByRole("link", { name: copy.backToSearch })).toHaveAttribute("href", "/");
     expect(queryClient.getQueryState(listKey)?.isInvalidated).toBe(true);
     expect(queryClient.getQueryData(bookingQueries.detail("account-1", BOOKING_ID).queryKey)).toBeDefined();
   });
@@ -135,7 +177,9 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     const { user } = setup({ initial: { checkIn: "2026-12-20", checkOut: "2026-12-20", petIds: [] } });
     await user.click(screen.getByRole("button", { name: copy.submit }));
     expect(await screen.findByText(copy.petsMin)).toBeInTheDocument();
-    expect(screen.getByLabelText("Saída")).toHaveAccessibleDescription("A saída precisa ser depois da chegada.");
+    expect(screen.getByLabelText("Chegada e saída")).toHaveAccessibleDescription(
+      "A saída precisa ser depois da chegada.",
+    );
     expect(bodies).toHaveLength(0);
   });
 
@@ -147,14 +191,16 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
       ),
     );
     const { user } = setup();
+    await checkCare(user);
     await user.click(screen.getByRole("button", { name: copy.submit }));
     expect(await screen.findByText("A chegada já passou.")).toBeInTheDocument();
-    expect(screen.getByLabelText("Chegada")).toHaveAccessibleDescription("A chegada já passou.");
+    expect(screen.getByLabelText("Chegada e saída")).toHaveAccessibleDescription("A chegada já passou.");
   });
 
   it("REQ-REQST-007 regra da API vira frase no topo com o dado: a noite sem vaga", async () => {
     serve(() => HttpResponse.json(apiFail("BOOKING_CAPACITY_EXCEEDED", "No room on 2026-12-22."), { status: 422 }));
     const { user } = setup();
+    await checkCare(user);
     await user.click(screen.getByRole("button", { name: copy.submit }));
     expect(
       await screen.findByText("Não tem vaga pra todos na noite de 22/12. Tenta outras datas ou menos pets."),
@@ -165,9 +211,10 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
   it("REQ-REQST-008 cantinho que saiu do ar: a frase e Voltar pra busca", async () => {
     serve(() => HttpResponse.json(apiFail("BOOKING_LISTING_NOT_FOUND"), { status: 404 }));
     const { user } = setup();
+    await checkCare(user);
     await user.click(screen.getByRole("button", { name: copy.submit }));
     expect(await screen.findByText("Esse cantinho não está recebendo pedidos agora.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: copy.backToSearch })).toHaveAttribute("href", "/search");
+    expect(screen.getByRole("link", { name: copy.backToSearch })).toHaveAttribute("href", "/");
   });
 
   it("REQ-REQST-002 sem pets na lista, o caminho para apresentar um", () => {

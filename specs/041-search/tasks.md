@@ -14,3 +14,10 @@ updated: 2026-10-15
 - [x] **T6 · Rota** (REQ-SRCH-001): `app/(account)/search/page.tsx`
 - [ ] **T7 · Stories, E2E e documentação**
 - [ ] **T8 · Mapa (opcional)** (REQ-SRCH-013): Leaflet + OSM, pino por bairro
+
+## Revisão 071
+
+- [x] Remover formulário avançado, estado e cópias sem uso.
+- [x] Compartilhar faixa da home, chips contornados e identificação do pet.
+- [x] Atualizar testes, stories e requisitos removidos.
+- [x] Registrar resultados finais e prints da validação 1440/390.
