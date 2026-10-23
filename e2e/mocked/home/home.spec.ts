@@ -37,7 +37,7 @@ test("REQ-HOME-001/002 visitante vê o início e volta à busca depois de entrar
 test("REQ-HOME-003 tutor com pet segue para busca com o id, sem dados do perfil", async ({ page, baseURL }) => {
   await loginAccount(page, baseURL!);
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Um quintal pra Luna enquanto você viaja." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Um quintal pra Luna enquanto você viaja" })).toBeVisible();
   await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Maringá");
   await submitSearch(page);
@@ -170,5 +170,30 @@ test.describe("vitrine perto de você", () => {
     expect(page.url()).not.toMatch(/latitude|longitude|-23\.4/);
     await hideDevIndicator(page);
     await page.screenshot({ path: "test-results/home-fidelity/nearby.png", fullPage: true });
+  });
+});
+
+test.describe("vitrine perto de você sem cantinho no raio", () => {
+  // Fortaleza: fora do mapa sintético do mock, então o raio de 10 km vem vazio.
+  test.use({ geolocation: { latitude: -3.7319, longitude: -38.5267 }, permissions: ["geolocation"] });
+
+  test("REQ-NEARBY-021 raio vazio mostra os cantinhos sem filtro de lugar", async ({ page }) => {
+    const searches: URLSearchParams[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (url.pathname === "/api/listings") searches.push(url.searchParams);
+    });
+    await page.goto("/");
+    await waitForHydration(page.getByRole("main"));
+    await expect(page.getByRole("heading", { level: 2, name: "13 casas com vaga para conhecer" })).toBeVisible({
+      timeout: 45_000,
+    });
+    await expect(
+      page.getByText("Ainda não achamos cantinhos num raio de 10 km, então mostramos outras casas."),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: /Quintal 1\b/ })).toBeVisible();
+    expect(searches.some((params) => params.has("radiusKm"))).toBe(true);
+    expect(searches.some((params) => [...params.keys()].join() === "pageSize")).toBe(true);
+    expect(page.url()).not.toMatch(/latitude|longitude|-3\.7/);
   });
 });

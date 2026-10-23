@@ -3,6 +3,7 @@ import { fail, ok, sessionUserOf } from "./session.mjs";
 
 const API = "http://localhost:5099/api/v1";
 const species = ["dog", "cat"];
+const MARINGA = { latitude: -23.42, longitude: -51.94 };
 const listings = Array.from({ length: 13 }, (_, index) => ({
   id: `0199d2a0-0000-7000-8000-${String(4100 + index).padStart(12, "0")}`,
   hostId: "0199d2a0-0000-7000-8000-000000000042",
@@ -40,15 +41,21 @@ export function searchListing(listingId) {
 export const searchHandlers = [
   http.get(`${API}/listings`, ({ request }) => {
     const params = new URL(request.url).searchParams;
-    // Visitante só busca por coordenada (a vitrine "perto de você" da home); sem ela a API continua pedindo conta.
     const byCoordinates = params.has("latitude") && params.has("longitude");
-    if (!sessionUserOf(request) && !byCoordinates) return fail(401, "UNAUTHORIZED");
+    const visitor = !sessionUserOf(request);
+    // Como a API real: visitante não tem endereço, então raio sem coordenada dá 422 e, sem coordenada nem lugar, lista todos.
+    if (visitor && params.has("radiusKm") && !byCoordinates) return fail(422, "LISTING_SEARCH_ADDRESS_REQUIRED");
     const city = params.get("city");
     if (city === "Sem endereço") return fail(422, "LISTING_SEARCH_ADDRESS_REQUIRED");
     if (city === "Fora do mapa") return fail(422, "LISTING_SEARCH_ADDRESS_NOT_LOCATED");
     if (city === "Indisponível") return fail(503, "LISTING_GEOCODER_UNAVAILABLE");
     if (city === "Inválida") return fail(400, "VALIDATION_ERROR", [{ field: "city", messages: ["invalid"] }]);
-    let items = city && city !== "Maringá" ? [] : listings;
+    // O mapa sintético fica em Maringá: coordenada a mais de meio grau dali não tem cantinho no raio.
+    const offMap =
+      byCoordinates &&
+      (Math.abs(Number(params.get("latitude")) - MARINGA.latitude) > 0.5 ||
+        Math.abs(Number(params.get("longitude")) - MARINGA.longitude) > 0.5);
+    let items = (city && city !== "Maringá") || offMap ? [] : listings;
     if (params.get("hasYard") === "true") items = items.filter((item) => item.hasYard);
     if (params.get("homeType")) items = items.filter((item) => item.homeType === params.get("homeType"));
     if (params.has("maxNightlyRate"))
@@ -57,9 +64,10 @@ export const searchHandlers = [
     const page = Number(params.get("page") ?? 1);
     const pageSize = Number(params.get("pageSize") ?? 12);
     return ok({
-      items: items
-        .slice((page - 1) * pageSize, page * pageSize)
-        .map((item) => ({ ...item, distanceKm: city && !params.has("radiusKm") ? undefined : item.distanceKm })),
+      items: items.slice((page - 1) * pageSize, page * pageSize).map((item) => ({
+        ...item,
+        distanceKm: (city && !params.has("radiusKm")) || (visitor && !byCoordinates) ? undefined : item.distanceKm,
+      })),
       page,
       pageSize,
       totalCount: items.length,
