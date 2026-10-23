@@ -1,16 +1,19 @@
-"use client";
-import { Button, Stack, TextField } from "@mui/material";
-import type { SearchQuery } from "../../../types";
+﻿"use client";
+import { Button, Stack } from "@mui/material";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
+import type { SearchPet, SearchQuery } from "../../../types";
 import { searchCopy as copy } from "../../../lib/searchCopy";
-
-/** Filtros aplicados e escrita da URL, sem transporte. @example { query, onChange: search } */
+/** Filtros rápidos suportados pela API; escrita da URL delegada ao consumidor. */
 export interface FilterChipsProps {
   query: SearchQuery;
+  pets?: SearchPet[];
   onChange: (query: SearchQuery) => void;
   errors?: Record<string, string>;
 }
-/** Filtros somados; botões anunciam estado, limpar preserva lugar/datas/pets. @example <FilterChips query={query} onChange={setQuery} /> */
-export function FilterChips({ query, onChange, errors = {} }: FilterChipsProps) {
+/** Pílulas contornadas; limpar preserva lugar, datas e pets.
+ * @example <FilterChips query={query} pets={pets} onChange={search} />
+ */
+export function FilterChips({ query, pets = [], onChange, errors = {} }: FilterChipsProps) {
   const filters = [
     ["hasYard", true, copy.yard],
     ["hasKids", false, copy.noKids],
@@ -19,103 +22,83 @@ export function FilterChips({ query, onChange, errors = {} }: FilterChipsProps) 
     ["homeType", "house", copy.house],
     ["homeType", "apartment", copy.apartment],
   ] as const;
+  const selected = pets.filter((pet) => query.pets.includes(pet.id));
   const hasFilters =
-    filters.some(([key]) => query[key] !== undefined) ||
-    query.maxNightlyRate !== undefined ||
-    query.minNightlyRate !== undefined ||
-    query.minCapacity !== undefined ||
-    query.species.length > 0 ||
-    query.sizes.length > 0 ||
-    query.weekdays.length > 0;
+    filters.some(([key]) => query[key] !== undefined) || query.species.length > 0 || query.sizes.length > 0;
+  const style = {
+    borderRadius: `${quintalRadii.pill}px`,
+    px: 2,
+    py: 0.75,
+    minHeight: 40,
+    borderColor: "text.primary",
+    color: "text.primary",
+    fontSize: 14,
+    fontWeight: 600,
+    boxShadow: "none",
+    "&:hover": { boxShadow: "none", transform: "none" },
+  };
+  function pill(label: string, active: boolean, click: () => void) {
+    return (
+      <Button
+        key={label}
+        aria-label={label}
+        aria-pressed={active}
+        variant="outlined"
+        onClick={click}
+        sx={{ ...style, bgcolor: active ? "action.selected" : "transparent" }}
+      >
+        {active && <span aria-hidden="true">✓&nbsp;</span>}
+        {label}
+      </Button>
+    );
+  }
   return (
     <Stack spacing={1.5}>
       <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1 }}>
-        {filters.map(([key, value, label]) => (
-          <Button
-            key={label}
-            aria-pressed={query[key] === value}
-            color={query[key] === value ? "success" : "inherit"}
-            variant={query[key] === value ? "contained" : "outlined"}
-            onClick={() => onChange({ ...query, [key]: query[key] === value ? undefined : value })}
-          >
-            {label}
-          </Button>
-        ))}
-        {[
-          ["species", "cat", copy.acceptsCats],
-          ["sizes", "large", copy.acceptsLarge],
-        ].map(([key, value, label]) => {
-          const field = key as "species" | "sizes";
-          return (
-            <Button
-              key={label}
-              aria-pressed={query[field].includes(value!)}
-              color={query[field].includes(value!) ? "success" : "inherit"}
-              variant="outlined"
-              onClick={() =>
-                onChange({
-                  ...query,
-                  [field]: query[field].includes(value!)
-                    ? query[field].filter((item) => item !== value)
-                    : [...query[field], value!],
-                })
-              }
-            >
-              {label}
-            </Button>
-          );
-        })}
-      </Stack>
-      <TextField
-        label={copy.maxRate}
-        type="number"
-        value={query.maxNightlyRate ?? ""}
-        error={Boolean(errors.maxNightlyRate)}
-        helperText={errors.maxNightlyRate}
-        slotProps={{ htmlInput: { min: 0, step: "0.01" } }}
-        onChange={(event) => {
-          const value = event.target.value;
-          if (!value || Number(value) >= 0) onChange({ ...query, maxNightlyRate: value ? Number(value) : undefined });
-        }}
-        sx={{ maxWidth: 240 }}
-      />
-      {query.maxNightlyRate !== undefined && (
-        <Button
-          aria-pressed
-          variant="contained"
-          color="success"
-          onClick={() => onChange({ ...query, maxNightlyRate: undefined })}
-        >
-          {copy.rateLimit(query.maxNightlyRate)}
-        </Button>
-      )}
-      {hasFilters && (
-        <Button
-          onClick={() =>
+        {selected.length > 0 &&
+          pill(copy.matchesPet(selected.map((pet) => pet.name)), true, () => onChange({ ...query, pets: [] }))}
+        {filters.map(([key, value, label]) =>
+          pill(label, query[key] === value, () =>
+            onChange({ ...query, [key]: query[key] === value ? undefined : value }),
+          ),
+        )}
+        {(
+          [
+            ["species", "cat", copy.acceptsCats],
+            ["sizes", "large", copy.acceptsLarge],
+          ] as const
+        ).map(([key, value, label]) =>
+          pill(label, query[key].includes(value), () =>
             onChange({
               ...query,
-              hasYard: undefined,
-              hasKids: undefined,
-              hasDogs: undefined,
-              hasCats: undefined,
-              homeType: undefined,
-              maxNightlyRate: undefined,
-              minNightlyRate: undefined,
-              minCapacity: undefined,
-              species: [],
-              sizes: [],
-              weekdays: [],
-            })
-          }
-        >
-          {copy.clear}
-        </Button>
-      )}
+              [key]: query[key].includes(value) ? query[key].filter((item) => item !== value) : [...query[key], value],
+            }),
+          ),
+        )}
+        {hasFilters && (
+          <Button
+            onClick={() =>
+              onChange({
+                ...query,
+                hasYard: undefined,
+                hasKids: undefined,
+                hasDogs: undefined,
+                hasCats: undefined,
+                homeType: undefined,
+                species: [],
+                sizes: [],
+              })
+            }
+          >
+            {copy.clear}
+          </Button>
+        )}
+      </Stack>
       {Object.entries(errors)
-        .filter(([key]) => !["where", "neighborhood", "from", "to", "count", "maxNightlyRate"].includes(key))
+        .filter(([key]) => !["where", "from", "to", "count"].includes(key))
         .map(([key, value]) => (
           <span role="alert" key={key}>
-            {copy.fieldLabels[key] ? `${copy.fieldLabels[key]}: ` : ""}
+            {copy.fieldLabels[key] ? copy.fieldLabels[key] + ": " : ""}
             {value}
           </span>
         ))}
