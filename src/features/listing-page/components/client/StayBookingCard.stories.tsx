@@ -23,6 +23,7 @@ const meta = {
   },
   args: {
     listingId: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c",
+    account: "owner",
     nightlyRate: 60,
     hostName: "Dona Cida",
     today: "2026-12-01",
@@ -47,5 +48,9 @@ export const SemPets: Story = { args: { pets: [], petIds: [] } };
 export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };
 /** Visitante (sem conta): as datas valem, sem "Quem vai"; "Pedir estadia" leva ao login de tutor e volta aqui. */
 export const Visitante: Story = {
-  args: { pets: null, petIds: [], search: "from=2026-12-20&to=2026-12-25" },
+  args: { account: "visitor", pets: [], petIds: [], count: 1, search: "from=2026-12-20&to=2026-12-25" },
+};
+/** Anfitrião vendo cantinho alheio: o mesmo card; "Pedir estadia" leva à troca para a conta de tutor e volta aqui. */
+export const Anfitriao: Story = {
+  args: { account: "host", pets: [], petIds: [], count: 1, search: "from=2026-12-20&to=2026-12-25" },
 };

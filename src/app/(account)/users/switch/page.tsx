@@ -19,6 +19,7 @@ interface AccountSwitchPageProps {
  * O `<Suspense>` local cobre a leitura da sessão (`requirePersonalUser`, que espera a requisição e reusa o
  * `cache()` do `getSession`, sem segundo `GET /users/me`).
  * `?to=` escolhe o destino; ausente, inválido ou igual à conta atual vira a outra conta (REQ-SWITCH-011).
+ * `?next=` é para onde a pessoa volta depois da troca ou do "Agora não" (REQ-SWITCH-013).
  * @example <AccountSwitchPage searchParams={Promise.resolve({ to: "host" })} />
  */
 export default function AccountSwitchPage(props: AccountSwitchPageProps) {
@@ -31,6 +32,7 @@ export default function AccountSwitchPage(props: AccountSwitchPageProps) {
 
 async function ConfirmedSwitchPage({ searchParams }: AccountSwitchPageProps) {
   const user = await requirePersonalUser(SWITCH_PATH);
-  const target = resolveSwitchTarget(user.role, firstParam((await searchParams).to));
-  return <AccountSwitchScreen userId={user.id} current={user.role} target={target} />;
+  const params = await searchParams;
+  const target = resolveSwitchTarget(user.role, firstParam(params.to));
+  return <AccountSwitchScreen userId={user.id} current={user.role} target={target} next={firstParam(params.next)} />;
 }

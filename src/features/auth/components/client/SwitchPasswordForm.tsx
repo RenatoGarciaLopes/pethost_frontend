@@ -8,7 +8,7 @@ import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { isApiError } from "@/shared/api/errors/ApiError";
 import { translateError } from "@/shared/api/errors/translateError";
 import type { PersonalRole, SessionUser } from "@/shared/auth/contracts/session";
-import { forgotPasswordPath, homeOf } from "@/shared/config/appRoutes";
+import { forgotPasswordPath } from "@/shared/config/appRoutes";
 import { roleLabel } from "@/shared/config/roleLabels";
 import { PasswordField } from "@/shared/ui/forms/PasswordField";
 import { useErrorNotice } from "@/shared/hooks/useErrorNotice";
@@ -18,8 +18,9 @@ import { switchAccountSchema, type SwitchAccountValues } from "../../schemas/swi
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 
 export interface SwitchPasswordFormProps {
-  current: PersonalRole;
   target: PersonalRole;
+  /** "Agora não": de volta para onde a pessoa estava, ou a casa da conta atual. */
+  cancelHref: string;
   /** A API abriu a outra conta; a tela navega e anuncia. */
   onSwitched: (user: SessionUser) => void;
 }
@@ -29,9 +30,9 @@ export interface SwitchPasswordFormProps {
  * abrir: a API responde igual) esvazia e foca o campo, com a frase neutra no próprio campo, sem dizer se a
  * conta existe. `429` trava o envio com a contagem. A senha fica só no formulário (REQ-SWITCH-010).
  *
- * @example <SwitchPasswordForm current="owner" target="host" onSwitched={(user) => …} />
+ * @example <SwitchPasswordForm target="host" cancelHref="/" onSwitched={(user) => …} />
  */
-export function SwitchPasswordForm({ current, target, onSwitched }: SwitchPasswordFormProps) {
+export function SwitchPasswordForm({ target, cancelHref, onSwitched }: SwitchPasswordFormProps) {
   const mutation = useSwitchAccountMutation();
   const notice = useErrorNotice();
   const { control, handleSubmit, setError, resetField, setFocus, formState } = useForm<SwitchAccountValues>({
@@ -101,7 +102,7 @@ export function SwitchPasswordForm({ current, target, onSwitched }: SwitchPasswo
             >
               {mutation.isPending ? switchCopy.submitting : switchCopy.target(account)}
             </Button>
-            <Button component={NextLink} href={homeOf(current)} variant="text" fullWidth>
+            <Button component={NextLink} href={cancelHref} variant="text" fullWidth>
               {switchCopy.notNow}
             </Button>
           </Stack>

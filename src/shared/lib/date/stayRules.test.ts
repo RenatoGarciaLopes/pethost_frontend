@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { addDays, brasiliaToday, nightsBetween, validateStay } from "./stayRules";
+import {
+  addDays,
+  brasiliaToday,
+  earliestRequestCheckIn,
+  nightsBetween,
+  validateRequestStay,
+  validateStay,
+} from "./stayRules";
 
 describe("REQ-SRCH-003 estadia", () => {
   it("usa o dia em Brasília, inclusive antes da meia-noite local", () => {
@@ -40,5 +47,27 @@ describe("REQ-STDAY-008 relógio da estadia", () => {
     expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
     expect(addDays("2026-03-01", -1)).toBe("2026-02-28");
     expect(addDays("2026-02-30", 1)).toBe("");
+  });
+});
+
+describe("REQ-REQST-010 pedido com 72 h de antecedência", () => {
+  it("a primeira chegada possível é hoje + 4 dias (meia-noite do dia da chegada a 72 h ou mais)", () => {
+    expect(earliestRequestCheckIn("2026-12-10")).toBe("2026-12-14");
+    expect(earliestRequestCheckIn("2026-12-30")).toBe("2027-01-03");
+  });
+
+  it("chegada antes disso leva a frase em pt-BR; a busca (validateStay) continua aceitando", () => {
+    expect(validateRequestStay("2026-12-13", "2026-12-15", "2026-12-10").checkIn).toBe(
+      "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.",
+    );
+    expect(validateRequestStay("2026-12-14", "2026-12-15", "2026-12-10")).toEqual({});
+    expect(validateStay("2026-12-11", "2026-12-12", "2026-12-10")).toEqual({});
+  });
+
+  it("o pedido exige as duas datas", () => {
+    expect(validateRequestStay("", "", "2026-12-10")).toMatchObject({
+      checkIn: "Escolhe uma data de chegada válida.",
+      checkOut: "Escolhe uma data de saída válida.",
+    });
   });
 });

@@ -9,6 +9,8 @@ export interface AccountSwitchScreenProps {
   userId: string;
   current: PersonalRole;
   target: PersonalRole;
+  /** `?next=` da URL, ainda sem validar: o painel só usa caminho interno seguro. */
+  next?: string;
 }
 
 /**
@@ -17,14 +19,14 @@ export interface AccountSwitchScreenProps {
  *
  * @example <AccountSwitchScreen userId={user.id} current="owner" target="host" />
  */
-export async function AccountSwitchScreen({ userId, current, target }: AccountSwitchScreenProps) {
+export async function AccountSwitchScreen({ userId, current, target, next }: AccountSwitchScreenProps) {
   const queryClient = getQueryClient();
   await prefetchLinkedAccounts(queryClient, userId);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <PasswordScreen inShell>
-        <AccountSwitchPanel userId={userId} current={current} target={target} />
+        <AccountSwitchPanel userId={userId} current={current} target={target} next={next} />
       </PasswordScreen>
     </HydrationBoundary>
   );

@@ -7,7 +7,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
-import { nightsBetween } from "@/shared/lib/date/stayRules";
+import { earliestRequestCheckIn, nightsBetween } from "@/shared/lib/date/stayRules";
 import { formatBRL } from "@/shared/lib/money";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -28,7 +28,7 @@ import type { Booking } from "../../types";
 import { PetPickCards, type PickablePet } from "./PetPickCards";
 
 const copy = bookingCopy.request;
-const FIELDS = ["checkIn", "checkOut", "petIds"] as const;
+const FIELDS = ["checkIn", "checkOut", "petIds", "careTermsAccepted"] as const;
 
 /** O cantinho como o pedido mostra (vem da página do cantinho, pela rota). Diária em reais, como a API manda. */
 export interface RequestStayListing {
@@ -144,6 +144,7 @@ export function RequestStayForm({ accountId, listing, pets, today, initial, tota
       checkIn: initial.checkIn,
       checkOut: initial.checkOut,
       petIds: initial.petIds.filter((id) => fitting.has(id)),
+      careTermsAccepted: { food: false, meds: false },
     },
   });
   const [checkIn, checkOut, petIds] = useWatch({ control, name: ["checkIn", "checkOut", "petIds"] });
@@ -151,7 +152,6 @@ export function RequestStayForm({ accountId, listing, pets, today, initial, tota
   const sending = useRef(false);
   const [sent, setSent] = useState<Booking | null>(null);
   const [notice, setNotice] = useState<{ message: string; listingGone: boolean } | null>(null);
-  const [packed, setPacked] = useState({ food: false, meds: false });
   const hostName = listing.hostName ?? copy.theHost;
 
   if (sent) return <RequestSent booking={sent} hostName={hostName} now={now ?? new Date()} />;
@@ -206,6 +206,7 @@ export function RequestStayForm({ accountId, listing, pets, today, initial, tota
               checkIn={checkIn}
               checkOut={checkOut}
               today={today}
+              min={earliestRequestCheckIn(today)}
               errors={dateErrors}
               onChange={(range) => {
                 setValue("checkIn", range.checkIn, { shouldValidate: revalidate });
@@ -243,25 +244,32 @@ export function RequestStayForm({ accountId, listing, pets, today, initial, tota
               {copy.checklist}
             </Typography>
             <Stack>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={packed.food}
-                    onChange={(event) => setPacked((value) => ({ ...value, food: event.target.checked }))}
-                  />
-                }
-                label={copy.food}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={packed.meds}
-                    onChange={(event) => setPacked((value) => ({ ...value, meds: event.target.checked }))}
-                  />
-                }
-                label={copy.meds}
-              />
+              {(
+                [
+                  ["food", copy.food],
+                  ["meds", copy.meds],
+                ] as const
+              ).map(([name, label]) => (
+                <Controller
+                  key={name}
+                  control={control}
+                  name={`careTermsAccepted.${name}`}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox checked={field.value} onChange={(event) => field.onChange(event.target.checked)} />
+                      }
+                      label={label}
+                    />
+                  )}
+                />
+              ))}
             </Stack>
+            {formState.errors.careTermsAccepted && (
+              <Typography role="alert" color="error" sx={{ mt: 0.5 }}>
+                {formState.errors.careTermsAccepted.message}
+              </Typography>
+            )}
           </Box>
         </Stack>
         <Stack spacing={2} sx={{ width: { xs: "100%", md: 340 }, flexShrink: 0 }}>
