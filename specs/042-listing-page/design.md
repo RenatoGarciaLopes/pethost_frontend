@@ -1,12 +1,12 @@
 ---
 spec: 042-listing-page
 status: in-progress
-updated: 2026-10-22
+updated: 2026-10-23
 ---
 
 # 042 · Design técnico
 
-- Rota `app/(account)/listings/[listingId]/page.tsx`: UUID conferido, `requirePersonalUser`, `getListingPageDetail` com `cache()` para metadados e página dividirem o `GET`; a composição busca pets da casa e, para tutor, os pets ativos selecionados. O endpoint `GET /hosts/me` fornece o id do perfil anfitrião para comparar com `listing.hostId`; a conta não é esse id.
+- Rota `app/listings/[listingId]/page.tsx` (fora do grupo `(account)` desde a 087, aberta ao visitante): UUID conferido, `getSession` (visitante e admin no escopo `visitor`), `AppShell` composto pela própria página, `getListingPageDetail` com `cache()` para metadados e página dividirem o `GET`; a composição busca pets da casa e, para tutor, os pets ativos selecionados. O endpoint `GET /hosts/me` fornece o id do perfil anfitrião para comparar com `listing.hostId`; a conta não é esse id.
 - Feature `features/listing-page`: `api/contracts.ts` valida as respostas OpenAPI; `api/queries.ts` consulta detalhe e pets residentes; `lib/petFitsListing.ts` compara espécie e porte; `lib/stayTotal.ts` calcula total sem erro de centavos; `components/ListingPageScreen.tsx` compõe a galeria, fatos, anfitrião, preço e estados de conta; `lib/listingPageCopy.ts` centraliza os textos da feature.
 - A rota compõe `HouseResidents` por `@/features/pets/index.client` e faz prefetch via `@/features/pets/index.server` em um `QueryClient` exclusivo, que só hidrata a projeção pública de `GET /hosts/{hostId}/pets`. O erro/vazio é tolerado pela query da 023 e não bloqueia o detalhe; não há import da feature 023 pela feature 042.
 - Os links MUI da página ficam em `ListingPageActions`, componente client, porque o tema desta branch ainda não adapta `Button href` ao Link do Next. A RSC não passa funções para componentes client.
@@ -15,19 +15,19 @@ updated: 2026-10-22
 
 ## Matriz de testes
 
-| REQ                     | Nível                    | Arquivo                                                                                                                                                                                    |
-| ----------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 005                     | Unitário                 | `lib/petFitsListing.test.ts`                                                                                                                                                               |
-| 004                     | Unitário                 | `lib/stayTotal.test.ts`, com `formatBRL` e `nightsBetween`                                                                                                                                 |
-| 001/003/005/006/007/010/011 | Componente           | `components/ListingPageScreen.test.tsx`                                                                                                                                                    |
-| 001/008                 | Integração (Node/MSW)    | `api/server/listingPage.server.int.test.ts`                                                                                                                                                |
-| 009                     | Integração da rota       | `app/(account)/listings/[listingId]/page.test.tsx`                                                                                                                                         |
-| 004                     | Componente               | `components/client/StayBookingCard.test.tsx` (conta, total, pílulas de pet, URL)                                                                                                           |
-| 001/010/011             | Unitário                 | `lib/listingFacts.test.ts`, `lib/searchOrigin.test.ts`                                                                                                                                     |
-| 005                     | Componente               | `features/search/components/client/CompatibilityNotice/CompatibilityNotice.test.tsx`; `features/search/lib/compatibilityLabel.test.ts`                                                    |
-| 010                     | Integração (Node/MSW)    | `api/server/listingPage.server.int.test.ts` (avaliações e falha silenciosa)                                                                                                                |
-| 001                     | Contrato/consulta        | `api/queries.test.ts`                                                                                                                                                                      |
-| 001/002/003/004/006/007 | Storybook + E2E simulado | Stories do detalhe (`TutorCompativel`, `ComAviso`, `SemFotos`, `SemAvaliacao`, `TutorSemEscolha`, `AnfitriaoVisitante`, `DonoDoCantinho`, `Celular`), da lateral, das ações, de `CompatibilityNotice` e `HouseResidents`; `e2e/mocked/search/listing-page.spec.ts` cobre conta, compatibilidade, avaliações, voltar e troca de pet (sem residentes); a integração/story de 023 cobre residentes presentes |
+| REQ                         | Nível                    | Arquivo                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 005                         | Unitário                 | `lib/petFitsListing.test.ts`                                                                                                                                                                                                                                                                                                                                                                              |
+| 004                         | Unitário                 | `lib/stayTotal.test.ts`, com `formatBRL` e `nightsBetween`                                                                                                                                                                                                                                                                                                                                                |
+| 001/003/005/006/007/010/011 | Componente               | `components/ListingPageScreen.test.tsx`                                                                                                                                                                                                                                                                                                                                                                   |
+| 001/008                     | Integração (Node/MSW)    | `api/server/listingPage.server.int.test.ts`                                                                                                                                                                                                                                                                                                                                                               |
+| 009/012                     | Integração da rota       | `app/listings/[listingId]/page.test.tsx` (metadata e escopo); `app/listings/[listingId]/page.int.test.tsx` (visitante sem cookie: só detalhe e avaliações, pedido pelo login)                                                                                                                                                                                                                             |
+| 004                         | Componente               | `components/client/StayBookingCard.test.tsx` (conta, total, pílulas de pet, URL)                                                                                                                                                                                                                                                                                                                          |
+| 001/010/011                 | Unitário                 | `lib/listingFacts.test.ts`, `lib/searchOrigin.test.ts`                                                                                                                                                                                                                                                                                                                                                    |
+| 005                         | Componente               | `features/search/components/client/CompatibilityNotice/CompatibilityNotice.test.tsx`; `features/search/lib/compatibilityLabel.test.ts`                                                                                                                                                                                                                                                                    |
+| 010                         | Integração (Node/MSW)    | `api/server/listingPage.server.int.test.ts` (avaliações e falha silenciosa)                                                                                                                                                                                                                                                                                                                               |
+| 001                         | Contrato/consulta        | `api/queries.test.ts`                                                                                                                                                                                                                                                                                                                                                                                     |
+| 001/002/003/004/006/007     | Storybook + E2E simulado | Stories do detalhe (`TutorCompativel`, `ComAviso`, `SemFotos`, `SemAvaliacao`, `TutorSemEscolha`, `AnfitriaoVisitante`, `DonoDoCantinho`, `Celular`), da lateral, das ações, de `CompatibilityNotice` e `HouseResidents`; `e2e/mocked/search/listing-page.spec.ts` cobre conta, compatibilidade, avaliações, voltar e troca de pet (sem residentes); a integração/story de 023 cobre residentes presentes |
 
 ## Revisão 078: página fiel à prancha (22/10/2026)
 
@@ -45,13 +45,25 @@ Pedido do Renato: fonte, itens, chips, selos, tons e cabeçalho estavam longe do
 
 ### Lacunas da prancha (a API não manda)
 
-| Prancha | Hoje | Por quê |
-| --- | --- | --- |
-| "2,1 km de você" | linha sem distância | o detalhe não traz `distanceKm` (só a busca) |
-| "6 casas perto da Zona 7" | "← Casas perto de {onde}" ou "← Voltar pra busca" | o card da busca não leva a contagem nem sempre o lugar |
-| "No PetHost desde outubro · já criou três cachorros" | só nome (e "Empresa parceira") | `listing.host` público só tem nome, foto e empresa; `GET /hosts/{id}` é do admin |
-| Fala do anfitrião | a descrição do cantinho entre aspas | não há campo de fala; a descrição é o texto do anfitrião |
-| "Puxar conversa" | ausente | Conversas (055) não tem tela na dev; decisão do coordenador em 22/10: fica fora até a tela existir |
-| "Marina · Thor" | só o primeiro nome de quem avaliou | avaliação do tutor não traz o pet |
-| "casa com quintal murado" | "casa com quintal" | não há campo de muro |
-| "R$ 60" | "R$ 60,00" | `formatBRL` é o padrão do app em todo valor |
+| Prancha                                              | Hoje                                              | Por quê                                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| "2,1 km de você"                                     | linha sem distância                               | o detalhe não traz `distanceKm` (só a busca)                                                       |
+| "6 casas perto da Zona 7"                            | "← Casas perto de {onde}" ou "← Voltar pra busca" | o card da busca não leva a contagem nem sempre o lugar                                             |
+| "No PetHost desde outubro · já criou três cachorros" | só nome (e "Empresa parceira")                    | `listing.host` público só tem nome, foto e empresa; `GET /hosts/{id}` é do admin                   |
+| Fala do anfitrião                                    | a descrição do cantinho entre aspas               | não há campo de fala; a descrição é o texto do anfitrião                                           |
+| "Puxar conversa"                                     | ausente                                           | Conversas (055) não tem tela na dev; decisão do coordenador em 22/10: fica fora até a tela existir |
+| "Marina · Thor"                                      | só o primeiro nome de quem avaliou                | avaliação do tutor não traz o pet                                                                  |
+| "casa com quintal murado"                            | "casa com quintal"                                | não há campo de muro                                                                               |
+| "R$ 60"                                              | "R$ 60,00"                                        | `formatBRL` é o padrão do app em todo valor                                                        |
+
+## Revisão 087: cantinho aberto ao visitante (23/10/2026)
+
+Pedido do Renato: sem estar logado, ver as páginas de venda dos cantinhos; o login só na hora de pedir. Só frontend: a API já abre `GET /listings`, `GET /listings/{id}` e `GET /reviews`.
+
+- **Rota:** `app/(account)/listings/[listingId]/page.tsx` virou `app/listings/[listingId]/page.tsx`, fora do `RoleGate`. A página lê a sessão com `getSession` (access vencido passa pelo refresh e volta) e compõe o `AppShell`, que agora aceita `user: null` (cabeçalho sem atalhos, com Entrar). Admin é tratado como visitante, como na home. O proxy já tratava `/listings` como público (`routeAccess`).
+- **Visitante:** detalhe e avaliações sem token (`backendForRequest` sem cookie não manda `Authorization`; o BFF segue a regra `anonymous`). Não pede pets do tutor, `/hosts/me`, pets da casa nem compatibilidade (exigem login): `residents` e `compatibility` ficam vazios. Cache do detalhe no escopo `visitor`.
+- **`StayBookingCard`:** `pets: null` é o visitante: sem "Quem vai", com o recado `signInToRequest`; "Pedir estadia" vira `loginRedirectPath("/listings/{id}?…", "owner")`, com as datas e a busca de origem. Depois do login a página volta com elas e o tutor escolhe os pets.
+- **Pedido:** `app/(account)/listings/[listingId]/request` continua no grupo protegido; nada mudou no pagamento.
+- **Home:** o recado "Entre para ver os cantinhos disponíveis." e o ramo de 401 da vitrine (`NearbyListings`) saíram; o visitante já via vitrine e resultados.
+- **Mock E2E:** `GET /listings/{id}` do mock da página ficou aberto, como a API.
+- **Pendente:** decidir se a página aberta deve ser indexada (segue `noindex`).

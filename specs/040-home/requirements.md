@@ -1,7 +1,7 @@
 ---
 spec: 040-home
 status: in-progress
-updated: 2026-10-15
+updated: 2026-10-23
 area: HOME
 ---
 
@@ -9,14 +9,14 @@ area: HOME
 
 ## Contexto
 
-`/` é a entrada pública da PetHost e hoje responde 404. A tela apresenta o cuidado em casas de vizinhos e permite preparar uma busca antes de entrar. A pesquisa de disponibilidade exige sessão e pertence à spec 041. A pessoa visitante, o tutor sem pet cadastrado e o tutor com pet têm estados próprios; cadastrar um pet nunca é pré-requisito para começar uma busca.
+`/` é a entrada pública da PetHost e hoje responde 404. A tela apresenta o cuidado em casas de vizinhos e permite preparar uma busca antes de entrar. A pesquisa de disponibilidade pertence à spec 041 e é aberta ao visitante. A pessoa visitante, o tutor sem pet cadastrado e o tutor com pet têm estados próprios; cadastrar um pet nunca é pré-requisito para começar uma busca.
 
 ## Referências
 
 - **Design:** boards `Quintal-Visitante` e `Quintal-Casas`, notas do vault `design/10-hero.md`, `15-estados-com-e-sem-pet.md`, `16-desktop-e-mobile.md`, `14-loading.md` e `21-mapa-de-telas.md`.
 - **Roadmap:** linha 040 em `specs/roadmap.md`: hero com a turma e o campo “Cão ou gato?”; conteúdo estático pode ser entregue antes da API de busca.
 - **Sessão e pets:** `GET /users/me` e `GET /pets/me` implementados nas specs 003/020. `/pets/me` só é consultado para tutor autenticado; anfitrião e visitante não fazem essa chamada.
-- **Busca (spec 041):** `GET /listings` exige login. A home não chama a busca. Escreve na URL de `/` (revisão 079) com `where`, `from`, `to` e seleção de pet/espécie; sem sessão envolve o destino em `/login?next=` preservando todos os parâmetros.
+- **Busca (spec 041):** `GET /listings` é aberta, com ou sem sessão (a home busca para o visitante desde a 079; o recado de login saiu na 087). Escreve na URL de `/` (revisão 079) com `where`, `from`, `to` e seleção de pet/espécie; o visitante vê os resultados e os cantinhos sem login; a conta só entra na hora de pedir (spec 042, REQ-LPAGE-012).
 - **Depende de:** 002, 003, 004 e 020. Entrega o destino da busca consumido pela 041; não implementa resultados nem API de listings.
 
 ## Histórias
@@ -45,7 +45,7 @@ area: HOME
 
 | Estado                 | O que aparece                                                        |
 | ---------------------- | -------------------------------------------------------------------- |
-| Visitante              | Hero genérico; escolha Cão ou gato?; busca continua depois do login. |
+| Visitante              | Hero genérico; escolha Cão ou gato?; busca e cantinhos sem login.    |
 | Tutor sem pet          | Hero genérico; escolha Cão ou gato?; busca roda na própria home.     |
 | Tutor com pets         | Nome do pet selecionado no hero; multisseleção dos pets ativos.      |
 | Anfitrião              | Hero genérico; quantidade de pets; busca roda na própria home.       |
@@ -61,7 +61,7 @@ area: HOME
 - “Onde” · “Perto de casa ou cidade” · “Chegada” · “Saída” · “Pet” · “Cão ou gato?” · “Achar um cantinho”
 - Tutor com pet: “Escolha quem vai viajar com você.”
 - Tutor sem pet: “Você pode buscar antes de cadastrar seu pet.”
-- Visitante: “Entre para ver os cantinhos disponíveis.”
+- Visitante: “Pode olhar à vontade: a conta só entra na hora de pedir.”
 - Falha de pets: “Não conseguimos carregar seus pets agora. Você pode buscar por cão ou gato.”
 - Garantias: “Converse antes de combinar” · “Receba foto todo dia” · “Pagamento protegido até seu pet voltar”
 

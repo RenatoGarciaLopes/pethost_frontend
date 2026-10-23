@@ -87,14 +87,6 @@ it("REQ-NEARBY-013 falha de posição com a reserva fora do ar deixa tentar de n
   expect(geo.request).toHaveBeenCalledOnce();
 });
 
-it("REQ-NEARBY-014 API ainda exigindo conta vira convite para entrar, sem erro na tela", async () => {
-  server.use(http.get("*/api/listings", () => apiError(401, "UNAUTHORIZED")));
-  setup("granted", point);
-  expect(await screen.findByText("Entre para ver os cantinhos disponíveis.")).toBeVisible();
-  expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
-  expect(screen.queryByText("Não conseguimos carregar os cantinhos agora.")).not.toBeInTheDocument();
-});
-
 it("REQ-NEARBY-015 sem cantinhos no raio nem na reserva explica e a falha da API deixa tentar de novo", async () => {
   server.use(
     http.get("*/api/listings", () => HttpResponse.json(apiOk({ items: [], page: 1, pageSize: 6, totalCount: 0 }))),

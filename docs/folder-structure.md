@@ -41,12 +41,13 @@ Testes/stories ao lado dos componentes; funções e regras ficam em lib, E/S na 
 
 ## Página do cantinho (spec 042)
 
-`src/app/(account)/listings/[listingId]/` contém a rota autenticada, que compõe as features: `HouseResidents` (pets) e `CompatibilityNotice` (busca) entram como slots da `ListingPageScreen`, sem import entre features. `features/listing-page/components/ListingPageScreen.tsx` é a composição server (revisão 078, fiel à prancha); a lateral do tutor é `components/client/StayBookingCard.tsx` e os recados de quem não pede ficam em `components/client/ListingPageActions.tsx`.
+`src/app/listings/[listingId]/` contém a rota aberta ao visitante (087; só o pedido, em `(account)/listings/[listingId]/request`, exige conta), que compõe a casca (`AppShell`, com `user` nulo para o visitante) e as features: `HouseResidents` (pets) e `CompatibilityNotice` (busca) entram como slots da `ListingPageScreen`, sem import entre features. `features/listing-page/components/ListingPageScreen.tsx` é a composição server (revisão 078, fiel à prancha); a lateral do tutor é `components/client/StayBookingCard.tsx` e os recados de quem não pede ficam em `components/client/ListingPageActions.tsx`.
 
 ```text
-src/app/(account)/listings/[listingId]/
-  page.tsx                              auth, metadata, avaliações, slots, prefetch/hydration
-  page.test.tsx                         metadata e preservação da busca no login
+src/app/listings/[listingId]/
+  page.tsx                              sessão opcional, casca, metadata, avaliações, slots, prefetch/hydration
+  page.test.tsx                         metadata e escopo do visitante
+  page.int.test.tsx                     visitante sem cookie: só o que é aberto, pedido pelo login
 src/features/listing-page/
   api/                                   contratos (detalhe, avaliações), query e carregamento server
   lib/                                   copy, total, fatos da casa, motivos, voltar (searchOrigin)
