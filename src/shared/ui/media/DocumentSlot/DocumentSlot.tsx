@@ -1,5 +1,6 @@
 "use client";
 
+import { keyboardFocus } from "@/shared/theme/focus";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, ButtonBase, FormHelperText, Stack, Typography } from "@mui/material";
 import { useId, useRef, type ChangeEvent, type ReactNode } from "react";
@@ -104,7 +105,7 @@ export function DocumentSlot({
           borderStyle: file || uploaded ? "solid" : "dashed",
           borderColor: error ? "error.main" : theme.palette.quintal.tinta,
           bgcolor: "background.paper",
-          "&:focus-visible": { outline: `3px solid ${theme.palette.quintal.tinta}`, outlineOffset: 3 },
+          [keyboardFocus()]: { outline: `3px solid ${theme.palette.quintal.tinta}`, outlineOffset: 3 },
           "&.Mui-disabled": { opacity: 0.7 },
         })}
       >

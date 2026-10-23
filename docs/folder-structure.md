@@ -486,3 +486,15 @@ As rotas compõem `AuditTable` pelo índice público `features/admin-audit/index
 ## Revisão 071 da busca
 
 SearchBar em features/search/components/client/SearchBar centraliza a faixa usada por home, /search e detalhe. searchDateLabel e seus testes migram de widgets/home/lib para features/search/lib; não há pasta vazia ou cópia residual. HomeScreen compõe o recurso pelo index.client público.
+
+## Modalidade de entrada e foco (081)
+
+```text
+src/shared/theme/focus.ts                  seletor keyboardFocus, geometria focusRing e atributo
+src/shared/hooks/useInputModality.ts       listeners documentais sem estado React
+src/shared/hooks/useInputModality.test.tsx cleanup do efeito
+```
+
+ThemeProviders instala o hook no topo do app; o decorator existente de .storybook/preview.ts instala o mesmo efeito nas stories. Nenhum provider/contexto/store novo. Overrides e consumidores usam o helper do tema; o antigo export focusRing de overrides/Button.ts foi movido para theme/focus.ts com todos os imports migrados. Detalhes e validação: [081](../specs/081-keyboard-only-focus/design.md).
+
+GlobalError, fronteira alternativa que substitui o layout sem MUI/providers, instala o mesmo hook e usa o helper/geometry para CSS nativo. Não há segundo tracker simultâneo na árvore normal; detalhes em frontend-input-modality.

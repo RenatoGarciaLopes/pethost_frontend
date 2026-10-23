@@ -18,7 +18,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Regressão 072: os quatro controles mantêm foco em tinta ao navegar por Tab. */
+/** Regressões 072/081: contorno em tinta só durante navegação de teclado. */
 export const Keyboard: Story = {
   play: async ({ canvas }) => {
     const controls = [
@@ -27,11 +27,22 @@ export const Keyboard: Story = {
       canvas.getByRole("link", { name: "Ver cantinho" }),
       canvas.getByRole("textbox", { name: "Nome do pet" }),
     ];
+    await userEvent.click(controls[3]);
+    await expect(controls[3]).toHaveFocus();
+    await expect(controls[3]).toHaveStyle({ outlineStyle: "none" });
+    await userEvent.keyboard("a");
+    await expect(controls[3]).toHaveStyle({ outlineStyle: "none" });
+    await userEvent.tab({ shift: true });
     controls[0].focus();
     for (let index = 0; index < controls.length; index += 1) {
       if (index > 0) await userEvent.tab();
       await expect(controls[index]).toHaveFocus();
       await expect(controls[index]).toHaveStyle({ outlineColor: "rgb(31, 26, 23)" });
+      await expect(controls[index]).toHaveStyle({ outlineWidth: "3px" });
     }
+    // Clicking the already-focused input hides the ring without requiring blur.
+    await userEvent.click(controls[3]);
+    await expect(controls[3]).toHaveFocus();
+    await expect(controls[3]).toHaveStyle({ outlineStyle: "none" });
   },
 };

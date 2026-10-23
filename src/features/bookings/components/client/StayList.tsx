@@ -1,5 +1,6 @@
 "use client";
 
+import { keyboardFocus } from "@/shared/theme/focus";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -31,7 +32,7 @@ function StayListItem({ booking }: { booking: Booking }) {
         sx={{
           color: "text.primary",
           textDecoration: "none",
-          "&:focus-visible [data-surface]": { outline: "3px solid", outlineOffset: 3 },
+          [keyboardFocus("&:focus-visible [data-surface]")]: { outline: "3px solid", outlineOffset: 3 },
         }}
       >
         <Surface component="span" interactive elevation="sm" sx={{ display: "grid", gap: 0.5, p: 2 }}>
