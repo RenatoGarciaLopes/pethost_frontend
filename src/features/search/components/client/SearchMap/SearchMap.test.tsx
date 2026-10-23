@@ -19,7 +19,7 @@ const fake = vi.hoisted(() => {
     zoomIn = vi.fn();
     zoomOut = vi.fn();
     remove = vi.fn();
-    constructor() {
+    constructor(readonly options: { fitBoundsOptions?: { maxZoom?: number } } = {}) {
       instances.push(this);
     }
     on(name: string, handler: Handler) {
@@ -138,6 +138,12 @@ describe("mapa da busca", () => {
     expect(lastMap().zoomIn).toHaveBeenCalledWith(expect.anything(), { userAction: true });
     await user.click(screen.getByRole("checkbox", { name: "Buscar quando eu mexer no mapa" }));
     expect(onSearchOnMoveChange).toHaveBeenCalledWith(true);
+  });
+
+  it("REQ-SRCH-013 o enquadramento inicial nunca passa do zoom de bairro, mesmo com um cantinho só", async () => {
+    setup({ listings: [searchMapListingsFixture[0]] });
+    await screen.findByRole("button", { name: "Aproximar o mapa" });
+    expect(lastMap().options.fitBoundsOptions?.maxZoom).toBe(14);
   });
 
   it("REQ-SRCH-013 sem onSearchOnMoveChange o controle de buscar ao mexer não aparece", async () => {
