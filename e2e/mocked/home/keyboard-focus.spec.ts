@@ -19,6 +19,7 @@ test("REQ-FOC-081 clique na barra não mostra contorno; Tab real mostra na célu
 
   await page.keyboard.press("Tab");
   const next = page.locator(":focus");
+  await expect(next.locator("..")).toHaveCSS("outline-style", "solid");
   await expect(next.locator("..")).toHaveCSS("outline-color", "rgb(31, 26, 23)");
   await expect(next.locator("..")).toHaveCSS("outline-width", "3px");
 

@@ -13,6 +13,7 @@ export const focusRing = { outline: `3px solid ${quintalColors.tinta}`, outlineO
  * @example { [keyboardFocus("&:has(:focus-visible)")]: focusRing }
  */
 export function keyboardFocus(selector = "&:focus-visible"): string {
-  // Keep existing specificity, including intentional outline suppression on step headings.
-  return `:where(html[${INPUT_MODALITY_ATTRIBUTE}="keyboard"]) ${selector}`;
+  // Starts with `html`, not a pseudo-class: stylis prepends the component class to any key that starts with ":", which
+  // produced `.cls:where(html…) .cls:focus-visible` and never matched. :where keeps the modality gate at zero specificity.
+  return `html:where([${INPUT_MODALITY_ATTRIBUTE}="keyboard"]) ${selector}`;
 }
