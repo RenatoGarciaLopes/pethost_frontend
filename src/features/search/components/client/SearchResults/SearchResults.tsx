@@ -21,6 +21,8 @@ export interface SearchResultsProps {
   onMore: () => void;
   onRetry: () => void;
   onExpand: (radius: number) => void;
+  /** Há um mapa ao lado: a lista fica em duas colunas no computador, em vez de três. */
+  withMap?: boolean;
 }
 /** Lista sem dependência de mapa; mantém cards e ações durante atualização/erro. @example <SearchResults {...props} /> */
 export function SearchResults({
@@ -35,6 +37,7 @@ export function SearchResults({
   onMore,
   onRetry,
   onExpand,
+  withMap = false,
 }: SearchResultsProps) {
   const addressError =
     error?.code === "LISTING_SEARCH_ADDRESS_REQUIRED" || error?.code === "LISTING_SEARCH_ADDRESS_NOT_LOCATED";
@@ -70,7 +73,11 @@ export function SearchResults({
           p: 0,
           m: 0,
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, minmax(0, 1fr))",
+            lg: `repeat(${withMap ? 2 : 3}, minmax(0, 1fr))`,
+          },
           gap: 3,
         }}
       >

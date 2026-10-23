@@ -82,20 +82,19 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   await loginAccount(page, baseURL!, "both", "owner");
   const from = nextMonday();
   const to = plus(from, 2);
-  await page.goto("/search");
+  await page.goto("/");
   await openSearch(page);
   await pickDates(page, page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }), from, to);
-  await page.getByRole("combobox", { name: "Pet" }).click();
-  await page.getByRole("option", { name: "Luna", exact: true }).click();
-  await page.keyboard.press("Escape");
+  // A home já parte com a primeira pet do tutor (Luna) escolhida.
   await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("casas com vaga perto", NAVIGATION);
+  await expect(page.getByRole("heading", { level: 2, name: /casas com vaga perto/ })).toBeVisible(NAVIGATION);
 
   const card = page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first();
   // O título já existe antes da busca: espera o card levar as datas e o pet da URL nova, senão o clique abre o
   // cantinho sem eles (corrida vista no E2E da 078).
   await expect(card).toHaveAttribute("href", new RegExp(`pets=.+&from=${from}&to=${to}`), NAVIGATION);
   const title = (await card.getByRole("heading").first().textContent())?.trim() ?? "";
+  await expect(card).toHaveAttribute("href", /pets=.+&from=.+&to=.+/);
   await waitForHydration(card);
   await card.click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible(FIRST_COMPILE);

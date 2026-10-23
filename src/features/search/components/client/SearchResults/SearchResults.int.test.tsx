@@ -8,7 +8,7 @@ import { apiOk } from "@/test/fixtures/session";
 import { listingFixture, searchPetsFixture, searchQueryFixture } from "@/test/fixtures/search";
 import { server } from "@/test/msw/server";
 import { searchQueries } from "../../../api/queries";
-import { SearchExperience } from "../SearchExperience";
+import { SearchResultsSection } from "../SearchResultsSection";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () =>
@@ -30,7 +30,7 @@ function page(items = [first], number = 1, total = items.length) {
   return { items, page: number, pageSize: 1, totalCount: total };
 }
 function renderSearch(total = 1) {
-  window.history.replaceState(null, "", "/search");
+  window.history.replaceState(null, "", "/");
   const push = window.history.pushState.bind(window.history);
   vi.spyOn(window.history, "pushState").mockImplementation((...args) => {
     push(...args);
@@ -42,7 +42,7 @@ function renderSearch(total = 1) {
     pageParams: [1],
   });
   return renderWithProviders(
-    <SearchExperience accountId="owner" initialQuery={initialQuery} pets={searchPetsFixture} today="2026-10-15" />,
+    <SearchResultsSection accountId="owner" initialQuery={initialQuery} pets={searchPetsFixture} />,
     { queryClient: client, theme: quintalTheme },
   );
 }
@@ -137,7 +137,7 @@ it("REQ-SRCH-012 503 mantém cards e repetir busca funciona", async () => {
   expect(await screen.findByRole("link", { name: /Varanda da Bia/ })).toBeVisible();
 });
 
-it("REQ-SRCH-012 400 associa campo da API ao campo Onde", async () => {
+it("REQ-SRCH-012 400 mostra o erro do campo Onde junto dos chips", async () => {
   server.use(
     http.get("http://localhost:3000/api/listings", () =>
       HttpResponse.json(
@@ -157,7 +157,7 @@ it("REQ-SRCH-012 400 associa campo da API ao campo Onde", async () => {
   const { user } = renderSearch();
   await user.click(screen.getByRole("button", { name: "Casa" }));
   await screen.findByRole("button", { name: "Tentar de novo" });
-  expect(screen.getByLabelText("Onde")).toHaveAttribute("aria-invalid", "true");
+  expect(screen.getByText("Onde: Confere esse filtro e busca de novo.")).toBeVisible();
 });
 
 it("REQ-SRCH-002 histórico restaura o filtro e recarregar usa o mesmo parser", async () => {
@@ -166,7 +166,7 @@ it("REQ-SRCH-002 histórico restaura o filtro e recarregar usa o mesmo parser", 
   await user.click(screen.getByRole("button", { name: "Sem cachorro" }));
   await screen.findByRole("link", { name: /Varanda da Bia/ });
   await act(async () => {
-    window.history.replaceState(null, "", "/search");
+    window.history.replaceState(null, "", "/");
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
   expect(screen.getByRole("button", { name: "Sem cachorro" })).toHaveAttribute("aria-pressed", "false");

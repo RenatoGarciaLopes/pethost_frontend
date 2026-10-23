@@ -63,7 +63,7 @@ it("REQ-NEARBY-011 com a posição, mostra a contagem e os cards sem pedir login
   setup("granted", point);
   expect(await screen.findByRole("heading", { name: "2 casas com vaga perto de você" })).toBeVisible();
   expect(screen.getByRole("link", { name: /Varanda da Bia/ })).toBeVisible();
-  expect(screen.getByRole("link", { name: "Ver todos os cantinhos" })).toHaveAttribute("href", "/search");
+  expect(screen.queryByRole("link", { name: "Ver todos os cantinhos" })).not.toBeInTheDocument();
   expect(seen?.get("latitude")).toBe("-23.43");
   expect(seen?.get("longitude")).toBe("-51.94");
   expect(seen?.get("radiusKm")).toBe("10");
@@ -144,7 +144,7 @@ it("REQ-NEARBY-016 raio de 10 km vazio busca os cantinhos sem filtro de lugar e 
     screen.getByText("Ainda não achamos cantinhos num raio de 10 km, então mostramos outras casas."),
   ).toBeVisible();
   expect(screen.getByRole("link", { name: /Sítio do Leo/ })).toBeVisible();
-  expect(screen.getByRole("link", { name: "Ver todos os cantinhos" })).toHaveAttribute("href", "/search");
+  expect(screen.queryByRole("link", { name: "Ver todos os cantinhos" })).not.toBeInTheDocument();
   expect(screen.queryByText(/Tente outra cidade na busca/)).not.toBeInTheDocument();
   // Primeiro o raio; depois a reserva só com a página, sem coordenada, raio nem lugar.
   expect(seen).toHaveLength(2);
@@ -249,4 +249,27 @@ it("REQ-SRCH-020 tutor com pet e datas vê o total e a compatibilidade nos cards
   expect(screen.getByRole("link", { name: /Quintal da Cida/ }).textContent).toMatch(/R\$\s300,50 as 5 noites/);
   expect(asked[0]?.get("petId")).toBe("0199d2a0-0000-7000-8000-0000000000e1");
   expect(asked[0]?.get("checkIn")).toBe("2026-12-20");
+});
+
+it("REQ-HOME-011 o cantinho aberto pela vitrine leva os pets e as datas escolhidos na barra", async () => {
+  server.use(
+    http.get("*/api/listings", () =>
+      HttpResponse.json(apiOk({ items: [listingFixture()], page: 1, pageSize: 6, totalCount: 1 })),
+    ),
+    http.get("*/api/listings/:id/compatibility", () => new HttpResponse(null, { status: 500 })),
+  );
+  geo.state = { status: "granted", coords: point };
+  renderWithProviders(
+    <NearbyListings
+      scope="owner-1"
+      pets={[{ id: "0199d2a0-0000-7000-8000-0000000000e1", name: "Pipoca" }]}
+      from="2026-12-20"
+      to="2026-12-25"
+    />,
+    { theme: quintalTheme },
+  );
+  const href = (await screen.findByRole("link", { name: /Quintal da Cida/ })).getAttribute("href") ?? "";
+  const params = new URL(href, "http://x").searchParams;
+  expect(params.get("pets")).toBe("0199d2a0-0000-7000-8000-0000000000e1");
+  expect(params.get("from")).toBe("2026-12-20");
 });

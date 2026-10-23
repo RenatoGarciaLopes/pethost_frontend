@@ -122,3 +122,11 @@ Níveis aplicáveis: unitário parser/serialização/mapeamento e searchDateLabe
 Níveis não executados: API real/geocodificador não disponíveis nesta validação; E2E usa backend simulado. Sem suíte completa por orientação do Renato; SSR/query/erros inalterados permanecem nas suítes existentes. Sem E2E isolado das funções puras (cobertura pela jornada de URL/datas).
 
 Foco das células date: somente :has(input[type=date]:focus-visible), contorno em text.primary; não reintroduz focus-within geral nem o token foco retirado pela 072. Regra de foco regressivo Saída por Shift+Tab preservada para integração com o teste do Rivet.
+
+## Revisão 079: arquitetura da busca na home
+
+- `app/page.tsx` lê a URL (`searchParamsToQuery`), faz `prefetchSearch` (`features/search/index.server`) e hidrata; passa `initialQuery` e `initialError` ao `HomeScreen`.
+- `useSearchUrl` (`features/search/hooks`): lê a busca da URL e escreve o próximo estado por `history.pushState("/?...")` (`searchHref`); `useSearch` usa ele e busca os resultados.
+- `HomeScreen`: barra no hero (`SearchBar`, `key` pela URL) e, abaixo das garantias, `SearchResultsSection` quando há filtros ou `NearbyListings` quando não há.
+- `SearchResultsSection`: título `h2`, `FilterChips`, `SearchResults` e o `SearchMap` (só com `where` ou `state` e ao menos um resultado: coluna à direita, fixa, a partir de `lg`; abaixo disso o botão "Ver mapa" abre o mapa em tela cheia, com "Ver lista" para voltar). Sem origem (não há geocodificação) e sem "Buscar quando eu mexer no mapa": a home não passa `onSearchOnMoveChange`, então o controle nem aparece (lacuna registrada: lat/lng na URL e raio no `toApiSearch`). Erros dos campos da barra (Onde, datas, quantidade) aparecem como alerta junto dos chips.
+- Rotas e consumidores: `SEARCH_PATH` (bookings) agora é `/`; o "voltar" da página do cantinho usa a home com os mesmos parâmetros.

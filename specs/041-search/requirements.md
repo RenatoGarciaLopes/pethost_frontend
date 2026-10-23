@@ -75,3 +75,14 @@ O tutor procura quem cuide do pet perto de casa, nas datas da viagem ([[11-busca
 - REQ-SRCH-004: removido título por nome do pet; identificação passa ao chip Combina com.
 - REQ-SRCH-005: substituído texto condicional por contagem no padrão da prancha. Sem datas, a API lista oferta geral; o título não confirma reserva.
 - Vizinho e Responde rápido: lacuna da API, sem filtro correspondente. Fora dos chips por decisão expressa, sem alteração no backend.
+
+## Revisão 079: a busca mora na home (22/10/2026)
+
+Decisão do Renato: a home é a página de resultados e a rota `/search` sai ([[2026-10-22-home-e-a-busca]]). O que muda nos requisitos acima:
+
+- **REQ-SRCH-001 (substituído):** a busca DEVE funcionar na própria `/`, sem login: visitante, tutor e anfitrião buscam e veem os resultados no lugar da vitrine. O estado vai para a URL de `/`; sem filtros na URL, a home mostra a vitrine "perto de você". Visitante sem lugar recebe o aviso de endereço da API (`422`), com o atalho para escrever a cidade no campo Onde.
+- **REQ-SRCH-002, 005, 006, 008, 009, 010:** valem como estão, agora dentro da home (título no `h2`, chips embaixo, "Mostrar mais cantinhos"). A primeira página vem do servidor (`prefetchSearch` em `app/page.tsx`) e hidrata no cliente.
+- **REQ-SRCH-003:** a SearchBar da home é a mesma; o envio escreve a URL (`/?where=...`) pelo histórico, sem navegar.
+- **Chips na home:** os mesmos do `FilterChips` (Combina com {pet}, Casa com quintal, Sem criança/cachorro/gato, Casa, Apartamento, Aceita gatos, Aceita porte grande). "Vizinho" e "Responde rápido" continuam fora: a API não filtra (lacuna registrada).
+- **Removidos:** a rota `/search` (sem redirect: nenhum link externo a usa), `SearchScreen`, `SearchExperience` (virou `SearchResultsSection`, sem a barra), `buildHomeSearchPath` e o botão "Ver todos os cantinhos" da vitrine.
+- **Mapa nos resultados (079 + 080):** com região na busca (`where` ou `state`) e resultados, `SearchResultsSection` monta o `SearchMap`: lista à esquerda e mapa à direita a partir de `lg`; no celular, botão "Ver mapa" abre o mapa em tela cheia (REQ-SRCH-013).

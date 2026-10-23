@@ -1,4 +1,3 @@
 import "server-only";
-/** Composição SSR da busca, exclusiva do servidor. */
-export { SearchScreen } from "./components/SearchScreen";
-export { prefetchCompatibility } from "./api/server/search.server";
+/** Prefetch da busca para a home e da compatibilidade para a página do cantinho, exclusivo do servidor. */
+export { prefetchSearch, prefetchCompatibility } from "./api/server/search.server";

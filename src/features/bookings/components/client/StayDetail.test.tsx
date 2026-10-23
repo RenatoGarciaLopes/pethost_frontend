@@ -71,7 +71,7 @@ describe("StayDetail", () => {
     setup({ status: "declined", responseDeadline: null, declineReason: "Já estou com a casa cheia" });
     expect(screen.getByText("Aparecida Souza não pôde receber dessa vez.")).toBeInTheDocument();
     expect(screen.getByText("Motivo: Já estou com a casa cheia")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: copy.searchAgain })).toHaveAttribute("href", "/search");
+    expect(screen.getByRole("link", { name: copy.searchAgain })).toHaveAttribute("href", "/");
   });
 
   it("REQ-STAYS-008 expirada: o anfitrião não respondeu a tempo", () => {

@@ -134,7 +134,7 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     expect(bodies).toHaveLength(1);
     expect(screen.getByText("Aparecida Souza responde até amanhã às 9h.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: copy.seeStays })).toHaveAttribute("href", "/owner/bookings");
-    expect(screen.getByRole("link", { name: copy.backToSearch })).toHaveAttribute("href", "/search");
+    expect(screen.getByRole("link", { name: copy.backToSearch })).toHaveAttribute("href", "/");
     expect(queryClient.getQueryState(listKey)?.isInvalidated).toBe(true);
     expect(queryClient.getQueryData(bookingQueries.detail("account-1", BOOKING_ID).queryKey)).toBeDefined();
   });
@@ -178,7 +178,7 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     const { user } = setup();
     await user.click(screen.getByRole("button", { name: copy.submit }));
     expect(await screen.findByText("Esse cantinho não está recebendo pedidos agora.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: copy.backToSearch })).toHaveAttribute("href", "/search");
+    expect(screen.getByRole("link", { name: copy.backToSearch })).toHaveAttribute("href", "/");
   });
 
   it("REQ-REQST-002 sem pets na lista, o caminho para apresentar um", () => {

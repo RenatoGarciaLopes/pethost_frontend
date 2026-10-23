@@ -73,6 +73,6 @@ describe("StayList", { timeout: 15000 }, () => {
     serve([]);
     renderList("proximas");
     expect(await screen.findByText(copy.empty.proximas!)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: copy.search })).toHaveAttribute("href", "/search");
+    expect(screen.getByRole("link", { name: copy.search })).toHaveAttribute("href", "/");
   });
 });

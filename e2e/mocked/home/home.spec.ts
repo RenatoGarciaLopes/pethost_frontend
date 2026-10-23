@@ -18,7 +18,7 @@ async function submitSearch(page: Page) {
   await ((await desktopSearch.isVisible()) ? desktopSearch : mobileSearch).click();
 }
 
-test("REQ-HOME-001/002 visitante vê o início e volta à busca depois de entrar", async ({ page }) => {
+test("REQ-HOME-001/002 visitante vê o início e busca na própria home", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle("Início · PetHost");
   await expect(
@@ -30,19 +30,20 @@ test("REQ-HOME-001/002 visitante vê o início e volta à busca depois de entrar
   await page.getByRole("option", { name: "Cão", exact: true }).click();
   await submitSearch(page);
 
-  await expect(page).toHaveURL(/\/login\?next=/);
-  const next = new URL(page.url()).searchParams.get("next");
-  expect(next).toBe("/search?where=Zona+7&species=dog");
+  await expect(page).toHaveURL(/\/\?(?=.*where=Zona\+7)(?=.*species=dog)/);
+  await expect(page.getByRole("heading", { level: 2, name: /casas? com vaga perto de Zona 7/ })).toBeVisible({
+    timeout: 30_000,
+  });
 });
 
-test("REQ-HOME-003 tutor com pet segue para busca com o id, sem dados do perfil", async ({ page, baseURL }) => {
+test("REQ-HOME-003 tutor com pet busca na home com o id na URL, sem dados do perfil", async ({ page, baseURL }) => {
   await loginAccount(page, baseURL!);
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "Um quintal pra Luna enquanto você viaja" })).toBeVisible();
   await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Maringá");
   await submitSearch(page);
-  await expect(page).toHaveURL(/\/search\?/, { timeout: 45_000 });
+  await expect(page).toHaveURL(/\/\?.*where=/, { timeout: 45_000 });
   const params = new URL(page.url()).searchParams;
   expect(params.get("where")).toBe("Maringá");
   expect(params.getAll("pets")).toEqual(["0199d2a0-0000-7000-8000-0000000000e1"]);
@@ -57,7 +58,7 @@ test("REQ-HOME-002 tutor sem pet escolhe espécie sem convite para cadastro", as
   await page.getByRole("combobox", { name: "Pet" }).click();
   await page.getByRole("option", { name: "Gato", exact: true }).click();
   await submitSearch(page);
-  await expect(page).toHaveURL(/\/search\?species=cat$/);
+  await expect(page).toHaveURL(/\/\?species=cat$/);
 });
 
 test("REQ-HOME-006 celular abre a busca pela pílula acessível", async ({ page }) => {
@@ -115,7 +116,7 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
     .toBe(true);
   const form = page.getByRole("form", { name: "Busca de cantinhos" });
   await expect(form).toHaveCSS("box-shadow", "rgb(31, 26, 23) 0px 5px 0px 0px");
-  const lawn = form.locator("../..");
+  const lawn = form.locator("../../..");
   await expect(lawn).toHaveCSS("background-color", "rgb(207, 227, 160)");
   await expect(lawn).toHaveCSS("border-bottom-color", "rgb(31, 26, 23)");
   const wave = lawn.locator("svg").first();

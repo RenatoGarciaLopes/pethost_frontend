@@ -9,6 +9,8 @@ export const searchCopy = {
   close: "Fechar busca",
   loading: "Farejando cantinhos…",
   more: "Mostrar mais cantinhos",
+  showMap: "Ver mapa",
+  showList: "Ver lista",
   clear: "Limpar filtros",
   retry: "Tentar de novo",
   empty: "Nenhum cantinho por aqui com esses filtros.",
@@ -38,7 +40,6 @@ export const searchCopy = {
   totalStay: (nights: number) => ` as ${nights} noites`,
   distance: (km: string) => `${km} km de você`,
   rating: (average: string, count: number) => `Nota ${average} em ${count} ${count === 1 ? "avaliação" : "avaliações"}`,
-  hostAvatar: (name: string) => `Anfitrião ${name}`,
   attributes: { yard: "Quintal", house: "Casa", apartment: "Apartamento" },
   compat: {
     matches: (pet: string) => `Combina com a ${pet}`,
@@ -68,6 +69,10 @@ export const searchCopy = {
   unnamedHost: "Anfitrião",
   noPhoto: "Cantinho sem foto",
   fieldLabels: {
+    where: "Onde",
+    from: "Chegada",
+    to: "Saída",
+    count: "Quantos pets",
     radius: "Distância",
     state: "Estado",
     species: "Espécie",

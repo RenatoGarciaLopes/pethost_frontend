@@ -4,14 +4,15 @@ import { ReadonlyURLSearchParams } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { listingFixture, searchPetsFixture, searchQueryFixture } from "@/test/fixtures/search";
 import { searchQueries } from "../../api/queries";
-import { SearchExperience } from "./SearchExperience";
+import { SearchResultsSection } from "./SearchResultsSection";
 
-const query = searchQueryFixture();
+/** Com `where` a busca tem região: lista e mapa lado a lado no computador, botão "Ver mapa" no celular. */
+const query = searchQueryFixture({ where: "Zona 7" });
 const meta = {
-  title: "Search/SearchExperience",
-  component: SearchExperience,
+  title: "Search/SearchResultsSection",
+  component: SearchResultsSection,
   parameters: { design: { board: "Busca-Mapa" } },
-  args: { accountId: "story-owner", initialQuery: query, today: "2026-10-15", pets: searchPetsFixture },
+  args: { accountId: "story-owner", initialQuery: query, pets: searchPetsFixture },
   beforeEach: () => {
     useSearchParams.mockReturnValue(new ReadonlyURLSearchParams());
   },
@@ -31,8 +32,8 @@ const meta = {
       );
     },
   ],
-} satisfies Meta<typeof SearchExperience>;
+} satisfies Meta<typeof SearchResultsSection>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-export const ComPets: Story = {};
+export const ComMapa: Story = {};
 export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };

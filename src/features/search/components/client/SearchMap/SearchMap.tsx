@@ -19,9 +19,9 @@ export interface SearchMapProps {
   /** Cantinho selecionado (cartão no rodapé do mapa); `null` fecha o cartão. */
   selectedId?: string | null;
   onSelect: (id: string | null) => void;
-  /** "Buscar quando eu mexer no mapa". */
-  searchOnMove: boolean;
-  onSearchOnMoveChange: (value: boolean) => void;
+  /** "Buscar quando eu mexer no mapa": o controle só aparece quando quem monta a tela dá `onSearchOnMoveChange` (e trata `onMoveEnd`). */
+  searchOnMove?: boolean;
+  onSearchOnMoveChange?: (value: boolean) => void;
   /** Só quando a pessoa mexe no mapa (arrasta, dá zoom) e a opção está ligada; raio em km do recorte visível. */
   onMoveEnd?: (center: GeoPoint, radiusKm: number) => void;
   /** Datas da busca: com período e `petCount`, o pino mostra o total da estadia (como o `ListingCard`). */

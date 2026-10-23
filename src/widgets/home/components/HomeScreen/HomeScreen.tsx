@@ -1,25 +1,25 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { SearchBar } from "@/features/search/index.client";
-import type { SearchQuery } from "@/features/search";
-import { useRouter } from "next/navigation";
+import { SearchBar, SearchResultsSection, useSearchUrl } from "@/features/search/index.client";
+import { queryToSearchParams, type SearchError, type SearchQuery } from "@/features/search";
 import { useState } from "react";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
-import { loginRedirectPath } from "@/shared/config/appRoutes";
 import { DoorScene } from "@/shared/ui/brand/DoorScene";
 import { GroundLine } from "@/shared/ui/brand/GroundLine";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { TrustList } from "@/shared/ui/data-display/TrustList";
 import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { NearbyListings } from "../NearbyListings";
-import { buildHomeSearchPath, type HomePetSpecies } from "../../lib/homeSearchPath";
 import { homeCopy as copy } from "../../lib/homeCopy";
+
+const EMPTY_QUERY: SearchQuery = { pets: [], species: [], sizes: [] };
 
 export interface HomePetOption {
   id: string;
   name: string;
   species: string;
+  size: string | null;
 }
 
 export interface HomeScreenProps {
@@ -30,6 +30,10 @@ export interface HomeScreenProps {
   petsUnavailable: boolean;
   /** Id da conta logada; `null` para visitante. Separa o cache da vitrine "perto de você". */
   accountId?: string | null;
+  /** Busca que a URL de `/` já trazia no servidor; com ela a home mostra os resultados no lugar da vitrine. */
+  initialQuery?: SearchQuery;
+  /** Erro conhecido da busca inicial, para o cliente não repetir a chamada que já falhou. */
+  initialError?: SearchError;
 }
 
 /**
@@ -38,29 +42,26 @@ export interface HomeScreenProps {
  * Visitante passa pelo login com next seguro; tutor seleciona ids; host informa quantidade fora da faixa.
  * @example <HomeScreen viewer="visitor" pets={[]} petsUnavailable={false} />
  */
-export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: HomeScreenProps) {
-  const router = useRouter();
-  const [petIds, setPetIds] = useState<string[]>(viewer === "owner" && pets[0] ? [pets[0].id] : []);
-  const [stay, setStay] = useState<{ from?: string; to?: string }>({});
+export function HomeScreen({
+  viewer,
+  pets,
+  petsUnavailable,
+  accountId = null,
+  initialQuery = EMPTY_QUERY,
+  initialError,
+}: HomeScreenProps) {
+  const { query, update } = useSearchUrl();
+  const params = queryToSearchParams(query).toString();
+  const searching = params !== "";
+  const [petIds, setPetIds] = useState<string[]>(
+    query.pets.length ? query.pets : viewer === "owner" && pets[0] ? [pets[0].id] : [],
+  );
+  const [stay, setStay] = useState<{ from?: string; to?: string; count?: number }>({});
   const selectedPets = pets.filter((pet) => petIds.includes(pet.id));
   const personalized = viewer === "owner" && selectedPets.length > 0;
   const title = personalized ? copy.petsTitle(selectedPets.map((pet) => pet.name)) : copy.genericTitle;
   const isPetList = viewer === "owner" && pets.length > 0 && !petsUnavailable;
   const isHost = viewer === "host";
-
-  function handleSearch(query: SearchQuery) {
-    const path = buildHomeSearchPath({
-      where: query.where,
-      from: query.from,
-      to: query.to,
-      ...(isPetList
-        ? { petIds: query.pets }
-        : isHost
-          ? { petCount: query.count }
-          : { species: query.species as HomePetSpecies[] }),
-    });
-    router.push(viewer === "visitor" ? loginRedirectPath(path) : path);
-  }
 
   return (
     <Box
@@ -153,16 +154,19 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
                 <Notice tone="atencao">{copy.petError}</Notice>
               </Box>
             )}
-            <SearchBar
-              query={{ pets: petIds, species: [], sizes: [] }}
-              pets={isPetList ? pets : []}
-              quantityMode={isHost}
-              onSearch={handleSearch}
-              onDraftChange={(query) => {
-                setPetIds(query.pets);
-                setStay({ from: query.from, to: query.to });
-              }}
-            />
+            <Box id="search-fields">
+              <SearchBar
+                key={params}
+                query={{ ...query, pets: petIds }}
+                pets={isPetList ? pets : []}
+                quantityMode={isHost}
+                onSearch={update}
+                onDraftChange={(draft) => {
+                  setPetIds(draft.pets);
+                  setStay({ from: draft.from, to: draft.to, count: draft.count });
+                }}
+              />
+            </Box>
             <Typography sx={{ position: "absolute", bottom: 4, fontSize: 14 }}>
               {isHost
                 ? copy.hostHint
@@ -178,12 +182,25 @@ export function HomeScreen({ viewer, pets, petsUnavailable, accountId = null }: 
       <PageContainer width="page" id="como-funciona" sx={{ py: { xs: 3, md: 4 }, scrollMarginTop: 80 }}>
         <TrustList variant="cards" items={copy.trust} />
       </PageContainer>
-      <NearbyListings
-        scope={accountId ?? "visitor"}
-        pets={personalized ? selectedPets.map(({ id, name }) => ({ id, name })) : undefined}
-        from={stay.from}
-        to={stay.to}
-      />
+      {searching ? (
+        <PageContainer width="page" component="section" aria-labelledby="results-title" sx={{ pb: { xs: 4, md: 6 } }}>
+          <SearchResultsSection
+            key={accountId ?? "visitor"}
+            accountId={accountId ?? "visitor"}
+            pets={pets.map(({ id, name, species, size }) => ({ id, name, species, size }))}
+            initialQuery={initialQuery}
+            initialError={initialError}
+          />
+        </PageContainer>
+      ) : (
+        <NearbyListings
+          scope={accountId ?? "visitor"}
+          pets={personalized ? selectedPets.map(({ id, name }) => ({ id, name })) : undefined}
+          from={stay.from}
+          to={stay.to}
+          count={stay.count}
+        />
+      )}
     </Box>
   );
 }

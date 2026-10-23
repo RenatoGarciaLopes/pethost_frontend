@@ -1,6 +1,6 @@
 "use client";
 import { Box, ButtonBase, Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
-import { Map as MapLibreMap, type GeoJSONSource } from "maplibre-gl";
+import { Map as MapLibreMap, setWorkerUrl, type GeoJSONSource } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -18,10 +18,15 @@ import { CompatibilityChip } from "../ListingCard/CompatibilityChip";
 import type { SearchMapProps } from "./SearchMap";
 import type { ListingSummary } from "../../../api/contracts";
 
+// O bundler reescreve o `import.meta.url` do MapLibre e o worker padrão não carrega: o arquivo vira um asset estático do app.
+setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).href);
+
 /** Centro de Maringá (piloto), usado só quando não há nenhum ponto para enquadrar. */
 const FALLBACK_CENTER: [number, number] = [-51.9386, -23.4205];
 const RING_KM = [1, 2];
 const GRID_PX = 40;
+/** Enquadramento nunca passa daqui: com 1 cantinho (ou vários no mesmo ponto) o mapa mostra o bairro e os arredores. */
+const MAX_FIT_ZOOM = 14;
 /** Altura que o cartão do selecionado e a faixa de privacidade tomam no pé do mapa. */
 const SELECTED_CARD_HEIGHT = 230;
 /** Folga para nenhum pino ficar sob os controles (topo e direita) nem sob a faixa de privacidade (embaixo). */
@@ -38,7 +43,7 @@ export function SearchMapView({
   origin,
   selectedId = null,
   onSelect,
-  searchOnMove,
+  searchOnMove = false,
   onSearchOnMoveChange,
   onMoveEnd,
   query,
@@ -72,13 +77,15 @@ export function SearchMapView({
   const approxData = useMemo(
     () => ({
       type: "FeatureCollection" as const,
-      features: listings.map((listing) => ({
+      // Um círculo por ponto: cantinhos no mesmo lugar não empilham o preenchimento até virar um borrão.
+      features: [
+        ...new Map(
+          listings.map((listing) => [JSON.stringify(listing.approximateLocation), listing.approximateLocation]),
+        ).values(),
+      ].map((area) => ({
         type: "Feature" as const,
-        properties: { id: listing.id },
-        geometry: {
-          type: "Polygon" as const,
-          coordinates: [circleRing(listing.approximateLocation, listing.approximateLocation.radiusMeters)],
-        },
+        properties: {},
+        geometry: { type: "Polygon" as const, coordinates: [circleRing(area, area.radiusMeters)] },
       })),
     }),
     [listings],
@@ -124,7 +131,7 @@ export function SearchMapView({
                 [bounds.west, bounds.south],
                 [bounds.east, bounds.north],
               ] as [[number, number], [number, number]],
-              fitBoundsOptions: { padding: FIT_PADDING, maxZoom: 15 },
+              fitBoundsOptions: { padding: FIT_PADDING, maxZoom: MAX_FIT_ZOOM },
             }
           : { center: FALLBACK_CENTER, zoom: 12 }),
         attributionControl: false,
@@ -237,7 +244,7 @@ export function SearchMapView({
         [bounds.west, bounds.south],
         [bounds.east, bounds.north],
       ],
-      { padding: FIT_PADDING, maxZoom: 15, duration: latest.current.reducedMotion ? 0 : 500 },
+      { padding: FIT_PADDING, maxZoom: MAX_FIT_ZOOM, duration: latest.current.reducedMotion ? 0 : 500 },
     );
     // Só quando muda o conjunto de cantinhos.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -420,30 +427,31 @@ export function SearchMapView({
         })}
       </Box>
 
-      <FormControlLabel
-        label={mapCopy.searchOnMove}
-        control={
-          <Checkbox
-            size="small"
-            checked={searchOnMove}
-            onChange={(event) => onSearchOnMoveChange(event.target.checked)}
-          />
-        }
-        sx={{
-          position: "absolute",
-          top: 12,
-          left: 12,
-          m: 0,
-          pr: 1.5,
-          bgcolor: "background.default",
-          border: "2px solid",
-          borderColor: "text.primary",
-          borderRadius: `${quintalRadii.pill}px`,
-          boxShadow: hardShadow(3),
-          "& .MuiFormControlLabel-label": { fontSize: 13, fontWeight: 700 },
-        }}
-      />
-
+      {onSearchOnMoveChange && (
+        <FormControlLabel
+          label={mapCopy.searchOnMove}
+          control={
+            <Checkbox
+              size="small"
+              checked={searchOnMove}
+              onChange={(event) => onSearchOnMoveChange(event.target.checked)}
+            />
+          }
+          sx={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+            m: 0,
+            pr: 1.5,
+            bgcolor: "background.default",
+            border: "2px solid",
+            borderColor: "text.primary",
+            borderRadius: `${quintalRadii.pill}px`,
+            boxShadow: hardShadow(3),
+            "& .MuiFormControlLabel-label": { fontSize: 13, fontWeight: 700 },
+          }}
+        />
+      )}
       <Box sx={{ position: "absolute", top: 12, right: 12, display: "grid", gap: 0.75 }}>
         {(
           [

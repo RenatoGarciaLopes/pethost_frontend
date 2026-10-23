@@ -4,6 +4,23 @@ import { fail, ok, sessionUserOf } from "./session.mjs";
 const API = "http://localhost:5099/api/v1";
 const species = ["dog", "cat"];
 const MARINGA = { latitude: -23.42, longitude: -51.94 };
+/** Pontos aproximados (3 casas) espalhados por bairros de Maringá, para o mapa mostrar vários pinos. */
+const NEIGHBORHOODS = [
+  { latitude: -23.425, longitude: -51.938 },
+  { latitude: -23.412, longitude: -51.925 },
+  { latitude: -23.438, longitude: -51.952 },
+  { latitude: -23.419, longitude: -51.957 },
+  { latitude: -23.445, longitude: -51.921 },
+  { latitude: -23.431, longitude: -51.934 },
+  { latitude: -23.408, longitude: -51.943 },
+  { latitude: -23.452, longitude: -51.945 },
+  { latitude: -23.422, longitude: -51.911 },
+  { latitude: -23.436, longitude: -51.967 },
+  { latitude: -23.415, longitude: -51.935 },
+  { latitude: -23.428, longitude: -51.949 },
+  { latitude: -23.441, longitude: -51.931 },
+];
+
 const listings = Array.from({ length: 13 }, (_, index) => ({
   id: `0199d2a0-0000-7000-8000-${String(4100 + index).padStart(12, "0")}`,
   hostId: "0199d2a0-0000-7000-8000-000000000042",
@@ -28,7 +45,7 @@ const listings = Array.from({ length: 13 }, (_, index) => ({
   acceptsLarge: true,
   availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
   distanceKm: 1 + index / 10,
-  approximateLocation: { latitude: -23.425, longitude: -51.938, radiusMeters: 500 },
+  approximateLocation: { ...NEIGHBORHOODS[index % NEIGHBORHOODS.length], radiusMeters: 500 },
   badges: index % 2 ? [] : ["yard", "neighbor", "well_rated"],
   ...(index % 3 === 0 ? { rating: { average: 4.8, count: 9 } } : {}),
 }));

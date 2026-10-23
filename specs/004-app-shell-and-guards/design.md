@@ -63,7 +63,7 @@ O widget só importa `shared` (e features pelo `index.client`, se precisar). Os 
 
 ## Proxy (`src/proxy.ts`)
 
-1. Caminho público (`/`, `/search`, `/listings/*`, `/login`, `/admin/login`, `/register/*`, `/forgot-password`, `/reset-password`, `/api/*`, estáticos) → segue.
+1. Caminho público (`/`, `/listings/*`, `/login`, `/admin/login`, `/register/*`, `/forgot-password`, `/reset-password`, `/api/*`, estáticos) → segue.
 2. Sem `pethost_at` e sem `pethost_rt` → `/login?next=<rota>` (admin → `/admin/login?next=`).
 3. Com `pethost_at`: `readRoleHint` decodifica a claim `role` **sem verificar a assinatura**. Papel não permitido no prefixo → `homeOf(role)`.
 4. Só com `pethost_rt` (access venceu) → segue; o layout chama `requireRole`, que redireciona para o refresh (REQ-HTTP-016).

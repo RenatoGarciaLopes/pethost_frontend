@@ -23,6 +23,8 @@ export interface NearbyListingsProps {
   /** Período da busca da home (AAAA-MM-DD); com ele e com pets os cards mostram o total da estadia. */
   from?: string;
   to?: string;
+  /** Quantidade de pets da busca de anfitrião (sem pets cadastrados); entra no total dos cards. */
+  count?: number;
 }
 
 /**
@@ -33,8 +35,14 @@ export interface NearbyListingsProps {
  *
  * @example <NearbyListings scope="visitor" />
  */
-export function NearbyListings({ scope, pets = [], from, to }: NearbyListingsProps) {
-  const cardQuery: SearchQuery = { ...CARD_QUERY, from: from || undefined, to: to || undefined };
+export function NearbyListings({ scope, pets = [], from, to, count }: NearbyListingsProps) {
+  const cardQuery: SearchQuery = {
+    ...CARD_QUERY,
+    pets: pets.map(({ id }) => id),
+    from: from || undefined,
+    to: to || undefined,
+    count,
+  };
   const compatibility = scope !== "visitor" && pets.length > 0 ? { accountId: scope, pets } : undefined;
   const location = useGeolocation();
   const nearby = useNearbyListings(scope, location.coords);
@@ -90,13 +98,10 @@ export function NearbyListings({ scope, pets = [], from, to }: NearbyListingsPro
           >
             {shown.items.map((listing) => (
               <Box component="li" key={listing.id}>
-                <ListingCard listing={listing} query={cardQuery} petCount={pets.length} compatibility={compatibility} />
+                <ListingCard listing={listing} query={cardQuery} petCount={pets.length || count || 0} compatibility={compatibility} />
               </Box>
             ))}
           </Box>
-          <Button href="/search" variant="outlined" sx={{ mt: 3 }}>
-            {copy.seeAll}
-          </Button>
         </>
       ) : (
         <Surface elevation="md" sx={{ p: { xs: 2.5, md: 3.5 } }}>

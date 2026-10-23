@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { petQueries } from "@/features/pets";
 import { prefetchMyPets } from "@/features/pets/index.server";
+import { queryToSearchParams, searchParamsToQuery } from "@/features/search";
+import { prefetchSearch } from "@/features/search/index.server";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { getSession } from "@/shared/auth/server/getSession";
 import { GrassFooter } from "@/shared/ui/brand/GrassFooter";
@@ -13,8 +16,8 @@ import { AppHeader } from "@/widgets/app-shell";
 export const metadata: Metadata = { title: homeCopy.pageTitle };
 
 /**
- * Início público (spec 040): a identidade e a lista de pets só são lidas na requisição. A página não busca
- * disponibilidade; entrega os filtros preparados para `/search` (spec 041).
+ * Início e busca (specs 040 e 041): a identidade e a lista de pets só são lidas na requisição. Sem filtros na URL
+ * mostra a vitrine "perto de você"; com filtros, a primeira página de resultados já vem do servidor e hidrata no cliente.
  */
 interface HomePageProps {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -50,19 +53,32 @@ async function HomeContent({ searchParams }: HomePageProps) {
   let pets: HomePetOption[] = [];
   let petsUnavailable = false;
 
+  const queryClient = getQueryClient();
   if (user?.role === "owner") {
-    const queryClient = getQueryClient();
     await prefetchMyPets(queryClient, user.id);
     const query = petQueries.mine(user.id);
     const list = queryClient.getQueryData(query.queryKey);
-    pets = list?.active.map(({ id, name, species }) => ({ id, name, species })) ?? [];
+    pets = list?.active.map(({ id, name, species, size }) => ({ id, name, species, size: size ?? null })) ?? [];
     petsUnavailable = Boolean(queryClient.getQueryState(query.queryKey)?.error);
   }
+
+  const query = searchParamsToQuery(params);
+  const searching = queryToSearchParams(query).size > 0;
+  const initialError = searching ? await prefetchSearch(queryClient, user?.id ?? "visitor", query, pets) : undefined;
 
   return (
     <>
       <AppHeader variant="home" user={viewer === "visitor" ? null : user} />
-      <HomeScreen viewer={viewer} pets={pets} petsUnavailable={petsUnavailable} accountId={user?.id ?? null} />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <HomeScreen
+          viewer={viewer}
+          pets={pets}
+          petsUnavailable={petsUnavailable}
+          accountId={user?.id ?? null}
+          initialQuery={query}
+          initialError={initialError}
+        />
+      </HydrationBoundary>
       <GrassFooter />
     </>
   );
