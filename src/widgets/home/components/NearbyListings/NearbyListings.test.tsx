@@ -250,3 +250,26 @@ it("REQ-SRCH-020 tutor com pet e datas vê o total e a compatibilidade nos cards
   expect(asked[0]?.get("petId")).toBe("0199d2a0-0000-7000-8000-0000000000e1");
   expect(asked[0]?.get("checkIn")).toBe("2026-12-20");
 });
+
+it("REQ-HOME-011 o cantinho aberto pela vitrine leva os pets e as datas escolhidos na barra", async () => {
+  server.use(
+    http.get("*/api/listings", () =>
+      HttpResponse.json(apiOk({ items: [listingFixture()], page: 1, pageSize: 6, totalCount: 1 })),
+    ),
+    http.get("*/api/listings/:id/compatibility", () => new HttpResponse(null, { status: 500 })),
+  );
+  geo.state = { status: "granted", coords: point };
+  renderWithProviders(
+    <NearbyListings
+      scope="owner-1"
+      pets={[{ id: "0199d2a0-0000-7000-8000-0000000000e1", name: "Pipoca" }]}
+      from="2026-12-20"
+      to="2026-12-25"
+    />,
+    { theme: quintalTheme },
+  );
+  const href = (await screen.findByRole("link", { name: /Quintal da Cida/ })).getAttribute("href") ?? "";
+  const params = new URL(href, "http://x").searchParams;
+  expect(params.get("pets")).toBe("0199d2a0-0000-7000-8000-0000000000e1");
+  expect(params.get("from")).toBe("2026-12-20");
+});

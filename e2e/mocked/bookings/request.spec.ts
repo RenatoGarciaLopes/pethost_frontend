@@ -88,6 +88,7 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
 
   const card = page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first();
   const title = (await card.getByRole("heading").first().textContent())?.trim() ?? "";
+  await expect(card).toHaveAttribute("href", /pets=.+&from=.+&to=.+/);
   await waitForHydration(card);
   await card.click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible(FIRST_COMPILE);

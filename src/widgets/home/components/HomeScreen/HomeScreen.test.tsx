@@ -39,7 +39,7 @@ it("REQ-HOME-002 visitante busca por espécie na própria home, sem passar pelo 
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
 
   expect(window.location.pathname + window.location.search).toBe(
-    "/?where=Zona+7&from=2026-11-01&to=2026-11-05&species=dog",
+    "/?species=dog&where=Zona+7&from=2026-11-01&to=2026-11-05",
   );
 });
 

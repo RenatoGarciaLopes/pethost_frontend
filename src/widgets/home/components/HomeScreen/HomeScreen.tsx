@@ -56,7 +56,7 @@ export function HomeScreen({
   const [petIds, setPetIds] = useState<string[]>(
     query.pets.length ? query.pets : viewer === "owner" && pets[0] ? [pets[0].id] : [],
   );
-  const [stay, setStay] = useState<{ from?: string; to?: string }>({});
+  const [stay, setStay] = useState<{ from?: string; to?: string; count?: number }>({});
   const selectedPets = pets.filter((pet) => petIds.includes(pet.id));
   const personalized = viewer === "owner" && selectedPets.length > 0;
   const title = personalized ? copy.petsTitle(selectedPets.map((pet) => pet.name)) : copy.genericTitle;
@@ -163,7 +163,7 @@ export function HomeScreen({
                 onSearch={update}
                 onDraftChange={(draft) => {
                   setPetIds(draft.pets);
-                  setStay({ from: draft.from, to: draft.to });
+                  setStay({ from: draft.from, to: draft.to, count: draft.count });
                 }}
               />
             </Box>
@@ -198,6 +198,7 @@ export function HomeScreen({
           pets={personalized ? selectedPets.map(({ id, name }) => ({ id, name })) : undefined}
           from={stay.from}
           to={stay.to}
+          count={stay.count}
         />
       )}
     </Box>

@@ -3,6 +3,7 @@ import { useSearchParams } from "@storybook/nextjs-vite/navigation.mock";
 import { ReadonlyURLSearchParams } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { listingFixture, searchPetsFixture, searchQueryFixture } from "@/test/fixtures/search";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { searchQueries } from "../../api/queries";
 import { SearchResultsSection } from "./SearchResultsSection";
 
@@ -43,7 +44,7 @@ export const ComMapa: Story = {
         style={{
           minHeight: 320,
           border: "2px dashed currentColor",
-          borderRadius: 24,
+          borderRadius: quintalRadii.card,
           display: "grid",
           placeItems: "center",
         }}

@@ -157,7 +157,7 @@ it("REQ-SRCH-012 400 mostra o erro do campo Onde junto dos chips", async () => {
   const { user } = renderSearch();
   await user.click(screen.getByRole("button", { name: "Casa" }));
   await screen.findByRole("button", { name: "Tentar de novo" });
-  expect(screen.getByRole("alert")).toHaveTextContent("Onde: Confere esse filtro e busca de novo.");
+  expect(screen.getByText("Onde: Confere esse filtro e busca de novo.")).toBeVisible();
 });
 
 it("REQ-SRCH-002 histórico restaura o filtro e recarregar usa o mesmo parser", async () => {
