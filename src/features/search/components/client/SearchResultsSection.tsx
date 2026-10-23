@@ -88,6 +88,7 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
             void result.refetch();
           }}
           onExpand={(radius) => update({ ...query, radius })}
+          withMap={hasMap && desktop}
         />
         {hasMap && desktop && (
           <Box sx={{ position: "sticky", top: 24, height: "calc(100vh - 48px)", maxHeight: 760, minHeight: 480 }}>

@@ -18,6 +18,39 @@ test("079 resultados e chips na home em 1440 e 390", async ({ page, baseURL }, t
   await page.screenshot({ path: `test-results/home-079-${width}.png`, fullPage: true });
 });
 
+test("REQ-SRCH-013 busca com região mostra o mapa: ao lado da lista no computador, em tela cheia pelo Ver mapa no celular", async ({
+  page,
+}, testInfo) => {
+  const mobile = testInfo.project.name.includes("mobile");
+  const width = mobile ? 390 : 1440;
+  await page.setViewportSize({ width, height: 900 });
+  await page.goto("/?where=Maring%C3%A1");
+  await expect(page.getByRole("heading", { level: 2, name: "13 casas com vaga perto de Maringá" })).toBeVisible({
+    timeout: 30_000,
+  });
+  const map = page.getByRole("region", { name: "Mapa dos cantinhos" });
+  if (mobile) {
+    await expect(map).toHaveCount(0);
+    const open = page.getByRole("button", { name: "Ver mapa" });
+    await waitForHydration(open);
+    await open.click();
+  }
+  await expect(map).toBeVisible({ timeout: 30_000 });
+  await expect(map.getByRole("button", { name: /R\$/ }).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("checkbox", { name: "Buscar quando eu mexer no mapa" })).toHaveCount(0);
+  if (mobile) {
+    await page.getByRole("button", { name: "Ver lista" }).click();
+    await expect(map).toHaveCount(0);
+    await page.getByRole("button", { name: "Ver mapa" }).click();
+    await expect(map).toBeVisible();
+  }
+  if (!mobile)
+    await page.getByRole("heading", { level: 2, name: /casas com vaga perto/ }).evaluate((el) => el.scrollIntoView());
+  // Os tiles chegam depois do pino: espera o mapa assentar antes do print.
+  await page.waitForTimeout(4000);
+  await page.screenshot({ path: `test-results/home-079-mapa-${width}.png` });
+});
+
 test("REQ-SRCH-001 visitante busca na própria home, sem passar pelo login", async ({ page }) => {
   await page.goto("/?where=Maring%C3%A1&hasKids=false");
   await expect(page.getByRole("heading", { level: 2, name: "13 casas com vaga perto de Maringá" })).toBeVisible({

@@ -1,6 +1,6 @@
 "use client";
 import { Box, ButtonBase, Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
-import { Map as MapLibreMap, type GeoJSONSource } from "maplibre-gl";
+import { Map as MapLibreMap, setWorkerUrl, type GeoJSONSource } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -17,6 +17,9 @@ import { searchCopy } from "../../../lib/searchCopy";
 import { CompatibilityChip } from "../ListingCard/CompatibilityChip";
 import type { SearchMapProps } from "./SearchMap";
 import type { ListingSummary } from "../../../api/contracts";
+
+// O bundler reescreve o `import.meta.url` do MapLibre e o worker padrão não carrega: o arquivo vira um asset estático do app.
+setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).href);
 
 /** Centro de Maringá (piloto), usado só quando não há nenhum ponto para enquadrar. */
 const FALLBACK_CENTER: [number, number] = [-51.9386, -23.4205];

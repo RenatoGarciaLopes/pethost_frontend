@@ -40,7 +40,7 @@ const fake = vi.hoisted(() => {
   }
   return { instances, FakeMap };
 });
-vi.mock("maplibre-gl", () => ({ Map: fake.FakeMap }));
+vi.mock("maplibre-gl", () => ({ Map: fake.FakeMap, setWorkerUrl: vi.fn() }));
 vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));
 
 const [cida, antonio] = searchMapListingsFixture;
