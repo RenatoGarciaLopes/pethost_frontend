@@ -73,8 +73,8 @@ export const listingPageHandlers = [
     const items = listingId === LISTING_ID ? [review] : [];
     return ok({ items, page: 1, pageSize: 4, totalCount: items.length });
   }),
-  http.get(`${API}/listings/:listingId`, ({ request, params }) => {
-    if (!sessionUserOf(request)) return fail(401, "UNAUTHORIZED");
+  // Aberto, como a API real: o visitante vê o cantinho (sem a rua).
+  http.get(`${API}/listings/:listingId`, ({ params }) => {
     const listing = publicListing(params.listingId);
     return listing ? ok(listing) : fail(404, "LISTING_NOT_FOUND");
   }),

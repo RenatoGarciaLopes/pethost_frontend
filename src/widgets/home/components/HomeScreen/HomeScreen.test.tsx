@@ -30,7 +30,7 @@ function renderHome(overrides: Partial<HomeScreenProps> = {}, url = "/") {
 it("REQ-HOME-002 visitante busca por espécie na própria home, sem passar pelo login", async () => {
   const { user } = renderHome();
   expect(screen.getByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja" })).toBeVisible();
-  expect(screen.getByText("Entre para ver os cantinhos disponíveis.")).toBeVisible();
+  expect(screen.getByText("Pode olhar à vontade: a conta só entra na hora de pedir.")).toBeVisible();
 
   await user.type(screen.getByRole("textbox", { name: "Onde" }), "Zona 7");
   await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-11-01", "2026-11-05");

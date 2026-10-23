@@ -45,3 +45,7 @@ export const SemDatas: Story = { args: { search: "", from: undefined, to: undefi
 export const SemPets: Story = { args: { pets: [], petIds: [] } };
 /** No celular o botão vai para a barra fixa no rodapé. */
 export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };
+/** Visitante (sem conta): as datas valem, sem "Quem vai"; "Pedir estadia" leva ao login de tutor e volta aqui. */
+export const Visitante: Story = {
+  args: { pets: null, petIds: [], search: "from=2026-12-20&to=2026-12-25" },
+};

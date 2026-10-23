@@ -5,13 +5,16 @@ import { GrassFooter } from "@/shared/ui/brand/GrassFooter";
 import { AppHeader } from "./AppHeader";
 
 export interface AppShellProps {
-  /** Conta confirmada pela API (`requireRole`, via `RoleGate`), nunca lida do JWT. */
-  user: SessionUser;
+  /**
+   * Conta confirmada pela API (`requireRole`, via `RoleGate`, ou `getSession`), nunca lida do JWT. `null` é o visitante
+   * de uma página aberta (o cantinho): cabeçalho sem atalhos, com Entrar.
+   */
+  user: SessionUser | null;
   children: ReactNode;
 }
 
 /**
- * Casca das áreas logadas (spec 004), Server Component: "Pular para o conteúdo", cabeçalho no tom da conta
+ * Casca das áreas logadas (spec 004) e da página aberta do cantinho, Server Component: "Pular para o conteúdo", cabeçalho no tom da conta
  * (REQ-SHELL-001: tutor papel, anfitrião gramado claro, admin areia), logo levando à casa do papel, menu da
  * conta, os atalhos do papel (`NAV_ITEMS`; gaveta no celular), o `<main id="conteudo">` e o `GrassFooter`
  * (rodapé de gramado que desce para a terra, só desenho; fora do admin: orçamento de personalidade zero).
@@ -25,7 +28,7 @@ export function AppShell({ user, children }: AppShellProps) {
       <Box component="main" id="conteudo" tabIndex={-1} sx={{ outline: "none", flexGrow: 1 }}>
         {children}
       </Box>
-      {user.role !== "admin" && <GrassFooter />}
+      {user?.role !== "admin" && <GrassFooter />}
     </Box>
   );
 }

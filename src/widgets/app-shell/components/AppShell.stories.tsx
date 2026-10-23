@@ -8,8 +8,8 @@ import { useState } from "react";
 import { accountQueryKey } from "@/shared/api/query/queryClient";
 import { AppShell } from "./AppShell";
 
-/** Cache isolado, como nas stories de AddressFields, sem chamadas ao backend. */
-function Frame({ role }: { role: "owner" | "host" | "admin" }) {
+/** Cache isolado, como nas stories de AddressFields, sem chamadas ao backend. `visitor`: sem conta (página aberta). */
+function Frame({ role }: { role: "owner" | "host" | "admin" | "visitor" }) {
   const [client] = useState(() => {
     const cache = new QueryClient();
     cache.setQueryData(accountQueryKey("story-account", "linked-accounts"), [
@@ -21,7 +21,11 @@ function Frame({ role }: { role: "owner" | "host" | "admin" }) {
   return (
     <QueryClientProvider client={client}>
       <AppShell
-        user={{ id: "story-account", fullName: "Camila Souza", email: "camila@exemplo.test", role, isActive: true }}
+        user={
+          role === "visitor"
+            ? null
+            : { id: "story-account", fullName: "Camila Souza", email: "camila@exemplo.test", role, isActive: true }
+        }
       >
         <Box sx={{ p: 3 }}>
           <Typography component="h1" variant="h4">
@@ -90,6 +94,17 @@ export const Admin: Story = {
     await expect(body.queryByRole("menuitem", { name: "Minha conta" })).not.toBeInTheDocument();
     await expect(body.queryByRole("menuitem", { name: /Trocar pra/ })).not.toBeInTheDocument();
     await expect(body.getByRole("menuitem", { name: "Sair" })).toBeVisible();
+  },
+};
+
+/** Página aberta do cantinho sem conta: sem atalhos, com Entrar. */
+export const Visitante: Story = {
+  name: "REQ-LPAGE-012 Visitante",
+  args: { role: "visitor" },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+    await expect(canvas.queryByRole("navigation", { name: "Navegação principal" })).not.toBeInTheDocument();
   },
 };
 
