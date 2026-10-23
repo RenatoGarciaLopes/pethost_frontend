@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { listingBadgeLabel } from "@/shared/config/listingBadges";
-import { focusRing } from "@/shared/theme/overrides/Button";
+import { focusRing, keyboardFocus } from "@/shared/theme/focus";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
 import { DoorMark } from "@/shared/ui/brand/DoorMark";
@@ -75,7 +75,7 @@ export function ListingGallery({ title, photos, neighbor }: ListingGalleryProps)
         pb: { xs: 1, md: 0 },
         pr: { xs: 0.75, md: 0 },
         borderRadius: `${quintalRadii.media}px`,
-        "&:focus-visible": focusRing,
+        [keyboardFocus()]: focusRing,
         display: { xs: "flex", md: "grid" },
         gap: 2,
         overflowX: { xs: "auto", md: "visible" },
