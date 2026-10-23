@@ -41,6 +41,7 @@ export const listingPageCopy = {
   whoGoes: "Quem vai",
   noPets: "Pra pedir, cadastra seu pet primeiro.",
   newPet: "Cadastrar pet",
+  signInToRequest: "Pra pedir, você entra com sua conta de tutor (ou cria uma). As datas que escolher aqui vão junto.",
   breakdown: (rate: string, nights: number, pets: number) =>
     `${rate} × ${nights} ${nights === 1 ? "noite" : "noites"} × ${pets} ${pets === 1 ? "pet" : "pets"}`,
   total: "Total",

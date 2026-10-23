@@ -17,7 +17,7 @@ import { StayBookingCard, type StayBookingPet } from "./client/StayBookingCard";
 import { ListingGallery } from "./ListingGallery";
 import { NightlyPrice } from "./NightlyPrice";
 
-/** O que o tutor já escolheu (da URL) e os pets dele. Só existe para conta de tutor. */
+/** O que o tutor ou o visitante já escolheu (da URL) e os pets do tutor. Não existe para o anfitrião. */
 export interface ListingPageStay {
   /** Hoje em Brasília, para o campo de datas. */
   today: string;
@@ -29,16 +29,18 @@ export interface ListingPageStay {
   to?: string;
   petIds: string[];
   count?: number;
-  pets: StayBookingPet[];
+  /** Pets ativos do tutor; `null` para o visitante, que pede passando pelo login. */
+  pets: StayBookingPet[] | null;
 }
 
 export interface ListingPageScreenProps {
   listing: ListingDetail;
   isOwner: boolean;
-  accountRole: "owner" | "host";
+  /** `visitor`: sem conta; vê a página e a lateral de reserva, mas o pedido leva ao login. */
+  accountRole: "owner" | "host" | "visitor";
   /** Avaliações mais novas dos tutores; vazio esconde a seção. */
   reviews: ListingReview[];
-  /** Contexto do tutor; sem ele (anfitrião) a lateral mostra só a diária e o recado. */
+  /** Contexto do tutor ou do visitante; sem ele (anfitrião) a lateral mostra só a diária e o recado. */
   stay?: ListingPageStay;
   /** Caixa "Combina com essa casa" composta pela rota (compatibilidade vem da busca). */
   compatibility?: ReactNode;
@@ -68,7 +70,7 @@ export function ListingPageScreen({
 }: ListingPageScreenProps) {
   const address = listing.address;
   const ownerNotice = isOwner && accountRole === "host";
-  const tutor = accountRole === "owner" && stay;
+  const tutor = accountRole !== "host" && stay;
   const hostName = listing.host?.name ?? copy.noHost;
   const photos = [...listing.photos].sort((a, b) => a.position - b.position).slice(0, 5);
   const house = houseLine(listing);

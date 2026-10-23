@@ -4,6 +4,7 @@ import { Avatar, Box, Button, ButtonBase, Link as MuiLink, Stack, Typography } f
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { loginRedirectPath } from "@/shared/config/appRoutes";
 import { nightsBetween, validateStay } from "@/shared/lib/date/stayRules";
 import { formatBRL } from "@/shared/lib/money";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
@@ -34,14 +35,19 @@ export interface StayBookingCardProps {
   petIds: string[];
   /** "Quantos pets" da busca, usado na conta quando nenhum pet foi escolhido. */
   count?: number;
-  pets: StayBookingPet[];
+  /**
+   * Pets ativos do tutor; `null` para o visitante: sem "Quem vai", e "Pedir estadia" leva ao login de tutor com
+   * `next` de volta a esta página, com as datas.
+   */
+  pets: StayBookingPet[] | null;
 }
 
 /**
  * Lateral de reserva do tutor (prancha da página do cantinho): diária, CHEGADA e SAÍDA no `DateRangeField`, "Quem
  * vai" com os pets em pílula (escolhido em amarelo com ✓, os outros tracejados), a conta da estadia, "Pedir
  * estadia" e o recado de pagamento. Cada escolha vai para a URL (`router.replace`), então a compatibilidade e o
- * pedido usam as mesmas datas e pets. No celular o botão sai do card e vai para a barra fixa no rodapé.
+ * pedido usam as mesmas datas e pets. No celular o botão sai do card e vai para a barra fixa no rodapé. O visitante
+ * vê o mesmo card sem "Quem vai", e o pedido passa pelo login.
  * @example <StayBookingCard {...props} />
  */
 export function StayBookingCard({
@@ -63,7 +69,10 @@ export function StayBookingCard({
   const petCount = chosen.length > 0 ? chosen.length : (count ?? 0);
   const total = stayTotal(nightlyRate, dates.checkIn, dates.checkOut, petCount);
   const nights = total ? nightsBetween(dates.checkIn, dates.checkOut) : 0;
-  const requestHref = `/listings/${listingId}/request${params.size ? `?${params}` : ""}`;
+  const query = params.size ? `?${params}` : "";
+  const requestHref = pets
+    ? `/listings/${listingId}/request${query}`
+    : loginRedirectPath(`/listings/${listingId}${query}`, "owner");
 
   function update(nextDates: typeof dates, nextPets: string[]) {
     const next = stayParams(search, nextDates, nextPets);
@@ -88,25 +97,34 @@ export function StayBookingCard({
       <Stack spacing={2.5}>
         <NightlyPrice nightlyRate={nightlyRate} />
         <DateRangeField checkIn={dates.checkIn} checkOut={dates.checkOut} today={today} onChange={changeDates} />
-        <Box component="fieldset" sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
-          <Typography component="legend" sx={{ fontWeight: 700, fontSize: "0.95rem", mb: 1 }}>
-            {copy.whoGoes}
-          </Typography>
-          {pets.length === 0 ? (
-            <Typography variant="body2">
-              {copy.noPets}{" "}
-              <MuiLink component={Link} href="/pets/new" sx={{ fontWeight: 700, color: "text.primary" }}>
-                {copy.newPet}
-              </MuiLink>
+        {pets ? (
+          <Box component="fieldset" sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
+            <Typography component="legend" sx={{ fontWeight: 700, fontSize: "0.95rem", mb: 1 }}>
+              {copy.whoGoes}
             </Typography>
-          ) : (
-            <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1 }}>
-              {pets.map((pet) => (
-                <PetPill key={pet.id} pet={pet} selected={chosen.includes(pet.id)} onToggle={() => togglePet(pet.id)} />
-              ))}
-            </Stack>
-          )}
-        </Box>
+            {pets.length === 0 ? (
+              <Typography variant="body2">
+                {copy.noPets}{" "}
+                <MuiLink component={Link} href="/pets/new" sx={{ fontWeight: 700, color: "text.primary" }}>
+                  {copy.newPet}
+                </MuiLink>
+              </Typography>
+            ) : (
+              <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1 }}>
+                {pets.map((pet) => (
+                  <PetPill
+                    key={pet.id}
+                    pet={pet}
+                    selected={chosen.includes(pet.id)}
+                    onToggle={() => togglePet(pet.id)}
+                  />
+                ))}
+              </Stack>
+            )}
+          </Box>
+        ) : (
+          <Typography variant="body2">{copy.signInToRequest}</Typography>
+        )}
         {total && (
           <Stack spacing={1} aria-live="polite" sx={{ borderTop: "2px dashed", borderColor: "divider", pt: 2 }}>
             <Stack direction="row" sx={{ justifyContent: "space-between", gap: 2, fontSize: "0.95rem" }}>

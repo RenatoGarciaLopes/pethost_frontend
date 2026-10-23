@@ -70,3 +70,15 @@ it("tutor sem pet é convidado a cadastrar um", () => {
   render({ pets: [], petIds: [] });
   expect(screen.getByRole("link", { name: "Cadastrar pet" })).toHaveAttribute("href", "/pets/new");
 });
+
+it("REQ-LPAGE-012 visitante escolhe as datas sem 'Quem vai' e pedir leva ao login de tutor, voltando à página", () => {
+  render({ pets: null, petIds: [], search: "where=Zona+7&from=2026-12-20&to=2026-12-25" });
+  expect(screen.queryByText("Quem vai")).not.toBeInTheDocument();
+  expect(screen.getByText(/Pra pedir, você entra com sua conta de tutor/)).toBeVisible();
+  for (const link of screen.getAllByRole("link", { name: "Pedir estadia" })) {
+    const url = new URL(link.getAttribute("href")!, "http://test");
+    expect(url.pathname).toBe("/login");
+    expect(url.searchParams.get("as")).toBe("owner");
+    expect(url.searchParams.get("next")).toBe(`/listings/${LISTING}?where=Zona+7&from=2026-12-20&to=2026-12-25`);
+  }
+});

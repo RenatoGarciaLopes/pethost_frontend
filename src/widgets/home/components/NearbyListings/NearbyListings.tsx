@@ -2,8 +2,6 @@
 import { Box, Button, Typography } from "@mui/material";
 import { ListingCard, useAllListings, useNearbyListings } from "@/features/search/index.client";
 import type { CompatibilityPet, SearchQuery } from "@/features/search";
-import { isApiError } from "@/shared/api/errors/ApiError";
-import { loginRedirectPath } from "@/shared/config/appRoutes";
 import { useGeolocation } from "@/shared/hooks/useGeolocation";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -47,7 +45,6 @@ export function NearbyListings({ scope, pets = [], from, to, count }: NearbyList
   const location = useGeolocation();
   const nearby = useNearbyListings(scope, location.coords);
   const failure = nearby.error;
-  const needsLogin = isApiError(failure) && failure.status === 401;
 
   const located = location.status === "granted";
   const nearbyEmpty = located && nearby.data?.items.length === 0;
@@ -110,19 +107,7 @@ export function NearbyListings({ scope, pets = [], from, to, count }: NearbyList
           </Typography>
           {((located && nearby.isPending) || waitingAll) && <SniffLoader label={copy.finding} />}
           {nearbyEmpty && !waitingAll && <Notice tone="info">{copy.empty}</Notice>}
-          {located && needsLogin && (
-            <Notice
-              tone="info"
-              action={
-                <Button href={loginRedirectPath("/")} variant="contained">
-                  {copy.signInAction}
-                </Button>
-              }
-            >
-              {copy.signIn}
-            </Notice>
-          )}
-          {located && failure && !needsLogin && (
+          {located && failure && (
             <Notice
               tone="erro"
               action={

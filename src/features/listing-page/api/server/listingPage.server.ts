@@ -24,16 +24,18 @@ export const getListingPageDetail = cache(async (accountId: string, listingId: s
   }
 });
 
-/** Identifica com segurança o perfil anfitrião da sessão atual. */
-export const getListingPageContext = cache(async (accountId: string, role: "owner" | "host", listingId: string) => {
-  const listing = await getListingPageDetail(accountId, listingId);
-  const transport = await backendForRequest();
-  const hostProfile =
-    role === "host"
-      ? await transport.request({ method: "GET", path: "/hosts/me" }, unwrapData(GetApiV1HostsMeResponse))
-      : null;
-  return { listing, isOwner: role === "host" && hostProfile?.id === listing.hostId };
-});
+/** Identifica com segurança o perfil anfitrião da sessão atual. Visitante (`accountId` "visitor") nunca é o dono. */
+export const getListingPageContext = cache(
+  async (accountId: string, role: "owner" | "host" | "visitor", listingId: string) => {
+    const listing = await getListingPageDetail(accountId, listingId);
+    const transport = await backendForRequest();
+    const hostProfile =
+      role === "host"
+        ? await transport.request({ method: "GET", path: "/hosts/me" }, unwrapData(GetApiV1HostsMeResponse))
+        : null;
+    return { listing, isOwner: role === "host" && hostProfile?.id === listing.hostId };
+  },
+);
 
 /**
  * As avaliações mais novas dos tutores sobre o cantinho (`GET /reviews?listingId=`, pública). Falha não derruba a

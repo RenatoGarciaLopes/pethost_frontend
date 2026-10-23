@@ -12,7 +12,7 @@ export const homeCopy = {
   support: "Vizinhos de Maringá que recebem cães e gatos na própria casa.",
   supportWithPets: "Vizinhos de Maringá que recebem pets na própria casa.",
   supportSecond: "Você conversa antes, paga pelo app e recebe foto todo dia.",
-  guestHint: "Entre para ver os cantinhos disponíveis.",
+  guestHint: "Pode olhar à vontade: a conta só entra na hora de pedir.",
   ownerEmptyHint: "Você pode buscar antes de cadastrar seu pet.",
   ownerPetsHint: "Escolha quem vai viajar com você.",
   hostHint: "Quantos pets viajam com você?",
@@ -39,8 +39,6 @@ export const homeCopy = {
     unavailable: "Este navegador não informa a localização. Escreva a cidade ou o bairro na busca, no topo da página.",
     failed: "Não conseguimos saber onde você está agora.",
     retry: "Tentar de novo",
-    signIn: "Entre para ver os cantinhos disponíveis.",
-    signInAction: "Entrar",
     empty: "Ainda não achamos cantinhos num raio de 10 km. Tente outra cidade na busca.",
     allTitle: (total: number) => `${total} ${total === 1 ? "casa com vaga" : "casas com vaga"} para conhecer`,
     allReason: {
