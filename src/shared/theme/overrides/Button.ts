@@ -5,7 +5,7 @@ import { quintalColors as c } from "../tokens/colors";
 import { hardShadow } from "../tokens/shadows";
 import { SPRING_ASSENTAR } from "../tokens/springs";
 /** Universal visible focus ring; applies to keyboard interaction only. */
-export const focusRing = { outline: `3px solid ${c.foco}`, outlineOffset: "3px" };
+export const focusRing = { outline: `3px solid ${c.tinta}`, outlineOffset: "3px" };
 /** Quintal button geometry, press feedback and reduced-motion behavior. */
 export const buttonStyles = {
   minHeight: 48,

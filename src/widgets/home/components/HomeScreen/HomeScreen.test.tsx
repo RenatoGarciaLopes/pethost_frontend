@@ -61,7 +61,7 @@ it("REQ-HOME-004 anfitrião escolhe quantidade sem consultar pets da casa", asyn
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "3 pets" }));
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
-  expect(navigation.push).toHaveBeenCalledWith("/search?pets=3");
+  expect(navigation.push).toHaveBeenCalledWith("/search?count=3");
 });
 
 it("REQ-HOME-006 no celular a pílula expande e anuncia os campos", async () => {

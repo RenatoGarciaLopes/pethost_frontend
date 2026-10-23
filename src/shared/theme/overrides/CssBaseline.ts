@@ -6,6 +6,8 @@ export const quintalCssBaseline = {
   styleOverrides: {
     body: { backgroundImage: "url('/brand/paper-grain.png')", fontSize: "17px" },
     ":focus-visible": focusRing,
+    // InputBase resets outline on :focus; keep the keyboard indicator above that reset.
+    ".MuiInputBase-root .MuiInputBase-input:focus-visible": focusRing,
     "@media (prefers-reduced-motion: reduce)": {
       "*, *::before, *::after": {
         animation: "none !important",
