@@ -27,6 +27,8 @@ const detail = {
   availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
   address: { neighborhood: "Centro", city: "Maringá", state: "PR" },
   location: null,
+  // Obrigatório no contrato desde o OpenAPI da 070: ponto com 3 casas e raio de 500 m.
+  approximateLocation: { latitude: -23.426, longitude: -51.938, radiusMeters: 500 },
   photos: [{ id: "0199d2a0-0000-7000-8000-000000000043", url: "https://images.example.test/yard.webp", position: 1 }],
   isActive: true,
   deactivatedAt: null,
