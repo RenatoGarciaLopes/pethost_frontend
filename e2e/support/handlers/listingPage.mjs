@@ -73,6 +73,23 @@ export const listingPageHandlers = [
     const items = listingId === LISTING_ID ? [review] : [];
     return ok({ items, page: 1, pageSize: 4, totalCount: items.length });
   }),
+  // O perfil anfitrião da sessão, para a página saber se o cantinho é dela: a conta anfitriã do mock não é a Casa Cida.
+  http.get(`${API}/hosts/me`, ({ request }) => {
+    const user = sessionUserOf(request);
+    if (!user) return fail(401, "UNAUTHORIZED");
+    if (user.role !== "host") return fail(403, "FORBIDDEN");
+    return ok({
+      id: "0199d2a0-0000-7000-8000-0000000000b2",
+      userId: user.id,
+      personType: "individual",
+      verifiedAt: "2026-01-10T12:00:00Z",
+      isActive: true,
+      stripeConnected: true,
+      stripePayoutsEnabled: true,
+      stripeStatus: "enabled",
+      createdAt: "2026-01-10T12:00:00Z",
+    });
+  }),
   // Aberto, como a API real: o visitante vê o cantinho (sem a rua).
   http.get(`${API}/listings/:listingId`, ({ params }) => {
     const listing = publicListing(params.listingId);

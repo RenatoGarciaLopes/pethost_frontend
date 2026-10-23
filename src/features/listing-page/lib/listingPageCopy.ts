@@ -18,8 +18,6 @@ export const listingPageCopy = {
   addressPrivacy: "O endereço chega quando a estadia for confirmada.",
   ownListing: "É assim que os tutores veem seu cantinho (sem a rua)",
   edit: "Editar",
-  hostAccount: "Pra pedir uma estadia, entra com a conta de tutor.",
-  switchAccount: "Trocar de conta",
   sections: { host: "Quem cuida", rules: "Regras da casa", reviews: "O que os tutores contam" },
   noHost: "Anfitrião",
   company: "Empresa parceira",
@@ -41,7 +39,6 @@ export const listingPageCopy = {
   whoGoes: "Quem vai",
   noPets: "Pra pedir, cadastra seu pet primeiro.",
   newPet: "Cadastrar pet",
-  signInToRequest: "Pra pedir, você entra com sua conta de tutor (ou cria uma). As datas que escolher aqui vão junto.",
   breakdown: (rate: string, nights: number, pets: number) =>
     `${rate} × ${nights} ${nights === 1 ? "noite" : "noites"} × ${pets} ${pets === 1 ? "pet" : "pets"}`,
   total: "Total",

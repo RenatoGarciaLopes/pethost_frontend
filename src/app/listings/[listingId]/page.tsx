@@ -83,7 +83,7 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
           accountRole={user?.role ?? "visitor"}
           reviews={reviews}
           stay={
-            user?.role !== "host"
+            !isOwner
               ? {
                   today: brasiliaToday(),
                   search,
@@ -92,7 +92,7 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
                   to: query.to,
                   petIds: selectedPets.map((pet) => pet.id),
                   count: query.count,
-                  pets: user ? activePets.map(({ id, name, coverUrl }) => ({ id, name, coverUrl })) : null,
+                  pets: activePets.map(({ id, name, coverUrl }) => ({ id, name, coverUrl })),
                 }
               : undefined
           }

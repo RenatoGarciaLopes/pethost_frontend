@@ -12,11 +12,12 @@ updated: 2026-10-13
 - **Região viva no `AppProviders`:** o anúncio "Agora você está na conta de…" precisa sobreviver à troca de rota, e a casca da 004 ainda não existe. `AnnouncerProvider` + `useAnnounce` (`shared/ui/feedback/Announcer`) ficam acima dos grupos de rota; a casca reaproveita.
 - **Senha que não confere aparece no campo, não num `Notice`:** o REQ-SWITCH-007 pede campo vazio e focado; um `Notice` que também pega o foco brigaria com o campo. A frase neutra vira o erro do campo, lida pelo leitor de tela ao focar. `429` e erro desconhecido usam o `ErrorNotice` da 013.
 - **Reaproveita a 013:** `PasswordScreen` (coluna estreita com o cartão), `StepHeading`, `ErrorNotice`, `useErrorNotice`. O schema reaproveita a senha do login (`loginFormSchema.shape.password`): só exigida, sem regra de força.
-- **"Agora não" leva à casa da conta atual** (`homeOf`), não ao histórico: quem abre o link direto não tem página anterior.
+- **"Agora não" leva à casa da conta atual** (`homeOf`), não ao histórico: quem abre o link direto não tem página anterior. Desde a 089, se a URL trouxer `next` seguro, volta para ele (REQ-SWITCH-013).
 - **Cor da conta:** `theme.palette.account` (`accountTones`, já no tema); a 004 chamava de `headerTone`.
 - **Sem `Suspense` próprio na página:** o do `RoleGate` do layout `(account)` cobre a leitura da sessão e de `searchParams`; a sessão vem do `cache()` do `getSession`, sem segundo `GET /users/me`.
 - **Barreira de requisição antes da guarda:** `await connection()` no conteúdo assíncrono da página e no `ConfirmedArea` do `RoleGate` evita que o relógio de validade da sessão (`Date.now`) seja avaliado no prerender, inclusive quando o leitor de sessão é reutilizado do cache React. A página tem `Suspense` local com `SniffLoader`, pois a fronteira do layout não cobre a avaliação independente do segmento. Detectado pelo E2E com Next 16.4; o leitor compartilhado não foi alterado.
 - **Destino da troca:** `homeOf` do papel novo. `/` e `/host` ainda não têm página (casa e casca são da 004); o mesmo vale para o login hoje.
+- **`next` (089, REQ-SWITCH-013):** a página lê `?next=` e passa cru ao painel, que só usa caminho interno seguro: `resolvePostLoginPath(target, next)` depois da troca, `toSafeInternalPath(next, homeOf(current))` no "Agora não" (`SwitchPasswordForm` recebe `cancelHref` em vez de `current`), `registerPath(target, next)` e `loginRedirectPath(next, target)`. O link se monta com `switchAccountPath(to, next)` (`shared/config/appRoutes`).
 
 ## Rotas e renderização
 
@@ -96,3 +97,6 @@ AccountSwitchScreen (features/auth · server)
 | 006             | E2E real         | `e2e/real/auth/switch.spec.ts`                             | só se o seed tiver a mesma pessoa nas duas contas; senão N/A justificado no registro                 |
 | Visual          | Storybook        | `AccountSwitchPanel.stories.tsx`                           | cada estado; a11y sem violação                                                                       |
 | 012             | Integração (RSC) | `app/(account)/users/switch/page.test.ts`                  | `metadata.title` e `robots.index = false`                                                            |
+| 013             | Unitário         | `appRoutes.test.ts`                                        | `switchAccountPath` com `to` e `next` seguro; inseguro some                                          |
+| 013             | Componente (MSW) | `AccountSwitchPanel.test.tsx`                              | "Agora não" e a troca vão para o `next`; `next` inseguro cai na casa                                 |
+| 013             | E2E simulado     | `e2e/mocked/search/listing-page.spec.ts`                   | anfitrião pede no cantinho, troca para tutor e volta ao cantinho com as datas                        |
