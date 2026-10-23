@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { pickCalendarDays } from "@/test/calendar";
 import { renderWithProviders } from "@/test/render";
 import { StayBookingCard, type StayBookingCardProps } from "./StayBookingCard";
 
@@ -53,12 +54,12 @@ it("REQ-LPAGE-004 escolher outro pet vai para a URL, somando na conta e preserva
   expect(screen.getByText(/× 5 noites × 2 pets/)).toBeVisible();
 });
 
-it("REQ-LPAGE-004 sem datas não há total; as datas só vão para a URL quando formam uma estadia válida", () => {
-  render({ search: "", from: undefined, to: undefined, petIds: [] });
+it("REQ-LPAGE-004 sem datas não há total; as datas só vão para a URL quando formam uma estadia válida", async () => {
+  const { user } = render({ search: "", from: undefined, to: undefined, petIds: [] });
   expect(screen.queryByText("Total")).not.toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText("Chegada"), { target: { value: "2026-12-20" } });
-  expect(replace).not.toHaveBeenCalled();
-  fireEvent.change(screen.getByLabelText("Saída"), { target: { value: "2026-12-22" } });
+  await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-12-20", "2026-12-22");
+  // Só a estadia completa vai para a URL: a chegada sozinha não navegou.
+  expect(replace).toHaveBeenCalledTimes(1);
   expect(lastUrl().searchParams.get("from")).toBe("2026-12-20");
   expect(lastUrl().searchParams.get("to")).toBe("2026-12-22");
   // Sem pet escolhido e sem "quantos pets" da busca, ainda não dá pra fazer a conta.
