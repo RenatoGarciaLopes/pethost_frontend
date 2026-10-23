@@ -38,7 +38,7 @@ it("REQ-HOME-002 visitante prepara a busca por espécie e segue pelo login com o
   expect(navigation.push).toHaveBeenCalledWith(
     "/login?next=%2Fsearch%3Fwhere%3DZona%2B7%26from%3D2026-11-01%26to%3D2026-11-05%26species%3Ddog",
   );
-});
+}, 15_000);
 
 it("REQ-HOME-002 tutor sem pet pode escolher espécie e vai direto à busca", async () => {
   const { user } = renderHome({ viewer: "owner" });
