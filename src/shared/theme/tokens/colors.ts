@@ -11,5 +11,4 @@ export const quintalColors = {
   cartao: "#FFF6E6",
   linha: "#E3D6C2",
   erro: "#A8323E",
-  foco: "#2F5A86",
 } as const;

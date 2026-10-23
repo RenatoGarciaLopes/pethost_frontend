@@ -6,6 +6,7 @@ import { useId, useState, type FormEvent } from "react";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { loginRedirectPath } from "@/shared/config/appRoutes";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { focusRing } from "@/shared/theme/overrides/Button";
 import { DoorScene, DOOR_TARGET_ATTR, DOOR_WARM_ATTR } from "@/shared/ui/brand/DoorScene";
 import { GroundLine } from "@/shared/ui/brand/GroundLine";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -34,18 +35,15 @@ export interface HomeScreenProps {
 }
 
 const PET_COUNTS = [1, 2, 3, 4, 5, 6] as const;
+// Keep focus on the control: a cell must never draw a colored :focus-within ring.
 const cell = {
   position: "relative",
   minWidth: 0,
   minHeight: 56,
   px: { xs: 1, md: 2 },
   py: 0.5,
-  "&:focus-within": {
-    outline: "3px solid",
-    outlineColor: "var(--mui-palette-quintal-foco)",
-    outlineOffset: 2,
-    borderRadius: `${quintalRadii.control}px`,
-  },
+  // Date inputs are transparent overlays; expose their native keyboard focus on the cell.
+  "&:has(input[type=date]:focus-visible)": focusRing,
 } as const;
 const separator = { borderRight: { xs: "none", md: "1px dashed" }, borderColor: "divider" } as const;
 const label = {
