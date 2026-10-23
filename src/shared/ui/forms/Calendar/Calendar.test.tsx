@@ -101,36 +101,48 @@ describe("Calendar (REQ-CAL-005 intervalo)", () => {
     expect(screen.queryByText(/noites ·/)).not.toBeInTheDocument();
   });
 
-  it("com o intervalo completo o rodapé mostra o resumo, também ao abrir pela saída", () => {
-    renderWithProviders(
-      <Calendar
-        mode="range"
-        months={2}
-        value={{ start: "2026-10-24", end: "2026-10-30" }}
-        onChange={vi.fn()}
-        editing="end"
-        today="2026-10-15"
-        maxNights={30}
-      />,
-    );
+  it("com o intervalo completo o rodapé mostra o resumo, e um toque recomeça pela chegada", async () => {
+    const { user } = renderWithProviders(<Range initial={{ start: "2026-10-24", end: "2026-10-30" }} />);
     expect(screen.getByText("6 noites · 24 a 30 out")).toBeInTheDocument();
     expect(screen.queryByText(/Agora a saída/)).not.toBeInTheDocument();
+    await user.click(day("28 de outubro de 2026"));
+    expect(day("28 de outubro de 2026, chegada")).toBeInTheDocument();
+  });
+});
+
+describe("Calendar (REQ-CAL-009 prévia do intervalo)", () => {
+  const limitText = /até 30 noites, então o último dia é 19 nov/;
+
+  it("com a chegada escolhida, o mouse num dia depois dela mostra o intervalo até ele e sair do grid limpa", async () => {
+    const { user } = renderWithProviders(<Range initial={{ start: "2026-10-20", end: "" }} />);
+    await user.hover(day("25 de outubro de 2026"));
+    expect(screen.getByText("5 noites · 20 a 25 out")).toBeInTheDocument();
+    expect(iso("2026-10-22").closest('[role="gridcell"]')).toHaveAttribute("aria-selected", "false");
+    expect(day("25 de outubro de 2026")).not.toHaveAccessibleName(/saída/);
+    await user.unhover(day("25 de outubro de 2026"));
+    expect(screen.queryByText("5 noites · 20 a 25 out")).not.toBeInTheDocument();
+    expect(screen.getByText(limitText)).toBeInTheDocument();
   });
 
-  it("editando a saída, um dia depois da chegada troca só a saída e completa", async () => {
-    const onChange = vi.fn();
-    const { user } = renderWithProviders(
-      <Calendar
-        mode="range"
-        value={{ start: "2026-10-20", end: "2026-10-25" }}
-        onChange={onChange}
-        editing="end"
-        today="2026-10-15"
-        maxNights={30}
-      />,
-    );
-    await user.click(day("28 de outubro de 2026"));
-    expect(onChange).toHaveBeenCalledWith({ start: "2026-10-20", end: "2026-10-28" }, true);
+  it("dia que passa do limite de noites ou vem antes da chegada não prolonga a prévia", async () => {
+    const { user } = renderWithProviders(<Range initial={{ start: "2026-10-20", end: "" }} />);
+    await user.hover(day("20 de novembro de 2026"));
+    await user.hover(day("18 de outubro de 2026"));
+    expect(screen.queryByText(/noites · /)).not.toBeInTheDocument();
+    expect(screen.getByText(limitText)).toBeInTheDocument();
+  });
+
+  it("o foco por teclado também mostra a prévia", async () => {
+    const { user } = renderWithProviders(<Range initial={{ start: "2026-10-20", end: "" }} />);
+    day("20 de outubro de 2026, chegada").focus();
+    await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}");
+    expect(screen.getByText("3 noites · 20 a 23 out")).toBeInTheDocument();
+  });
+
+  it("sem chegada não há prévia", async () => {
+    const { user } = renderWithProviders(<Range />);
+    await user.hover(day("25 de outubro de 2026"));
+    expect(screen.getByText("Escolhe o dia da chegada.")).toBeInTheDocument();
   });
 });
 

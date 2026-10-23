@@ -57,7 +57,7 @@ it("REQ-LPAGE-004 escolher outro pet vai para a URL, somando na conta e preserva
 it("REQ-LPAGE-004 sem datas não há total; as datas só vão para a URL quando formam uma estadia válida", async () => {
   const { user } = render({ search: "", from: undefined, to: undefined, petIds: [] });
   expect(screen.queryByText("Total")).not.toBeInTheDocument();
-  await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-12-20", "2026-12-22");
+  await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-12-20", "2026-12-22");
   // Só a estadia completa vai para a URL: a chegada sozinha não navegou.
   expect(replace).toHaveBeenCalledTimes(1);
   expect(lastUrl().searchParams.get("from")).toBe("2026-12-20");

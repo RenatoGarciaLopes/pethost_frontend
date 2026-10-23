@@ -62,7 +62,7 @@ test("REQ-SRCH-003/004/007 datas, pets e total seguem no link", async ({ page, b
   const from = tomorrow.toISOString().slice(0, 10);
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 5);
   const to = tomorrow.toISOString().slice(0, 10);
-  await pickDates(page, page.getByLabel("Chegada", { exact: true }).filter({ visible: true }), from, to);
+  await pickDates(page, page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }), from, to);
   await page.getByRole("combobox", { name: "Pet" }).click();
   await page.getByRole("option", { name: "Luna", exact: true }).click();
   await page.keyboard.press("Escape");

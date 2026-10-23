@@ -73,8 +73,7 @@ function serve(response: () => Response) {
 describe("RequestStayForm", { timeout: 15000 }, () => {
   it("REQ-REQST-002 REQ-REQST-003 datas e pets da URL, cada pet com Combina ou o motivo; resumo com a conta", () => {
     setup();
-    expect(screen.getByLabelText("Chegada")).toHaveValue("20/12/2026");
-    expect(screen.getByLabelText("Saída")).toHaveValue("25/12/2026");
+    expect(screen.getByLabelText("Chegada e saída")).toHaveValue("20 a 25 dez · 5 noites");
     const who = screen.getByRole("group", { name: copy.pets });
     expect(within(who).getByRole("checkbox", { name: /Pipoca/ })).toBeChecked();
     expect(within(who).getByRole("checkbox", { name: /Thor/ })).toBeChecked();
@@ -93,9 +92,8 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
 
   it("REQ-REQST-002 trocar as datas pelo calendário refaz o resumo e o total", async () => {
     const { user } = setup();
-    await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-12-21", "2026-12-23");
-    expect(screen.getByLabelText("Chegada")).toHaveValue("21/12/2026");
-    expect(screen.getByLabelText("Saída")).toHaveValue("23/12/2026");
+    await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-12-21", "2026-12-23");
+    expect(screen.getByLabelText("Chegada e saída")).toHaveValue("21 a 23 dez · 2 noites");
     const summary = screen.getByRole("region", { name: copy.summary });
     expect(summary).toHaveTextContent("21 a 23 de dez. · 2 noites");
     expect(summary.textContent).toMatch(/R\$\s60,50 × 2 noites × 2 pets = R\$ 242,00/);
@@ -146,7 +144,9 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     const { user } = setup({ initial: { checkIn: "2026-12-20", checkOut: "2026-12-20", petIds: [] } });
     await user.click(screen.getByRole("button", { name: copy.submit }));
     expect(await screen.findByText(copy.petsMin)).toBeInTheDocument();
-    expect(screen.getByLabelText("Saída")).toHaveAccessibleDescription("A saída precisa ser depois da chegada.");
+    expect(screen.getByLabelText("Chegada e saída")).toHaveAccessibleDescription(
+      "A saída precisa ser depois da chegada.",
+    );
     expect(bodies).toHaveLength(0);
   });
 
@@ -160,7 +160,7 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     const { user } = setup();
     await user.click(screen.getByRole("button", { name: copy.submit }));
     expect(await screen.findByText("A chegada já passou.")).toBeInTheDocument();
-    expect(screen.getByLabelText("Chegada")).toHaveAccessibleDescription("A chegada já passou.");
+    expect(screen.getByLabelText("Chegada e saída")).toHaveAccessibleDescription("A chegada já passou.");
   });
 
   it("REQ-REQST-007 regra da API vira frase no topo com o dado: a noite sem vaga", async () => {

@@ -77,12 +77,30 @@ export function shortDate(iso: string): string {
   return `${Number(iso.slice(8))} ${shortMonth.format(utc(iso)).replace(".", "")}`;
 }
 
+function span(start: string, end: string): string {
+  return start.slice(0, 7) === end.slice(0, 7)
+    ? `${Number(start.slice(8))} a ${shortDate(end)}`
+    : `${shortDate(start)} a ${shortDate(end)}`;
+}
+const nightsLabel = (start: string, end: string) => {
+  const nights = nightsBetween(start, end);
+  return `${nights} ${nights === 1 ? "noite" : "noites"}`;
+};
+
 /** @example rangeSummary("2026-12-20", "2026-12-25") // "5 noites · 20 a 25 dez" */
 export function rangeSummary(start: string, end: string): string {
-  const nights = nightsBetween(start, end);
-  const sameMonth = start.slice(0, 7) === end.slice(0, 7);
-  const span = sameMonth ? `${Number(start.slice(8))} a ${shortDate(end)}` : `${shortDate(start)} a ${shortDate(end)}`;
-  return `${nights} ${nights === 1 ? "noite" : "noites"} · ${span}`;
+  return `${nightsLabel(start, end)} · ${span(start, end)}`;
+}
+
+/**
+ * O período como o campo de datas mostra: vazio, só a chegada ou o intervalo com as noites.
+ * @example stayLabel("2026-12-20", "") // "20 dez"
+ * @example stayLabel("2026-12-20", "2026-12-25") // "20 a 25 dez · 5 noites"
+ */
+export function stayLabel(start: string, end: string): string {
+  if (!isIsoDate(start)) return "";
+  if (!isIsoDate(end) || end <= start) return shortDate(start);
+  return `${span(start, end)} · ${nightsLabel(start, end)}`;
 }
 
 /** Dia da semana, 0 = domingo. @example weekdayOf("2026-12-25") // 5 */
@@ -96,17 +114,13 @@ export interface RangeValue {
 }
 
 /**
- * O que um toque em `iso` faz no intervalo. Com a chegada escolhida e sem saída (ou editando a saída), um dia depois
+ * O que um toque em `iso` faz no intervalo. Com a chegada escolhida e sem saída, um dia depois
  * da chegada vira saída e fecha o intervalo; qualquer outro dia recomeça pela chegada.
  *
- * @example pickInRange({ start: "2026-12-20", end: "" }, "2026-12-25", false) // { range: { start: "2026-12-20", end: "2026-12-25" }, complete: true }
+ * @example pickInRange({ start: "2026-12-20", end: "" }, "2026-12-25") // { range: { start: "2026-12-20", end: "2026-12-25" }, complete: true }
  */
-export function pickInRange(
-  range: RangeValue,
-  iso: string,
-  editingEnd: boolean,
-): { range: RangeValue; complete: boolean } {
-  if (range.start && (!range.end || editingEnd) && iso > range.start) {
+export function pickInRange(range: RangeValue, iso: string): { range: RangeValue; complete: boolean } {
+  if (range.start && !range.end && iso > range.start) {
     return { range: { start: range.start, end: iso }, complete: true };
   }
   return { range: { start: iso, end: "" }, complete: false };

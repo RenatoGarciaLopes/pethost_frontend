@@ -6,8 +6,7 @@ import { focusRing, keyboardFocus } from "@/shared/theme/focus";
 import { DOOR_TARGET_ATTR, DOOR_WARM_ATTR } from "@/shared/ui/brand/DoorScene";
 import { Surface } from "@/shared/ui/layout/Surface";
 import { brasiliaToday, validateStay } from "@/shared/lib/date/stayRules";
-import { StayCalendar, type StayEdge } from "@/shared/ui/forms/Calendar";
-import { searchDateLabel } from "../../../lib/searchDateLabel";
+import { CalendarGlyph, stayLabel, StayCalendar } from "@/shared/ui/forms/Calendar";
 import type { SearchPet, SearchQuery } from "../../../types";
 import { searchCopy as copy } from "../../../lib/searchCopy";
 /** Faixa única compartilhada pela home, busca e cantinho; callbacks sem transporte. */
@@ -75,7 +74,7 @@ export function SearchBar({
   const ids = useId();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [draft, setDraft] = useState(query);
-  const [calendar, setCalendar] = useState<{ edge: StayEdge; anchor: HTMLElement; bar: HTMLElement } | null>(null);
+  const [calendar, setCalendar] = useState<{ anchor: HTMLElement; bar: HTMLElement } | null>(null);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
   const fieldErrors = { ...errors, ...localErrors };
   const where = draft.where ?? "",
@@ -151,7 +150,7 @@ export function SearchBar({
             display: { xs: mobileOpen ? "grid" : "none", md: "grid" },
             gridTemplateColumns: {
               xs: "1fr",
-              md: "minmax(0, 1.25fr) minmax(0, 1.2fr) minmax(0, 1.1fr) minmax(0, 1fr) auto",
+              md: "minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1fr) auto",
             },
             alignItems: "center",
             gap: { xs: 1, md: 0 },
@@ -173,48 +172,32 @@ export function SearchBar({
               sx={control}
             />
           </Box>
-          <Box sx={dateCell}>
-            <FormLabel htmlFor={`${ids}-from`} sx={label}>
-              {copy.checkIn}
-            </FormLabel>
-            <Typography id={`${ids}-from-value`} sx={{ fontSize: 14, lineHeight: "28px", whiteSpace: "nowrap" }}>
-              {searchDateLabel(from, "arrival")}
-            </Typography>
+          <Box sx={{ ...dateCell, display: "flex", alignItems: "center", gap: 1 }}>
+            <Box sx={{ display: "flex", flexShrink: 0, color: "text.primary" }}>
+              <CalendarGlyph />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <FormLabel htmlFor={`${ids}-dates`} sx={label}>
+                {copy.dates}
+              </FormLabel>
+              <Typography id={`${ids}-dates-value`} sx={{ fontSize: 14, lineHeight: "28px", whiteSpace: "nowrap" }}>
+                {stayLabel(from, to) || copy.datesEmpty}
+              </Typography>
+            </Box>
             <Box
               component="button"
               type="button"
-              id={`${ids}-from`}
+              id={`${ids}-dates`}
               aria-haspopup="dialog"
-              aria-describedby={`${ids}-from-value${fieldErrors.from ? ` ${ids}-from-error` : ""}`}
+              aria-describedby={[
+                `${ids}-dates-value`,
+                fieldErrors.from && `${ids}-from-error`,
+                fieldErrors.to && `${ids}-to-error`,
+              ]
+                .filter(Boolean)
+                .join(" ")}
               onClick={(event) =>
-                setCalendar({
-                  edge: "checkIn",
-                  anchor: event.currentTarget.parentElement!,
-                  bar: event.currentTarget.closest("form")!,
-                })
-              }
-              sx={dateButton}
-            />
-          </Box>
-          <Box sx={dateCell}>
-            <FormLabel htmlFor={`${ids}-to`} sx={label}>
-              {copy.checkOut}
-            </FormLabel>
-            <Typography id={`${ids}-to-value`} sx={{ fontSize: 14, lineHeight: "28px", whiteSpace: "nowrap" }}>
-              {searchDateLabel(to, "departure", from)}
-            </Typography>
-            <Box
-              component="button"
-              type="button"
-              id={`${ids}-to`}
-              aria-haspopup="dialog"
-              aria-describedby={`${ids}-to-value${fieldErrors.to ? ` ${ids}-to-error` : ""}`}
-              onClick={(event) =>
-                setCalendar({
-                  edge: "checkOut",
-                  anchor: event.currentTarget.parentElement!,
-                  bar: event.currentTarget.closest("form")!,
-                })
+                setCalendar({ anchor: event.currentTarget.parentElement!, bar: event.currentTarget.closest("form")! })
               }
               sx={dateButton}
             />
@@ -320,7 +303,7 @@ export function SearchBar({
           </Typography>
         ))}
       <StayCalendar
-        edge={calendar?.edge ?? null}
+        open={Boolean(calendar)}
         anchorEl={calendar?.anchor ?? null}
         clearEl={calendar?.bar}
         checkIn={from}

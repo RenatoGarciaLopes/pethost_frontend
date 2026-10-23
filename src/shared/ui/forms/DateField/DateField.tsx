@@ -3,6 +3,7 @@ import { useState, type Ref } from "react";
 import { Calendar } from "../Calendar/Calendar";
 import { calendarCopy } from "../Calendar/calendarCopy";
 import { CalendarInput } from "../Calendar/CalendarInput";
+import { formatDisplayDate } from "../Calendar/calendarDates";
 import { CalendarPopover } from "../Calendar/CalendarPopover";
 
 export interface DateFieldProps {
@@ -39,7 +40,7 @@ export function DateField({ onChange, onBlur, clearable = false, min, max, today
   }
   return (
     <>
-      <CalendarInput {...input} onOpen={setAnchor} />
+      <CalendarInput {...input} value={formatDisplayDate(input.value)} onOpen={setAnchor} />
       <CalendarPopover open={Boolean(anchor)} anchorEl={anchor} onClose={close} label={calendarCopy.dateDialog}>
         {() => (
           <Calendar

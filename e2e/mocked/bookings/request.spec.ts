@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { displayDate, pickDates } from "../../support/calendar";
+import { pickDates } from "../../support/calendar";
 import { loginAccount, resetAccountMock } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { openSearch } from "../../support/search";
@@ -42,7 +42,7 @@ test("REQ-REQST-002 a REQ-REQST-006 pede a estadia com o que veio da URL e acomp
   await page.goto(requestPath(monday, plus(monday, 2), [LUNA]));
 
   await expect(page.getByRole("heading", { name: "Pedir estadia", level: 1 })).toBeVisible();
-  await expect(page.getByLabel("Chegada")).toHaveValue(displayDate(monday));
+  await expect(page.getByLabel("Chegada e saída")).toHaveValue(/ · 2 noites$/);
   const who = page.getByRole("group", { name: "Quem vai?" });
   await expect(who.getByRole("checkbox", { name: /Luna/ })).toBeChecked();
   await expect(who.getByRole("checkbox", { name: /Thor/ })).not.toBeChecked();
@@ -55,8 +55,13 @@ test("REQ-REQST-002 a REQ-REQST-006 pede a estadia com o que veio da URL e acomp
   await waitForHydration(thor);
   await thor.check();
   await expect(summary).toContainText(/× 2 noites × 2 pets = R\$\s240,00/);
-  // Troca a saída pelo calendário: o resumo refaz a conta com uma noite a mais.
-  await pickDates(page, page.getByLabel("Saída", { exact: true }).filter({ visible: true }), plus(monday, 3));
+  // Troca o período pelo calendário: o resumo refaz a conta com uma noite a mais.
+  await pickDates(
+    page,
+    page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }),
+    monday,
+    plus(monday, 3),
+  );
   await expect(summary).toContainText(/× 3 noites × 2 pets = R\$\s360,00/);
   await page.getByRole("checkbox", { name: "A ração de costume" }).check();
   await expect(page.getByText("O pedido não segura a vaga: Casa Cida tem até 24 horas pra responder.")).toBeVisible();
@@ -79,7 +84,7 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   const to = plus(from, 2);
   await page.goto("/search");
   await openSearch(page);
-  await pickDates(page, page.getByLabel("Chegada", { exact: true }).filter({ visible: true }), from, to);
+  await pickDates(page, page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }), from, to);
   await page.getByRole("combobox", { name: "Pet" }).click();
   await page.getByRole("option", { name: "Luna", exact: true }).click();
   await page.keyboard.press("Escape");
@@ -101,8 +106,9 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   await expect(page).toHaveURL(/\/listings\/[0-9a-f-]+\/request\?/, NAVIGATION);
   await expect(page.getByRole("heading", { name: "Pedir estadia", level: 1 })).toBeVisible(NAVIGATION);
   // No celular a busca anterior continua montada e oculta, com os mesmos rótulos.
-  await expect(page.getByLabel("Chegada", { exact: true }).filter({ visible: true })).toHaveValue(displayDate(from));
-  await expect(page.getByLabel("Saída", { exact: true }).filter({ visible: true })).toHaveValue(displayDate(to));
+  await expect(page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true })).toHaveValue(
+    / · 2 noites$/,
+  );
   await expect(page.getByRole("group", { name: "Quem vai?" }).getByRole("checkbox", { name: /Luna/ })).toBeChecked();
   const summary = page.getByRole("region", { name: "Resumo do pedido" });
   await expect(summary).toContainText(title);

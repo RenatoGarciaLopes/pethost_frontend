@@ -1,9 +1,10 @@
 "use client";
-import { Stack } from "@mui/material";
 import { useState } from "react";
 import { validateStay } from "@/shared/lib/date/stayRules";
+import { calendarCopy } from "../Calendar/calendarCopy";
+import { stayLabel } from "../Calendar/calendarDates";
 import { CalendarInput } from "../Calendar/CalendarInput";
-import { StayCalendar, type StayEdge } from "../Calendar/StayCalendar";
+import { StayCalendar } from "../Calendar/StayCalendar";
 
 /** Controlado por datas ISO; today vem do servidor. @example { checkIn: "", checkOut: "", today, onChange: setRange } */
 export interface DateRangeFieldProps {
@@ -15,46 +16,41 @@ export interface DateRangeFieldProps {
 }
 
 /**
- * Campos de chegada e saída que abrem o calendário do PetHost (dois meses no desktop, folha de baixo no celular).
- * Não usar para instantes nem nascimento. Valida ao fechar o calendário e recebe erros de envio/API por prop.
+ * Campo único "Chegada e saída" que abre o calendário do PetHost (dois meses no desktop, folha de baixo no celular) e
+ * mostra o período ("24 a 30 out · 6 noites"). Não usar para instantes nem nascimento. Valida ao fechar o calendário e
+ * recebe erros de envio/API por prop (mostra o da chegada, ou o da saída se for o único).
  * @example <DateRangeField checkIn={from} checkOut={to} today={today} onChange={setRange} />
  */
 export function DateRangeField({ checkIn, checkOut, today, onChange, errors = {} }: DateRangeFieldProps) {
   const validation = validateStay(checkIn, checkOut, today);
-  const [touched, setTouched] = useState({ checkIn: false, checkOut: false });
-  const [open, setOpen] = useState<{ edge: StayEdge; anchor: HTMLElement } | null>(null);
-  const inError = errors.checkIn ?? (touched.checkIn ? validation.checkIn : undefined);
-  const outError = errors.checkOut ?? (touched.checkOut ? validation.checkOut : undefined);
+  const [touched, setTouched] = useState(false);
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const error =
+    errors.checkIn ?? errors.checkOut ?? (touched ? (validation.checkIn ?? validation.checkOut) : undefined);
 
-  function close(complete: boolean) {
-    if (open)
-      setTouched((value) => ({ ...value, [open.edge]: true, ...(complete && { checkIn: true, checkOut: true }) }));
-    setOpen(null);
-  }
-  function field(edge: StayEdge, label: string, value: string, error?: string) {
-    return (
+  return (
+    <>
       <CalendarInput
-        label={label}
-        value={value}
-        onOpen={(anchor) => setOpen({ edge, anchor })}
+        label={calendarCopy.stayLabel}
+        placeholder={calendarCopy.stayPlaceholder}
+        value={stayLabel(checkIn, checkOut)}
+        onOpen={setAnchor}
         error={Boolean(error)}
         helperText={error}
+        fullWidth
       />
-    );
-  }
-  return (
-    <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ "& > *": { flex: 1, minWidth: 0 } }}>
-      {field("checkIn", "Chegada", checkIn, inError)}
-      {field("checkOut", "Saída", checkOut, outError)}
       <StayCalendar
-        edge={open?.edge ?? null}
-        anchorEl={open?.anchor ?? null}
+        open={Boolean(anchor)}
+        anchorEl={anchor}
         checkIn={checkIn}
         checkOut={checkOut}
         today={today}
         onChange={onChange}
-        onClose={close}
+        onClose={() => {
+          setTouched(true);
+          setAnchor(null);
+        }}
       />
-    </Stack>
+    </>
   );
 }

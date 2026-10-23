@@ -125,19 +125,13 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
   await page.getByRole("textbox", { name: "Onde" }).fill("Zona 7, Maringá");
   const arrival = new Date(Date.now() + 30 * 86_400_000);
   const departure = new Date(arrival.getTime() + 5 * 86_400_000);
-  const shortDay = (date: Date) =>
-    new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", timeZone: "UTC" })
-      .format(date)
-      .replace(" de ", " ")
-      .replace(".", "");
   await pickDates(
     page,
-    page.getByLabel("Chegada", { exact: true }),
+    page.getByLabel("Chegada e saída", { exact: true }),
     arrival.toISOString().slice(0, 10),
     departure.toISOString().slice(0, 10),
   );
-  await expect(page.getByText(`${shortDay(arrival)}, a partir das 14h`)).toBeVisible();
-  await expect(page.getByText(`${shortDay(departure)} · 5 noites`)).toBeVisible();
+  await expect(page.getByText(/ · 5 noites$/)).toBeVisible();
   await expect(form.locator("fieldset")).toHaveCount(0);
   const guarantees = page.getByRole("list", { name: "Garantias da PetHost" }).getByRole("listitem");
   await expect(guarantees).toHaveCount(3);
@@ -246,8 +240,8 @@ test("072 mouse fecha Select sem anel na célula; Tab mantém foco em tinta", as
   await expect(petCell).toHaveCSS("border-radius", "12px");
   await page.screenshot({ path: `test-results/072-select-tab-${info.project.name}.png`, fullPage: true });
   await page.keyboard.press("Shift+Tab");
-  const departure = page.getByLabel("Saída", { exact: true });
-  await expect(departure).toBeFocused();
-  await expect(departure.locator("..")).toHaveCSS("outline-color", "rgb(31, 26, 23)");
-  await expect(departure.locator("..")).toHaveCSS("outline-width", "3px");
+  const dates = page.getByLabel("Chegada e saída", { exact: true });
+  await expect(dates).toBeFocused();
+  await expect(dates.locator("..")).toHaveCSS("outline-color", "rgb(31, 26, 23)");
+  await expect(dates.locator("..")).toHaveCSS("outline-width", "3px");
 });

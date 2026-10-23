@@ -21,7 +21,7 @@ export const CalendarioEmbaixo: Story = {
   globals: { viewport: { value: "desktop", isRotated: false } },
   play: async ({ canvas, canvasElement }) => {
     const bar = canvas.getByRole("form", { name: "Busca de cantinhos" });
-    await userEvent.click(canvas.getByLabelText("Saída"));
+    await userEvent.click(canvas.getByLabelText("Chegada e saída"));
     const dialog = await within(canvasElement.ownerDocument.body).findByRole("dialog", {
       name: "Escolher as datas da estadia",
     });
@@ -42,7 +42,7 @@ export const CalendarioEmCima: Story = {
   ],
   play: async ({ canvas, canvasElement }) => {
     const bar = canvas.getByRole("form", { name: "Busca de cantinhos" });
-    await userEvent.click(canvas.getByLabelText("Chegada"));
+    await userEvent.click(canvas.getByLabelText("Chegada e saída"));
     const dialog = await within(canvasElement.ownerDocument.body).findByRole("dialog", {
       name: "Escolher as datas da estadia",
     });

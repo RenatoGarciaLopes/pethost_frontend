@@ -59,6 +59,16 @@ export const SoChegada: Story = {
   },
 };
 
+/** Com a chegada escolhida, o mouse num dia depois dela pinta a prévia (faixa clara tracejada) e o rodapé conta as noites. */
+export const PreviaNoHover: Story = {
+  name: "REQ-CAL-009 Prévia no hover",
+  args: { initial: { start: "2026-10-20", end: "" } },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.hover(canvas.getByRole("button", { name: /, 28 de outubro de 2026/ }));
+    await expect(canvas.getByText("8 noites · 20 a 28 out")).toBeVisible();
+  },
+};
+
 /** Intervalo feito: pontas em coral, noites do meio na faixa verde e resumo no tom da casa. */
 export const Intervalo: Story = {
   name: "REQ-CAL-005 Intervalo",

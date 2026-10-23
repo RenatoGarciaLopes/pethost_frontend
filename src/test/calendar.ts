@@ -8,7 +8,7 @@ const DIALOG = { name: /^Escolher/ };
  * Abre o calendário pelo campo e toca nos dias ISO dados, navegando de mês em mês até achar cada um (os dias
  * trazem `data-iso`). Se o calendário ficar aberto (só a chegada, ou um dia só), fecha com Esc, como o usuário.
  *
- * @example await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-12-20", "2026-12-25")
+ * @example await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-12-20", "2026-12-25")
  */
 export async function pickCalendarDays(user: UserEvent, field: HTMLElement, ...days: string[]) {
   await user.click(field);

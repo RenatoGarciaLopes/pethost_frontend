@@ -19,7 +19,7 @@ it("REQ-SRCH-003/004 valida antes de buscar e permite escolher pets ativos", asy
   await user.click(dialog.getByRole("button", { name: "Achar um cantinho" }));
   expect(onSearch).not.toHaveBeenCalled();
   expect(dialog.getByText("A chegada pode ser de hoje até 365 dias à frente.")).toBeVisible();
-  await pickCalendarDays(user, dialog.getByLabelText("Chegada"), "2026-10-15", "2026-10-17");
+  await pickCalendarDays(user, dialog.getByLabelText("Chegada e saída"), "2026-10-15", "2026-10-17");
   await user.click(dialog.getByRole("combobox", { name: "Pet" }));
   await user.click(dialog.getByRole("option", { name: "Luna" }));
   await user.keyboard("{Escape}");
