@@ -40,6 +40,8 @@ vi.mock("next/headers", () => ({
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
   useRouter: () => ({ push: vi.fn() }),
+  // A home lê a busca da URL (useSearchUrl); fora do roteador o hook devolve null.
+  useSearchParams: () => new URLSearchParams(),
   redirect: (path: string) => {
     throw new Error(`NEXT_REDIRECT ${path}`);
   },
