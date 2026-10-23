@@ -2,6 +2,8 @@ import { screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
 import { searchPetsFixture, searchQueryFixture } from "@/test/fixtures/search";
+import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { quintalColors } from "@/shared/theme/tokens/colors";
 import { FilterChips } from "./FilterChips";
 it("REQ-SRCH-006 sem criança envia false e limpar preserva lugar e datas", async () => {
   const onChange = vi.fn();
@@ -45,4 +47,15 @@ it("espécie, porte e tipo de casa alternam sem perder os outros filtros", async
   expect(onChange).toHaveBeenLastCalledWith({ ...query, homeType: "apartment" });
   await user.click(screen.getByRole("button", { name: /^Casa$/ }));
   expect(onChange).toHaveBeenLastCalledWith({ ...query, homeType: undefined });
+});
+
+it("chip selecionado fica verde (grama) e o outro não", () => {
+  const query = searchQueryFixture({ hasYard: true });
+  renderWithProviders(<FilterChips query={query} onChange={vi.fn()} />, { theme: quintalTheme });
+  expect(screen.getByRole("button", { name: "Casa com quintal" })).toHaveStyle({
+    backgroundColor: quintalColors.grama,
+  });
+  expect(screen.getByRole("button", { name: "Apartamento" })).not.toHaveStyle({
+    backgroundColor: quintalColors.grama,
+  });
 });

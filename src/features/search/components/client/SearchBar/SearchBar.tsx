@@ -1,5 +1,5 @@
 "use client";
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Box, Button, Checkbox, FormControl, FormLabel, InputBase, MenuItem, Select, Typography } from "@mui/material";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { focusRing, keyboardFocus } from "@/shared/theme/focus";
@@ -18,6 +18,8 @@ export interface SearchBarProps {
   onDraftChange?: (query: SearchQuery) => void;
   quantityMode?: boolean;
   errors?: Record<string, string>;
+  /** Campo que já nasce em edição (busca compacta do cabeçalho); com ele os campos ficam sempre abertos. */
+  autoFocus?: "where" | "dates" | "pet";
 }
 const PET_COUNTS = [1, 2, 3, 4, 5, 6] as const;
 const cell = {
@@ -70,9 +72,11 @@ export function SearchBar({
   onDraftChange,
   quantityMode = !pets.length,
   errors = {},
+  autoFocus,
 }: SearchBarProps) {
   const ids = useId();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const fields = useRef<HTMLDivElement>(null);
+  const [mobileOpen, setMobileOpen] = useState(Boolean(autoFocus));
   const [draft, setDraft] = useState(query);
   const [calendar, setCalendar] = useState<{ anchor: HTMLElement; bar: HTMLElement } | null>(null);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
@@ -85,6 +89,11 @@ export function SearchBar({
     petCount = draft.count ?? 1;
   const isPetList = pets.length > 0,
     isHost = quantityMode;
+  useEffect(() => {
+    if (autoFocus === "where") document.getElementById(`${ids}-where`)?.focus();
+    else if (autoFocus === "dates") document.getElementById(`${ids}-dates`)?.click();
+    else if (autoFocus === "pet") fields.current?.querySelector<HTMLElement>("[role=combobox]")?.focus();
+  }, [autoFocus, ids]);
   function change(next: SearchQuery) {
     setDraft(next);
     onDraftChange?.(next);
@@ -138,7 +147,7 @@ export function SearchBar({
             justifyContent: "flex-start",
             px: 2,
             fontWeight: 700,
-            display: { xs: "flex", md: "none" },
+            display: autoFocus ? "none" : { xs: "flex", md: "none" },
             mb: mobileOpen ? 1 : 0,
           }}
         >
@@ -146,6 +155,7 @@ export function SearchBar({
         </Button>
         <Box
           id={`${ids}-fields`}
+          ref={fields}
           sx={{
             display: { xs: mobileOpen ? "grid" : "none", md: "grid" },
             gridTemplateColumns: {

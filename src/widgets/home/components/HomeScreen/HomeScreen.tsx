@@ -70,118 +70,122 @@ export function HomeScreen({
       tabIndex={-1}
       sx={{ color: "text.primary", bgcolor: "background.default", outline: "none" }}
     >
-      <Box
-        component="section"
-        aria-labelledby="home-title"
-        sx={(theme) => ({
-          position: "relative",
-          overflow: "hidden",
-          backgroundImage: `url('/brand/paper-grain.png'), linear-gradient(180deg, ${theme.palette.scene.skyTop}, ${theme.palette.scene.skyMiddle} 65%, ${theme.palette.scene.skyBottom})`,
-          backgroundSize: "256px 256px, cover",
-          backgroundBlendMode: "multiply, normal",
-        })}
-      >
-        <PageContainer width="page" sx={{ py: 0 }}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1.1fr) minmax(0, 1fr)" },
-              alignItems: "end",
-              pt: { xs: 4, md: 5 },
-              minHeight: { md: 370 },
-            }}
-          >
-            <Box sx={{ alignSelf: "start", pb: { xs: 1, md: 5 }, position: "relative", zIndex: 1 }}>
-              <Typography
-                component="h1"
-                id="home-title"
-                sx={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "clamp(44px, 5vw, 68px)",
-                  lineHeight: 1.04,
-                  letterSpacing: "-.025em",
-                  maxWidth: "15ch",
-                  m: 0,
-                  mb: 2.5,
-                }}
-              >
-                {title}
-              </Typography>
-              <Typography sx={{ fontSize: { xs: 17, md: 19 }, lineHeight: 1.65 }}>
-                <Box component="span" sx={{ display: "block" }}>
-                  {personalized ? copy.supportWithPets : copy.support}
-                </Box>
-                <Box component="span" sx={{ display: "block" }}>
-                  {copy.supportSecond}
-                </Box>
-              </Typography>
-            </Box>
+      {!searching && (
+        <Box
+          component="section"
+          aria-labelledby="home-title"
+          sx={(theme) => ({
+            position: "relative",
+            overflow: "hidden",
+            backgroundImage: `url('/brand/paper-grain.png'), linear-gradient(180deg, ${theme.palette.scene.skyTop}, ${theme.palette.scene.skyMiddle} 65%, ${theme.palette.scene.skyBottom})`,
+            backgroundSize: "256px 256px, cover",
+            backgroundBlendMode: "multiply, normal",
+          })}
+        >
+          <PageContainer width="page" sx={{ py: 0 }}>
             <Box
-              aria-hidden="true"
               sx={{
-                width: "100%",
-                maxWidth: { xs: 390, md: 560 },
-                mx: "auto",
-                mb: -1,
-                // O chão da cena fica acima do fundo do viewBox; no computador ela desce até pousar no gramado.
-                transform: { md: "translateY(11%)" },
-                position: "relative",
-                zIndex: 1,
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1.1fr) minmax(0, 1fr)" },
+                alignItems: "end",
+                pt: { xs: 4, md: 5 },
+                minHeight: { md: 370 },
               }}
             >
-              <DoorScene variant="house" />
-            </Box>
-          </Box>
-        </PageContainer>
-        <Box
-          sx={{
-            position: "relative",
-            mt: { xs: -1, md: 0 },
-            bgcolor: "scene.ground",
-            borderBottom: "2px solid",
-            borderColor: "text.primary",
-          }}
-        >
-          <Box sx={{ position: "absolute", top: -40, left: 0, right: 0 }}>
-            <GroundLine variant="wave" height={56} />
-          </Box>
-          <PageContainer
-            width="page"
-            sx={{ pt: { xs: 2, md: 2 }, pb: { xs: 4, md: 4 }, position: "relative", zIndex: 2 }}
-          >
-            {petsUnavailable && (
-              <Box sx={{ mb: 2 }}>
-                <Notice tone="atencao">{copy.petError}</Notice>
+              <Box sx={{ alignSelf: "start", pb: { xs: 1, md: 5 }, position: "relative", zIndex: 1 }}>
+                <Typography
+                  component="h1"
+                  id="home-title"
+                  sx={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "clamp(44px, 5vw, 68px)",
+                    lineHeight: 1.04,
+                    letterSpacing: "-.025em",
+                    maxWidth: "15ch",
+                    m: 0,
+                    mb: 2.5,
+                  }}
+                >
+                  {title}
+                </Typography>
+                <Typography sx={{ fontSize: { xs: 17, md: 19 }, lineHeight: 1.65 }}>
+                  <Box component="span" sx={{ display: "block" }}>
+                    {personalized ? copy.supportWithPets : copy.support}
+                  </Box>
+                  <Box component="span" sx={{ display: "block" }}>
+                    {copy.supportSecond}
+                  </Box>
+                </Typography>
               </Box>
-            )}
-            <Box id="search-fields">
-              <SearchBar
-                key={params}
-                query={{ ...query, pets: petIds }}
-                pets={isPetList ? pets : []}
-                quantityMode={isHost}
-                onSearch={update}
-                onDraftChange={(draft) => {
-                  setPetIds(draft.pets);
-                  setStay({ from: draft.from, to: draft.to, count: draft.count });
+              <Box
+                aria-hidden="true"
+                sx={{
+                  width: "100%",
+                  maxWidth: { xs: 390, md: 560 },
+                  mx: "auto",
+                  mb: -1,
+                  // O chão da cena fica acima do fundo do viewBox; no computador ela desce até pousar no gramado.
+                  transform: { md: "translateY(11%)" },
+                  position: "relative",
+                  zIndex: 1,
                 }}
-              />
+              >
+                <DoorScene variant="house" />
+              </Box>
             </Box>
-            <Typography sx={{ position: "absolute", bottom: 4, fontSize: 14 }}>
-              {isHost
-                ? copy.hostHint
-                : viewer === "visitor"
-                  ? copy.guestHint
-                  : isPetList
-                    ? copy.ownerPetsHint
-                    : copy.ownerEmptyHint}
-            </Typography>
           </PageContainer>
+          <Box
+            sx={{
+              position: "relative",
+              mt: { xs: -1, md: 0 },
+              bgcolor: "scene.ground",
+              borderBottom: "2px solid",
+              borderColor: "text.primary",
+            }}
+          >
+            <Box sx={{ position: "absolute", top: -40, left: 0, right: 0 }}>
+              <GroundLine variant="wave" height={56} />
+            </Box>
+            <PageContainer
+              width="page"
+              sx={{ pt: { xs: 2, md: 2 }, pb: { xs: 4, md: 4 }, position: "relative", zIndex: 2 }}
+            >
+              {petsUnavailable && (
+                <Box sx={{ mb: 2 }}>
+                  <Notice tone="atencao">{copy.petError}</Notice>
+                </Box>
+              )}
+              <Box id="search-fields">
+                <SearchBar
+                  key={params}
+                  query={{ ...query, pets: petIds }}
+                  pets={isPetList ? pets : []}
+                  quantityMode={isHost}
+                  onSearch={update}
+                  onDraftChange={(draft) => {
+                    setPetIds(draft.pets);
+                    setStay({ from: draft.from, to: draft.to, count: draft.count });
+                  }}
+                />
+              </Box>
+              <Typography sx={{ position: "absolute", bottom: 4, fontSize: 14 }}>
+                {isHost
+                  ? copy.hostHint
+                  : viewer === "visitor"
+                    ? copy.guestHint
+                    : isPetList
+                      ? copy.ownerPetsHint
+                      : copy.ownerEmptyHint}
+              </Typography>
+            </PageContainer>
+          </Box>
         </Box>
-      </Box>
-      <PageContainer width="page" id="como-funciona" sx={{ py: { xs: 3, md: 4 }, scrollMarginTop: 80 }}>
-        <TrustList variant="cards" items={copy.trust} />
-      </PageContainer>
+      )}
+      {!searching && (
+        <PageContainer width="page" id="como-funciona" sx={{ py: { xs: 3, md: 4 }, scrollMarginTop: 80 }}>
+          <TrustList variant="cards" items={copy.trust} />
+        </PageContainer>
+      )}
       {searching ? (
         <PageContainer width="page" component="section" aria-labelledby="results-title" sx={{ pb: { xs: 4, md: 6 } }}>
           <SearchResultsSection
@@ -200,6 +204,11 @@ export function HomeScreen({
           to={stay.to}
           count={stay.count}
         />
+      )}
+      {searching && (
+        <PageContainer width="page" id="como-funciona" sx={{ py: { xs: 3, md: 4 }, scrollMarginTop: 80 }}>
+          <TrustList variant="cards" items={copy.trust} />
+        </PageContainer>
       )}
     </Box>
   );

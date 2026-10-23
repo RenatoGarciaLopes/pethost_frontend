@@ -120,7 +120,7 @@ it("REQ-HOME-010 os campos de pet não repassam atributos inválidos ao DOM", ()
   error.mockRestore();
 });
 
-it("REQ-HOME-011 com filtros na URL a home mostra os resultados no lugar da vitrine e o chip refaz a busca na API", async () => {
+it("REQ-HOME-011 com filtros na URL a home mostra os resultados no lugar da vitrine, com os filtros na chamada da API", async () => {
   const seen: URLSearchParams[] = [];
   server.use(
     http.get("*/api/listings", ({ request }) => {
@@ -128,7 +128,7 @@ it("REQ-HOME-011 com filtros na URL a home mostra os resultados no lugar da vitr
       return HttpResponse.json(apiOk({ items: [listingFixture()], page: 1, pageSize: 12, totalCount: 1 }));
     }),
   );
-  const { user } = renderHome(
+  renderHome(
     { initialQuery: { pets: [], species: [], sizes: [], where: "Maringá", hasYard: true } },
     "/?where=Maring%C3%A1&hasYard=true",
   );
@@ -137,6 +137,15 @@ it("REQ-HOME-011 com filtros na URL a home mostra os resultados no lugar da vitr
   expect(screen.getByRole("link", { name: /Quintal da Cida/ })).toBeVisible();
   expect(seen[0]?.get("hasYard")).toBe("true");
   expect(seen[0]?.get("city")).toBe("Maringá");
-  await user.click(screen.getByRole("button", { name: "Casa com quintal" }));
-  expect(window.location.search).toBe("?where=Maring%C3%A1");
+});
+
+it("REQ-SRCH-014 com busca na URL a home mostra só os resultados: sem hero nem barra grande", () => {
+  server.use(
+    http.get("*/api/listings", () =>
+      HttpResponse.json(apiOk({ items: [listingFixture()], page: 1, pageSize: 12, totalCount: 1 })),
+    ),
+  );
+  renderHome({}, "/?where=Zona+7");
+  expect(screen.queryByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("form", { name: "Busca de cantinhos" })).not.toBeInTheDocument();
 });

@@ -11,6 +11,7 @@ import { getSession } from "@/shared/auth/server/getSession";
 import { GrassFooter } from "@/shared/ui/brand/GrassFooter";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { HomeScreen, homeCopy, type HomePetOption } from "@/widgets/home";
+import { SearchFilterBar, SearchSummaryBar } from "@/features/search/index.client";
 import { AppHeader } from "@/widgets/app-shell";
 
 export const metadata: Metadata = { title: homeCopy.pageTitle };
@@ -68,7 +69,12 @@ async function HomeContent({ searchParams }: HomePageProps) {
 
   return (
     <>
-      <AppHeader variant="home" user={viewer === "visitor" ? null : user} />
+      <AppHeader
+        variant="home"
+        user={viewer === "visitor" ? null : user}
+        search={<SearchSummaryBar pets={pets} quantityMode={viewer === "host"} />}
+        filters={<SearchFilterBar pets={pets} />}
+      />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <HomeScreen
           viewer={viewer}

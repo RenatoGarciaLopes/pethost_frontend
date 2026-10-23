@@ -1,4 +1,5 @@
 import { Box, Button } from "@mui/material";
+import type { ReactNode } from "react";
 import NextLink from "next/link";
 import type { SessionUser } from "@/shared/auth/contracts/session";
 import { homeOf } from "@/shared/config/appRoutes";
@@ -14,6 +15,10 @@ interface AppHeaderProps {
   user?: Pick<SessionUser, "id" | "fullName" | "role" | "avatarUrl"> | null;
   /** Home pública tem atalhos de descoberta; a casca conserva os atalhos de cada papel. */
   variant?: "shell" | "home";
+  /** Busca minificada no centro do cabeçalho (resultados da home); some sozinha quando não há busca. */
+  search?: ReactNode;
+  /** Faixa própria abaixo da linha principal, ainda acima da borda do cabeçalho (chips dos resultados). */
+  filters?: ReactNode;
 }
 
 const HOW: NavItem = { id: "how", label: "Como funciona", href: "#como-funciona", roles: ["owner", "host"] };
@@ -27,7 +32,7 @@ const HOME_OWNER_ITEMS = navItemsFor("owner").filter((item) => item.id === "owne
  * AccountMenu.
  * @example <AppHeader user={user} variant="home" />
  */
-export function AppHeader({ user, variant = "shell" }: AppHeaderProps) {
+export function AppHeader({ user, variant = "shell", search, filters }: AppHeaderProps) {
   const home = variant === "home";
   const items = home
     ? user?.role === "owner"
@@ -56,6 +61,7 @@ export function AppHeader({ user, variant = "shell" }: AppHeaderProps) {
             minHeight: "inherit",
             display: "flex",
             alignItems: "center",
+            flexWrap: { xs: "wrap", md: "nowrap" },
             gap: { xs: 1, md: 2 },
           }}
         >
@@ -67,6 +73,8 @@ export function AppHeader({ user, variant = "shell" }: AppHeaderProps) {
             <DoorMark size="header" withWordmark />
           </NextLink>
           <Box sx={{ flexGrow: 1 }} />
+          {search}
+          {search && <Box sx={{ flexGrow: 1, display: { xs: "none", md: "block" } }} />}
           {items.length > 0 && <HeaderNav items={items} />}
           {user ? (
             <AccountMenu user={{ ...user, avatarUrl: user.avatarUrl ?? null }} />
@@ -76,6 +84,7 @@ export function AppHeader({ user, variant = "shell" }: AppHeaderProps) {
             </Button>
           )}
         </PageContainer>
+        {filters}
       </Box>
     </>
   );

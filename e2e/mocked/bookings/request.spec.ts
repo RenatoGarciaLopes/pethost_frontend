@@ -87,7 +87,7 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   await pickDates(page, page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }), from, to);
   // A home já parte com a primeira pet do tutor (Luna) escolhida.
   await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
-  await expect(page.getByRole("heading", { level: 2, name: /casas com vaga perto/ })).toBeVisible(NAVIGATION);
+  await expect(page.getByRole("heading", { level: 1, name: /casas com vaga perto/ })).toBeVisible(NAVIGATION);
 
   const card = page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first();
   // O título já existe antes da busca: espera o card levar as datas e o pet da URL nova, senão o clique abre o
