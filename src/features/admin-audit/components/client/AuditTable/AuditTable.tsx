@@ -20,7 +20,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AdminDataTable, type AdminTableColumn } from "@/shared/ui/data-display/AdminDataTable";
 import { EmptyState } from "@/shared/ui/feedback/EmptyState";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { formatDateTime } from "@/shared/lib/date/formatDateTime";
 import type { AuditEntry } from "../../../api/contracts";
 import { auditQueries } from "../../../api/queries";
@@ -139,7 +139,7 @@ export function AuditTable({
 
   if (rangeInvalid) return <Typography role="alert">{copy.invalidRange}</Typography>;
   if (query.isPending) return <AuditTableSkeleton />;
-  if (query.isError) return <ErrorState title={getErrorMessage(query.error)} onRetry={() => void query.refetch()} />;
+  if (query.isError) return <ErrorState title={translateError(query.error)} onRetry={() => void query.refetch()} />;
 
   const totalPages = query.data.totalPages ?? Math.max(1, Math.ceil(query.data.totalCount / pageSize));
   const clearFilters = () =>

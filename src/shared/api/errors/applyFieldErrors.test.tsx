@@ -15,10 +15,13 @@ const validationError = new ApiError({
   status: 400,
   code: "VALIDATION_ERROR",
   message: "Validation failed",
-  fieldErrors: {
-    email: ["Email is required."],
-    "address.zipCode": ["Zip code is invalid.", "Zip code is required."],
-    unknownField: ["ignored"],
+  fieldIssues: {
+    email: [{ code: "FIELD_REQUIRED", params: {}, message: "Email is required." }],
+    "address.zipCode": [
+      { code: "FIELD_INVALID_FORMAT", params: {}, message: "Zip code is invalid." },
+      { code: "FIELD_REQUIRED", params: {}, message: "Zip code is required." },
+    ],
+    unknownField: [{ code: "FIELD_TOO_LONG", params: { max: 80 }, message: "ignored" }],
   },
 });
 
@@ -60,8 +63,11 @@ describe("applyFieldErrors", () => {
 
     await user.click(screen.getByRole("button", { name: "aplicar" }));
 
-    expect(screen.getByTestId("email-error")).toHaveTextContent("Email is required.");
-    expect(screen.getByTestId("zip-error")).toHaveTextContent("Zip code is invalid. Zip code is required.");
+    expect(screen.getByTestId("email-error")).toHaveTextContent("Esse campo é obrigatório.");
+    expect(screen.getByTestId("email-error")).not.toHaveTextContent("Email is required.");
+    expect(screen.getByTestId("zip-error")).toHaveTextContent(
+      "Esse formato não é válido. Confere o que foi digitado. Esse campo é obrigatório.",
+    );
     expect(screen.getByTestId("password-error")).toBeEmptyDOMElement();
     expect(screen.getByLabelText("E-mail")).toHaveFocus();
     expect(onApplied).toHaveBeenCalledWith(["email", "address.zipCode"]);
@@ -72,10 +78,10 @@ describe("applyFieldErrors", () => {
 
     await user.click(screen.getByRole("button", { name: "aplicar" }));
 
-    expect(screen.getByTestId("root-error")).toHaveTextContent("ignored");
+    expect(screen.getByTestId("root-error")).toHaveTextContent("Cabe até 80 caracteres.");
   });
 
-  it("REQ-HTTP-006 erro sem fieldErrors não mexe no formulário", async () => {
+  it("REQ-HTTP-006 erro sem motivos de campo não mexe no formulário", async () => {
     const onApplied = vi.fn();
     const { user } = renderWithProviders(<Form error={new Error("x")} onApplied={onApplied} />);
 

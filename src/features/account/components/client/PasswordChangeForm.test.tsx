@@ -68,7 +68,11 @@ describe("trocar a senha", () => {
       http.post("*/api/users/me/password", () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "Inválido", [
-            { field: "currentPassword", messages: ["A senha atual não confere."] },
+            {
+              field: "currentPassword",
+              messages: ["A senha atual não confere."],
+              errors: [{ code: "FIELD_INVALID_FORMAT" }],
+            },
           ]),
           { status: 400 },
         ),
@@ -79,7 +83,7 @@ describe("trocar a senha", () => {
     await user.type(next(), STRONG);
     await user.click(submit());
 
-    expect(await screen.findByText("A senha atual não confere.")).toBeInTheDocument();
+    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
     expect(current()).toHaveValue("");
     expect(next()).toHaveValue(STRONG);
     await waitFor(() => expect(current()).toHaveFocus());
@@ -90,7 +94,11 @@ describe("trocar a senha", () => {
       http.post("*/api/users/me/password", () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "Inválido", [
-            { field: "newPassword", messages: ["A senha nova não pode ser igual à atual."] },
+            {
+              field: "newPassword",
+              messages: ["A senha nova não pode ser igual à atual."],
+              errors: [{ code: "FIELD_INVALID_FORMAT" }],
+            },
           ]),
           { status: 400 },
         ),
@@ -101,7 +109,7 @@ describe("trocar a senha", () => {
     await user.type(next(), STRONG);
     await user.click(submit());
 
-    expect(await screen.findByText("A senha nova não pode ser igual à atual.")).toBeInTheDocument();
+    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
     expect(current()).toHaveValue(STRONG);
   });
 

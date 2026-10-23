@@ -125,7 +125,7 @@ it("REQ-ACC-020/028 conserva campos e Retry-After", async () => {
     ),
   );
   await expect(gatewayFor("owner", transport).save({ cpf: "16899535009" })).rejects.toMatchObject({
-    fieldErrors: { currentPassword: ["Confira a senha."] },
+    fieldIssues: { currentPassword: [expect.objectContaining({ message: "Confira a senha." })] },
   });
   server.use(
     http.patch(`${BASE}/owners/me`, () =>

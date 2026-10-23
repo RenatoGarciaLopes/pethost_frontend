@@ -4,8 +4,7 @@ import { Box, Button, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { useCallback, useMemo, useState } from "react";
-import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError, translateFieldErrors } from "@/shared/api/errors/translateError";
 import { useUnsavedChangesGuard } from "@/shared/hooks/useUnsavedChangesGuard";
 import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
@@ -44,7 +43,7 @@ export function ListingEditor({ accountId, listingId, kind, firstName }: Listing
     return (
       <ErrorState
         title={copy.loadError}
-        description={getErrorMessage(query.error)}
+        description={translateError(query.error)}
         onRetry={() => void query.refetch()}
       />
     );
@@ -87,13 +86,12 @@ function ListingEditorView({
   function reportError(section: ListingSectionId, error: unknown) {
     const fields: Record<string, string> = {};
     const others: string[] = [];
-    if (isApiError(error))
-      for (const [field, messages] of Object.entries(error.fieldErrors)) {
-        if (sectionOfField(field) === section) fields[field] = messages.join(" ");
-        else others.push(...messages);
-      }
+    for (const [field, message] of Object.entries(translateFieldErrors(error))) {
+      if (sectionOfField(field) === section) fields[field] = message;
+      else others.push(message);
+    }
     const notice =
-      Object.keys(fields).length > 0 && others.length === 0 ? undefined : others.join(" ") || getErrorMessage(error);
+      Object.keys(fields).length > 0 && others.length === 0 ? undefined : others.join(" ") || translateError(error);
     setServerErrors((current) => ({ ...current, [section]: { fields, notice } }));
   }
 
@@ -169,7 +167,7 @@ function PauseControls({ accountId, listing }: { accountId: string; listing: Lis
         >
           {copy.editor.reopen}
         </Button>
-        {reopen.isError && <Notice tone="erro" title={getErrorMessage(reopen.error)} />}
+        {reopen.isError && <Notice tone="erro" title={translateError(reopen.error)} />}
       </Stack>
     );
 
@@ -185,7 +183,7 @@ function PauseControls({ accountId, listing }: { accountId: string; listing: Lis
         confirmLabel={copy.editor.pauseConfirm}
         cancelLabel={copy.editor.keepOpen}
         busy={pause.isPending}
-        error={pause.isError ? getErrorMessage(pause.error) : null}
+        error={pause.isError ? translateError(pause.error) : null}
         onConfirm={() => pause.mutate(undefined, { onSuccess: () => setAsking(false) })}
         onCancel={() => {
           pause.reset();

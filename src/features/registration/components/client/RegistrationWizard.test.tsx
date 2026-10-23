@@ -179,7 +179,13 @@ describe("RegistrationWizard: envio e erros da API", () => {
     server.use(
       http.post(REGISTER_URL, () =>
         HttpResponse.json(
-          apiFail("VALIDATION_ERROR", "inválido", [{ field: "address.zipCode", messages: ["CEP inválido na API."] }]),
+          apiFail("VALIDATION_ERROR", "inválido", [
+            {
+              field: "address.zipCode",
+              messages: ["CEP inválido na API."],
+              errors: [{ code: "FIELD_INVALID_FORMAT" }],
+            },
+          ]),
           { status: 400 },
         ),
       ),
@@ -188,7 +194,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
     await reachSubmit(user, OWNER);
     await user.click(submitButton());
 
-    expect(await screen.findByText("CEP inválido na API.")).toBeInTheDocument();
+    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
     expect(heading()).toHaveTextContent(steps.address.title);
     await waitFor(() => expect(field("CEP")).toHaveFocus());
   });
@@ -197,7 +203,9 @@ describe("RegistrationWizard: envio e erros da API", () => {
     server.use(
       http.post(REGISTER_URL, () =>
         HttpResponse.json(
-          apiFail("VALIDATION_ERROR", "inválido", [{ field: "email", messages: ["E-mail recusado pela API."] }]),
+          apiFail("VALIDATION_ERROR", "inválido", [
+            { field: "email", messages: ["E-mail recusado pela API."], errors: [{ code: "FIELD_INVALID_FORMAT" }] },
+          ]),
           { status: 400 },
         ),
       ),
@@ -207,7 +215,7 @@ describe("RegistrationWizard: envio e erros da API", () => {
     await user.click(submitButton());
 
     expect(await screen.findByRole("heading", { level: 1, name: steps.person.title })).toBeInTheDocument();
-    expect(screen.getByText("E-mail recusado pela API.")).toBeInTheDocument();
+    expect(screen.getByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
     await waitFor(() => expect(field(fields.email)).toHaveFocus());
   });
 

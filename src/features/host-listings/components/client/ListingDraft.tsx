@@ -3,7 +3,7 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useId, useMemo, useRef, useState } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError, translateFieldErrors } from "@/shared/api/errors/translateError";
 import { useSessionDraft } from "@/shared/hooks/useSessionDraft";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { toCreateListingRequest } from "../../api/mappers";
@@ -26,17 +26,17 @@ import type { ListingSectionHostValue } from "./sections/ListingSectionHost";
 type ServerErrors = ListingSectionHostValue["serverErrors"];
 
 /** Erros de campo do `400` agrupados por seção; o que não é de seção nenhuma volta à parte. */
-function groupFieldErrors(fieldErrors: Record<string, string[]>) {
+function groupFieldErrors(fieldErrors: Record<string, string>) {
   const bySection: ServerErrors = {};
   const orphan: string[] = [];
-  for (const [field, messages] of Object.entries(fieldErrors)) {
+  for (const [field, message] of Object.entries(fieldErrors)) {
     const section = sectionOfField(field);
     if (!section) {
-      orphan.push(...messages);
+      orphan.push(message);
       continue;
     }
     const current = bySection[section] ?? { fields: {} };
-    bySection[section] = { ...current, fields: { ...current.fields, [field]: messages.join(" ") } };
+    bySection[section] = { ...current, fields: { ...current.fields, [field]: message } };
   }
   return { bySection, orphan };
 }
@@ -97,8 +97,9 @@ export function ListingDraft({ accountId, profile }: ListingDraftProps) {
   }
 
   function reportError(error: unknown) {
-    if (isApiError(error) && Object.keys(error.fieldErrors).length > 0) {
-      const { bySection, orphan } = groupFieldErrors(error.fieldErrors);
+    const fieldErrors = translateFieldErrors(error);
+    if (Object.keys(fieldErrors).length > 0) {
+      const { bySection, orphan } = groupFieldErrors(fieldErrors);
       const sections = LISTING_SECTIONS.filter((section) => bySection[section]);
       setServerErrors(bySection);
       saveDraft(
@@ -109,16 +110,16 @@ export function ListingDraft({ accountId, profile }: ListingDraftProps) {
       return setNotice(orphan.length > 0 ? { tone: "erro", text: orphan.join(" ") } : null);
     }
     if (isApiError(error) && error.code === "LISTING_GEOCODER_UNAVAILABLE")
-      return setNotice({ tone: "atencao", text: getErrorMessage(error) });
+      return setNotice({ tone: "atencao", text: translateError(error) });
     if (isApiError(error) && error.code === "LISTING_ADDRESS_NOT_LOCATED") {
-      setServerErrors({ address: { fields: {}, notice: getErrorMessage(error) } });
+      setServerErrors({ address: { fields: {}, notice: translateError(error) } });
       saveDraft(
         current.values,
         current.done.filter((section) => section !== "address"),
       );
       return setFocusSection("address");
     }
-    setNotice({ tone: "erro", text: getErrorMessage(error) });
+    setNotice({ tone: "erro", text: translateError(error) });
   }
 
   async function open() {

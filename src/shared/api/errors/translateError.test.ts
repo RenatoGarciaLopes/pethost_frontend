@@ -1,37 +1,44 @@
-import { describe, expect, it } from "vitest";
-import { ApiError } from "./ApiError";
-import { errorCopy, GENERIC_ERROR_MESSAGE } from "./errorCopy";
-import { getErrorCopy, getErrorMessage } from "./getErrorMessage";
+import { describe, expect, it, vi } from "vitest";
+import { ApiError, type FieldIssue } from "./ApiError";
+import { errorCopy } from "./errorCopy";
+import {
+  GENERIC_ERROR_MESSAGE,
+  GENERIC_FIELD_MESSAGE,
+  translateCode,
+  translateError,
+  translateFieldErrors,
+  translateFieldIssue,
+} from "./translateError";
 
 const apiError = (code: string, extra: Partial<ConstructorParameters<typeof ApiError>[0]> = {}) =>
   new ApiError({ status: 400, code, message: "english from the API", ...extra });
 
-describe("getErrorMessage", () => {
+describe("translateError", () => {
   it("REQ-AQUEUE-013 conflitos e identidades duplicadas têm orientação administrativa", () => {
     for (const code of ["HOST_APPLICATION_CONFLICT", "HOST_APPLICATION_NOT_UNDER_REVIEW"])
-      expect(getErrorMessage(apiError(code))).toBe("Outra pessoa da equipe já decidiu essa verificação.");
-    expect(getErrorMessage(apiError("HOST_CPF_ALREADY_REGISTERED"), { adminReview: true })).toContain("Recuse com");
-    expect(getErrorMessage(apiError("HOST_CPF_ALREADY_REGISTERED"))).not.toContain("Recuse com");
+      expect(translateError(apiError(code))).toBe("Outra pessoa da equipe já decidiu essa verificação.");
+    expect(translateError(apiError("HOST_CPF_ALREADY_REGISTERED"), { adminReview: true })).toContain("Recuse com");
+    expect(translateError(apiError("HOST_CPF_ALREADY_REGISTERED"))).not.toContain("Recuse com");
   });
   it("REQ-AACC-011 usa orientação de admin sem trocar a copy da conta pessoal", () => {
-    expect(getErrorMessage(apiError("HOST_NOT_FOUND"), { adminAccounts: true })).toBe(
+    expect(translateError(apiError("HOST_NOT_FOUND"), { adminAccounts: true })).toBe(
       "Esse perfil de anfitrião não existe mais.",
     );
-    expect(getErrorMessage(apiError("OWNER_NOT_FOUND"))).toBe("Não achamos seu perfil de tutor. Fala com o suporte.");
-    expect(getErrorMessage(apiError("OWNER_SUSPENSION_REQUIRED"), { adminAccounts: true })).toContain(
+    expect(translateError(apiError("OWNER_NOT_FOUND"))).toBe("Não achamos seu perfil de tutor. Fala com o suporte.");
+    expect(translateError(apiError("OWNER_SUSPENSION_REQUIRED"), { adminAccounts: true })).toContain(
       "não está suspensa",
     );
-    expect(getErrorMessage(apiError("OWNER_CPF_RELEASED"), { adminAccounts: true })).toContain("já foi liberado");
-    expect(getErrorMessage(apiError("HOST_IDENTITY_RELEASED"), { adminAccounts: true })).toContain("já foi liberada");
-    expect(getErrorMessage(apiError("AUTH_ADMIN_SUSPENSION_FORBIDDEN"), { adminAccounts: true })).toContain(
+    expect(translateError(apiError("OWNER_CPF_RELEASED"), { adminAccounts: true })).toContain("já foi liberado");
+    expect(translateError(apiError("HOST_IDENTITY_RELEASED"), { adminAccounts: true })).toContain("já foi liberada");
+    expect(translateError(apiError("AUTH_ADMIN_SUSPENSION_FORBIDDEN"), { adminAccounts: true })).toContain(
       "não pode ser suspensa",
     );
-    expect(getErrorMessage(apiError("HOST_STRIPE_ACCOUNT_NOT_REJECTED"), { adminAccounts: true })).toContain(
+    expect(translateError(apiError("HOST_STRIPE_ACCOUNT_NOT_REJECTED"), { adminAccounts: true })).toContain(
       "não está recusado",
     );
   });
   it("REQ-PNEW-007 tipo de arquivo recusado tem frase em português", () => {
-    expect(getErrorMessage(apiError("UNSUPPORTED_MEDIA_TYPE"))).toBe(
+    expect(translateError(apiError("UNSUPPORTED_MEDIA_TYPE"))).toBe(
       "Esse arquivo não é uma foto: use JPG, PNG ou WebP.",
     );
   });
@@ -50,7 +57,7 @@ describe("getErrorMessage", () => {
     ["HOST_NOT_A_COMPANY", "Esses dados são só de conta de empresa."],
     ["PAYLOAD_TOO_LARGE", "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB."],
   ])("REQ-ACC-007/010/011/017 %s usa a frase da spec", (code, expected) => {
-    expect(getErrorMessage(apiError(code!))).toBe(expected);
+    expect(translateError(apiError(code!))).toBe(expected);
   });
   it.each([
     ["HOST_CNPJ_ALREADY_REGISTERED", "Esse CNPJ já está em outra conta. Se a empresa é sua, fala com o suporte."],
@@ -60,7 +67,7 @@ describe("getErrorMessage", () => {
     ["HOST_APPLICATION_COMPANY_DATA_NOT_ALLOWED", "Dados de empresa só valem pra verificação de empresa."],
     ["HOST_APPLICATION_DOCUMENTS_MISSING", "Ainda falta foto. Confere as três vagas antes de enviar."],
   ])("REQ-HVER-019 %s usa a frase da spec", (code, expected) => {
-    expect(getErrorMessage(apiError(code!))).toBe(expected);
+    expect(translateError(apiError(code!))).toBe(expected);
   });
   it.each([
     ["LISTING_HOST_PAYOUTS_NOT_ENABLED", "Seu cantinho abre depois que o recebimento estiver conectado."],
@@ -76,7 +83,7 @@ describe("getErrorMessage", () => {
     ["LISTING_PHOTO_ALREADY_EXISTS", "Essa foto já está no cantinho."],
     ["LISTING_NOT_FOUND", "Não achamos esse cantinho."],
   ])("REQ-LIST-012 %s usa a frase da PetHost", (code, expected) => {
-    expect(getErrorMessage(apiError(code!))).toBe(expected);
+    expect(translateError(apiError(code!))).toBe(expected);
   });
   it.each([
     ["BOOKING_NOT_FOUND", "Não achamos essa estadia."],
@@ -104,10 +111,10 @@ describe("getErrorMessage", () => {
     ["BOOKING_NOT_IN_PROGRESS", "Só dá pra marcar a volta de estadia que está acontecendo."],
     ["BOOKING_CONFLICT", "A estadia mudou enquanto você olhava. Confere de novo."],
   ])("REQ-HREQ-006 REQ-STDAY-006 %s usa a frase da PetHost", (code, expected) => {
-    expect(getErrorMessage(apiError(code!))).toBe(expected);
+    expect(translateError(apiError(code!))).toBe(expected);
   });
   it.each(Object.keys(errorCopy))("REQ-HTTP-005 %s tem frase da PetHost e nunca a mensagem da API", (code) => {
-    const message = getErrorMessage(apiError(code, { retryAfterSeconds: 5 }));
+    const message = translateError(apiError(code, { retryAfterSeconds: 5 }));
 
     expect(message).not.toBe("english from the API");
     expect(message.length).toBeGreaterThan(10);
@@ -115,47 +122,47 @@ describe("getErrorMessage", () => {
   });
 
   it("REQ-HTTP-005 código desconhecido cai na frase genérica", () => {
-    expect(getErrorMessage(apiError("SOMETHING_NEW"))).toBe(GENERIC_ERROR_MESSAGE);
+    expect(translateError(apiError("SOMETHING_NEW"))).toBe(GENERIC_ERROR_MESSAGE);
     expect(GENERIC_ERROR_MESSAGE).toMatch(/^Deu um problema do nosso lado/);
   });
 
   it("REQ-HTTP-005 erro que não é ApiError cai na frase genérica", () => {
-    expect(getErrorMessage(new Error("boom"))).toBe(GENERIC_ERROR_MESSAGE);
-    expect(getErrorMessage(undefined)).toBe(GENERIC_ERROR_MESSAGE);
+    expect(translateError(new Error("boom"))).toBe(GENERIC_ERROR_MESSAGE);
+    expect(translateError(undefined)).toBe(GENERIC_ERROR_MESSAGE);
   });
 
   it("REQ-HTTP-005 e-mail já cadastrado muda com o tipo de conta", () => {
     const error = apiError("AUTH_EMAIL_ALREADY_REGISTERED");
 
-    expect(getErrorMessage(error, { role: "owner" })).toBe("Esse e-mail já tem conta de tutor. Quer entrar?");
-    expect(getErrorMessage(error, { role: "host" })).toBe("Esse e-mail já tem conta de anfitrião. Quer entrar?");
-    expect(getErrorMessage(error)).toBe("Esse e-mail já tem conta. Quer entrar?");
+    expect(translateError(error, { role: "owner" })).toBe("Esse e-mail já tem conta de tutor. Quer entrar?");
+    expect(translateError(error, { role: "host" })).toBe("Esse e-mail já tem conta de anfitrião. Quer entrar?");
+    expect(translateError(error)).toBe("Esse e-mail já tem conta. Quer entrar?");
   });
 
   it("REQ-HTTP-005 limite de tentativas mostra os segundos do Retry-After", () => {
-    expect(getErrorMessage(apiError("TOO_MANY_REQUESTS", { retryAfterSeconds: 30 }))).toBe(
+    expect(translateError(apiError("TOO_MANY_REQUESTS", { retryAfterSeconds: 30 }))).toBe(
       "Muitas tentativas seguidas. Respira e tenta de novo em 30 segundos.",
     );
-    expect(getErrorMessage(apiError("TOO_MANY_REQUESTS", { retryAfterSeconds: 1 }))).toBe(
+    expect(translateError(apiError("TOO_MANY_REQUESTS", { retryAfterSeconds: 1 }))).toBe(
       "Muitas tentativas seguidas. Respira e tenta de novo em 1 segundo.",
     );
-    expect(getErrorMessage(apiError("TOO_MANY_REQUESTS"))).toBe(
+    expect(translateError(apiError("TOO_MANY_REQUESTS"))).toBe(
       "Muitas tentativas seguidas. Respira e tenta de novo daqui a pouco.",
     );
   });
 
   it("REQ-HTTP-005 frases da tabela do contrato", () => {
-    expect(getErrorMessage(apiError("AUTH_INVALID_CREDENTIALS"))).toBe(
+    expect(translateError(apiError("AUTH_INVALID_CREDENTIALS"))).toBe(
       "E-mail ou senha não batem com essa conta. Confere se você é tutor ou anfitrião aqui em cima.",
     );
-    expect(getErrorMessage(apiError("NETWORK_ERROR"))).toMatch(/conexão/);
+    expect(translateError(apiError("NETWORK_ERROR"))).toMatch(/conexão/);
   });
 });
 
-it("REQ-HTTP-005 getErrorCopy resolve frases que dependem do contexto, sem um erro em mãos", () => {
-  expect(getErrorCopy("HOST_NOT_FOUND")).toBe("Seus dados ficam editáveis depois da verificação.");
-  expect(getErrorCopy("HOST_NOT_FOUND", { adminAccounts: true })).toBe("Esse perfil de anfitrião não existe mais.");
-  expect(getErrorCopy("CODIGO_QUE_NAO_EXISTE")).toBe(getErrorMessage(new Error("x")));
+it("REQ-HTTP-005 translateCode resolve frases que dependem do contexto, sem um erro em mãos", () => {
+  expect(translateCode("HOST_NOT_FOUND")).toBe("Seus dados ficam editáveis depois da verificação.");
+  expect(translateCode("HOST_NOT_FOUND", { adminAccounts: true })).toBe("Esse perfil de anfitrião não existe mais.");
+  expect(translateCode("CODIGO_QUE_NAO_EXISTE")).toBe(translateError(new Error("x")));
 });
 it.each([
   ["HOST_STRIPE_UNAVAILABLE", "O Stripe não respondeu agora. Tenta de novo em alguns minutos."],
@@ -171,5 +178,78 @@ it.each([
   ["HOST_STRIPE_ACCOUNT_ALREADY_EXISTS", "Essa conta já tem recebimento conectado. Pra trocar, fala com o suporte."],
   ["HOST_STRIPE_ACCOUNT_NOT_FOUND", "Você ainda não começou seu cadastro de recebimento. Começa por aqui."],
 ])("REQ-PAYOUT-012 %s tem frase própria", (code, message) => {
-  expect(getErrorMessage(apiError(code))).toBe(message);
+  expect(translateError(apiError(code))).toBe(message);
+});
+
+const issue = (code: string | null, params: FieldIssue["params"] = {}): FieldIssue => ({
+  code,
+  params,
+  message: "english from the API",
+});
+
+describe("translateFieldIssue", () => {
+  it("REQ-HTTP-005 traduz o código do campo com os params", () => {
+    expect(translateFieldIssue(issue("BOOKING_CHECK_IN_TOO_SOON", { minimumHours: 72, responseHours: 24 }))).toBe(
+      "A chegada precisa ser com pelo menos 72 horas de antecedência. O anfitrião tem até 24 horas pra responder.",
+    );
+    expect(translateFieldIssue(issue("FIELD_TOO_LONG", { max: 1500 }))).toBe("Cabe até 1.500 caracteres.");
+    expect(translateFieldIssue(issue("BOOKING_CARE_TERMS_NOT_ACCEPTED"))).toMatch(/comida do pet/);
+  });
+
+  it("REQ-HTTP-005 params ausentes não quebram a frase", () => {
+    expect(translateFieldIssue(issue("BOOKING_CHECK_IN_TOO_SOON"))).toBe(
+      "A chegada precisa ser com pelo menos mais tempo de antecedência.",
+    );
+  });
+
+  it("REQ-HTTP-005 sem código (API antiga) ou código novo cai em frase do campo, nunca no texto da API", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(translateFieldIssue(issue(null))).toBe(GENERIC_FIELD_MESSAGE);
+    expect(translateFieldIssue(issue("CODIGO_NOVO_DO_BACK"))).toBe(GENERIC_FIELD_MESSAGE);
+    expect(translateFieldIssue(issue("CODIGO_NOVO_DO_BACK"))).not.toBe("english from the API");
+    warn.mockRestore();
+  });
+
+  it("REQ-HTTP-005 avisa o código sem tradução uma vez, só o código", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    translateFieldIssue(issue("OUTRO_CODIGO_NOVO", { cpf: "123" }));
+    translateFieldIssue(issue("OUTRO_CODIGO_NOVO", { cpf: "123" }));
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0])).toContain("OUTRO_CODIGO_NOVO");
+    expect(String(warn.mock.calls[0])).not.toContain("123");
+    warn.mockRestore();
+  });
+
+  it("REQ-HTTP-005 a frase de campo pode depender do contexto", () => {
+    expect(translateFieldIssue(issue("AUTH_EMAIL_ALREADY_REGISTERED"), { role: "owner" })).toBe(
+      "Esse e-mail já tem conta de tutor. Quer entrar?",
+    );
+  });
+
+  it("REQ-HTTP-005 não confunde código com chave herdada do objeto", () => {
+    expect(translateFieldIssue(issue("constructor"))).toBe(GENERIC_FIELD_MESSAGE);
+  });
+});
+
+describe("translateFieldErrors", () => {
+  it("REQ-HTTP-006 devolve a frase de cada campo e junta motivos sem repetir", () => {
+    const error = ApiError.fromEnvelope(400, {
+      code: "VALIDATION_ERROR",
+      message: "x",
+      details: [
+        {
+          field: "checkIn",
+          messages: ["a"],
+          errors: [{ code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72 } }],
+        },
+        { field: "name", messages: ["a", "b"], errors: [{ code: "FIELD_REQUIRED" }, { code: "FIELD_REQUIRED" }] },
+      ],
+    });
+
+    expect(translateFieldErrors(error)).toEqual({
+      checkIn: "A chegada precisa ser com pelo menos 72 horas de antecedência.",
+      name: "Esse campo é obrigatório.",
+    });
+    expect(translateFieldErrors(new Error("x"))).toEqual({});
+  });
 });

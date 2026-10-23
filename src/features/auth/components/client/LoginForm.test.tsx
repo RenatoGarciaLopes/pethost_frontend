@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { errorCopy, GENERIC_ERROR_MESSAGE } from "@/shared/api/errors/errorCopy";
+import { GENERIC_ERROR_MESSAGE, translateCode } from "@/shared/api/errors/translateError";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { apiFail, apiOk, sessionUserFixture } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
@@ -93,7 +93,7 @@ describe("LoginForm", { timeout: 15000 }, () => {
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Entrar" }));
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent(String(errorCopy.AUTH_INVALID_CREDENTIALS));
+    expect(alert).toHaveTextContent(translateCode("AUTH_INVALID_CREDENTIALS"));
     await waitFor(() => expect(alert).toHaveFocus());
     expect(screen.getByLabelText(/^E-mail/)).toHaveValue("TESTE@exemplo.com");
     expect(screen.getByLabelText(/^Senha/)).toHaveValue("");
@@ -112,7 +112,7 @@ describe("LoginForm", { timeout: 15000 }, () => {
     const { user } = setup(role);
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Entrar" }));
-    await waitFor(() => expect(screen.getByText(String(errorCopy.AUTH_ACCOUNT_DEACTIVATED))).toBeVisible());
+    await waitFor(() => expect(screen.getByText(translateCode("AUTH_ACCOUNT_DEACTIVATED"))).toBeVisible());
     await user.clear(screen.getByLabelText(/^E-mail/));
     await user.paste("outro@exemplo.com");
     await user.clear(screen.getByLabelText(/^Senha/));
@@ -146,7 +146,7 @@ describe("LoginForm", { timeout: 15000 }, () => {
     fireEvent.click(action);
     await waitFor(() => expect(requests).toBe(1));
     complete();
-    expect(await screen.findByRole("alert")).toHaveTextContent(String(errorCopy.AUTH_INVALID_CREDENTIALS));
+    expect(await screen.findByRole("alert")).toHaveTextContent(translateCode("AUTH_INVALID_CREDENTIALS"));
     expect(screen.getByLabelText(/^Senha/)).toHaveValue("");
     expect(router.replace).not.toHaveBeenCalled();
   });
@@ -156,7 +156,7 @@ describe("LoginForm", { timeout: 15000 }, () => {
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Entrar" }));
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent(String(errorCopy.AUTH_ACCOUNT_SUSPENDED));
+    expect(alert).toHaveTextContent(translateCode("AUTH_ACCOUNT_SUSPENDED"));
     expect(within(alert).queryByRole("link")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reativar minha conta" })).not.toBeInTheDocument();
     expect(screen.getByLabelText(/^Senha/)).toHaveValue("");
@@ -194,7 +194,7 @@ describe("LoginForm", { timeout: 15000 }, () => {
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Entrar" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      kind === "network" ? String(errorCopy.NETWORK_ERROR) : GENERIC_ERROR_MESSAGE,
+      kind === "network" ? translateCode("NETWORK_ERROR") : GENERIC_ERROR_MESSAGE,
     );
     expect(screen.getByLabelText(/^Senha/)).toHaveValue("senha");
     expect(screen.getByLabelText(/^E-mail/)).toHaveValue("TESTE@exemplo.com");
@@ -203,15 +203,20 @@ describe("LoginForm", { timeout: 15000 }, () => {
   it("REQ-AUTH-003 associa validação da API ao campo", async () => {
     server.use(
       http.post(endpoint, () =>
-        HttpResponse.json(apiFail("VALIDATION_ERROR", "x", [{ field: "email", messages: ["Email recusado"] }]), {
-          status: 400,
-        }),
+        HttpResponse.json(
+          apiFail("VALIDATION_ERROR", "x", [
+            { field: "email", messages: ["Email recusado"], errors: [{ code: "FIELD_INVALID_FORMAT" }] },
+          ]),
+          {
+            status: 400,
+          },
+        ),
       ),
     );
     const { user } = setup();
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Entrar" }));
-    expect(await screen.findByText("Email recusado")).toBeVisible();
+    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeVisible();
     expect(screen.getByLabelText(/^E-mail/)).toHaveAttribute("aria-invalid", "true");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });

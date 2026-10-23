@@ -158,7 +158,9 @@ describe("RegistrationWizard anfitrião: envio e erros da API", () => {
     server.use(
       http.post(HOST_REGISTER_URL, () =>
         HttpResponse.json(
-          apiFail("VALIDATION_ERROR", "inválido", [{ field: "email", messages: ["E-mail recusado pela API."] }]),
+          apiFail("VALIDATION_ERROR", "inválido", [
+            { field: "email", messages: ["E-mail recusado pela API."], errors: [{ code: "FIELD_INVALID_FORMAT" }] },
+          ]),
           { status: 400 },
         ),
       ),
@@ -168,7 +170,7 @@ describe("RegistrationWizard anfitrião: envio e erros da API", () => {
     await user.click(submitButton());
 
     expect(await screen.findByRole("heading", { level: 1, name: steps.person.title })).toBeInTheDocument();
-    expect(screen.getByText("E-mail recusado pela API.")).toBeInTheDocument();
+    expect(screen.getByText("Esse formato não é válido. Confere o que foi digitado.")).toBeInTheDocument();
     await waitFor(() => expect(field(fields.email)).toHaveFocus());
   });
 

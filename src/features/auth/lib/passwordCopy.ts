@@ -2,7 +2,7 @@ import type { PersonalRole } from "@/shared/auth/contracts/session";
 
 /**
  * Textos de esqueci e troquei a senha (spec 013, seção Microcopy). Erros vindos da API não ficam aqui:
- * a frase de cada código vem de `getErrorMessage` (`shared/api/errors/errorCopy.ts`).
+ * a frase de cada código vem de `translateError` (`shared/api/errors/translateError.ts`).
  */
 export const passwordCopy = {
   forgot: {

@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { vi } from "vitest";
 import { ApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { ownerProfileDtoFixture } from "@/test/fixtures/account";
 import { apiOk } from "@/test/fixtures/session";
@@ -35,5 +35,5 @@ export { router };
 
 /** Frase pública do código recebido, sem usar mensagens internas da API. @example messageFor("OWNER_NOT_FOUND"); */
 export function messageFor(code: string) {
-  return getErrorMessage(new ApiError({ status: 400, code, message: code }));
+  return translateError(new ApiError({ status: 400, code, message: code }));
 }

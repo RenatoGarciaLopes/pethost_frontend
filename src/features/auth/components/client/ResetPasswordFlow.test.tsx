@@ -107,7 +107,11 @@ describe("ResetPasswordFlow", () => {
         return bodies.length === 1
           ? HttpResponse.json(
               apiFail("VALIDATION_ERROR", "Inválido", [
-                { field: "newPassword", messages: ["Escolha outra senha forte."] },
+                {
+                  field: "newPassword",
+                  messages: ["Escolha outra senha forte."],
+                  errors: [{ code: "FIELD_INVALID_FORMAT" }],
+                },
               ]),
               { status: 400 },
             )
@@ -119,7 +123,7 @@ describe("ResetPasswordFlow", () => {
     await user.click(passwordField());
     await user.paste("Abcdef1!");
     await user.click(screen.getByRole("button", { name: reset.submit }));
-    expect(await screen.findByText("Escolha outra senha forte.")).toBeVisible();
+    expect(await screen.findByText("Esse formato não é válido. Confere o que foi digitado.")).toBeVisible();
     expect(passwordField()).toHaveAttribute("aria-invalid", "true");
     expect(passwordField()).toHaveValue("Abcdef1!");
     expect(passwordField()).toHaveFocus();
@@ -135,7 +139,12 @@ describe("ResetPasswordFlow", () => {
   });
 
   it.each([
-    [400, "VALIDATION_ERROR", [{ field: "token", messages: ["Token ausente."] }], reset.incomplete],
+    [
+      400,
+      "VALIDATION_ERROR",
+      [{ field: "token", messages: ["Token ausente."], errors: [{ code: "FIELD_INVALID_FORMAT" }] }],
+      reset.incomplete,
+    ],
     [401, "AUTH_PASSWORD_RESET_TOKEN_INVALID", undefined, reset.expired],
   ] as const)(
     "REQ-PWD-006 e REQ-PWD-010 erro %s de token esconde o formulário e move o foco",

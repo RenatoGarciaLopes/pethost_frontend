@@ -4,7 +4,7 @@ import { Button, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
@@ -36,7 +36,7 @@ export function PetProfile({ accountId, petId }: { accountId: string; petId: str
     return (
       <ErrorState
         title={copy.loadError}
-        description={getErrorMessage(query.error)}
+        description={translateError(query.error)}
         onRetry={() => void query.refetch()}
       />
     );
@@ -66,7 +66,7 @@ export function PetProfile({ accountId, petId }: { accountId: string; petId: str
           >
             {copy.reactivate}
           </Button>
-          <ErrorNotice message={reactivate.isError ? getErrorMessage(reactivate.error) : null} tone="erro" />
+          <ErrorNotice message={reactivate.isError ? translateError(reactivate.error) : null} tone="erro" />
         </Stack>
       )}
       <PetProfileCard values={pet.values} coverUrl={pet.photos[0]?.url ?? null} now={now} showEmptyBlocks />

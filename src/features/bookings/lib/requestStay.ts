@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { hasErrorCode, isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { validateStay } from "@/shared/lib/date/stayRules";
 import { bookingCopy } from "./bookingCopy";
 import { bookingErrorDetail } from "./bookingErrorDetail";
@@ -62,5 +62,5 @@ export function requestStayErrorMessage(error: unknown, pets: readonly { id: str
     const pet = pets.find((item) => cited.has(item.id.toLowerCase()));
     if (pet) return copy.petConflict(pet.name);
   }
-  return getErrorMessage(error);
+  return translateError(error);
 }
