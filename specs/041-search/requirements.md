@@ -85,4 +85,4 @@ Decisão do Renato: a home é a página de resultados e a rota `/search` sai ([[
 - **REQ-SRCH-003:** a SearchBar da home é a mesma; o envio escreve a URL (`/?where=...`) pelo histórico, sem navegar.
 - **Chips na home:** os mesmos do `FilterChips` (Combina com {pet}, Casa com quintal, Sem criança/cachorro/gato, Casa, Apartamento, Aceita gatos, Aceita porte grande). "Vizinho" e "Responde rápido" continuam fora: a API não filtra (lacuna registrada).
 - **Removidos:** a rota `/search` (sem redirect: nenhum link externo a usa), `SearchScreen`, `SearchExperience` (virou `SearchResultsSection`, sem a barra), `buildHomeSearchPath` e o botão "Ver todos os cantinhos" da vitrine.
-- **Ponto de encaixe do mapa (080):** `SearchResultsSection` aceita `map?: ReactNode`; com ele, lista e mapa ficam lado a lado a partir de `lg`.
+- **Mapa nos resultados (079 + 080):** com região na busca (`where` ou `state`) e resultados, `SearchResultsSection` monta o `SearchMap`: lista à esquerda e mapa à direita a partir de `lg`; no celular, botão "Ver mapa" abre o mapa em tela cheia (REQ-SRCH-013).
