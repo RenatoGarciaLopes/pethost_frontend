@@ -14,7 +14,8 @@ export async function mockViaCep(page: Page) {
   );
 }
 
-export const field = (page: Page, label: string) => page.getByLabel(new RegExp(`^${label}`));
+/** Só a rota visível: o App Router pode manter a tela anterior oculta durante a troca de papel. */
+export const field = (page: Page, label: string) => page.getByLabel(new RegExp(`^${label}`)).filter({ visible: true });
 
 /** E-mail único por execução: o mock não guarda contas, mas o teste não depende disso. */
 const uniqueEmail = (prefix: string) => `${prefix}.${Date.now()}.${Math.floor(Math.random() * 1e6)}@pethost.test`;

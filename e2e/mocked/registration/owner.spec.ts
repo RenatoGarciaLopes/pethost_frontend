@@ -14,6 +14,9 @@ test("074 composição de cadastro e foco em 1440 e 390", async ({ page }, testI
   await field(page, "Nascimento").fill("15031990");
   await field(page, "CPF").fill("52998224725");
   await field(page, "Crie uma senha").fill("Teste2026");
+  // O print mostra o estado em repouso; a interface de desenvolvimento não pertence ao produto.
+  await page.getByRole("heading", { level: 1 }).click();
+  await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
   await expect(page.getByText("Passo 1 de 3", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Bora se conhecer.");
   await expect(page.getByText("O que a gente faz com cada dado")).toHaveCount(0);

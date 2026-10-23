@@ -6,7 +6,7 @@ updated: 2026-10-22
 
 # Cadastro fiel ao Figma (074)
 
-Implementação na worktree `pethost_frontend-074`, branch `fix/074-register-fidelity`, sobre `dev` em `92ced52`. Referências visuais: `cadastro-figma.png` e `cadastro-atual.png` do briefing. Código e validação da vaga B preparados; E2E e prints aguardam janela de portas do coordenador. Não confundir as suítes históricas com aprovação desta revisão.
+Implementação na worktree `pethost_frontend-074`, branch `fix/074-register-fidelity`, sobre `dev` em `92ced52`. Referências visuais: `cadastro-figma.png` e `cadastro-atual.png` do briefing. Código validado na vaga B e jornadas/prints executados na janela de portas do coordenador. Não confundir as suítes históricas com aprovação desta revisão.
 
 ## Decisão de fluxo aprovada pelo coordenador
 
@@ -52,7 +52,7 @@ Vaga B liberada e executada conforme resultados abaixo. E2E/prints aguardam a ja
 - Stories: RegistrationScreen documenta a composição de RegistrationWizard e PersonStep (tutor, anfitrião, celular, erros); RegisterChoice documenta tutor/host/mobile; WizardProgress acrescenta Cadastro; checklist acrescenta celular e mantém vazio/parcial/completo. Sem estados sem foto/nota artificiais, pois esses componentes não recebem esses dados.
 - E2E: specs existentes owner/host adaptadas à entrada direta e aos novos rótulos; novo cenário 074 salva `test-results/register-074-1440.png` e `register-074-390.png`. ViaCEP/backend são simulados. Só executar casos relevantes após liberação, com CI=1, portas exclusivas e webpack para a junction.
 
-Níveis não executados por ora: E2E aguarda janela de portas; resultados da vaga B abaixo. Integração à API real N/A nesta revisão visual; backend e regras não mudaram. Não declarar equivalência entre mock e API real. Prints ainda não existem; comparação final com Figma pendente.
+Níveis não executados por ora: E2E aguarda janela de portas; resultados da vaga B abaixo. Integração à API real N/A nesta revisão visual; backend e regras não mudaram. Não declarar equivalência entre mock e API real. Prints executados na janela autorizada; comparação abaixo.
 
 ## Validação da vaga B (22/10/2026)
 
@@ -64,3 +64,17 @@ Autorizada explicitamente pelo coordenador, sem subir Next/mock nem usar 3100/50
 - Story tests apenas dos quatro arquivos tocados: RegistrationScreen, RegisterChoice, PasswordStrengthChecklist e WizardProgress, --maxWorkers=1: 15 estados aprovados. Usado config temporário mergeConfig + server.fs.allow para realpath da junction, removido após execução. A primeira rodada encontrou duas medições durante fade parcial; waitForEntrance interno da story aguarda opacidade final antes do axe, sem excluir regras de contraste. RegistrationScreen reexecutada isoladamente: 4/4 aprovados; demais 11 já aprovados.
 
 Níveis não executados: E2E/prints aguardam a janela após Pixel e Sage; nenhum servidor subido. Integração HTTP não repetida porque endpoint, mapper, schema e momento do POST não mudaram; os caminhos felizes owner/host da jornada verificarão isso na janela autorizada. API real não usada. Sem suíte completa nem repetição das regras puras de senha inalteradas, conforme orientação do Renato.
+
+## Janela E2E e prints (22/10/2026)
+
+Liberada pelo coordenador após o Sage. Portas 3100/5099 verificadas livres antes de iniciar. Execução CI=1, um worker, projetos mocked-desktop e mocked-mobile, config temporário que preserva as configurações do repositório e troca apenas Next dev por webpack para a junction. Sem instalação ou mudança em next.config.
+
+Comando: node node_modules/@playwright/test/cli.js test e2e/mocked/registration/owner.spec.ts e2e/mocked/registration/host.spec.ts --config=playwright.074.config.ts --project=mocked-desktop --project=mocked-mobile -g 074.
+
+Caminhos felizes tutor: 2 aprovados (desktop/mobile), criando a conta após endereço, cookies HttpOnly e next preservados. Anfitrião: primeira rodada parou no seletor que incluía CPF da rota anterior oculta; field(page,label) agora filtra apenas visible, documentando o cache de navegação do App Router. Reexecução apenas do host: 2/2 aprovados, sem CPF/role no corpo e sucesso levando à verificação. Produto/API não alterados nesta correção do helper.
+
+Prints 1440/390 passaram na rodada inicial e foram atualizados em estado de repouso (sem foco após digitar e sem o portal de ferramentas do Next). Artefatos: test-results/register-074-1440.png, test-results/register-074-390.png e test-results/register-074-comparison.html, lado a lado com referência copiada do briefing. Dados sintéticos; comparação não depende de CPF/e-mail reais.
+
+Diferenças intencionais para o Figma: foco azul da referência não é reproduzido (072); ilustrações são SVGs simples com tokens existentes; textos/dados de exemplo são sintéticos; no celular os cartões empilham e ações seguem a barra fixa existente. Regras de senha, confirmação de descarte, endpoints e convite opcional ao pet permanecem os documentados.
+
+Escopo de validação: somente os casos 074 dos dois specs; demais jornadas de erros/permissões/SSR inalteradas não repetidas. Backend e ViaCEP simulados; nenhuma integração com API real declarada.
