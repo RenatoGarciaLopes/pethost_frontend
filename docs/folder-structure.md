@@ -4,7 +4,7 @@
 
 `src/widgets/app-shell/components/AppHeader.tsx` extrai o cabeçalho comum; `src/widgets/app-shell/index.ts` oferece sua API síncrona à rota pública, enquanto index.server mantém a casca dos layouts. Home e casca compartilham header sem um widget importar outro. `src/app/HomeFidelity.stories.tsx` compõe os dois widgets como a rota; o HomeScreen continua responsável por um único main.
 
-`src/shared/ui/brand/DoorScene/HouseScene.tsx` implementa somente a variante house do DoorScene existente; o default dos formulários permanece. `src/widgets/home/lib/homeDateLabel.ts` apresenta datas sem alterar a URL. TrustList ganha cards no próprio módulo. Testes/stories continuam próximos dos recursos. Não há feature/pasta nova de busca nem cópia da 041. Contratos, responsabilidades, catálogo provisório e validação: [implementação T7](../specs/005-ui-conformance/home-fidelity-implementation.md).
+`src/shared/ui/brand/DoorScene/HouseScene.tsx` implementa somente a variante house do DoorScene existente; o default dos formulários permanece. `src/features/search/lib/searchDateLabel.ts` apresenta datas sem alterar a URL. TrustList ganha cards no próprio módulo. Testes/stories continuam próximos dos recursos. Não há feature/pasta nova de busca nem cópia da 041. Contratos, responsabilidades, catálogo provisório e validação: [implementação T7](../specs/005-ui-conformance/home-fidelity-implementation.md).
 
 ## Busca de cantinhos (spec 041, worktree pethost_frontend-041)
 
@@ -485,3 +485,7 @@ e2e/mocked/admin/accounts.spec.ts                              jornada conta →
 ```
 
 As rotas compõem `AuditTable` pelo índice público `features/admin-audit/index.client.ts` e passam o nó pelo `auditTrail`; `widgets/admin-accounts` não importa a feature. O mock mantém eventos sintéticos para ids de tutor e anfitrião e registra ambos os handlers e resets em `mock-backend.mjs`. A primeira coluna do diretório de contas já traz o texto visível do nome, então não fornece `rowLabel` redundante ao `AdminDataTable` atualizado.
+
+## Revisão 071 da busca
+
+SearchBar em features/search/components/client/SearchBar centraliza a faixa usada por home, /search e detalhe. searchDateLabel e seus testes migram de widgets/home/lib para features/search/lib; não há pasta vazia ou cópia residual. HomeScreen compõe o recurso pelo index.client público.

@@ -66,6 +66,21 @@ it("SniffLoader anuncia somente rótulo e permite personalizar escala", () => {
   expect(screen.queryByText("Farejando")).not.toBeInTheDocument();
   expect(container.querySelector('svg[viewBox="0 0 100 110"]')).toHaveAttribute("width", "60");
 });
+it("REQ-DS-016 SniffLoader empilha batente, cachorros e folha, nessa ordem, e centraliza no contêiner", () => {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
+  );
+  renderWithProviders(<SniffLoader />, { theme: quintalTheme });
+  const scene = screen.getByRole("status").firstElementChild!;
+  const [back, track, front] = [...scene.children];
+  expect(back.tagName).toBe("svg");
+  expect(front.tagName).toBe("svg");
+  expect(track.querySelectorAll("img")).toHaveLength(3);
+  expect(back.querySelector("path")).toHaveAttribute("fill", "var(--loader-light)");
+  expect(front.querySelector("path")).toHaveAttribute("fill", "var(--loader-leaf)");
+  expect(screen.getByRole("status")).toHaveStyle({ width: "100%", justifyContent: "center", alignItems: "center" });
+});
 it("REQ-DS-016 Celebration preserva interação e informa término uma vez", async () => {
   const done = vi.fn();
   const click = vi.fn();

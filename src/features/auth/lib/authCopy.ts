@@ -6,7 +6,7 @@ import type { PersonalRole } from "@/shared/auth/contracts/session";
  * a frase de cada código vem de `getErrorMessage` (`shared/api/errors/errorCopy.ts`).
  */
 export const authCopy = {
-  title: "Entra que a porta tá aberta.",
+  title: "Entra que a porta tá aberta",
   greeting: "Que bom te ver",
   adminTitle: "Entrada da equipe",
   roleLabel: "Você entra como",

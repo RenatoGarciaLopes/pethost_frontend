@@ -7,7 +7,7 @@ import { waitForHydration } from "./hydration";
  */
 export async function openSearch(page: Page) {
   const pill = page.getByRole("button", { name: "Onde, datas e pet" });
-  const search = page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true });
+  const search = page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true });
   await expect(async () => {
     if ((await pill.isVisible()) && (await pill.getAttribute("aria-expanded")) !== "true") await pill.click();
     await expect(search).toBeVisible({ timeout: 1_000 });

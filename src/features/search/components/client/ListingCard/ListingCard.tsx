@@ -70,7 +70,6 @@ export function ListingCard({ listing, query, petCount, compatibility }: Listing
     pets: query.pets,
     species: [],
     sizes: [],
-    weekdays: [],
     from: query.from,
     to: query.to,
     count: query.count,

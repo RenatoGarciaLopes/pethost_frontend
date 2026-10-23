@@ -37,7 +37,7 @@ test("REQ-HOME-001/002 visitante vê o início e volta à busca depois de entrar
 test("REQ-HOME-003 tutor com pet segue para busca com o id, sem dados do perfil", async ({ page, baseURL }) => {
   await loginAccount(page, baseURL!);
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Um quintal pra Luna enquanto você viaja." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Um quintal pra Luna enquanto você viaja" })).toBeVisible();
   await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Maringá");
   await submitSearch(page);
@@ -185,4 +185,57 @@ test.describe("vitrine perto de você", () => {
     await hideDevIndicator(page);
     await page.screenshot({ path: "test-results/home-fidelity/nearby-owner.png", fullPage: true });
   });
+});
+
+test.describe("vitrine perto de você sem cantinho no raio", () => {
+  // Fortaleza: fora do mapa sintético do mock, então o raio de 10 km vem vazio.
+  test.use({ geolocation: { latitude: -3.7319, longitude: -38.5267 }, permissions: ["geolocation"] });
+
+  test("REQ-NEARBY-021 raio vazio mostra os cantinhos sem filtro de lugar", async ({ page }) => {
+    const searches: URLSearchParams[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (url.pathname === "/api/listings") searches.push(url.searchParams);
+    });
+    await page.goto("/");
+    await waitForHydration(page.getByRole("main"));
+    await expect(page.getByRole("heading", { level: 2, name: "13 casas com vaga para conhecer" })).toBeVisible({
+      timeout: 45_000,
+    });
+    await expect(
+      page.getByText("Ainda não achamos cantinhos num raio de 10 km, então mostramos outras casas."),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: /Quintal 1\b/ })).toBeVisible();
+    expect(searches.some((params) => params.has("radiusKm"))).toBe(true);
+    expect(searches.some((params) => [...params.keys()].join() === "pageSize")).toBe(true);
+    expect(page.url()).not.toMatch(/latitude|longitude|-3\.7/);
+  });
+});
+
+test("072 mouse fecha Select sem anel na célula; Tab mantém foco em tinta", async ({ page }, info) => {
+  await page.setViewportSize({ width: info.project.use.isMobile ? 390 : 1440, height: 960 });
+  await page.goto("/");
+  await expandSearchOnMobile(page);
+  const pet = page.getByRole("combobox", { name: "Pet" });
+  const petCell = pet.locator("..").locator("..").locator("..");
+  await pet.click();
+  await page.getByRole("option", { name: "Cão", exact: true }).click();
+  await expect(pet).toBeFocused();
+  await expect(pet).toHaveCSS("outline-style", "none");
+  await expect(petCell).toHaveCSS("outline-style", "none");
+  await page.screenshot({ path: `test-results/072-select-mouse-${info.project.name}.png`, fullPage: true });
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await expect(pet).toBeFocused();
+  await expect(pet).toHaveCSS("outline-style", "none");
+  await expect(petCell).toHaveCSS("outline-color", "rgb(31, 26, 23)");
+  await expect(petCell).toHaveCSS("outline-width", "3px");
+  await expect(petCell).toHaveCSS("outline-offset", "3px");
+  await expect(petCell).toHaveCSS("border-radius", "12px");
+  await page.screenshot({ path: `test-results/072-select-tab-${info.project.name}.png`, fullPage: true });
+  await page.keyboard.press("Shift+Tab");
+  const departure = page.getByLabel("Saída", { exact: true });
+  await expect(departure).toBeFocused();
+  await expect(departure.locator("..")).toHaveCSS("outline-color", "rgb(31, 26, 23)");
+  await expect(departure.locator("..")).toHaveCSS("outline-width", "3px");
 });
