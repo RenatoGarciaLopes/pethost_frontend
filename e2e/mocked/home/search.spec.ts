@@ -9,7 +9,7 @@ test("079 resultados e chips na home em 1440 e 390", async ({ page, baseURL }, t
   const width = testInfo.project.name.includes("mobile") ? 390 : 1440;
   await page.setViewportSize({ width, height: 900 });
   await page.goto("/?where=Maring%C3%A1&pets=0199d2a0-0000-7000-8000-0000000000e1");
-  await expect(page.getByRole("heading", { level: 2, name: "13 casas com vaga perto de Maringá" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "13 casas com vaga perto de Maringá" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Combina com Luna" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByLabel("Bairro (opcional)")).toHaveCount(0);
   await expect(page.getByLabel("Diária máxima (R$)")).toHaveCount(0);
@@ -25,7 +25,7 @@ test("REQ-SRCH-013 busca com região mostra o mapa: ao lado da lista no computad
   const width = mobile ? 390 : 1440;
   await page.setViewportSize({ width, height: 900 });
   await page.goto("/?where=Maring%C3%A1");
-  await expect(page.getByRole("heading", { level: 2, name: "13 casas com vaga perto de Maringá" })).toBeVisible({
+  await expect(page.getByRole("heading", { level: 1, name: "13 casas com vaga perto de Maringá" })).toBeVisible({
     timeout: 30_000,
   });
   const map = page.getByRole("region", { name: "Mapa dos cantinhos" });
@@ -45,7 +45,7 @@ test("REQ-SRCH-013 busca com região mostra o mapa: ao lado da lista no computad
     await expect(map).toBeVisible();
   }
   if (!mobile)
-    await page.getByRole("heading", { level: 2, name: /casas com vaga perto/ }).evaluate((el) => el.scrollIntoView());
+    await page.getByRole("heading", { level: 1, name: /casas com vaga perto/ }).evaluate((el) => el.scrollIntoView());
   // Os tiles chegam depois do pino: espera o mapa assentar antes do print.
   await page.waitForTimeout(4000);
   await page.screenshot({ path: `test-results/home-079-mapa-${width}.png` });
@@ -53,7 +53,7 @@ test("REQ-SRCH-013 busca com região mostra o mapa: ao lado da lista no computad
 
 test("REQ-SRCH-001 visitante busca na própria home, sem passar pelo login", async ({ page }) => {
   await page.goto("/?where=Maring%C3%A1&hasKids=false");
-  await expect(page.getByRole("heading", { level: 2, name: "13 casas com vaga perto de Maringá" })).toBeVisible({
+  await expect(page.getByRole("heading", { level: 1, name: "13 casas com vaga perto de Maringá" })).toBeVisible({
     timeout: 30_000,
   });
   await expect(page).toHaveURL(/\/\?where=Maring%C3%A1&hasKids=false$/);
@@ -98,7 +98,7 @@ test("REQ-SRCH-003/004/007 datas, pets e total seguem no link", async ({ page, b
   await pickDates(page, page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }), from, to);
   // A home já parte com a primeira pet do tutor (Luna) escolhida.
   await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
-  await expect(page.getByRole("heading", { level: 2, name: /casas com vaga perto/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /casas com vaga perto/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Combina com Luna" })).toHaveAttribute("aria-pressed", "true");
   const card = page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first();
   await expect(card).toContainText(/300,00 as 5 noites/);
@@ -148,4 +148,35 @@ test("REQ-SRCH-008 lista fica visível enquanto o filtro busca", async ({ page, 
     release();
   }
   await expect(list.getByRole("link")).toHaveCount(7);
+});
+
+test("REQ-SRCH-014 resultados trazem a busca minificada no cabeçalho, editável por segmento, e chips verdes", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  await loginAccount(page, baseURL!);
+  const mobile = testInfo.project.name.includes("mobile");
+  const width = mobile ? 390 : 1440;
+  await page.setViewportSize({ width, height: 900 });
+  await page.goto("/?where=Zona+7&from=2026-12-20&to=2026-12-25&pets=0199d2a0-0000-7000-8000-0000000000e1");
+  const summary = page.getByRole("group", { name: "Sua busca" });
+  await expect(summary).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("form", { name: "Busca de cantinhos" })).toHaveCount(0);
+  await expect(summary.getByRole("button", { name: "Editar o lugar: Zona 7" })).toBeVisible();
+  await expect(summary.getByRole("button", { name: "Editar as datas: 20 a 25 dez" })).toBeVisible();
+  await expect(summary.getByRole("button", { name: "Editar o pet: Luna" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Combina com Luna" })).toHaveCSS(
+    "background-color",
+    "rgb(197, 219, 79)",
+  );
+  await page.screenshot({ path: `test-results/home-088-${width}.png` });
+  const edit = summary.getByRole("button", { name: /^Editar o lugar/ });
+  await waitForHydration(edit);
+  await edit.click();
+  const where = page.getByRole("textbox", { name: "Onde" });
+  await expect(where).toBeFocused();
+  await where.fill("Zona 5");
+  await page.getByRole("button", { name: "Achar um cantinho", exact: true }).click();
+  await expect(page).toHaveURL(/where=Zona\+5/);
+  await expect(summary.getByRole("button", { name: "Editar o lugar: Zona 5" })).toBeVisible();
 });

@@ -11,3 +11,8 @@ export const quietVariant = {
 };
 /** Chip marcado (`ChipPicker`): fundo grama com texto tinta. */
 export const okChipVariant = { props: { variant: "ok" as const }, style: { backgroundColor: c.grama } };
+/** Botão marcado (chips de filtro): fundo grama com texto tinta, como o `ok` do Chip. */
+export const okButtonVariant = {
+  props: { variant: "ok" as const },
+  style: { backgroundColor: c.grama, "&:hover": { backgroundColor: c.grama } },
+};

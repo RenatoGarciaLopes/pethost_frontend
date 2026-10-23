@@ -31,7 +31,7 @@ test("REQ-HOME-001/002 visitante vê o início e busca na própria home", async 
   await submitSearch(page);
 
   await expect(page).toHaveURL(/\/\?(?=.*where=Zona\+7)(?=.*species=dog)/);
-  await expect(page.getByRole("heading", { level: 2, name: /casas? com vaga perto de Zona 7/ })).toBeVisible({
+  await expect(page.getByRole("heading", { level: 1, name: /casas? com vaga perto de Zona 7/ })).toBeVisible({
     timeout: 30_000,
   });
 });

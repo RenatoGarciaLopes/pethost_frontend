@@ -1,6 +1,6 @@
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import type { Components, Theme } from "@mui/material/styles";
-import { quietVariant } from "../variants/quintalVariants";
+import { okButtonVariant, quietVariant } from "../variants/quintalVariants";
 import { quintalColors as c } from "../tokens/colors";
 import { hardShadow } from "../tokens/shadows";
 import { SPRING_ASSENTAR } from "../tokens/springs";
@@ -33,5 +33,5 @@ export const quintalButton = {
       "&.MuiButton-contained": { backgroundColor: c.coral, "&:hover": { backgroundColor: c.coral } },
     },
   },
-  variants: [quietVariant],
+  variants: [quietVariant, okButtonVariant],
 } satisfies Components<Theme>["MuiButton"];

@@ -51,7 +51,7 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
   );
   return (
     <Stack spacing={2}>
-      <Typography component="h2" variant="h2" id="results-title" aria-live="polite">
+      <Typography component="h1" variant="h2" id="results-title" aria-live="polite">
         {copy.heading(data?.pages[0]?.totalCount ?? 0, query)}
       </Typography>
       <FilterChips query={query} pets={pets} onChange={update} errors={error?.fields} />

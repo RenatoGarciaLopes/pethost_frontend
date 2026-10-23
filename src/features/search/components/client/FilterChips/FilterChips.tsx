@@ -43,9 +43,9 @@ export function FilterChips({ query, pets = [], onChange, errors = {} }: FilterC
         key={label}
         aria-label={label}
         aria-pressed={active}
-        variant="outlined"
+        variant={active ? "ok" : "outlined"}
         onClick={click}
-        sx={{ ...style, bgcolor: active ? "action.selected" : "transparent" }}
+        sx={style}
       >
         {active && <span aria-hidden="true">✓&nbsp;</span>}
         {label}

@@ -140,3 +140,9 @@ it("REQ-HOME-011 com filtros na URL a home mostra os resultados no lugar da vitr
   await user.click(screen.getByRole("button", { name: "Casa com quintal" }));
   expect(window.location.search).toBe("?where=Maring%C3%A1");
 });
+
+it("REQ-SRCH-014 com busca na URL a home mostra só os resultados: sem hero nem barra grande", () => {
+  renderHome({}, "/?where=Zona+7");
+  expect(screen.queryByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("form", { name: "Busca de cantinhos" })).not.toBeInTheDocument();
+});
