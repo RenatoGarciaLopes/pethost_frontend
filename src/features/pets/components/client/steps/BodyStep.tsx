@@ -5,6 +5,8 @@ import { Autocomplete, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
+import { brasiliaToday } from "@/shared/lib/date/stayRules";
+import { DateField } from "@/shared/ui/forms/DateField";
 import { SegmentedControl } from "@/shared/ui/forms/SegmentedControl";
 import { ageBucketToBirthDate } from "../../../lib/ageBucketToBirthDate";
 import { gramsToKg } from "../../../lib/gramsToKg";
@@ -114,16 +116,16 @@ export function BodyStep() {
             control={control}
             name="birthDate"
             render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                ref={undefined}
-                value={field.value ?? ""}
+              <DateField
+                name={field.name}
                 inputRef={field.ref}
-                type="date"
+                onBlur={field.onBlur}
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                max={brasiliaToday()}
                 label={copy.birthDate}
                 error={Boolean(fieldState.error)}
                 helperText={fieldState.error?.message}
-                slotProps={{ inputLabel: { shrink: true } }}
               />
             )}
           />

@@ -1,5 +1,6 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
+import { pickCalendarDays } from "@/test/calendar";
 import { renderWithProviders } from "@/test/render";
 
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
@@ -8,7 +9,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 import { ListingSearchControls } from "./ListingSearchControls";
 
 it("REQ-LPAGE-004 abre os campos existentes da busca e preserva datas e pets na URL", async () => {
-  renderWithProviders(
+  const { user } = renderWithProviders(
     <ListingSearchControls
       listingId="listing-1"
       today="2026-10-15"
@@ -17,8 +18,7 @@ it("REQ-LPAGE-004 abre os campos existentes da busca e preserva datas e pets na 
     />,
   );
   fireEvent.click(screen.getByRole("button", { name: "Escolher datas e pets" }));
-  fireEvent.change(screen.getByLabelText("Chegada"), { target: { value: "2026-10-16" } });
-  fireEvent.change(screen.getByLabelText("Saída"), { target: { value: "2026-10-17" } });
+  await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-10-16", "2026-10-17");
   fireEvent.click(screen.getByLabelText("Luna"));
   fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
   expect(push).toHaveBeenCalledWith("/listings/listing-1?pets=pet-1&from=2026-10-16&to=2026-10-17");
