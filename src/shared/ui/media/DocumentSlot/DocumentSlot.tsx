@@ -104,7 +104,7 @@ export function DocumentSlot({
           borderStyle: file || uploaded ? "solid" : "dashed",
           borderColor: error ? "error.main" : theme.palette.quintal.tinta,
           bgcolor: "background.paper",
-          "&.Mui-focusVisible": { outline: `3px solid ${theme.palette.quintal.foco}`, outlineOffset: 3 },
+          "&:focus-visible": { outline: `3px solid ${theme.palette.quintal.tinta}`, outlineOffset: 3 },
           "&.Mui-disabled": { opacity: 0.7 },
         })}
       >

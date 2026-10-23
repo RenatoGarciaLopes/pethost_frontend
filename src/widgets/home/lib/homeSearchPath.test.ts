@@ -20,7 +20,7 @@ describe("REQ-HOME-005 destino de busca", () => {
   });
 
   it("leva a quantidade escolhida pelo anfitrião no parâmetro da API", () => {
-    expect(buildHomeSearchPath({ petCount: 3 })).toBe("/search?pets=3");
+    expect(buildHomeSearchPath({ petCount: 3 })).toBe("/search?count=3");
   });
 
   it("codifica texto livre e deixa a busca sem filtro como /search", () => {

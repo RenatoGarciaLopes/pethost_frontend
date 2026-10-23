@@ -74,8 +74,6 @@ export const searchHandlers = [
     let items = (city && city !== "Maringá") || offMap ? [] : listings;
     if (params.get("hasYard") === "true") items = items.filter((item) => item.hasYard);
     if (params.get("homeType")) items = items.filter((item) => item.homeType === params.get("homeType"));
-    if (params.has("maxNightlyRate"))
-      items = items.filter((item) => item.nightlyRate <= Number(params.get("maxNightlyRate")));
     if (Number(params.get("pets") ?? 1) > 5) items = [];
     const page = Number(params.get("page") ?? 1);
     const pageSize = Number(params.get("pageSize") ?? 12);

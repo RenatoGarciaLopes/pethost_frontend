@@ -1,7 +1,7 @@
 ---
 spec: 041-search
 status: in-progress
-updated: 2026-10-15
+updated: 2026-10-22
 area: SRCH
 ---
 
@@ -30,10 +30,10 @@ O tutor procura quem cuide do pet perto de casa, nas datas da viagem ([[11-busca
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | REQ-SRCH-001 | `/search` DEVE exigir conta de tutor ou anfitrião (a API exige login); visitante vai para `/login?next=` com a busca preservada                                                                                                                                                                                                                                                       |
 | REQ-SRCH-002 | O estado da busca DEVE viver na URL (`where`, `from`, `to`, `pets` como ids dos pets do tutor, `radius` e os filtros), lido e escrito por um único parser testado (`searchParamsToQuery`/`queryToSearchParams`); voltar e recarregar repetem a mesma busca                                                                                                                            |
-| REQ-SRCH-003 | O campo de reserva DEVE ter rótulos visíveis: Onde (vazio = "Perto de casa"; texto = cidade e, opcional, bairro), Chegada, Saída e Pet; datas seguem as regras da API (de hoje a 365 dias, saída depois, até 30 noites) e o erro aparece no campo antes de buscar                                                                                                                     |
-| REQ-SRCH-004 | "Pet" DEVE oferecer os pets ativos do tutor (020); escolher pets manda `pets` (quantos), `species` (as espécies escolhidas) e `sizes` (os portes informados), e o título diz "Cantinhos que recebem {nomes}"                                                                                                                                                                          |
-| REQ-SRCH-005 | O título DEVE dizer a contagem na voz da marca: "{n} cantinhos com vaga perto de casa" (raio) ou "{n} cantinhos em {cidade}" (lugar); com datas, "com vaga" só quando `checkIn` vier                                                                                                                                                                                                  |
-| REQ-SRCH-006 | Chips de filtro: "Casa com quintal" (`hasYard=true`), "Sem criança" (`hasKids=false`), "Sem cachorro" (`hasDogs=false`), "Sem gato" (`hasCats=false`), "Casa" e "Apartamento" (`homeType`), "Até R$ {x} a diária" (`maxNightlyRate`); ativo fica grama; "Limpar filtros" quando houver algum                                                                                          |
+| REQ-SRCH-003 | Faixa única SearchBar compartilhada com a home: Onde (cidade ou vazio para perto de casa), Chegada, Saída, Pet e Achar um cantinho. Sem bairro separado nem formulário avançado. Datas validadas antes de buscar.                                                                                                                                                                     |
+| REQ-SRCH-004 | Pet oferece os pets ativos; a busca deriva quantidade, espécie e porte. O chip ativo ✓ Combina com {nomes} permite retirar a seleção; sem pets, o campo informa quantidade.                                                                                                                                                                                                           |
+| REQ-SRCH-005 | Título único antes dos chips: N casas com vaga perto de {lugar}, ou perto da sua casa sem lugar.                                                                                                                                                                                                                                                                                      |
+| REQ-SRCH-006 | Pílulas contornadas: Casa com quintal, Sem criança/cachorro/gato, Casa, Apartamento, Aceita gatos e Aceita porte grande. Ativo com ✓ e aria-pressed; limpar preserva lugar, datas e pets.                                                                                                                                                                                             |
 | REQ-SRCH-007 | Cada card DEVE ser um link único para `/listings/{id}` levando datas e pets na URL, com capa 4:3, aba do anfitrião (avatar e nome; empresa pelo nome fantasia), título, bairro e cidade, distância ("a 1,4 km", só com raio), os selos traduzidos (Vizinho, Responde rápido, Casa com quintal, Experiente) e o preço: diária por pet ou, com datas e pets, o total "R$ X as N noites" |
 | REQ-SRCH-008 | ENQUANTO a busca carrega depois de mudar um filtro, a lista anterior fica visível e a faixa "Farejando cantinhos…" aparece (o corgi atravessa uma vez; sem movimento com movimento reduzido); a primeira carga vem do servidor, sem loader                                                                                                                                            |
 | REQ-SRCH-009 | A paginação DEVE ser "Mostrar mais cantinhos" (`page + 1`, acumulando), sem rolagem infinita automática                                                                                                                                                                                                                                                                               |
@@ -67,3 +67,11 @@ O tutor procura quem cuide do pet perto de casa, nas datas da viagem ([[11-busca
 - Ordenar por preço ou nota (a API não ordena por eles; nota depende das avaliações).
 - Filtro "Responde rápido" e "Vizinho" (são selos calculados, sem filtro na API): só aparecem no card.
 - Agenda de dias bloqueados (045).
+
+## Removidos por decisão do Renato em 2026-10-22 (071)
+
+- Formulário avançado, campo Bairro separado e linha solta das três garantias: não existem na composição aprovada da prancha; reutilizar a faixa da home.
+- REQ-SRCH-006: removida diária máxima. Também removidos do estado, parse/serialize e requisições: maxNightlyRate, minNightlyRate, minCapacity, neighborhood e weekdays. A API continua oferecendo esses parâmetros para outros consumidores; links antigos são ignorados pela busca.
+- REQ-SRCH-004: removido título por nome do pet; identificação passa ao chip Combina com.
+- REQ-SRCH-005: substituído texto condicional por contagem no padrão da prancha. Sem datas, a API lista oferta geral; o título não confirma reserva.
+- Vizinho e Responde rápido: lacuna da API, sem filtro correspondente. Fora dos chips por decisão expressa, sem alteração no backend.

@@ -13,7 +13,7 @@ import { homeCopy } from "../../lib/homeCopy";
 
 const copy = homeCopy.nearby;
 /** Base dos cards: sem datas nem pets eles mostram a diária. */
-const CARD_QUERY: SearchQuery = { pets: [], species: [], sizes: [], weekdays: [] };
+const CARD_QUERY: SearchQuery = { pets: [], species: [], sizes: [] };
 
 export interface NearbyListingsProps {
   /** `visitor` ou o id da conta: os selos dependem de quem vê, então o cache é separado. */

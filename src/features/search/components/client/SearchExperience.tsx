@@ -1,5 +1,6 @@
 "use client";
-import { Container, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import type { SearchPet, SearchQuery } from "../../types";
 import type { SearchError } from "../../lib/searchErrors";
 import { searchCopy as copy } from "../../lib/searchCopy";
@@ -27,11 +28,8 @@ export function SearchExperience({
   const selected = pets.filter((pet) => query.pets.includes(pet.id));
   const items = [...new Map(data?.pages.flatMap((page) => page.items).map((item) => [item.id, item]) ?? []).values()];
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page" sx={{ py: { xs: 3, md: 5 } }}>
       <Stack spacing={4}>
-        <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
-          {selected.length ? copy.petsHeading(selected.map((pet) => pet.name)) : copy.title}
-        </Typography>
         <Stack spacing={2} id="search-fields">
           <SearchBar
             key={queryToSearchParams(query).toString()}
@@ -41,13 +39,16 @@ export function SearchExperience({
             onSearch={update}
             errors={error?.fields}
           />
-          <Typography>{copy.guarantees}</Typography>
         </Stack>
-        <FilterChips query={query} onChange={update} errors={error?.fields} />
+        <Stack spacing={2}>
+          <Typography variant="h1" aria-live="polite" sx={{ fontSize: { xs: 30, md: 40 } }}>
+            {copy.heading(data?.pages[0]?.totalCount ?? 0, query)}
+          </Typography>
+          <FilterChips query={query} pets={pets} onChange={update} errors={error?.fields} />
+        </Stack>
         <SearchResults
           query={query}
           items={items}
-          totalCount={data?.pages[0]?.totalCount ?? 0}
           petCount={selected.length || query.count || 0}
           compatibility={selected.length ? { accountId, pets: selected } : undefined}
           isFetching={result.isFetching}
@@ -62,6 +63,6 @@ export function SearchExperience({
           onExpand={(radius) => update({ ...query, radius })}
         />
       </Stack>
-    </Container>
+    </PageContainer>
   );
 }

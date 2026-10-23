@@ -1,11 +1,10 @@
-/** Microcopy da busca; não promete vaga quando não há período. @example searchCopy.loading */
+/** Microcopy da busca alinhada à prancha e aos filtros atendidos pela API. @example searchCopy.loading */
 export const searchCopy = {
   title: "Buscar cantinhos",
   where: "Onde",
   nearby: "Perto de casa",
-  neighborhood: "Bairro (opcional)",
   pet: "Pet",
-  search: "Buscar",
+  search: "Achar um cantinho",
   edit: "Onde, datas e pet",
   close: "Fechar busca",
   loading: "Farejando cantinhos…",
@@ -20,11 +19,10 @@ export const searchCopy = {
   cityHelp: "Escreve uma cidade no campo Onde e busca de novo.",
   genericError: "Não deu pra procurar agora. Tenta de novo?",
   filterError: "Confere esse filtro e busca de novo.",
-  guarantees: "Conversa antes · Foto todo dia · Pagamento guardado",
-  species: "Cão ou gato?",
+  checkIn: "Chegada",
+  checkOut: "Saída",
+  matchesPet: (names: string[]) => `Combina com ${names.join(" e ")}`,
   allPets: "Qualquer pet",
-  count: "Quantos pets vão?",
-  maxRate: "Diária máxima (R$)",
   house: "Casa",
   apartment: "Apartamento",
   yard: "Casa com quintal",
@@ -36,8 +34,6 @@ export const searchCopy = {
   acceptsCats: "Aceita gatos",
   acceptsLarge: "Aceita porte grande",
   cityTooLong: "Use até 80 caracteres para a cidade.",
-  neighborhoodTooLong: "Use até 80 caracteres para o bairro.",
-  invalidCount: "Escolhe de 1 a 200 pets.",
   nightly: "/noite",
   totalStay: (nights: number) => ` as ${nights} noites`,
   distance: (km: string) => `${km} km de você`,
@@ -61,7 +57,6 @@ export const searchCopy = {
     },
   },
   photoAlt: (title: string) => `Cantinho ${title}`,
-  rateLimit: (amount: number) => `Até R$ ${amount.toLocaleString("pt-BR")} a diária`,
   unnamedHost: "Anfitrião",
   noPhoto: "Cantinho sem foto",
   fieldLabels: {
@@ -69,9 +64,6 @@ export const searchCopy = {
     state: "Estado",
     species: "Espécie",
     sizes: "Porte",
-    weekdays: "Dias da semana",
-    minCapacity: "Quantidade de pets",
-    minNightlyRate: "Diária mínima",
     hasYard: "Casa com quintal",
     hasKids: "Crianças na casa",
     hasDogs: "Cachorros na casa",
@@ -79,7 +71,6 @@ export const searchCopy = {
     homeType: "Tipo de casa",
   } as Record<string, string>,
   expand: (radius: number) => `Bora olhar até ${radius} km`,
-  heading: (count: number, query: { where?: string; from?: string; state?: string; neighborhood?: string }) =>
-    `${count} ${count === 1 ? "cantinho" : "cantinhos"}${query.from ? " com vaga" : ""} ${query.where || query.state || query.neighborhood ? `em ${query.where || query.neighborhood || query.state}` : "perto de casa"}`,
-  petsHeading: (names: string[]) => `Cantinhos que recebem ${names.join(" e ")}`,
+  heading: (count: number, query: { where?: string; state?: string }) =>
+    `${count} ${count === 1 ? "casa" : "casas"} com vaga perto ${query.where || query.state ? `de ${query.where || query.state}` : "da sua casa"}`,
 };

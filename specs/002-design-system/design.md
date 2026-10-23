@@ -82,3 +82,13 @@ Validação: quatro testes de componente aprovados (OutlinedInput e FormLabel), 
 | masks           | Unitário               | `masks.test.ts`                                                                                             | Máscara e desmáscara, entradas parciais e caracteres inválidos                         |
 | 014             | Componente + Storybook | `Hint`, `StatusPill`, `Sticker`, `EmptyState`, `FormActions`, `LockedField` (`*.test.tsx`, `*.stories.tsx`) | render, papel acessível, `FormActions` fixo no celular                                 |
 | 016             | Componente             | `TurmaWalker.test.tsx`, `Celebration.test.tsx`                                                              | toca uma vez, não bloqueia clique, sem animação com `prefers-reduced-motion`           |
+
+## Foco em tinta (072, 22/10/2026)
+
+Token `foco` removido; `focusRing` e Link usam `tinta`, DocumentSlot usa `:focus-visible` nativo. HomeScreen não desenha mais contorno em células por `:focus-within`. A extração da barra para SearchBar deve preservar esta regra. Foco do controle permanece gerenciado pelo navegador e MUI. Story `src/shared/theme/Focus.stories.tsx` cobre botão, chip, link e input. Testes e limites na nota `development/resources/frontend-focus` do vault e decisão `2026-10-22-foco-sem-azul`.
+
+Validação final 072: E2E isolado da home com CI=1 e webpack na 3100/mock 5099, desktop+celular: 2/2 aprovados. Inclui mouse no Select, retorno pelo teclado e foco na célula da data transparente. Servidores encerrados, configs temporários removidos. Demais passes e limites: nota frontend-focus do vault. A comparação visual antes dos controles é reconstruída pela cor do CSS antigo; os prints após são do código entregue.
+
+Revisão do indicador da 072: foco de teclado é representado na célula completa por `:has(:focus-visible)`, raio control 12 px e offset 3 px; outline interno do InputBase é suprimido dentro da barra. Ícone, rótulo e valor ficam dentro do mesmo indicador. Nenhum focus-within colorido e nenhum anel na célula do PET após mouse. O ajuste será preservado pela extração 071.
+
+Revisão visual validada somente na story Visitante da HomeScreen: 1/1 aprovada, screenshots reais de mouse/Tab no PET em 1440/390 em `test-results/072-pet-review/`. E2E atualizado para indicador da célula, sem executar novamente nesta revisão por orientação do coordenador.
