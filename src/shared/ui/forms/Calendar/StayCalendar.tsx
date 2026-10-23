@@ -13,6 +13,8 @@ export interface StayCalendarProps {
   checkIn: string;
   checkOut: string;
   today: string;
+  /** Primeira chegada que o calendário deixa escolher; sem ela, hoje. */
+  min?: string;
   onChange: (value: { checkIn: string; checkOut: string }) => void;
   /** `complete` é verdadeiro quando o toque escolheu a saída e fechou o intervalo. */
   onClose: (complete: boolean) => void;
@@ -31,6 +33,7 @@ export function StayCalendar({
   checkIn,
   checkOut,
   today,
+  min = today,
   onChange,
   onClose,
 }: StayCalendarProps) {
@@ -48,7 +51,7 @@ export function StayCalendar({
           autoFocus
           months={compact ? 1 : 2}
           value={{ start: checkIn, end: checkOut }}
-          min={today}
+          min={min}
           max={addDays(today, 365)}
           today={today}
           maxNights={30}

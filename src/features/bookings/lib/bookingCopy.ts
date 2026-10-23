@@ -189,6 +189,7 @@ export const bookingCopy = {
     checklist: "Combinou de levar?",
     food: "A ração de costume",
     meds: "Os remédios e como dar",
+    careTerms: "Marca os dois pra confirmar que a ração e os remédios vão junto.",
     holdNotice: (host: string) => `O pedido não segura a vaga: ${host} tem até 24 horas pra responder.`,
     theHost: "o anfitrião",
     submit: "Pedir estadia",
