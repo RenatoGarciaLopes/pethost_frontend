@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { listingBadgeLabel } from "@/shared/config/listingBadges";
 import { focusRing } from "@/shared/theme/overrides/Button";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
@@ -33,7 +34,7 @@ const frame = {
 export function ListingGallery({ title, photos, neighbor }: ListingGalleryProps) {
   const sticker = neighbor && (
     <Box sx={{ position: "absolute", top: 16, right: 16, zIndex: 1 }}>
-      <Sticker label={copy.neighbor} color="grama" tilt={4} />
+      <Sticker label={listingBadgeLabel("neighbor")} color="grama" tilt={4} />
     </Box>
   );
   if (photos.length === 0)

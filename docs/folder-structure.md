@@ -56,6 +56,7 @@ src/features/listing-page/
   components/client/StayBookingCard.tsx   datas, pets, conta, pedido e barra do celular
   components/client/ListingPageActions.tsx recados do dono e da conta de anfitrião
 src/features/search/components/client/CompatibilityNotice/  caixa de compatibilidade da página
+src/shared/config/listingBadges.ts        selos do cantinho (códigos e rótulos), fonte única do card e da página
 src/test/fixtures/listingPage.ts          detalhe, fotos e avaliações sintéticos
 e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
 ```

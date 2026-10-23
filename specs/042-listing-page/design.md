@@ -40,6 +40,7 @@ Pedido do Renato: fonte, itens, chips, selos, tons e cabeçalho estavam longe do
 - **Compatibilidade:** `CompatibilityNotice` mora na feature search (dona de `searchQueries.compatibility`, `compatibilityWarnings` e da copy dos avisos) e reaproveita `Notice` do shared; a rota compõe uma por pet escolhido, com os motivos de `compatibilityReasons` (listing-page), e pré-carrega cada resposta com `prefetchCompatibility` (search `index.server`) no mesmo `QueryClient` dos residentes, para a caixa chegar hidratada. Feature não importa feature: a rota é o ponto de encontro, como já era com `HouseResidents`.
 - **Avaliações:** `getListingReviews` lê `GET /reviews` no servidor (pública, fora do BFF), as 4 mais novas; erro vira lista vazia. Mês da estadia por `formatMemberSince`.
 - **Voltar:** `searchOriginHref` é o único ponto que sabe onde ficam os resultados (home com os parâmetros da busca). Se o destino mudar, muda só lá.
+- **Selos:** códigos e rótulos num ponto só, `shared/config/listingBadges.ts` (`LISTING_BADGES`, `listingBadgeLabel`, `isListingBadge`), lidos pelo `ListingCard`, pelo contrato da busca e pela página; código novo da API fica de fora até ganhar rótulo. Substitui `features/search/lib/badgeLabel.ts` (removido) e o `badges` da copy da página.
 - **Removidos:** `ListingSearchControls` (rota) e seus teste/story; copy sem uso (`choose`, `fit`, `mismatch*`, `weekdays`, `property`, `description`, `host`); a seção "Combina com" local por `petFitsListing` (a função segue no pedido, spec 050).
 
 ### Lacunas da prancha (a API não manda)
@@ -54,4 +55,3 @@ Pedido do Renato: fonte, itens, chips, selos, tons e cabeçalho estavam longe do
 | "Marina · Thor" | só o primeiro nome de quem avaliou | avaliação do tutor não traz o pet |
 | "casa com quintal murado" | "casa com quintal" | não há campo de muro |
 | "R$ 60" | "R$ 60,00" | `formatBRL` é o padrão do app em todo valor |
-| Selos | rótulos repetidos de `badgeLabel` da busca | feature não importa feature e o card da 070 não pode ser mexido agora; unificar em `shared` depois do merge da 070 |

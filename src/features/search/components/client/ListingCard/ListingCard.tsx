@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import { Sticker } from "@/shared/ui/feedback/Sticker";
 import { initialsOf } from "@/shared/lib/text/initials";
+import { listingBadgeLabel } from "@/shared/config/listingBadges";
 import { nightsBetween } from "@/shared/lib/date/stayRules";
 import { formatBRL, fromCents, toCents } from "@/shared/lib/money";
 import type { ListingSummary } from "../../../api/contracts";
 import type { CompatibilityPet, SearchQuery } from "../../../types";
-import { badgeLabel } from "../../../lib/badgeLabel";
 import { queryToSearchParams } from "../../../lib/searchParams";
 import { searchCopy } from "../../../lib/searchCopy";
 import { AttributeIcon, type AttributeIconName } from "./AttributeIcon";
@@ -48,7 +48,7 @@ function attributesOf(listing: ListingSummary): { icon: AttributeIconName; label
     ...(listing.hasYard ? [{ icon: "yard" as const, label: copy.yard }] : []),
     ...BADGE_ATTRIBUTES.filter(([badge]) => listing.badges.includes(badge)).map(([badge, icon]) => ({
       icon,
-      label: badgeLabel(badge),
+      label: listingBadgeLabel(badge),
     })),
   ];
 }
@@ -113,7 +113,7 @@ export function ListingCard({ listing, query, petCount, compatibility }: Listing
         )}
         {listing.badges.includes("neighbor") && (
           <Box sx={{ position: "absolute", top: 12, right: 12 }}>
-            <Sticker label={badgeLabel("neighbor")} color="grama" tilt={4} />
+            <Sticker label={listingBadgeLabel("neighbor")} color="grama" tilt={4} />
           </Box>
         )}
         <Stack

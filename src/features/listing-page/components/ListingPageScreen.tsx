@@ -1,6 +1,7 @@
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
+import { isListingBadge, listingBadgeLabel } from "@/shared/config/listingBadges";
 import { formatMemberSince } from "@/shared/lib/date/formatMemberSince";
 import { initialsOf } from "@/shared/lib/text/initials";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
@@ -71,9 +72,10 @@ export function ListingPageScreen({
   const hostName = listing.host?.name ?? copy.noHost;
   const photos = [...listing.photos].sort((a, b) => a.position - b.position).slice(0, 5);
   const house = houseLine(listing);
-  const badges = (listing.badges ?? []).filter(
-    (badge) => badge !== "neighbor" && copy.badges[badge] && !(badge === "well_rated" && listing.rating),
-  );
+  // Vizinho vai na foto; "Bem avaliado" só sem a pílula da nota, que já diz mais.
+  const badges = (listing.badges ?? [])
+    .filter(isListingBadge)
+    .filter((badge) => badge !== "neighbor" && !(badge === "well_rated" && listing.rating));
 
   return (
     <PageContainer width="page" sx={{ py: { xs: 3, md: 4 }, pb: { xs: tutor ? 14 : 4, md: 6 } }}>
@@ -111,7 +113,7 @@ export function ListingPageScreen({
           <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1 }}>
             {listing.host && <StatusPill tone="ok" size="sm" label={copy.verified} />}
             {badges.map((badge) => (
-              <StatusPill key={badge} size="sm" label={copy.badges[badge]} />
+              <StatusPill key={badge} size="sm" label={listingBadgeLabel(badge)} />
             ))}
             {listing.rating && (
               <Box

@@ -5,14 +5,7 @@ export const listingPageCopy = {
   photoAlt: (n: number, title: string) => `Foto ${n} de ${title}`,
   noPhoto: "As fotos da casa ainda estão chegando.",
   noPhotoHint: "Enquanto isso, conhece quem cuida e as regras logo abaixo.",
-  neighbor: "Vizinho",
   verified: "Verificada",
-  badges: {
-    fast_responder: "Responde rápido",
-    yard: "Casa com quintal",
-    experienced: "Experiente",
-    well_rated: "Bem avaliado",
-  } as Record<string, string>,
   rating: (average: string, count: number) => `★ ${average} (${count})`,
   ratingLabel: (average: string, count: number) =>
     `Nota ${average} em ${count} ${count === 1 ? "avaliação" : "avaliações"}`,
