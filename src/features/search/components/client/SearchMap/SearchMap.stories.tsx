@@ -46,7 +46,9 @@ export const Varios: Story = {
   name: "REQ-SRCH-013 Vários cantinhos",
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(await canvas.findByRole("button", { name: /Casa da Dona Cida, R\$\s300/ })).toBeVisible();
+    // O MapLibre carrega sob demanda (import dinâmico): na primeira vez, o pino demora mais que 1 s.
+    const pin = await canvas.findByRole("button", { name: /Casa da Dona Cida, R\$\s300/ }, { timeout: 10_000 });
+    await expect(pin).toBeVisible();
     await expect(canvas.getByText(/O pino mostra o bairro, não a casa/)).toBeVisible();
   },
 };

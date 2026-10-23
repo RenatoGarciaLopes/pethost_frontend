@@ -6,7 +6,7 @@ export const mapCopy = {
   zoomOut: "Afastar o mapa",
   closeCard: "Fechar o cartão do cantinho",
   privacy: "O pino mostra o bairro, não a casa. O endereço chega depois do pagamento.",
-  attribution: "Mapa: OpenFreeMap, dados © colaboradores do OpenStreetMap",
+  attribution: "Mapa: OpenFreeMap · © OpenStreetMap",
   loading: "Abrindo o mapa…",
   unavailable: "Não deu pra abrir o mapa agora. A lista continua aqui do lado.",
   origin: (label: string) => `Você · ${label}`,

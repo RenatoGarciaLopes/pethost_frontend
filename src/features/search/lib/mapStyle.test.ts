@@ -21,11 +21,11 @@ describe("estilo do mapa da busca", () => {
     for (const color of colors) expect(brand.has(color.toLowerCase())).toBe(true);
   });
 
-  it("REQ-SRCH-013 avenidas em gema com contorno de tinta por baixo, ruas em cartão", () => {
+  it("REQ-SRCH-013 avenidas em gema com contorno de tinta por baixo, ruas secundárias em cartão", () => {
     const paint = (id: string) => style.layers.find((layer) => layer.id === id)?.paint as Record<string, unknown>;
     expect(paint("avenidas-fill")["line-color"]).toBe(quintalColors.gema);
     expect(paint("avenidas-casing")["line-color"]).toBe(quintalColors.tinta);
-    expect(paint("ruas-fill")["line-color"]).toBe(quintalColors.cartao);
+    expect(paint("secundarias-fill")["line-color"]).toBe(quintalColors.cartao);
     const ids = style.layers.map((layer) => layer.id);
     expect(ids.indexOf("avenidas-casing")).toBeLessThan(ids.indexOf("avenidas-fill"));
   });

@@ -100,7 +100,17 @@ export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
         "source-layer": "water",
         paint: { "line-color": palette.tinta, "line-width": 1.5 },
       },
-      ...roads("ruas", ["minor", "service", "tertiary"], palette.cartao, 1.2, 8),
+      {
+        id: "ruas",
+        type: "line",
+        source,
+        "source-layer": "transportation",
+        minzoom: 13.5,
+        filter: ["all", roadClass(["minor", "service"]), notTunnel],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": palette.tinta, "line-opacity": 0.4, "line-width": zoomWidth(0.6, 2.5) },
+      },
+      ...roads("secundarias", ["tertiary"], palette.cartao, 1.2, 8),
       ...roads("avenidas", ["secondary", "primary", "trunk", "motorway"], palette.gema, 2.5, 14),
       {
         id: "bairros",

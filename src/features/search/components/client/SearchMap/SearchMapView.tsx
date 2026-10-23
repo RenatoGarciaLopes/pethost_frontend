@@ -20,7 +20,7 @@ import type { ListingSummary } from "../../../api/contracts";
 const FALLBACK_CENTER: [number, number] = [-51.9386, -23.4205];
 const RING_KM = [1, 2, 4];
 const GRID_PX = 32;
-const FIT_PADDING = { top: 72, left: 56, right: 56, bottom: 120 };
+const FIT_PADDING = { top: 72, left: 80, right: 80, bottom: 120 };
 
 interface Pixel {
   x: number;
@@ -153,7 +153,7 @@ export function SearchMapView({
         id: "aproximado-area",
         type: "fill",
         source: "aproximado",
-        paint: { "fill-color": quintal.grama, "fill-opacity": 0.22 },
+        paint: { "fill-color": quintal.grama, "fill-opacity": 0.08 },
       });
       instance.addLayer({
         id: "aproximado-borda",
@@ -250,7 +250,10 @@ export function SearchMapView({
         backgroundPosition: `${gridOffset.x}px ${gridOffset.y}px`,
       }}
     >
-      <Box ref={containerRef} sx={{ position: "absolute", inset: 0 }} />
+      <Box sx={{ position: "absolute", inset: 0 }}>
+        {/* O MapLibre troca a posição do contêiner para relative: ele precisa de tamanho próprio, não de inset. */}
+        <Box ref={containerRef} sx={{ width: "100%", height: "100%" }} />
+      </Box>
       {failed && (
         <Box sx={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", p: 3, textAlign: "center" }}>
           <Typography role="status">{mapCopy.unavailable}</Typography>
@@ -434,6 +437,9 @@ export function SearchMapView({
         {selected && (
           <Box
             sx={{
+              minWidth: 0,
+              width: "100%",
+              maxWidth: 460,
               display: "flex",
               gap: 1.5,
               p: 1,
@@ -503,7 +509,12 @@ export function SearchMapView({
                   .join(" · ")}
               </Typography>
               {compatibleIds?.has(selected.id) && compatibleLabel && (
-                <Chip size="small" variant="ok" label={`✓ ${compatibleLabel}`} sx={{ justifySelf: "start" }} />
+                <Chip
+                  size="small"
+                  variant="ok"
+                  label={`✓ ${compatibleLabel}`}
+                  sx={{ justifySelf: "start", maxWidth: "100%", height: 24, fontSize: 12.5 }}
+                />
               )}
               <Typography sx={{ fontWeight: 800 }}>
                 {mapPrice(selected.nightlyRate, stay)}{" "}
@@ -565,7 +576,15 @@ export function SearchMapView({
           href="https://www.openstreetmap.org/copyright"
           target="_blank"
           rel="noopener noreferrer"
-          sx={{ justifySelf: "end", fontSize: 10, color: "quintal.texto2", lineHeight: 1.2 }}
+          sx={{
+            justifySelf: "end",
+            fontSize: 10,
+            color: "quintal.texto2",
+            lineHeight: 1.2,
+            bgcolor: "quintal.cartao",
+            borderRadius: `${quintalRadii.control}px`,
+            px: 0.75,
+          }}
         >
           {mapCopy.attribution}
         </Typography>
