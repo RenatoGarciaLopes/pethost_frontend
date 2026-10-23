@@ -42,8 +42,10 @@ const cell = {
   minHeight: 56,
   px: { xs: 1, md: 2 },
   py: 0.5,
-  // Date inputs are transparent overlays; expose their native keyboard focus on the cell.
-  "&:has(input[type=date]:focus-visible)": focusRing,
+  // Represent native keyboard focus on the whole cell, including icon and label.
+  "&:has(:focus-visible)": { ...focusRing, borderRadius: `${quintalRadii.control}px` },
+  // The cell owns this indicator; don't draw a second rectangle through its label.
+  "& .MuiInputBase-root .MuiInputBase-input:focus-visible": { outline: "none" },
 } as const;
 const separator = { borderRight: { xs: "none", md: "1px dashed" }, borderColor: "divider" } as const;
 const label = {
