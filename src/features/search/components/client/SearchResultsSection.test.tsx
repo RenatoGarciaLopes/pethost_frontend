@@ -22,10 +22,10 @@ function renderSection(query = searchQueryFixture()) {
     pages: [{ items: [listingFixture()], page: 1, pageSize: 12, totalCount: 1 }],
     pageParams: [1],
   });
-  return renderWithProviders(
-    <SearchResultsSection accountId="owner" initialQuery={query} pets={searchPetsFixture} />,
-    { queryClient: client, theme: quintalTheme },
-  );
+  return renderWithProviders(<SearchResultsSection accountId="owner" initialQuery={query} pets={searchPetsFixture} />, {
+    queryClient: client,
+    theme: quintalTheme,
+  });
 }
 
 afterEach(() => {

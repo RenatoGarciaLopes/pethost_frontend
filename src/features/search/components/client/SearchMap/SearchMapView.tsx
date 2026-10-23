@@ -38,7 +38,7 @@ export function SearchMapView({
   origin,
   selectedId = null,
   onSelect,
-  searchOnMove,
+  searchOnMove = false,
   onSearchOnMoveChange,
   onMoveEnd,
   query,
@@ -420,30 +420,31 @@ export function SearchMapView({
         })}
       </Box>
 
-      <FormControlLabel
-        label={mapCopy.searchOnMove}
-        control={
-          <Checkbox
-            size="small"
-            checked={searchOnMove}
-            onChange={(event) => onSearchOnMoveChange(event.target.checked)}
-          />
-        }
-        sx={{
-          position: "absolute",
-          top: 12,
-          left: 12,
-          m: 0,
-          pr: 1.5,
-          bgcolor: "background.default",
-          border: "2px solid",
-          borderColor: "text.primary",
-          borderRadius: `${quintalRadii.pill}px`,
-          boxShadow: hardShadow(3),
-          "& .MuiFormControlLabel-label": { fontSize: 13, fontWeight: 700 },
-        }}
-      />
-
+      {onSearchOnMoveChange && (
+        <FormControlLabel
+          label={mapCopy.searchOnMove}
+          control={
+            <Checkbox
+              size="small"
+              checked={searchOnMove}
+              onChange={(event) => onSearchOnMoveChange(event.target.checked)}
+            />
+          }
+          sx={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+            m: 0,
+            pr: 1.5,
+            bgcolor: "background.default",
+            border: "2px solid",
+            borderColor: "text.primary",
+            borderRadius: `${quintalRadii.pill}px`,
+            boxShadow: hardShadow(3),
+            "& .MuiFormControlLabel-label": { fontSize: 13, fontWeight: 700 },
+          }}
+        />
+      )}
       <Box sx={{ position: "absolute", top: 12, right: 12, display: "grid", gap: 0.75 }}>
         {(
           [

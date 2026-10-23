@@ -30,7 +30,6 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
   const { query, data, error, result, update } = useSearch(accountId, pets, initialQuery, initialError);
   const desktop = useMediaQuery((theme: Theme) => theme.breakpoints.up("lg"));
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [searchOnMove, setSearchOnMove] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const selected = pets.filter((pet) => query.pets.includes(pet.id));
   const items = [...new Map(data?.pages.flatMap((page) => page.items).map((item) => [item.id, item]) ?? []).values()];
@@ -45,8 +44,6 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
       listings={items}
       selectedId={selectedId}
       onSelect={setSelectedId}
-      searchOnMove={searchOnMove}
-      onSearchOnMoveChange={setSearchOnMove}
       query={query}
       petCount={selected.length || query.count || 0}
       compatibility={compatibility}

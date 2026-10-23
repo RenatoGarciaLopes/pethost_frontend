@@ -139,4 +139,10 @@ describe("mapa da busca", () => {
     await user.click(screen.getByRole("checkbox", { name: "Buscar quando eu mexer no mapa" }));
     expect(onSearchOnMoveChange).toHaveBeenCalledWith(true);
   });
+
+  it("REQ-SRCH-013 sem onSearchOnMoveChange o controle de buscar ao mexer não aparece", async () => {
+    setup({ onSearchOnMoveChange: undefined });
+    await screen.findByRole("button", { name: "Aproximar o mapa" });
+    expect(screen.queryByRole("checkbox", { name: "Buscar quando eu mexer no mapa" })).not.toBeInTheDocument();
+  });
 });
