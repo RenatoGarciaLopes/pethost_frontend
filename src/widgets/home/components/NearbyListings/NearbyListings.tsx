@@ -94,9 +94,6 @@ export function NearbyListings({ scope, pets = [], from, to }: NearbyListingsPro
               </Box>
             ))}
           </Box>
-          <Button href="/search" variant="outlined" sx={{ mt: 3 }}>
-            {copy.seeAll}
-          </Button>
         </>
       ) : (
         <Surface elevation="md" sx={{ p: { xs: 2.5, md: 3.5 } }}>

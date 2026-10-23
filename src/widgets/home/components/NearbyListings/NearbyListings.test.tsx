@@ -63,7 +63,7 @@ it("REQ-NEARBY-011 com a posição, mostra a contagem e os cards sem pedir login
   setup("granted", point);
   expect(await screen.findByRole("heading", { name: "2 casas com vaga perto de você" })).toBeVisible();
   expect(screen.getByRole("link", { name: /Varanda da Bia/ })).toBeVisible();
-  expect(screen.getByRole("link", { name: "Ver todos os cantinhos" })).toHaveAttribute("href", "/search");
+  expect(screen.queryByRole("link", { name: "Ver todos os cantinhos" })).not.toBeInTheDocument();
   expect(seen?.get("latitude")).toBe("-23.43");
   expect(seen?.get("longitude")).toBe("-51.94");
   expect(seen?.get("radiusKm")).toBe("10");
@@ -144,7 +144,7 @@ it("REQ-NEARBY-016 raio de 10 km vazio busca os cantinhos sem filtro de lugar e 
     screen.getByText("Ainda não achamos cantinhos num raio de 10 km, então mostramos outras casas."),
   ).toBeVisible();
   expect(screen.getByRole("link", { name: /Sítio do Leo/ })).toBeVisible();
-  expect(screen.getByRole("link", { name: "Ver todos os cantinhos" })).toHaveAttribute("href", "/search");
+  expect(screen.queryByRole("link", { name: "Ver todos os cantinhos" })).not.toBeInTheDocument();
   expect(screen.queryByText(/Tente outra cidade na busca/)).not.toBeInTheDocument();
   // Primeiro o raio; depois a reserva só com a página, sem coordenada, raio nem lugar.
   expect(seen).toHaveLength(2);

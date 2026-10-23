@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
-import { getRouter } from "@storybook/nextjs-vite/router.mock";
-import { fn } from "storybook/test";
+import { useSearchParams } from "@storybook/nextjs-vite/navigation.mock";
+import { ReadonlyURLSearchParams } from "next/navigation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { searchQueries } from "@/features/search/api/queries";
+import { listingFixture } from "@/test/fixtures/search";
 import { withQueryClient } from "@/test/storybook/withQueryClient";
 import { HomeScreen } from "./HomeScreen";
 
@@ -13,15 +15,14 @@ const meta = {
   args: { pets: [], petsUnavailable: false },
   decorators: [withQueryClient],
   beforeEach: () => {
-    // Mock do framework: o appDirectory ainda usa o contexto anterior ao Next 16.4 (como no PetWizard).
-    useRouter.mockReturnValue({ ...getRouter(), refresh: fn(), bfcacheId: "story" });
+    useSearchParams.mockReturnValue(new ReadonlyURLSearchParams());
   },
 } satisfies Meta<typeof HomeScreen>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Entrada sem sessão: busca encaminha para login preservando os parâmetros. */
+/** Entrada sem sessão: a busca roda na própria home, sem login. */
 export const Visitante: Story = { name: "REQ-HOME-002 Visitante", args: { viewer: "visitor" } };
 
 /** Tutor que ainda não cadastrou um pet pode escolher espécie. */
@@ -33,8 +34,8 @@ export const TutorComPets: Story = {
   args: {
     viewer: "owner",
     pets: [
-      { id: "pet-mel", name: "Mel", species: "dog" },
-      { id: "pet-nino", name: "Nino", species: "cat" },
+      { id: "pet-mel", name: "Mel", species: "dog", size: "small" },
+      { id: "pet-nino", name: "Nino", species: "cat", size: null },
     ],
   },
 };
@@ -53,4 +54,40 @@ export const Celular: Story = {
   name: "REQ-HOME-006 Celular",
   args: { viewer: "visitor" },
   globals: { viewport: { value: "celular", isRotated: false } },
+};
+
+const searched = { pets: [], species: [], sizes: [], where: "Maringá" };
+/** Com filtros na URL a vitrine dá lugar aos resultados, com título, chips rápidos e cards. */
+export const ComBusca: Story = {
+  name: "REQ-HOME-011 Com busca na URL",
+  args: { viewer: "visitor", initialQuery: searched },
+  beforeEach: () => {
+    useSearchParams.mockReturnValue(new ReadonlyURLSearchParams("where=Maring%C3%A1"));
+  },
+  decorators: [
+    (Story) => {
+      const client = new QueryClient({
+        defaultOptions: { queries: { staleTime: Infinity, enabled: false, retry: false } },
+      });
+      client.setQueryData(searchQueries.infinite("visitor", searched, []).queryKey, {
+        pages: [
+          {
+            items: [
+              listingFixture(),
+              listingFixture({ id: "0199d2a0-0000-7000-8000-000000000043", title: "Varanda da Bia", badges: [] }),
+            ],
+            page: 1,
+            pageSize: 12,
+            totalCount: 2,
+          },
+        ],
+        pageParams: [1],
+      });
+      return (
+        <QueryClientProvider client={client}>
+          <Story />
+        </QueryClientProvider>
+      );
+    },
+  ],
 };

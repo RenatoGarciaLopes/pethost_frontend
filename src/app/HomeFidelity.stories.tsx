@@ -98,7 +98,7 @@ export const Visitante: Story = {
 
 export const Tutor: Story = {
   name: "REQ-UIC-003/009 Tutor com Pipoca",
-  args: { viewer: "owner", pets: [{ id: "story-pipoca", name: "Pipoca", species: "dog" }] },
+  args: { viewer: "owner", pets: [{ id: "story-pipoca", name: "Pipoca", species: "dog", size: "small" }] },
 };
 
 export const Anfitriao: Story = { name: "REQ-HOME-004 Anfitrião", args: { viewer: "host" } };
@@ -127,7 +127,7 @@ export const Celular: Story = {
 /** A pílula com nome e o menu da casca também precisam caber no celular, não só a entrada anônima. */
 export const TutorCelular: Story = {
   name: "REQ-UIC-003/009 Tutor · 390",
-  args: { viewer: "owner", pets: [{ id: "story-pipoca", name: "Pipoca", species: "dog" }] },
+  args: { viewer: "owner", pets: [{ id: "story-pipoca", name: "Pipoca", species: "dog", size: "small" }] },
   globals: { viewport: { value: "celular", isRotated: false } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

@@ -35,7 +35,6 @@ export const homeCopy = {
     asking: "Esperando o navegador",
     finding: "Farejando cantinhos",
     title: (total: number) => `${total} ${total === 1 ? "casa com vaga" : "casas com vaga"} perto de você`,
-    seeAll: "Ver todos os cantinhos",
     denied: "Sem a localização não dá para olhar por perto. Escreva a cidade ou o bairro na busca, no topo da página.",
     unavailable: "Este navegador não informa a localização. Escreva a cidade ou o bairro na busca, no topo da página.",
     failed: "Não conseguimos saber onde você está agora.",
