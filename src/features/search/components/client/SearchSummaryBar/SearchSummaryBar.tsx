@@ -21,12 +21,12 @@ export interface SearchSummaryBarProps {
 const segment = {
   minWidth: 0,
   minHeight: 48,
-  px: { xs: 1.5, md: 2.5 },
+  px: { xs: 1, md: 2.5 },
   border: 0,
   bgcolor: "transparent",
   color: "text.primary",
   font: "inherit",
-  fontSize: { xs: 15, md: 17 },
+  fontSize: { xs: 14, md: 17 },
   fontWeight: 600,
   textAlign: "left",
   whiteSpace: "nowrap",
@@ -89,7 +89,7 @@ export function SearchSummaryBar({ pets, quantityMode = false }: SearchSummaryBa
           onClick={() => setEditing(field)}
           sx={{
             ...segment,
-            flex: "0 1 auto",
+            flex: index === 0 ? "1 1 0" : "0 0 auto",
             borderLeft: index === 0 ? 0 : "1px dashed",
             borderColor: "divider",
           }}
