@@ -138,6 +138,7 @@ export const listingsHandlers = [
       ...body,
       address: { complement: null, ...body.address, zipCode: String(body.address.zipCode).replace(/\D/g, "") },
       location: { latitude: -23.42, longitude: -51.93 },
+      approximateLocation: { latitude: -23.42, longitude: -51.93, radiusMeters: 500 },
       photos: [],
       isActive: true,
       deactivatedAt: null,
