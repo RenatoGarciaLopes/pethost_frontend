@@ -4,7 +4,7 @@ import { Avatar, Box, Button, ButtonBase, Link as MuiLink, Stack, Typography } f
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { loginRedirectPath } from "@/shared/config/appRoutes";
+import { loginRedirectPath, switchAccountPath } from "@/shared/config/appRoutes";
 import { nightsBetween, validateStay } from "@/shared/lib/date/stayRules";
 import { formatBRL } from "@/shared/lib/money";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
@@ -21,9 +21,14 @@ export interface StayBookingPet {
   coverUrl: string | null;
 }
 
-/** Contexto da estadia que veio da URL. @example { listingId, nightlyRate: 60, hostName: "Dona Cida", today, search: "pets=…&from=…", from, to, petIds: [id], pets } */
+/** Contexto da estadia que veio da URL. @example { listingId, account: "owner", nightlyRate: 60, hostName: "Dona Cida", today, search: "pets=…&from=…", from, to, petIds: [id], pets } */
 export interface StayBookingCardProps {
   listingId: string;
+  /**
+   * Quem vê o card. O tutor escolhe "Quem vai" e pede direto; o visitante passa pelo login de tutor e o anfitrião
+   * pela troca para a conta de tutor, os dois voltando a esta página com as datas.
+   */
+  account: "owner" | "host" | "visitor";
   nightlyRate: number;
   hostName: string;
   /** Hoje em Brasília (vem do servidor, para o campo de datas não depender do relógio do navegador). */
@@ -35,23 +40,21 @@ export interface StayBookingCardProps {
   petIds: string[];
   /** "Quantos pets" da busca, usado na conta quando nenhum pet foi escolhido. */
   count?: number;
-  /**
-   * Pets ativos do tutor; `null` para o visitante: sem "Quem vai", e "Pedir estadia" leva ao login de tutor com
-   * `next` de volta a esta página, com as datas.
-   */
-  pets: StayBookingPet[] | null;
+  /** Pets ativos do tutor, para "Quem vai"; vazio fora da conta de tutor. */
+  pets: StayBookingPet[];
 }
 
 /**
  * Lateral de reserva do tutor (prancha da página do cantinho): diária, CHEGADA e SAÍDA no `DateRangeField`, "Quem
  * vai" com os pets em pílula (escolhido em amarelo com ✓, os outros tracejados), a conta da estadia, "Pedir
  * estadia" e o recado de pagamento. Cada escolha vai para a URL (`router.replace`), então a compatibilidade e o
- * pedido usam as mesmas datas e pets. No celular o botão sai do card e vai para a barra fixa no rodapé. O visitante
- * vê o mesmo card sem "Quem vai", e o pedido passa pelo login.
+ * pedido usam as mesmas datas e pets. No celular o botão sai do card e vai para a barra fixa no rodapé. Visitante e
+ * anfitrião veem o mesmo card sem "Quem vai"; só o clique em "Pedir estadia" leva ao login ou à troca de conta.
  * @example <StayBookingCard {...props} />
  */
 export function StayBookingCard({
   listingId,
+  account,
   nightlyRate,
   hostName,
   today,
@@ -70,9 +73,12 @@ export function StayBookingCard({
   const total = stayTotal(nightlyRate, dates.checkIn, dates.checkOut, petCount);
   const nights = total ? nightsBetween(dates.checkIn, dates.checkOut) : 0;
   const query = params.size ? `?${params}` : "";
-  const requestHref = pets
-    ? `/listings/${listingId}/request${query}`
-    : loginRedirectPath(`/listings/${listingId}${query}`, "owner");
+  const here = `/listings/${listingId}${query}`;
+  const requestHref = {
+    owner: `/listings/${listingId}/request${query}`,
+    visitor: loginRedirectPath(here, "owner"),
+    host: switchAccountPath("owner", here),
+  }[account];
 
   function update(nextDates: typeof dates, nextPets: string[]) {
     const next = stayParams(search, nextDates, nextPets);
@@ -97,7 +103,7 @@ export function StayBookingCard({
       <Stack spacing={2.5}>
         <NightlyPrice nightlyRate={nightlyRate} />
         <DateRangeField checkIn={dates.checkIn} checkOut={dates.checkOut} today={today} onChange={changeDates} />
-        {pets ? (
+        {account === "owner" && (
           <Box component="fieldset" sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
             <Typography component="legend" sx={{ fontWeight: 700, fontSize: "0.95rem", mb: 1 }}>
               {copy.whoGoes}
@@ -122,8 +128,6 @@ export function StayBookingCard({
               </Stack>
             )}
           </Box>
-        ) : (
-          <Typography variant="body2">{copy.signInToRequest}</Typography>
         )}
         {total && (
           <Stack spacing={1} aria-live="polite" sx={{ borderTop: "2px dashed", borderColor: "divider", pt: 2 }}>

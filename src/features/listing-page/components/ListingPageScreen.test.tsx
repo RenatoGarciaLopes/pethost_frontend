@@ -117,10 +117,23 @@ it("REQ-LPAGE-003/006 só mostra a rua na visão da pessoa anfitriã dona do can
   expect(screen.queryByRole("link", { name: /Voltar|Casas perto/ })).not.toBeInTheDocument();
 });
 
-it("REQ-LPAGE-007 outra conta de anfitrião vê a diária e a troca de conta no lugar do pedido", () => {
-  render(<ListingPageScreen listing={listingDetailFixture()} isOwner={false} accountRole="host" reviews={[]} />);
-  expect(screen.getByText(/R\$\s60,00/)).toBeVisible();
-  expect(screen.getByText("Pra pedir uma estadia, entra com a conta de tutor.")).toBeVisible();
-  expect(screen.getByRole("link", { name: "Trocar de conta" })).toHaveAttribute("href", "/users/switch");
-  expect(screen.queryByRole("link", { name: "Pedir estadia" })).not.toBeInTheDocument();
+it("REQ-LPAGE-007 outra conta de anfitrião vê o card de compra, e o pedir passa pela troca para a conta de tutor", () => {
+  render(
+    <ListingPageScreen
+      listing={listingDetailFixture()}
+      isOwner={false}
+      accountRole="host"
+      reviews={[]}
+      stay={{ ...stay, search: "from=2026-12-20&to=2026-12-25", petIds: [], pets: [] }}
+    />,
+  );
+  expect(screen.getByLabelText("Chegada e saída")).toBeVisible();
+  expect(screen.queryByText("Quem vai")).not.toBeInTheDocument();
+  expect(screen.queryByText(/Pra pedir uma estadia|Trocar de conta/)).not.toBeInTheDocument();
+  const url = new URL(screen.getAllByRole("link", { name: "Pedir estadia" })[0]!.getAttribute("href")!, "http://test");
+  expect(url.pathname).toBe("/users/switch");
+  expect(url.searchParams.get("to")).toBe("owner");
+  expect(url.searchParams.get("next")).toBe(
+    "/listings/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c?from=2026-12-20&to=2026-12-25",
+  );
 });

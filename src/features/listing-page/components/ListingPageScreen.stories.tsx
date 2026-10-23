@@ -76,14 +76,19 @@ export const SemAvaliacao: Story = {
 export const TutorSemEscolha: Story = {
   args: { stay: { ...stay, search: "", from: undefined, to: undefined, petIds: [], where: undefined } },
 };
-/** Outra conta de anfitrião visitando: diária e troca de conta no lugar do pedido. */
-export const AnfitriaoVisitante: Story = { args: { accountRole: "host", stay: undefined } };
+/** Outra conta de anfitrião visitando: o card de compra sem "Quem vai"; o pedido passa pela troca de conta. */
+export const AnfitriaoVisitante: Story = {
+  args: {
+    accountRole: "host",
+    stay: { ...stay, search: "where=Zona+7&from=2026-12-20&to=2026-12-25", petIds: [], count: 1, pets: [] },
+  },
+};
 export const DonoDoCantinho: Story = { args: { isOwner: true, accountRole: "host", stay: undefined } };
 /** Visitante (sem conta): fotos, quem cuida, regras, avaliações e a lateral de datas; sem "Quem mora aqui" nem compatibilidade, que exigem conta. */
 export const Visitante: Story = {
   args: {
     accountRole: "visitor",
-    stay: { ...stay, search: "where=Zona+7&from=2026-12-20&to=2026-12-25", petIds: [], pets: null },
+    stay: { ...stay, search: "where=Zona+7&from=2026-12-20&to=2026-12-25", petIds: [], count: 1, pets: [] },
   },
 };
 export const Celular: Story = {

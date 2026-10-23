@@ -11,6 +11,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
 const LISTING = "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c";
 const base: StayBookingCardProps = {
   listingId: LISTING,
+  account: "owner",
   nightlyRate: 60,
   hostName: "Dona Cida",
   today: "2026-12-01",
@@ -71,14 +72,21 @@ it("tutor sem pet é convidado a cadastrar um", () => {
   expect(screen.getByRole("link", { name: "Cadastrar pet" })).toHaveAttribute("href", "/pets/new");
 });
 
-it("REQ-LPAGE-012 visitante escolhe as datas sem 'Quem vai' e pedir leva ao login de tutor, voltando à página", () => {
-  render({ pets: null, petIds: [], search: "where=Zona+7&from=2026-12-20&to=2026-12-25" });
-  expect(screen.queryByText("Quem vai")).not.toBeInTheDocument();
-  expect(screen.getByText(/Pra pedir, você entra com sua conta de tutor/)).toBeVisible();
-  for (const link of screen.getAllByRole("link", { name: "Pedir estadia" })) {
-    const url = new URL(link.getAttribute("href")!, "http://test");
-    expect(url.pathname).toBe("/login");
-    expect(url.searchParams.get("as")).toBe("owner");
-    expect(url.searchParams.get("next")).toBe(`/listings/${LISTING}?where=Zona+7&from=2026-12-20&to=2026-12-25`);
-  }
-});
+it.each([
+  ["REQ-LPAGE-012 visitante", "visitor", "/login", "as"],
+  ["REQ-LPAGE-007 anfitrião", "host", "/users/switch", "to"],
+] as const)(
+  "%s vê o card de compra sem 'Quem vai'; só o pedir leva à conta de tutor, voltando à página",
+  (_, account, pathname, roleParam) => {
+    render({ account, pets: [], petIds: [], count: 1, search: "where=Zona+7&from=2026-12-20&to=2026-12-25" });
+    expect(screen.queryByText("Quem vai")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Pra pedir|Trocar de conta/)).not.toBeInTheDocument();
+    expect(screen.getByText(/R\$\s60,00 × 5 noites × 1 pet/)).toBeVisible();
+    for (const link of screen.getAllByRole("link", { name: "Pedir estadia" })) {
+      const url = new URL(link.getAttribute("href")!, "http://test");
+      expect(url.pathname).toBe(pathname);
+      expect(url.searchParams.get(roleParam)).toBe("owner");
+      expect(url.searchParams.get("next")).toBe(`/listings/${LISTING}?where=Zona+7&from=2026-12-20&to=2026-12-25`);
+    }
+  },
+);

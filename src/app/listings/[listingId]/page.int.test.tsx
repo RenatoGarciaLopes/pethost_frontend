@@ -28,7 +28,10 @@ vi.mock("next/navigation", async (importOriginal) => ({
 const listing = listingDetailFixture();
 
 async function resolveListingContent(search: Record<string, string> = {}) {
-  const page = ListingPage({ params: Promise.resolve({ listingId: listing.id }), searchParams: Promise.resolve(search) });
+  const page = ListingPage({
+    params: Promise.resolve({ listingId: listing.id }),
+    searchParams: Promise.resolve(search),
+  });
   const content = page.props.children as ReactElement;
   const renderContent = content.type as (props: typeof content.props) => Promise<ReactNode>;
   const resolved = await renderContent(content.props);
@@ -59,7 +62,7 @@ it("REQ-LPAGE-012 visitante abre o cantinho sem login, sem o que exige conta, e 
   expect(screen.getByRole("heading", { level: 1, name: listing.title })).toBeVisible();
   expect(within(screen.getByRole("banner")).getByRole("link", { name: "Entrar" })).toBeVisible();
   expect(screen.queryByRole("group", { name: "Quem vai" })).not.toBeInTheDocument();
-  expect(screen.getByText(/Pra pedir, você entra com sua conta de tutor/)).toBeVisible();
+  expect(screen.getByLabelText("Chegada e saída")).toBeVisible();
 
   for (const link of screen.getAllByRole("link", { name: "Pedir estadia" })) {
     const url = new URL(link.getAttribute("href")!, "http://test");
