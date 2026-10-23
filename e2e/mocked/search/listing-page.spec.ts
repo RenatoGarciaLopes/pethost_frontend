@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { accountFixture, loginAccount } from "../../support/account";
 import { LISTING_ID } from "../../support/handlers/listingPage.mjs";
+import { waitForHydration } from "../../support/hydration";
 
 const LUNA = "0199d2a0-0000-7000-8000-0000000000e1";
 
@@ -88,4 +89,32 @@ test("REQ-LPAGE-012 visitante abre o cantinho sem login e só entra na hora de p
   );
   expect(request.pathname).toBe(`/listings/${LISTING_ID}/request`);
   expect(request.searchParams.get("from")).toBe("2026-10-15");
+});
+
+test("REQ-LPAGE-007 anfitrião vê o card de compra e só ao pedir troca para a conta de tutor, voltando com as datas", async ({
+  page,
+  baseURL,
+}) => {
+  await loginAccount(page, baseURL!, "both", "host");
+  const path = `/listings/${LISTING_ID}?from=2026-10-15&to=2026-10-20`;
+  await page.goto(path);
+  await expect(page.getByRole("heading", { level: 1, name: "Quintal da Cida" })).toBeVisible();
+  await expect(page.getByText("Quem vai", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Trocar de conta")).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Pedir estadia" }).filter({ visible: true }).click();
+  // Primeira ida à troca no next dev ainda compila a rota.
+  await expect(page).toHaveURL(/\/users\/switch\?/, { timeout: 30_000 });
+  const switchUrl = new URL(page.url());
+  expect(switchUrl.searchParams.get("to")).toBe("owner");
+  expect(switchUrl.searchParams.get("next")).toBe(path);
+
+  const password = page.getByLabel(/^Senha da conta de tutor/);
+  await waitForHydration(password);
+  await password.fill(accountFixture("both", "owner").password);
+  await page.getByRole("button", { name: "Entrar na conta de tutor" }).click();
+
+  // De volta ao cantinho como tutor, com as datas e "Quem vai".
+  await expect(page).toHaveURL(path, { timeout: 15_000 });
+  await expect(page.getByText("Quem vai", { exact: true })).toBeVisible();
 });

@@ -17,7 +17,7 @@ import { StayBookingCard, type StayBookingPet } from "./client/StayBookingCard";
 import { ListingGallery } from "./ListingGallery";
 import { NightlyPrice } from "./NightlyPrice";
 
-/** O que o tutor ou o visitante já escolheu (da URL) e os pets do tutor. Não existe para o anfitrião. */
+/** O que já foi escolhido (da URL) e os pets do tutor. Não existe para o anfitrião dono do cantinho. */
 export interface ListingPageStay {
   /** Hoje em Brasília, para o campo de datas. */
   today: string;
@@ -29,18 +29,18 @@ export interface ListingPageStay {
   to?: string;
   petIds: string[];
   count?: number;
-  /** Pets ativos do tutor; `null` para o visitante, que pede passando pelo login. */
-  pets: StayBookingPet[] | null;
+  /** Pets ativos do tutor; vazio para o visitante e o anfitrião, que pedem passando pelo login ou pela troca. */
+  pets: StayBookingPet[];
 }
 
 export interface ListingPageScreenProps {
   listing: ListingDetail;
   isOwner: boolean;
-  /** `visitor`: sem conta; vê a página e a lateral de reserva, mas o pedido leva ao login. */
+  /** Quem vê: o visitante (sem conta) e o anfitrião veem a mesma lateral, e o pedido leva ao login ou à troca. */
   accountRole: "owner" | "host" | "visitor";
   /** Avaliações mais novas dos tutores; vazio esconde a seção. */
   reviews: ListingReview[];
-  /** Contexto do tutor ou do visitante; sem ele (anfitrião) a lateral mostra só a diária e o recado. */
+  /** Contexto da lateral de reserva; sem ele (dono do cantinho) a lateral mostra só a diária. */
   stay?: ListingPageStay;
   /** Caixa "Combina com essa casa" composta pela rota (compatibilidade vem da busca). */
   compatibility?: ReactNode;
@@ -70,7 +70,6 @@ export function ListingPageScreen({
 }: ListingPageScreenProps) {
   const address = listing.address;
   const ownerNotice = isOwner && accountRole === "host";
-  const tutor = accountRole !== "host" && stay;
   const hostName = listing.host?.name ?? copy.noHost;
   const photos = [...listing.photos].sort((a, b) => a.position - b.position).slice(0, 5);
   const house = houseLine(listing);
@@ -80,15 +79,15 @@ export function ListingPageScreen({
     .filter((badge) => badge !== "neighbor" && !(badge === "well_rated" && listing.rating));
 
   return (
-    <PageContainer width="page" sx={{ py: { xs: 3, md: 4 }, pb: { xs: tutor ? 14 : 4, md: 6 } }}>
+    <PageContainer width="page" sx={{ py: { xs: 3, md: 4 }, pb: { xs: stay ? 14 : 4, md: 6 } }}>
       {ownerNotice && (
         <Box sx={{ mb: 3 }}>
-          <ListingPageActions listingId={listing.id} variant="owner-notice" />
+          <ListingPageActions listingId={listing.id} />
         </Box>
       )}
-      {tutor && (
+      {stay && (
         <Typography sx={{ mb: 2, fontWeight: 700, fontSize: "0.95rem", "& a": { color: "text.primary" } }}>
-          <NextLink href={searchOriginHref(tutor.search)}>{copy.back(tutor.where)}</NextLink>
+          <NextLink href={searchOriginHref(stay.search)}>{copy.back(stay.where)}</NextLink>
         </Typography>
       )}
       <ListingGallery title={listing.title} photos={photos} neighbor={Boolean(listing.badges?.includes("neighbor"))} />
@@ -143,29 +142,22 @@ export function ListingPageScreen({
 
         <Box sx={{ gridArea: "aside", position: { md: "sticky" }, top: { md: 24 } }}>
           <Surface component="aside" elevation="lg" sx={{ p: 3 }}>
-            {tutor ? (
+            {stay ? (
               <StayBookingCard
                 listingId={listing.id}
+                account={accountRole}
                 nightlyRate={listing.nightlyRate}
                 hostName={hostName}
-                today={tutor.today}
-                search={tutor.search}
-                from={tutor.from}
-                to={tutor.to}
-                petIds={tutor.petIds}
-                count={tutor.count}
-                pets={tutor.pets}
+                today={stay.today}
+                search={stay.search}
+                from={stay.from}
+                to={stay.to}
+                petIds={stay.petIds}
+                count={stay.count}
+                pets={stay.pets}
               />
             ) : (
-              <Stack spacing={2}>
-                <NightlyPrice nightlyRate={listing.nightlyRate} />
-                {!ownerNotice && <ListingPageActions listingId={listing.id} variant="host-switch" />}
-                {!isOwner && (
-                  <Typography variant="body2" color="text.secondary">
-                    {copy.addressPrivacy}
-                  </Typography>
-                )}
-              </Stack>
+              <NightlyPrice nightlyRate={listing.nightlyRate} />
             )}
           </Surface>
         </Box>
