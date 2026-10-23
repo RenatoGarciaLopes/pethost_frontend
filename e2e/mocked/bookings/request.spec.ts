@@ -155,6 +155,7 @@ test("REQ-REQST-004 REQ-REQST-010 sem marcar ração e remédios a frase aparece
   const dialog = page.getByRole("dialog", { name: /^Escolher/ });
   await expect(dialog.locator(`[data-iso="${plus(today, 3)}"]`)).toHaveAttribute("aria-disabled", "true");
   await expect(dialog.locator(`[data-iso="${plus(today, 4)}"]`)).not.toHaveAttribute("aria-disabled");
+  await page.waitForTimeout(600);
   await page.screenshot({ path: `test-results/request-091-calendario-${testInfo.project.name}.png` });
 });
 
