@@ -14,7 +14,7 @@ import { buildMapStyle } from "../../../lib/mapStyle";
 import { mapPrice } from "../../../lib/mapPrice";
 import { searchCopy } from "../../../lib/searchCopy";
 import type { SearchMapProps } from "./SearchMap";
-import type { SearchMapListing } from "./types";
+import type { ListingSummary } from "../../../api/contracts";
 
 /** Centro de Maringá (piloto), usado só quando não há nenhum ponto para enquadrar. */
 const FALLBACK_CENTER: [number, number] = [-51.9386, -23.4205];
@@ -230,7 +230,7 @@ export function SearchMapView({
     map?.[direction]({ duration: reducedMotion ? 0 : 300 }, { userAction: true });
   const pins = listings
     .map((listing) => ({ listing, at: project(listing.approximateLocation) }))
-    .filter((pin): pin is { listing: SearchMapListing; at: Pixel } => pin.at !== null)
+    .filter((pin): pin is { listing: ListingSummary; at: Pixel } => pin.at !== null)
     .sort((a, b) => a.at.y - b.at.y);
   const originAt = origin ? project(origin) : null;
   const ink = theme.palette.quintal.tinta;

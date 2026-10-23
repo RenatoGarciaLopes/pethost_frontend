@@ -4,14 +4,15 @@ import { lazy, Suspense, useSyncExternalStore } from "react";
 import { mapCopy } from "../../../lib/mapCopy";
 import type { GeoPoint } from "../../../lib/mapGeometry";
 import type { MapStay } from "../../../lib/mapPrice";
-import type { SearchMapListing, SearchMapOrigin } from "./types";
+import type { ListingSummary } from "../../../api/contracts";
+import type { SearchMapOrigin } from "./types";
 
 /** O MapLibre só entra no cliente, quando o mapa aparece: o resto da busca não carrega esse peso. */
 const SearchMapView = lazy(() => import("./SearchMapView").then((module) => ({ default: module.SearchMapView })));
 
 export interface SearchMapProps {
-  /** Cantinhos com `approximateLocation`; a lista continua sendo a fonte, o mapa é complemento. */
-  listings: SearchMapListing[];
+  /** Cantinhos da busca; o círculo vem do `approximateLocation` do backend (nunca a casa); a lista continua sendo a fonte, o mapa é complemento. */
+  listings: ListingSummary[];
   /** Origem da busca ("Você · Zona 7"). Sem ela, não há marcador nem círculos de distância. */
   origin?: SearchMapOrigin;
   /** Cantinho selecionado (cartão no rodapé do mapa); `null` fecha o cartão. */

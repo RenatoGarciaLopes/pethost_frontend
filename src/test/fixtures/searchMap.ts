@@ -1,25 +1,26 @@
-import type { SearchMapListing, SearchMapOrigin } from "@/features/search/index.client";
+import type { ListingSummary } from "@/features/search";
+import type { SearchMapOrigin } from "@/features/search/index.client";
+import { listingFixture } from "./search";
 
 /** Origem sintética da busca, na Zona 7 de Maringá. @example <SearchMap origin={searchMapOrigin} … /> */
 export const searchMapOrigin: SearchMapOrigin = { latitude: -23.4205, longitude: -51.9331, label: "Zona 7" };
 
 /** Cantinho sintético com círculo aproximado de 500 m (nunca coordenada exata). @example searchMapListingFixture({ title: "Casa da Teresa" }) */
-export function searchMapListingFixture(overrides: Partial<SearchMapListing> = {}): SearchMapListing {
-  return {
+export function searchMapListingFixture(overrides: Partial<ListingSummary> = {}): ListingSummary {
+  return listingFixture({
     id: "0199d2a0-0000-7000-8000-000000000051",
     title: "Casa da Dona Cida",
     neighborhood: "Jd. Alvorada",
     nightlyRate: 60,
-    coverPhotoUrl: null,
     distanceKm: 2.1,
     rating: { average: 4.9, count: 18 },
     approximateLocation: { latitude: -23.4075, longitude: -51.9275, radiusMeters: 500 },
     ...overrides,
-  };
+  });
 }
 
 /** Cinco cantinhos em volta da origem, como no board `Busca-Mapa`. @example <SearchMap listings={searchMapListingsFixture} … /> */
-export const searchMapListingsFixture: SearchMapListing[] = [
+export const searchMapListingsFixture: ListingSummary[] = [
   searchMapListingFixture(),
   searchMapListingFixture({
     id: "0199d2a0-0000-7000-8000-000000000052",
