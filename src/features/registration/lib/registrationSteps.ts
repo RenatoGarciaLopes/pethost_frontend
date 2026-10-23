@@ -33,12 +33,18 @@ export function registrationSteps(personFields: readonly RegistrationField[]): r
       id: "person",
       label: registrationCopy.steps.person.label,
       title: registrationCopy.steps.person.title,
+      description: personFields.includes("cpf")
+        ? registrationCopy.steps.person.description
+        : registrationCopy.steps.person.hostDescription,
       fields: personFields,
     },
     {
       id: "address",
       label: registrationCopy.steps.address.label,
       title: registrationCopy.steps.address.title,
+      description: personFields.includes("cpf")
+        ? registrationCopy.steps.address.description
+        : registrationCopy.steps.address.hostDescription,
       fields: ADDRESS_FIELDS,
     },
   ];

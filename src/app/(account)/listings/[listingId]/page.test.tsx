@@ -5,7 +5,11 @@ const { getListingPageDetail, requirePersonalUser } = vi.hoisted(() => ({
   getListingPageDetail: vi.fn(async () => ({ title: "Quintal tranquilo" })),
   requirePersonalUser: vi.fn(async () => ({ id: "account-1", role: "owner" as const })),
 }));
-vi.mock("@/features/listing-page/index.server", () => ({ getListingPageDetail, getListingPageContext: vi.fn() }));
+vi.mock("@/features/listing-page/index.server", () => ({
+  getListingPageDetail,
+  getListingPageContext: vi.fn(),
+  getListingReviews: vi.fn(),
+}));
 vi.mock("@/shared/auth/server/requirePersonalUser", () => ({ requirePersonalUser }));
 
 import ListingPage, { generateMetadata } from "./page";

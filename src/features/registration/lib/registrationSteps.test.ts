@@ -6,7 +6,7 @@ const steps = registrationSteps(["fullName", "email", "cpf"]);
 describe("registrationSteps", () => {
   it("REQ-OREG-002 REQ-HREG-001 dois passos: você e onde você mora", () => {
     expect(steps.map((step) => step.label)).toEqual(["Você", "Onde você mora"]);
-    expect(steps.map((step) => step.title)).toEqual(["Primeiro, você", "Onde você mora"]);
+    expect(steps.map((step) => step.title)).toEqual(["Bora se conhecer.", "Onde você mora"]);
   });
 
   it("REQ-HREG-001 o passo 1 tem os campos de pessoa da variante; o endereço é igual", () => {

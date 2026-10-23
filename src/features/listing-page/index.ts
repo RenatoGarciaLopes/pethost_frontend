@@ -4,3 +4,4 @@ export type { ListingDetail } from "./api/contracts";
 export { petFitsListing } from "./lib/petFitsListing";
 export type { ListingFitPet, ListingFitResult, ListingFitRules } from "./lib/petFitsListing";
 export { stayTotal } from "./lib/stayTotal";
+export { compatibilityReasons } from "./lib/listingFacts";
