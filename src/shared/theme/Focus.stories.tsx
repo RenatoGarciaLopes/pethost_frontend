@@ -18,20 +18,24 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Regressão 072: os quatro controles mantêm foco em tinta ao navegar por Tab. */
-export const Keyboard: Story = {
+/**
+ * Regressão 081: clique e digitação nunca desenham contorno. O Tab real é conferido no E2E
+ * `e2e/mocked/home/keyboard-focus.spec.ts`: o userEvent da story é sintético e não ativa o :focus-visible do Chrome.
+ */
+export const Pointer: Story = {
+  name: "REQ-FOC-081 Clique não mostra contorno",
   play: async ({ canvas }) => {
     const controls = [
       canvas.getByRole("button", { name: "Continuar" }),
       canvas.getByRole("button", { name: "Com quintal" }),
-      canvas.getByRole("link", { name: "Ver cantinho" }),
       canvas.getByRole("textbox", { name: "Nome do pet" }),
     ];
-    controls[0].focus();
-    for (let index = 0; index < controls.length; index += 1) {
-      if (index > 0) await userEvent.tab();
-      await expect(controls[index]).toHaveFocus();
-      await expect(controls[index]).toHaveStyle({ outlineColor: "rgb(31, 26, 23)" });
+    for (const control of controls) {
+      await userEvent.click(control);
+      await expect(control).toHaveFocus();
+      await expect(control).toHaveStyle({ outlineStyle: "none" });
     }
+    await userEvent.keyboard("a");
+    await expect(controls[2]).toHaveStyle({ outlineStyle: "none" });
   },
 };

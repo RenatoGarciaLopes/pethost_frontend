@@ -1,4 +1,6 @@
 "use client";
+
+import { keyboardFocus } from "@/shared/theme/focus";
 import { Box, Typography } from "@mui/material";
 import type { ReactNode, Ref } from "react";
 import { toneIcon, type FeedbackTone } from "../feedbackIcons";
@@ -50,7 +52,7 @@ export function Notice({ tone, title, children, action, ref, id }: NoticeProps) 
           border: surface.border,
           color: "text.primary",
           "& > svg": { color: surface.icon, flexShrink: 0, marginTop: "1px" },
-          "&:focus-visible": { outlineOffset: 3 },
+          [keyboardFocus()]: { outlineOffset: 3 },
         };
       }}
     >

@@ -3,6 +3,7 @@ import { Box, Link, Stack, Typography } from "@mui/material";
 import { keyframes } from "@mui/material/styles";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { addDays, brasiliaToday, nightsBetween } from "@/shared/lib/date/stayRules";
+import { focusRing, keyboardFocus } from "@/shared/theme/focus";
 import { quintalColors } from "@/shared/theme/tokens/colors";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { calendarCopy } from "./calendarCopy";
@@ -117,7 +118,7 @@ function NavButton({ label, disabled, onClick, children }: NavButtonProps) {
         borderRadius: PILL,
         "&:hover:not(:disabled)": { bgcolor: quintalColors.luz },
         "&:disabled": { opacity: 0.35, cursor: "default" },
-        "&:focus-visible": { outline: `3px solid ${quintalColors.tinta}`, outlineOffset: 2 },
+        [keyboardFocus()]: focusRing,
       }}
     >
       {children}
@@ -295,7 +296,7 @@ export function Calendar(props: CalendarProps) {
                         textDecorationStyle: "dashed",
                         textUnderlineOffset: "4px",
                         borderRadius: `${quintalRadii.control}px`,
-                        "&:focus-visible": { outline: `3px solid ${quintalColors.tinta}`, outlineOffset: 2 },
+                        [keyboardFocus()]: focusRing,
                       }}
                     >
                       {monthTitle(month)}
@@ -462,7 +463,7 @@ function DayCell({ iso, column, range, rangeMode, today, blocked, tabbable, onCh
           bgcolor: selected ? quintalColors.coral : "transparent",
           ...(iso === today && !selected && { borderStyle: "dashed", borderColor: "text.primary" }),
           "&:hover": !blocked && !selected ? { bgcolor: quintalColors.luz } : undefined,
-          "&:focus-visible": { outline: `3px solid ${quintalColors.tinta}`, outlineOffset: 2 },
+          [keyboardFocus()]: focusRing,
         }}
       >
         {Number(iso.slice(8))}
@@ -537,7 +538,7 @@ function YearGrid({ current, minYear, maxYear, onPick }: YearGridProps) {
                 bgcolor: year === current ? quintalColors.coral : "transparent",
                 "&:hover:not(:disabled)": year === current ? undefined : { bgcolor: quintalColors.luz },
                 "&:disabled": { opacity: 0.35, cursor: "default" },
-                "&:focus-visible": { outline: `3px solid ${quintalColors.tinta}`, outlineOffset: 2 },
+                [keyboardFocus()]: focusRing,
               }}
             >
               {year}

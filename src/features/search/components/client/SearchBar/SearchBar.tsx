@@ -2,7 +2,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { Box, Button, Checkbox, FormControl, FormLabel, InputBase, MenuItem, Select, Typography } from "@mui/material";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
-import { focusRing } from "@/shared/theme/overrides/Button";
+import { focusRing, keyboardFocus } from "@/shared/theme/focus";
 import { DOOR_TARGET_ATTR, DOOR_WARM_ATTR } from "@/shared/ui/brand/DoorScene";
 import { Surface } from "@/shared/ui/layout/Surface";
 import { brasiliaToday, validateStay } from "@/shared/lib/date/stayRules";
@@ -28,9 +28,9 @@ const cell = {
   px: { xs: 1, md: 2 },
   py: 0.5,
   // Keyboard focus wraps the whole cell (icon, label and value); no colored :focus-within ring.
-  "&:has(:focus-visible)": { ...focusRing, borderRadius: `${quintalRadii.control}px` },
+  [keyboardFocus("&:has(:focus-visible)")]: { ...focusRing, borderRadius: `${quintalRadii.control}px` },
   // The cell owns this indicator; don't draw a second rectangle through its label.
-  "& .MuiInputBase-root .MuiInputBase-input:focus-visible": { outline: "none" },
+  [keyboardFocus("& .MuiInputBase-root .MuiInputBase-input:focus-visible")]: { outline: "none" },
 } as const;
 const dateButton = {
   position: "absolute",

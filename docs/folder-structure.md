@@ -491,6 +491,18 @@ As rotas compõem `AuditTable` pelo índice público `features/admin-audit/index
 
 SearchBar em features/search/components/client/SearchBar centraliza a faixa usada por home, /search e detalhe. searchDateLabel e seus testes migram de widgets/home/lib para features/search/lib; não há pasta vazia ou cópia residual. HomeScreen compõe o recurso pelo index.client público.
 
+## Modalidade de entrada e foco (081)
+
+```text
+src/shared/theme/focus.ts                  seletor keyboardFocus, geometria focusRing e atributo
+src/shared/hooks/useInputModality.ts       listeners documentais sem estado React
+src/shared/hooks/useInputModality.test.tsx cleanup do efeito
+```
+
+ThemeProviders instala o hook no topo do app; o decorator existente de .storybook/preview.ts instala o mesmo efeito nas stories. Nenhum provider/contexto/store novo. Overrides e consumidores usam o helper do tema; o antigo export focusRing de overrides/Button.ts foi movido para theme/focus.ts com todos os imports migrados. Detalhes e validação: [081](../specs/081-keyboard-only-focus/design.md).
+
+GlobalError, fronteira alternativa que substitui o layout sem MUI/providers, instala o mesmo hook e usa o helper/geometry para CSS nativo. Não há segundo tracker simultâneo na árvore normal; detalhes em frontend-input-modality.
+
 ## Revisão 074 do cadastro
 
 RegisterChoiceScreen foi removido; /register compõe RegistrationScreen owner diretamente. RegisterChoice permanece interno ao wizard como cartões de troca de papel. Stories de RegistrationScreen cobrem composição do wizard/PersonStep; stories de RegisterChoice cobrem as opções. Nenhuma store/provider/pasta nova. WizardProgress e PasswordStrengthChecklist foram estendidos nas pastas existentes. Fonte técnica: [cadastro fiel](../specs/005-ui-conformance/register-fidelity-implementation.md).

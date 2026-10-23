@@ -1,5 +1,6 @@
 "use client";
 
+import { keyboardFocus } from "@/shared/theme/focus";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { useId, useRef, useState, type ChangeEvent } from "react";
 import {
@@ -102,7 +103,7 @@ function AvatarPicker({ name, avatarUrl, busy, error, onUpload, onRemove, disabl
           position: "relative",
           display: "inline-flex",
           borderRadius: `${quintalRadii.control}px`,
-          "&:focus-within": { outline: "2px solid", outlineColor: "text.primary", outlineOffset: 3 },
+          [keyboardFocus("&:has(input:focus-visible)")]: { outline: "2px solid", outlineColor: "text.primary", outlineOffset: 3 },
         }}
       >
         <Button component="label" role={undefined} tabIndex={-1} htmlFor={id} disabled={blocked} variant="outlined">
