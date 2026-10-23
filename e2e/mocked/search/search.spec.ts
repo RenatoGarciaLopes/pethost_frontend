@@ -3,6 +3,20 @@ import { loginAccount } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { openSearch } from "../../support/search";
 
+test("071 faixa única e chips em 1440 e 390", async ({ page, baseURL }, testInfo) => {
+  await loginAccount(page, baseURL!);
+  const width = testInfo.project.name.includes("mobile") ? 390 : 1440;
+  await page.setViewportSize({ width, height: 900 });
+  await page.goto("/search?where=Maring%C3%A1&pets=0199d2a0-0000-7000-8000-0000000000e1");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("13 casas com vaga perto de Maringá");
+  await expect(page.getByRole("button", { name: "Combina com Luna" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByLabel("Bairro (opcional)")).toHaveCount(0);
+  await expect(page.getByLabel("Diária máxima (R$)")).toHaveCount(0);
+  await expect(page.getByText("Conversa antes · Foto todo dia · Pagamento guardado")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: `test-results/search-071-${width}.png`, fullPage: true });
+});
+
 test("REQ-SRCH-001 visitante preserva a busca no login", async ({ page }) => {
   await page.goto("/search?where=Maring%C3%A1&hasKids=false");
   // Primeira visita da execução: o `next dev` ainda compila o redirect e o /login.
@@ -49,12 +63,15 @@ test("REQ-SRCH-003/004/007 datas, pets e total seguem no link", async ({ page, b
   const to = tomorrow.toISOString().slice(0, 10);
   await page.getByLabel("Chegada", { exact: true }).filter({ visible: true }).fill(from);
   await page.getByLabel("Saída", { exact: true }).filter({ visible: true }).fill(from);
-  await page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }).click();
+  await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
   await expect(page.getByText("A saída precisa ser depois da chegada.")).toBeVisible();
   await page.getByLabel("Saída", { exact: true }).filter({ visible: true }).fill(to);
-  await page.getByLabel("Luna", { exact: true }).filter({ visible: true }).check();
-  await page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cantinhos que recebem Luna");
+  await page.getByRole("combobox", { name: "Pet" }).click();
+  await page.getByRole("option", { name: "Luna", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("casas com vaga perto");
+  await expect(page.getByRole("button", { name: "Combina com Luna" })).toHaveAttribute("aria-pressed", "true");
   const card = page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first();
   await expect(card).toContainText(/300,00 as 5 noites/);
   expect(await card.getAttribute("href")).toContain(`from=${from}`);
@@ -80,9 +97,9 @@ test("REQ-SRCH-003 anfitrião busca sem usar pets residentes", async ({ page, ba
   await loginAccount(page, baseURL!, "both", "host");
   await page.goto("/search");
   await openSearch(page);
-  await expect(page.getByLabel("Quantos pets vão?").filter({ visible: true })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Pet" })).toBeVisible();
   await expect(page.getByLabel("Luna", { exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }).click();
+  await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
   await expect(page).toHaveURL(/count=1/);
 });
 
