@@ -3,11 +3,11 @@ import { useSearchParams } from "@storybook/nextjs-vite/navigation.mock";
 import { ReadonlyURLSearchParams } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { listingFixture, searchPetsFixture, searchQueryFixture } from "@/test/fixtures/search";
-import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { searchQueries } from "../../api/queries";
 import { SearchResultsSection } from "./SearchResultsSection";
 
-const query = searchQueryFixture();
+/** Com `where` a busca tem região: lista e mapa lado a lado no computador, botão "Ver mapa" no celular. */
+const query = searchQueryFixture({ where: "Zona 7" });
 const meta = {
   title: "Search/SearchResultsSection",
   component: SearchResultsSection,
@@ -35,22 +35,5 @@ const meta = {
 } satisfies Meta<typeof SearchResultsSection>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-export const ComPets: Story = {};
+export const ComMapa: Story = {};
 export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };
-export const ComMapa: Story = {
-  args: {
-    map: (
-      <div
-        style={{
-          minHeight: 320,
-          border: "2px dashed currentColor",
-          borderRadius: quintalRadii.card,
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        Mapa (080)
-      </div>
-    ),
-  },
-};

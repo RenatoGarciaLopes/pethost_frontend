@@ -9,6 +9,8 @@ export const searchCopy = {
   close: "Fechar busca",
   loading: "Farejando cantinhos…",
   more: "Mostrar mais cantinhos",
+  showMap: "Ver mapa",
+  showList: "Ver lista",
   clear: "Limpar filtros",
   retry: "Tentar de novo",
   empty: "Nenhum cantinho por aqui com esses filtros.",

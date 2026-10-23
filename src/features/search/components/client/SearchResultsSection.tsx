@@ -1,35 +1,56 @@
 "use client";
-import type { ReactNode } from "react";
-import { Box, Stack, Typography } from "@mui/material";
+import { useState } from "react";
+import { Box, Button, Dialog, Stack, Typography, useMediaQuery } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import type { SearchPet, SearchQuery } from "../../types";
 import type { SearchError } from "../../lib/searchErrors";
+import { mapCopy } from "../../lib/mapCopy";
 import { searchCopy as copy } from "../../lib/searchCopy";
 import { useSearch } from "../../hooks/useSearch";
 import { FilterChips } from "./FilterChips";
+import { SearchMap } from "./SearchMap";
 import { SearchResults } from "./SearchResults";
 
-/** Quem busca, o que a URL já trazia (para o servidor e o cliente concordarem) e o espaço do mapa. @example { accountId, pets, initialQuery, initialError, map } */
+/** Quem busca e o que a URL já trazia (para o servidor e o cliente concordarem). @example { accountId, pets, initialQuery, initialError } */
 export interface SearchResultsSectionProps {
   accountId: string;
   pets: SearchPet[];
   initialQuery: SearchQuery;
   initialError?: SearchError;
-  /** Mapa ao lado da lista (a partir de `lg`); sem ele a lista ocupa a largura toda. Ponto de encaixe do SearchMap (080). */
-  map?: ReactNode;
 }
 
 /**
  * Resultados da busca dentro da home: título com a contagem, chips rápidos (reaproveita `FilterChips`) e os cards,
  * com "Mostrar mais cantinhos". A URL de `/` é a fonte dos filtros; ativar um chip refaz a busca na API.
+ * Com região na busca (`where` ou `state`) e resultados, o mapa (`SearchMap`) entra à direita da lista no computador
+ * e, no celular, abre em tela cheia pelo botão "Ver mapa".
  * @example <SearchResultsSection accountId={id} pets={pets} initialQuery={query} />
  */
-export function SearchResultsSection({ accountId, pets, initialQuery, initialError, map }: SearchResultsSectionProps) {
+export function SearchResultsSection({ accountId, pets, initialQuery, initialError }: SearchResultsSectionProps) {
   const { query, data, error, result, update } = useSearch(accountId, pets, initialQuery, initialError);
+  const desktop = useMediaQuery((theme: Theme) => theme.breakpoints.up("lg"));
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [searchOnMove, setSearchOnMove] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
   const selected = pets.filter((pet) => query.pets.includes(pet.id));
   const items = [...new Map(data?.pages.flatMap((page) => page.items).map((item) => [item.id, item]) ?? []).values()];
   // A barra fica fora desta seção: o erro dos campos dela aparece aqui, junto dos chips.
   const barErrors = Object.entries(error?.fields ?? {}).filter(([key]) =>
     ["where", "from", "to", "count"].includes(key),
+  );
+  const compatibility = selected.length ? { accountId, pets: selected } : undefined;
+  const hasMap = Boolean(query.where || query.state) && items.length > 0;
+  const map = (
+    <SearchMap
+      listings={items}
+      selectedId={selectedId}
+      onSelect={setSelectedId}
+      searchOnMove={searchOnMove}
+      onSearchOnMoveChange={setSearchOnMove}
+      query={query}
+      petCount={selected.length || query.count || 0}
+      compatibility={compatibility}
+    />
   );
   return (
     <Stack spacing={2}>
@@ -42,11 +63,16 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
           {copy.fieldLabels[key]}: {message}
         </Typography>
       ))}
+      {hasMap && !desktop && (
+        <Button variant="outlined" onClick={() => setMapOpen(true)} sx={{ alignSelf: "flex-start" }}>
+          {copy.showMap}
+        </Button>
+      )}
       <Box
         sx={{
           display: "grid",
           gap: 3,
-          gridTemplateColumns: map ? { xs: "1fr", lg: "minmax(0, 1fr) minmax(0, 1fr)" } : "1fr",
+          gridTemplateColumns: hasMap && desktop ? "minmax(0, 1fr) minmax(0, 1fr)" : "1fr",
           alignItems: "start",
         }}
       >
@@ -54,7 +80,7 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
           query={query}
           items={items}
           petCount={selected.length || query.count || 0}
-          compatibility={selected.length ? { accountId, pets: selected } : undefined}
+          compatibility={compatibility}
           isFetching={result.isFetching}
           hasNextPage={!result.isPlaceholderData && result.hasNextPage}
           error={error}
@@ -66,8 +92,22 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
           }}
           onExpand={(radius) => update({ ...query, radius })}
         />
-        {map && <Box sx={{ position: { lg: "sticky" }, top: { lg: 24 } }}>{map}</Box>}
+        {hasMap && desktop && (
+          <Box sx={{ position: "sticky", top: 24, height: "calc(100vh - 48px)", maxHeight: 760, minHeight: 480 }}>
+            {map}
+          </Box>
+        )}
       </Box>
+      {hasMap && !desktop && (
+        <Dialog fullScreen open={mapOpen} onClose={() => setMapOpen(false)} aria-label={mapCopy.region}>
+          <Box sx={{ position: "relative", flex: 1, p: 1.5, display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Button variant="outlined" onClick={() => setMapOpen(false)} sx={{ alignSelf: "flex-start" }}>
+              {copy.showList}
+            </Button>
+            <Box sx={{ flex: 1, minHeight: 0 }}>{map}</Box>
+          </Box>
+        </Dialog>
+      )}
     </Stack>
   );
 }
