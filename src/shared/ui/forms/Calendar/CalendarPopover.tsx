@@ -1,14 +1,17 @@
 "use client";
 import { Box, Button, Drawer, Popover, useMediaQuery, type Theme } from "@mui/material";
-import type { ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
 import { calendarCopy } from "./calendarCopy";
+import { placeCalendar } from "./calendarPlacement";
 
 export interface CalendarPopoverProps {
   open: boolean;
-  /** Campo que abriu o calendário; Esc e o fechamento devolvem o foco a ele. */
+  /** Campo ou célula que abriu o calendário: o popover alinha a borda esquerda a ele. */
   anchorEl: HTMLElement | null;
+  /** O que o popover não pode cobrir (a barra inteira); sem ele, o próprio `anchorEl`. */
+  clearEl?: HTMLElement | null;
   onClose: () => void;
   /** Nome do diálogo para leitor de tela. */
   label: string;
@@ -21,8 +24,17 @@ export interface CalendarPopoverProps {
  *
  * @example <CalendarPopover open={open} anchorEl={anchor} onClose={close} label="Escolher a data">{({ compact }) => <Calendar … />}</CalendarPopover>
  */
-export function CalendarPopover({ open, anchorEl, onClose, label, children }: CalendarPopoverProps) {
+export function CalendarPopover({ open, anchorEl, clearEl, onClose, label, children }: CalendarPopoverProps) {
   const compact = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
+  const placement = useMemo(() => {
+    const clear = (clearEl ?? anchorEl)?.getBoundingClientRect();
+    const align = anchorEl?.getBoundingClientRect();
+    return open && clear && align ? placeCalendar(clear, align.left, window.innerHeight) : null;
+  }, [open, anchorEl, clearEl]);
+  // Na saída o popover segue onde estava, em vez de pular para o topo durante a transição.
+  const [lastPlacement, setLastPlacement] = useState(placement);
+  if (placement && placement !== lastPlacement) setLastPlacement(placement);
+  const where = placement ?? lastPlacement;
   const paper = {
     role: "dialog",
     "aria-label": label,
@@ -65,14 +77,14 @@ export function CalendarPopover({ open, anchorEl, onClose, label, children }: Ca
   return (
     <Popover
       open={open}
-      anchorEl={anchorEl}
+      anchorReference="anchorPosition"
+      anchorPosition={where?.anchorPosition}
       onClose={onClose}
-      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      transformOrigin={{ vertical: "top", horizontal: "left" }}
+      transformOrigin={{ vertical: where?.edge ?? "top", horizontal: "left" }}
       slotProps={{
         paper: {
           ...paper,
-          sx: { ...paper.sx, mt: 1, borderRadius: `${quintalRadii.card}px`, boxShadow: hardShadow(5) },
+          sx: { ...paper.sx, borderRadius: `${quintalRadii.card}px`, boxShadow: hardShadow(5) },
         },
       }}
     >

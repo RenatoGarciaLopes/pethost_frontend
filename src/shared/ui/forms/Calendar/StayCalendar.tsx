@@ -11,6 +11,8 @@ export interface StayCalendarProps {
   edge: StayEdge | null;
   /** Campo ou célula que abriu o calendário. */
   anchorEl: HTMLElement | null;
+  /** O que o calendário não pode cobrir (a barra de busca); sem ele, o `anchorEl`. */
+  clearEl?: HTMLElement | null;
   checkIn: string;
   checkOut: string;
   today: string;
@@ -25,11 +27,21 @@ export interface StayCalendarProps {
  *
  * @example <StayCalendar edge={open} anchorEl={anchor} checkIn={from} checkOut={to} today={today} onChange={setRange} onClose={close} />
  */
-export function StayCalendar({ edge, anchorEl, checkIn, checkOut, today, onChange, onClose }: StayCalendarProps) {
+export function StayCalendar({
+  edge,
+  anchorEl,
+  clearEl,
+  checkIn,
+  checkOut,
+  today,
+  onChange,
+  onClose,
+}: StayCalendarProps) {
   return (
     <CalendarPopover
       open={Boolean(edge)}
       anchorEl={anchorEl}
+      clearEl={clearEl}
       onClose={() => onClose(false)}
       label={calendarCopy.rangeDialog}
     >

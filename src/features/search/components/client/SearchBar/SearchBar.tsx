@@ -75,7 +75,7 @@ export function SearchBar({
   const ids = useId();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [draft, setDraft] = useState(query);
-  const [calendar, setCalendar] = useState<{ edge: StayEdge; anchor: HTMLElement } | null>(null);
+  const [calendar, setCalendar] = useState<{ edge: StayEdge; anchor: HTMLElement; bar: HTMLElement } | null>(null);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
   const fieldErrors = { ...errors, ...localErrors };
   const where = draft.where ?? "",
@@ -186,7 +186,13 @@ export function SearchBar({
               id={`${ids}-from`}
               aria-haspopup="dialog"
               aria-describedby={`${ids}-from-value${fieldErrors.from ? ` ${ids}-from-error` : ""}`}
-              onClick={(event) => setCalendar({ edge: "checkIn", anchor: event.currentTarget.parentElement! })}
+              onClick={(event) =>
+                setCalendar({
+                  edge: "checkIn",
+                  anchor: event.currentTarget.parentElement!,
+                  bar: event.currentTarget.closest("form")!,
+                })
+              }
               sx={dateButton}
             />
           </Box>
@@ -203,7 +209,13 @@ export function SearchBar({
               id={`${ids}-to`}
               aria-haspopup="dialog"
               aria-describedby={`${ids}-to-value${fieldErrors.to ? ` ${ids}-to-error` : ""}`}
-              onClick={(event) => setCalendar({ edge: "checkOut", anchor: event.currentTarget.parentElement! })}
+              onClick={(event) =>
+                setCalendar({
+                  edge: "checkOut",
+                  anchor: event.currentTarget.parentElement!,
+                  bar: event.currentTarget.closest("form")!,
+                })
+              }
               sx={dateButton}
             />
           </Box>
@@ -310,6 +322,7 @@ export function SearchBar({
       <StayCalendar
         edge={calendar?.edge ?? null}
         anchorEl={calendar?.anchor ?? null}
+        clearEl={calendar?.bar}
         checkIn={from}
         checkOut={to}
         today={today ?? brasiliaToday()}
