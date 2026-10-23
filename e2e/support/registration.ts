@@ -25,12 +25,12 @@ const uniqueEmail = (prefix: string) => `${prefix}.${Date.now()}.${Math.floor(Ma
  * @example await fillPerson(page, { cpf: "52998224725" });
  */
 export async function fillPerson(page: Page, { cpf, email }: { cpf?: string; email?: string } = {}) {
-  await waitForHydration(field(page, "Seu nome completo"));
-  await field(page, "Seu nome completo").fill("Camila Souza");
+  await waitForHydration(field(page, "Nome completo"));
+  await field(page, "Nome completo").fill("Camila Souza");
   await field(page, "E-mail").fill(email ?? uniqueEmail(cpf ? "tutor" : "anfitriao"));
   await field(page, "Crie uma senha").fill("Senha#forte1");
   await field(page, "Celular com DDD").fill("44999990000");
-  await field(page, "Quando você nasceu\\?").fill("15031990");
+  await field(page, "Nascimento").fill("15031990");
   if (cpf) await field(page, "CPF").fill(cpf);
   await page.getByRole("button", { name: "Continuar: endereço" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Onde você mora" })).toBeVisible();
