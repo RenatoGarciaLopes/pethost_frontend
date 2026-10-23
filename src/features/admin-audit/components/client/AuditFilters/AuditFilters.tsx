@@ -1,6 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { Autocomplete, Box, Button, MenuItem, Stack, TextField } from "@mui/material";
+import { DateField } from "@/shared/ui/forms/DateField";
 import { auditActionGroups, auditActionOptions } from "../../../lib/auditActionCopy";
 import { auditCopy as copy } from "../../../lib/auditCopy";
 import {
@@ -113,25 +114,23 @@ export function AuditFilters({ filters, invalidFields, onApply, onClear }: Audit
           />
         </Stack>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-          <TextField
-            type="date"
+          <DateField
             fullWidth
+            clearable
             label={copy.from}
             value={draft.from ?? ""}
-            onChange={(event) => setDraft((current) => ({ ...current, from: event.target.value || undefined }))}
+            onChange={(value) => setDraft((current) => ({ ...current, from: value || undefined }))}
             error={errors.has("from")}
             helperText={errors.has("from") ? "Escolha uma data válida." : undefined}
-            slotProps={{ inputLabel: { shrink: true } }}
           />
-          <TextField
-            type="date"
+          <DateField
             fullWidth
+            clearable
             label={copy.to}
             value={draft.to ?? ""}
-            onChange={(event) => setDraft((current) => ({ ...current, to: event.target.value || undefined }))}
+            onChange={(value) => setDraft((current) => ({ ...current, to: value || undefined }))}
             error={errors.has("to") || rangeInvalid}
             helperText={rangeInvalid ? copy.invalidRange : errors.has("to") ? "Escolha uma data válida." : undefined}
-            slotProps={{ inputLabel: { shrink: true } }}
           />
         </Stack>
         <Stack direction="row" spacing={1}>

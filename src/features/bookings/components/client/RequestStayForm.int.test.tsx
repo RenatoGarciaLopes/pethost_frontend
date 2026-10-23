@@ -2,6 +2,7 @@ import { screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { pickCalendarDays } from "@/test/calendar";
 import { BOOKING_ID, bookingDto, PIPOCA_ID, THOR_ID } from "@/test/fixtures/bookings";
 import { apiFail, apiOk } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
@@ -72,8 +73,8 @@ function serve(response: () => Response) {
 describe("RequestStayForm", { timeout: 15000 }, () => {
   it("REQ-REQST-002 REQ-REQST-003 datas e pets da URL, cada pet com Combina ou o motivo; resumo com a conta", () => {
     setup();
-    expect(screen.getByLabelText("Chegada")).toHaveValue("2026-12-20");
-    expect(screen.getByLabelText("Saída")).toHaveValue("2026-12-25");
+    expect(screen.getByLabelText("Chegada")).toHaveValue("20/12/2026");
+    expect(screen.getByLabelText("Saída")).toHaveValue("25/12/2026");
     const who = screen.getByRole("group", { name: copy.pets });
     expect(within(who).getByRole("checkbox", { name: /Pipoca/ })).toBeChecked();
     expect(within(who).getByRole("checkbox", { name: /Thor/ })).toBeChecked();
@@ -88,6 +89,16 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     expect(summary).toHaveTextContent("20 a 25 de dez. · 5 noites");
     expect(summary).toHaveTextContent("Pipoca, Thor");
     expect(summary.textContent).toMatch(/R\$\s60,50 × 5 noites × 2 pets = R\$ 605,00/);
+  });
+
+  it("REQ-REQST-002 trocar as datas pelo calendário refaz o resumo e o total", async () => {
+    const { user } = setup();
+    await pickCalendarDays(user, screen.getByLabelText("Chegada"), "2026-12-21", "2026-12-23");
+    expect(screen.getByLabelText("Chegada")).toHaveValue("21/12/2026");
+    expect(screen.getByLabelText("Saída")).toHaveValue("23/12/2026");
+    const summary = screen.getByRole("region", { name: copy.summary });
+    expect(summary).toHaveTextContent("21 a 23 de dez. · 2 noites");
+    expect(summary.textContent).toMatch(/R\$\s60,50 × 2 noites × 2 pets = R\$ 242,00/);
   });
 
   it("REQ-REQST-002 pet que não combina vindo da URL não fica marcado; mudar pets refaz a conta", async () => {
