@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
-import { getRouter } from "@storybook/nextjs-vite/router.mock";
-import { fn } from "storybook/test";
+import { useSearchParams } from "@storybook/nextjs-vite/navigation.mock";
+import { ReadonlyURLSearchParams } from "next/navigation";
 import { withQueryClient } from "@/test/storybook/withQueryClient";
 import { HomeScreen } from "./HomeScreen";
 
@@ -13,15 +12,14 @@ const meta = {
   args: { pets: [], petsUnavailable: false },
   decorators: [withQueryClient],
   beforeEach: () => {
-    // Mock do framework: o appDirectory ainda usa o contexto anterior ao Next 16.4 (como no PetWizard).
-    useRouter.mockReturnValue({ ...getRouter(), refresh: fn(), bfcacheId: "story" });
+    useSearchParams.mockReturnValue(new ReadonlyURLSearchParams());
   },
 } satisfies Meta<typeof HomeScreen>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Entrada sem sessão: busca encaminha para login preservando os parâmetros. */
+/** Entrada sem sessão: a busca roda na própria home, sem login. */
 export const Visitante: Story = { name: "REQ-HOME-002 Visitante", args: { viewer: "visitor" } };
 
 /** Tutor que ainda não cadastrou um pet pode escolher espécie. */
@@ -33,8 +31,8 @@ export const TutorComPets: Story = {
   args: {
     viewer: "owner",
     pets: [
-      { id: "pet-mel", name: "Mel", species: "dog" },
-      { id: "pet-nino", name: "Nino", species: "cat" },
+      { id: "pet-mel", name: "Mel", species: "dog", size: "small" },
+      { id: "pet-nino", name: "Nino", species: "cat", size: null },
     ],
   },
 };

@@ -30,3 +30,23 @@ it("REQ-UIC-003 tutor vê estadias e nome na pílula sem perder o menu da conta"
   await user.click(account);
   expect(await screen.findByRole("menuitem", { name: "Minha conta" })).toHaveAttribute("href", "/users/profile");
 });
+
+it("REQ-SHELL-002 REQ-UIC-003 na casca o tutor vê Buscar (home), Meus pets e Minhas estadias, e a pílula com o nome", () => {
+  renderWithProviders(<AppHeader user={sessionUserFixture} />, { theme: quintalTheme });
+  const nav = within(screen.getByRole("navigation", { name: "Navegação principal" }));
+  expect(nav.getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
+    ["Buscar", "/"],
+    ["Meus pets", "/pets"],
+    ["Minhas estadias", "/owner/bookings"],
+  ]);
+  expect(nav.queryByRole("link", { name: "Conversas" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /Menu da conta de Camila Souza/ })).toHaveTextContent("Camila");
+});
+
+it("REQ-LPAGE-012 o Entrar do visitante volta para a página aberta que ele estava vendo", () => {
+  renderWithProviders(<AppHeader returnTo="/listings/abc?from=2026-11-10" />, { theme: quintalTheme });
+  expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute(
+    "href",
+    "/login?next=%2Flistings%2Fabc%3Ffrom%3D2026-11-10",
+  );
+});

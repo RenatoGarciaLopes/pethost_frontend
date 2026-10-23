@@ -4,7 +4,7 @@ import { registrationCopy } from "./registrationCopy";
 import { REGISTRATION_VARIANTS } from "./registrationVariants";
 
 const { owner, host } = REGISTRATION_VARIANTS;
-const { dataUse, steps, fields } = registrationCopy;
+const { steps, fields } = registrationCopy;
 
 const ADDRESS_FIELDS = [
   "address.zipCode",
@@ -62,12 +62,12 @@ describe("REGISTRATION_VARIANTS", () => {
 
   it("REQ-OREG-002 REQ-OREG-009 tutor: CPF no passo 1 e todos os campos na ordem da tela", () => {
     expect(owner.steps.map((step) => step.id)).toEqual(["person", "address"]);
-    expect(owner.fields).toEqual(["fullName", "email", "password", "phone", "birthDate", "cpf", ...ADDRESS_FIELDS]);
+    expect(owner.fields).toEqual(["fullName", "email", "phone", "birthDate", "cpf", "password", ...ADDRESS_FIELDS]);
   });
 
   it("REQ-HREG-001 anfitrião: os mesmos 2 passos, sem CPF", () => {
     expect(host.steps.map((step) => step.id)).toEqual(["person", "address"]);
-    expect(host.fields).toEqual(["fullName", "email", "password", "phone", "birthDate", ...ADDRESS_FIELDS]);
+    expect(host.fields).toEqual(["fullName", "email", "phone", "birthDate", "password", ...ADDRESS_FIELDS]);
     expect(host.steps[0].fields).not.toContain("cpf");
   });
 
@@ -94,12 +94,6 @@ describe("REGISTRATION_VARIANTS", () => {
       nextStep: { label: "Começar a verificação", href: "/host/application" },
       laterHref: "/host",
     });
-  });
-
-  it("REQ-HREG-001 o que a gente faz com cada dado: o anfitrião não fala de CPF", () => {
-    expect(owner.dataUse.map((item) => item.field)).toEqual(["Nome e celular", "CPF", "Endereço", "Senha"]);
-    expect(host.dataUse).toEqual([dataUse.items.hostContact, dataUse.items.hostAddress, dataUse.items.password]);
-    expect(host.dataUse.map((item) => item.field)).not.toContain("CPF");
   });
 
   it("REQ-OREG-008 resolver do tutor valida e devolve o corpo com CPF", async () => {

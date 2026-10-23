@@ -21,8 +21,8 @@ export const PostApiV1ConversationsBody = zod.object({
 }).describe('Corpo de `POST /api/v1/conversations`.')
 
 export const PostApiV1ConversationsResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "ownerId": zod.string().uuid().describe('Tutor (`owner.owners.id`).'),
   "owner": zod.union([zod.null(),zod.object({
@@ -51,14 +51,9 @@ export const PostApiV1ConversationsResponse = zod.object({
   "blockedByModeration": zod.boolean().describe('A moderação bloqueou (denúncia procedente): ninguém desbloqueia pelo app.'),
   "lastMessageAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true})
-}).describe('Uma conversa vista por um dos dois lados.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma conversa vista por um dos dois lados.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Da atividade mais recente para a mais antiga, cada uma com a última mensagem e as não lidas
@@ -72,8 +67,8 @@ export const GetApiV1ConversationsMeQueryParams = zod.object({
 })
 
 export const GetApiV1ConversationsMeResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
   "ownerId": zod.string().uuid().describe('Tutor (`owner.owners.id`).'),
@@ -108,31 +103,21 @@ export const GetApiV1ConversationsMeResponse = zod.object({
   "pageSize": zod.number().int(),
   "totalCount": zod.number().int(),
   "totalPages": zod.number().int().optional()
-}).describe('Página de uma lista (§13): `page` começa em 1.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Página de uma lista (§13): `page` começa em 1.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Anfitrião ainda não aprovado (sem perfil): `0`.
  * @summary O contador de não lidas da conta logada, somando todas as conversas.
  */
 export const GetApiV1ConversationsMeUnreadCountResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "total": zod.number().int()
-}).describe('Total de mensagens não lidas da conta logada, em todas as conversas (o contador do app).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Total de mensagens não lidas da conta logada, em todas as conversas (o contador do app).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * `unreadMessagesEmail`: o e-mail de "mensagens não lidas" (resumo, sem o texto, depois de
@@ -140,17 +125,12 @@ export const GetApiV1ConversationsMeUnreadCountResponse = zod.object({
  * @summary O que a conta logada recebe do chat fora do app.
  */
 export const GetApiV1ConversationsMeNotificationSettingsResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "unreadMessagesEmail": zod.boolean().describe('E-mail de "mensagens não lidas" (padrão: ligado).')
-}).describe('O que a conta recebe do chat fora do app.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('O que a conta recebe do chat fora do app.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Corpo: `{ "unreadMessagesEmail": false }`. Obrigatório (400 no campo). Idempotente.
@@ -161,17 +141,12 @@ export const PutApiV1ConversationsMeNotificationSettingsBody = zod.object({
 }).describe('Corpo de `PUT /api/v1/conversations/me/notification-settings`.')
 
 export const PutApiV1ConversationsMeNotificationSettingsResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "unreadMessagesEmail": zod.boolean().describe('E-mail de "mensagens não lidas" (padrão: ligado).')
-}).describe('O que a conta recebe do chat fora do app.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('O que a conta recebe do chat fora do app.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Conversa de outra pessoa: 404 `CONVERSATION_NOT_FOUND`, como se não existisse.
@@ -182,8 +157,8 @@ export const GetApiV1ConversationsConversationIdParams = zod.object({
 })
 
 export const GetApiV1ConversationsConversationIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "ownerId": zod.string().uuid().describe('Tutor (`owner.owners.id`).'),
   "owner": zod.union([zod.null(),zod.object({
@@ -212,14 +187,9 @@ export const GetApiV1ConversationsConversationIdResponse = zod.object({
   "blockedByModeration": zod.boolean().describe('A moderação bloqueou (denúncia procedente): ninguém desbloqueia pelo app.'),
   "lastMessageAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true})
-}).describe('Uma conversa vista por um dos dois lados.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma conversa vista por um dos dois lados.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Paginação por cursor: sem `before`, as mais recentes; para as anteriores, mande em
@@ -238,8 +208,8 @@ export const GetApiV1ConversationsConversationIdMessagesQueryParams = zod.object
 })
 
 export const GetApiV1ConversationsConversationIdMessagesResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
   "conversationId": zod.string().uuid(),
@@ -251,14 +221,9 @@ export const GetApiV1ConversationsConversationIdMessagesResponse = zod.object({
 }).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.')),
   "pageSize": zod.number().int(),
   "hasMore": zod.boolean().describe('Há mensagens mais antigas que as desta página.')
-}).describe('Uma página de mensagens, da mais nova para a mais antiga. Para a página seguinte (mais\nantiga), o cliente manda o id da última mensagem desta em `before`.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma página de mensagens, da mais nova para a mais antiga. Para a página seguinte (mais\nantiga), o cliente manda o id da última mensagem desta em `before`.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Corpo: `body`, até 2.000 caracteres, sem caractere de controle (quebra de linha e
@@ -278,8 +243,8 @@ export const PostApiV1ConversationsConversationIdMessagesBody = zod.object({
 }).describe('Corpo de `POST /api/v1/conversations/{conversationId}/messages`.')
 
 export const PostApiV1ConversationsConversationIdMessagesResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
@@ -287,14 +252,9 @@ export const PostApiV1ConversationsConversationIdMessagesResponse = zod.object({
   "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
-}).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * `multipart/form-data` com a imagem na parte `file` (JPG/JPEG, PNG ou WebP, até 5 MB;
@@ -315,8 +275,8 @@ export const PostApiV1ConversationsConversationIdMessagesPhotoBody = zod.object(
 }))
 
 export const PostApiV1ConversationsConversationIdMessagesPhotoResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
@@ -324,14 +284,9 @@ export const PostApiV1ConversationsConversationIdMessagesPhotoResponse = zod.obj
   "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
-}).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Chamado quando o app abre a conversa. Devolve o contador novo da conta (`total`), que
@@ -344,17 +299,12 @@ export const PutApiV1ConversationsConversationIdReadMarkerParams = zod.object({
 })
 
 export const PutApiV1ConversationsConversationIdReadMarkerResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "total": zod.number().int()
-}).describe('Total de mensagens não lidas da conta logada, em todas as conversas (o contador do app).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Total de mensagens não lidas da conta logada, em todas as conversas (o contador do app).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Os dois lados continuam lendo o histórico; enviar dá 422 `CONVERSATION_BLOCKED`. Devolve a
@@ -368,8 +318,8 @@ export const PutApiV1ConversationsConversationIdBlockParams = zod.object({
 })
 
 export const PutApiV1ConversationsConversationIdBlockResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "ownerId": zod.string().uuid().describe('Tutor (`owner.owners.id`).'),
   "owner": zod.union([zod.null(),zod.object({
@@ -398,14 +348,9 @@ export const PutApiV1ConversationsConversationIdBlockResponse = zod.object({
   "blockedByModeration": zod.boolean().describe('A moderação bloqueou (denúncia procedente): ninguém desbloqueia pelo app.'),
   "lastMessageAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true})
-}).describe('Uma conversa vista por um dos dois lados.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma conversa vista por um dos dois lados.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Bloqueada pelo outro lado: 403 `CONVERSATION_UNBLOCK_FORBIDDEN`. Idempotente: conversa já
@@ -417,8 +362,8 @@ export const DeleteApiV1ConversationsConversationIdBlockParams = zod.object({
 })
 
 export const DeleteApiV1ConversationsConversationIdBlockResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "ownerId": zod.string().uuid().describe('Tutor (`owner.owners.id`).'),
   "owner": zod.union([zod.null(),zod.object({
@@ -447,14 +392,9 @@ export const DeleteApiV1ConversationsConversationIdBlockResponse = zod.object({
   "blockedByModeration": zod.boolean().describe('A moderação bloqueou (denúncia procedente): ninguém desbloqueia pelo app.'),
   "lastMessageAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true})
-}).describe('Uma conversa vista por um dos dois lados.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Uma conversa vista por um dos dois lados.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Corpo: `reason` (`spam`, `harassment`, `scam`, `inappropriate` ou
@@ -476,20 +416,15 @@ export const PostApiV1ConversationsConversationIdMessagesMessageIdReportBody = z
 }).describe('Corpo de `POST /api/v1/conversations/{conversationId}/messages/{messageId}/report`.')
 
 export const PostApiV1ConversationsConversationIdMessagesMessageIdReportResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "conversationId": zod.string().uuid(),
   "messageId": zod.string().uuid(),
   "reason": zod.string().describe('O motivo escolhido (`spam`, `harassment`, `scam`, `inappropriate`, `other`).'),
   "status": zod.string().describe('Sempre `pending` ao denunciar.'),
   "createdAt": zod.string().datetime({"offset":true})
-}).describe('O que quem denunciou recebe de volta: a denúncia foi registrada e espera o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('O que quem denunciou recebe de volta: a denúncia foi registrada e espera o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

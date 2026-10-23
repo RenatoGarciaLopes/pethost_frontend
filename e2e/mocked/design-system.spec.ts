@@ -53,7 +53,7 @@ test("REQ-DS-004 REQ-DS-005 REQ-DS-006 REQ-DS-007 botão afunda e mostra foco", 
   await page.keyboard.press("Tab");
   await expect(button).toBeFocused();
   await expect(button).toHaveCSS("outline-width", "3px");
-  await expect(button).toHaveCSS("outline-color", "rgb(47, 90, 134)");
+  await expect(button).toHaveCSS("outline-color", "rgb(31, 26, 23)");
   await expect(button).toHaveCSS("outline-offset", "3px");
   if (!test.info().project.use.isMobile) {
     await button.hover();

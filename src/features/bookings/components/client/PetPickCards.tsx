@@ -2,7 +2,7 @@
 
 import { Avatar, Box, ButtonBase, Checkbox, FormHelperText, Typography } from "@mui/material";
 import { useId } from "react";
-import { focusRing } from "@/shared/theme/overrides/Button";
+import { focusRing, keyboardFocus } from "@/shared/theme/focus";
 import { quintalColors as c } from "@/shared/theme/tokens/colors";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
@@ -81,7 +81,7 @@ export function PetPickCards({ label, pets, value, onChange, error, disabled = f
                 color: c.tinta,
                 boxShadow: hardShadow(checked ? 0 : 3),
                 opacity: pet.fit.fits ? 1 : 0.75,
-                "&:has(input:focus-visible)": focusRing,
+                [keyboardFocus("&:has(input:focus-visible)")]: focusRing,
               }}
             >
               <Checkbox

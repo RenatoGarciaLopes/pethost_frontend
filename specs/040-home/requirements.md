@@ -1,7 +1,7 @@
 ---
 spec: 040-home
 status: in-progress
-updated: 2026-10-15
+updated: 2026-10-23
 area: HOME
 ---
 
@@ -9,14 +9,14 @@ area: HOME
 
 ## Contexto
 
-`/` é a entrada pública da PetHost e hoje responde 404. A tela apresenta o cuidado em casas de vizinhos e permite preparar uma busca antes de entrar. A pesquisa de disponibilidade exige sessão e pertence à spec 041. A pessoa visitante, o tutor sem pet cadastrado e o tutor com pet têm estados próprios; cadastrar um pet nunca é pré-requisito para começar uma busca.
+`/` é a entrada pública da PetHost e hoje responde 404. A tela apresenta o cuidado em casas de vizinhos e permite preparar uma busca antes de entrar. A pesquisa de disponibilidade pertence à spec 041 e é aberta ao visitante. A pessoa visitante, o tutor sem pet cadastrado e o tutor com pet têm estados próprios; cadastrar um pet nunca é pré-requisito para começar uma busca.
 
 ## Referências
 
 - **Design:** boards `Quintal-Visitante` e `Quintal-Casas`, notas do vault `design/10-hero.md`, `15-estados-com-e-sem-pet.md`, `16-desktop-e-mobile.md`, `14-loading.md` e `21-mapa-de-telas.md`.
 - **Roadmap:** linha 040 em `specs/roadmap.md`: hero com a turma e o campo “Cão ou gato?”; conteúdo estático pode ser entregue antes da API de busca.
 - **Sessão e pets:** `GET /users/me` e `GET /pets/me` implementados nas specs 003/020. `/pets/me` só é consultado para tutor autenticado; anfitrião e visitante não fazem essa chamada.
-- **Busca (spec 041):** `GET /listings` exige login. A home não chama a busca. Monta `/search` com `where`, `from`, `to` e seleção de pet/espécie; sem sessão envolve o destino em `/login?next=` preservando todos os parâmetros.
+- **Busca (spec 041):** `GET /listings` é aberta, com ou sem sessão (a home busca para o visitante desde a 079; o recado de login saiu na 087). Escreve na URL de `/` (revisão 079) com `where`, `from`, `to` e seleção de pet/espécie; o visitante vê os resultados e os cantinhos sem login; a conta só entra na hora de pedir (spec 042, REQ-LPAGE-012).
 - **Depende de:** 002, 003, 004 e 020. Entrega o destino da busca consumido pela 041; não implementa resultados nem API de listings.
 
 ## Histórias
@@ -28,40 +28,40 @@ area: HOME
 
 ## Critérios de aceite
 
-| ID           | Critério                                                                                                                                                                                                                                                                                                                    |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| REQ-HOME-001 | QUANDO uma pessoa abre `/`, autenticada ou não, O SISTEMA DEVE renderizar a página pública de Início em vez de 404; a metadata identifica “Início · PetHost”.                                                                                                                                                               |
-| REQ-HOME-002 | ENQUANTO visitante ou tutor não tiver pet ativo, O SISTEMA DEVE mostrar “Um quintal pro seu pet enquanto você viaja”, explicar que vizinhos recebem cães e gatos e permitir selecionar cão ou gato sem pedir cadastro.                                                                                                     |
-| REQ-HOME-003 | SE um tutor tiver pets ativos, O SISTEMA DEVE iniciar com o pet mais recente selecionado, usar o nome dele sem inferir gênero, permitir escolher um ou mais pets e atualizar a chamada conforme a seleção. Pets inativos não aparecem.                                                                                      |
-| REQ-HOME-004 | QUANDO anfitrião abrir a busca, O SISTEMA DEVE oferecer quantidade de pets; a home não deve buscar nem carregar pets da casa.                                                                                                                                                                                               |
-| REQ-HOME-005 | QUANDO uma pessoa enviar a busca, O SISTEMA DEVE levar para `/search`, preservando `where`, `from`, `to` e os parâmetros de pets/espécie/quantidade aplicáveis. Com sessão, navega direto; sem sessão, navega a `/login?next=` cujo valor decodificado é o destino completo de `/search`. A home não chama `GET /listings`. |
-| REQ-HOME-006 | ENQUANTO o formulário estiver expandido, O SISTEMA DEVE mostrar rótulos visíveis “Onde”, “Chegada”, “Saída” e “Pet” e alvos de interação acessíveis; no celular o formulário começa recolhido como pílula e se expande ao toque.                                                                                            |
-| REQ-HOME-007 | O hero DEVE manter a composição aprovada: texto à esquerda e cena do quintal com a turma à direita no computador; no celular, conteúdo em coluna, sem depender de hover. A travessia é calma e `prefers-reduced-motion` mantém a cena compreensível e parada.                                                               |
-| REQ-HOME-008 | A home DEVE mostrar, perto da busca, as três garantias de confiança existentes no produto, usando `TrustList`.                                                                                                                                                                                                              |
-| REQ-HOME-009 | SE a consulta opcional de pets falhar, O SISTEMA DEVE mostrar texto curto de indisponibilidade, manter o campo “Cão ou gato?” e permitir continuar para a busca.                                                                                                                                                            |
-| REQ-HOME-010 | ENQUANTO a sessão/personalização aguarda dados da requisição, O SISTEMA DEVE mostrar uma alternativa visual de carregamento que não anuncia dados pessoais nem oferece uma ação com destino incorreto.                                                                                                                      |
+| ID           | Critério                                                                                                                                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| REQ-HOME-001 | QUANDO uma pessoa abre `/`, autenticada ou não, O SISTEMA DEVE renderizar a página pública de Início em vez de 404; a metadata identifica “Início · PetHost”.                                                                                                 |
+| REQ-HOME-002 | ENQUANTO visitante ou tutor não tiver pet ativo, O SISTEMA DEVE mostrar “Um quintal pro seu pet enquanto você viaja”, explicar que vizinhos recebem cães e gatos e permitir selecionar cão ou gato sem pedir cadastro.                                        |
+| REQ-HOME-003 | SE um tutor tiver pets ativos, O SISTEMA DEVE iniciar com o pet mais recente selecionado, usar o nome dele sem inferir gênero, permitir escolher um ou mais pets e atualizar a chamada conforme a seleção. Pets inativos não aparecem.                        |
+| REQ-HOME-004 | QUANDO anfitrião abrir a busca, O SISTEMA DEVE oferecer quantidade de pets; a home não deve buscar nem carregar pets da casa.                                                                                                                                 |
+| REQ-HOME-005 | (revisão 079) QUANDO uma pessoa enviar a busca, O SISTEMA DEVE escrever `where`, `from`, `to` e os parâmetros de pets/espécie/quantidade na URL de `/` e mostrar os resultados na própria home, sem login e sem navegar para outra página.                    |
+| REQ-HOME-006 | ENQUANTO o formulário estiver expandido, O SISTEMA DEVE mostrar rótulos visíveis “Onde”, “Chegada”, “Saída” e “Pet” e alvos de interação acessíveis; no celular o formulário começa recolhido como pílula e se expande ao toque.                              |
+| REQ-HOME-007 | O hero DEVE manter a composição aprovada: texto à esquerda e cena do quintal com a turma à direita no computador; no celular, conteúdo em coluna, sem depender de hover. A travessia é calma e `prefers-reduced-motion` mantém a cena compreensível e parada. |
+| REQ-HOME-008 | A home DEVE mostrar, perto da busca, as três garantias de confiança existentes no produto, usando `TrustList`.                                                                                                                                                |
+| REQ-HOME-009 | SE a consulta opcional de pets falhar, O SISTEMA DEVE mostrar texto curto de indisponibilidade, manter o campo “Cão ou gato?” e permitir continuar para a busca.                                                                                              |
+| REQ-HOME-010 | ENQUANTO a sessão/personalização aguarda dados da requisição, O SISTEMA DEVE mostrar uma alternativa visual de carregamento que não anuncia dados pessoais nem oferece uma ação com destino incorreto.                                                        |
 
 ## Estados da tela
 
-| Estado                 | O que aparece                                                         |
-| ---------------------- | --------------------------------------------------------------------- |
-| Visitante              | Hero genérico; escolha Cão ou gato?; busca continua depois do login.  |
-| Tutor sem pet          | Hero genérico; escolha Cão ou gato?; busca vai direto para `/search`. |
-| Tutor com pets         | Nome do pet selecionado no hero; multisseleção dos pets ativos.       |
-| Anfitrião              | Hero genérico; quantidade de pets; busca vai direto para `/search`.   |
-| Falha ao carregar pets | Aviso breve, seleção de espécie como alternativa e busca disponível.  |
-| Carregando             | Fallback sem controles de busca interativos.                          |
+| Estado                 | O que aparece                                                        |
+| ---------------------- | -------------------------------------------------------------------- |
+| Visitante              | Hero genérico; escolha Cão ou gato?; busca e cantinhos sem login.    |
+| Tutor sem pet          | Hero genérico; escolha Cão ou gato?; busca roda na própria home.     |
+| Tutor com pets         | Nome do pet selecionado no hero; multisseleção dos pets ativos.      |
+| Anfitrião              | Hero genérico; quantidade de pets; busca roda na própria home.       |
+| Falha ao carregar pets | Aviso breve, seleção de espécie como alternativa e busca disponível. |
+| Carregando             | Fallback sem controles de busca interativos.                         |
 
 ## Microcopy
 
 - “Um quintal pro seu pet enquanto você viaja”
-- “Um quintal pra {nome} enquanto você viaja.”
-- “Um quintal pros seus pets enquanto você viaja.”
+- “Um quintal pra {nome} enquanto você viaja”
+- “Um quintal pros seus pets enquanto você viaja”
 - “Vizinhos de Maringá que recebem cães e gatos na própria casa.”
 - “Onde” · “Perto de casa ou cidade” · “Chegada” · “Saída” · “Pet” · “Cão ou gato?” · “Achar um cantinho”
 - Tutor com pet: “Escolha quem vai viajar com você.”
 - Tutor sem pet: “Você pode buscar antes de cadastrar seu pet.”
-- Visitante: “Entre para ver os cantinhos disponíveis.”
+- Visitante: “Pode olhar à vontade: a conta só entra na hora de pedir.”
 - Falha de pets: “Não conseguimos carregar seus pets agora. Você pode buscar por cão ou gato.”
 - Garantias: “Converse antes de combinar” · “Receba foto todo dia” · “Pagamento protegido até seu pet voltar”
 
@@ -79,3 +79,7 @@ area: HOME
 - Cadastro/edição de pets, estados da conta e dados de hospedagens reais.
 - Uso de URL assinada ou dados privados de pet na query. Os ids selecionados são os parâmetros de seleção previstos pela 041; fotos não são transferidas à home.
 - Reescrever o destino pós-login ou pós-troca de conta: o tutor já retorna a `/` por `appRoutes`.
+
+## Revisão 079: a home é a página de resultados (22/10/2026)
+
+"Achar um cantinho" busca na própria home: o estado da busca vai para a URL de `/` (mesmos parâmetros da spec 041) e a seção de resultados substitui a vitrine "perto de você", que continua sendo o estado sem busca. Visitante não passa mais pelo login para buscar; `buildHomeSearchPath` e o REQ-HOME-005 (handoff para `/search`) deixam de existir. Ver [[2026-10-22-home-e-a-busca]] e `specs/041-search/requirements.md`.

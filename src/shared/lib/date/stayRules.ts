@@ -3,6 +3,13 @@ const BRASILIA_OFFSET_MS = -3 * 60 * 60 * 1000;
 const DAY_MS = 86_400_000;
 const MAX_ADVANCE_DAYS = 365;
 const MAX_NIGHTS = 30;
+/**
+ * Antecedência mínima do pedido: a API exige 72 h entre agora e a meia-noite (Brasília) do dia da chegada (`Booking.MinimumRequestNotice`:
+ * 24 h do anfitrião responder + 48 h até a chegada em que ele ainda pode aceitar). Com `today` em Brasília, a primeira
+ * chegada possível é daqui a 4 dias: hoje + 72 h cai no meio do dia 3 e a meia-noite seguinte é a do dia 4 (só às 00:00 em
+ * ponto o dia 3 serviria; a régua de dias inteiros erra para o lado seguro). A busca não usa a regra: ela só procura.
+ */
+const MIN_REQUEST_LEAD_DAYS = 4;
 
 /**
  * O dia de hoje em Brasília (`yyyy-MM-dd`), a régua das regras de estadia da API (chegada, janela do check-in). Às 23h
@@ -52,5 +59,25 @@ export function validateStay(
     if (nights <= 0) errors.checkOut = "A saída precisa ser depois da chegada.";
     else if (nights > MAX_NIGHTS) errors.checkOut = "Escolhe uma estadia de até 30 noites.";
   }
+  return errors;
+}
+
+/** Primeira chegada que a API aceita num pedido feito hoje (Brasília). @example earliestRequestCheckIn("2026-10-23") // "2026-10-27" */
+export function earliestRequestCheckIn(today: string): string {
+  return addDays(today, MIN_REQUEST_LEAD_DAYS);
+}
+
+/**
+ * Regras do pedido de estadia: as da estadia mais a antecedência mínima de 72 h da chegada. Pedido exige as duas datas.
+ * @example validateRequestStay("2026-10-24", "2026-10-26", "2026-10-23").checkIn // "A chegada precisa ser daqui a pelo menos 3 dias: …"
+ */
+export function validateRequestStay(
+  checkIn: string,
+  checkOut: string,
+  today: string,
+): Partial<Record<"checkIn" | "checkOut", string>> {
+  const errors = validateStay(checkIn || " ", checkOut || " ", today);
+  if (!errors.checkIn && checkIn < earliestRequestCheckIn(today))
+    errors.checkIn = "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.";
   return errors;
 }

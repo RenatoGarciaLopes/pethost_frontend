@@ -40,5 +40,6 @@ declare module "@mui/material/Chip" {
 declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     quiet: true;
+    ok: true;
   }
 }

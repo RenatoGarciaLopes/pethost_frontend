@@ -49,11 +49,11 @@ export const PostApiV1ListingsBody = zod.object({
 }).describe('Endereço do cantinho (cada filial tem o seu). No PATCH também é parcial.')]).optional()
 }).describe('Corpo do cadastro (`POST /listings`) e da alteração (`PATCH /listings/{listingId}`)\ndo cantinho. O anfitrião vem do token, não daqui; a coordenada sai do endereço. No PATCH, só o\nque vier muda. As fotos não vêm aqui: têm rotas próprias (`/listings/{listingId}/photos`).')
 
-export const postApiV1ListingsResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const postApiV1ListingsResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const PostApiV1ListingsResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -62,7 +62,7 @@ export const PostApiV1ListingsResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(postApiV1ListingsResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(postApiV1ListingsResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -92,6 +92,11 @@ export const PostApiV1ListingsResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -101,15 +106,14 @@ export const PostApiV1ListingsResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  *             Todos os filtros são opcionais e se somam (o cantinho atende a cada um): `state` (UF),
@@ -160,11 +164,11 @@ export const GetApiV1ListingsQueryParams = zod.object({
   "Pets": zod.number().int().optional().describe('Quantos pets vão (padrão 1): a vaga precisa caber todos.')
 })
 
-export const getApiV1ListingsResponseDataTwoItemsItemHostTwoPayoutsEnabledDefault = false;
+export const getApiV1ListingsResponseDataItemsItemHostTwoPayoutsEnabledDefault = false;
 
 export const GetApiV1ListingsResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
@@ -174,13 +178,18 @@ export const GetApiV1ListingsResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(getApiV1ListingsResponseDataTwoItemsItemHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(getApiV1ListingsResponseDataItemsItemHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Quem é o anfitrião do cantinho, para exibição. Sem e-mail, telefone nem endereço: o contato\nsó é liberado depois do pagamento (escopo, regra 7).')]).optional(),
   "title": zod.string(),
   "neighborhood": zod.string(),
   "city": zod.string(),
   "state": zod.string(),
-  "distanceKm": zod.number().nullish().describe('Distância em linha reta até a origem da busca, com 1 casa. Omitida quando a busca não é por raio (só estado/cidade/bairro).'),
+  "distanceKm": zod.number().nullish().describe('Distância em linha reta da origem da busca até o ponto aproximado, com 1 casa (erro de até 0,5 km). Omitida quando a busca não é por raio (só estado/cidade/bairro).'),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo (500 m) para o mapa.'),
   "nightlyRate": zod.number(),
   "capacity": zod.number().int(),
   "homeType": zod.string().nullish(),
@@ -191,38 +200,37 @@ export const GetApiV1ListingsResponse = zod.object({
   "acceptsLarge": zod.boolean(),
   "availableWeekdays": zod.array(zod.string()),
   "coverPhotoUrl": zod.string().nullish().describe('A primeira foto. Omitida se o cantinho não tem foto.'),
-  "badges": zod.array(zod.string()).describe('Selos automáticos: `neighbor`, `fast_responder`, `yard`, `experienced`.')
-}).describe('Um cantinho na lista da busca: o cartão com a capa, o bairro e a distância ("Jardim Alvorada ·\n2 km de você"). Sem endereço nem coordenada. O detalhe sai em `GET /listings/{id}`.')),
+  "badges": zod.array(zod.string()).describe('Selos automáticos: `neighbor`, `fast_responder`, `yard`, `experienced`, `well_rated`.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores (média com 1 casa e contagem). Omitida enquanto ninguém avaliou.')]).optional()
+}).describe('Um cantinho na lista da busca: o cartão com a capa, o bairro e a distância ("Jardim Alvorada ·\n2 km de você") e o ponto aproximado para o mapa. Sem endereço nem coordenada exata. O detalhe\nsai em `GET /listings/{id}`.')),
   "page": zod.number().int(),
   "pageSize": zod.number().int(),
   "totalCount": zod.number().int(),
   "totalPages": zod.number().int().optional()
-}).describe('Página de uma lista (§13): `page` começa em 1.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Página de uma lista (§13): `page` começa em 1.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * O anfitrião vem uma vez, em `host`; os cantinhos, em `listings`, com o endereço completo.
  * @summary Todos os cantinhos do anfitrião logado, ativos e inativos. Sem paginação nem filtro.
  */
-export const getApiV1ListingsMeResponseDataTwoHostTwoPayoutsEnabledDefault = false;
-export const getApiV1ListingsMeResponseDataTwoListingsItemHostTwoPayoutsEnabledDefault = false;
+export const getApiV1ListingsMeResponseDataHostTwoPayoutsEnabledDefault = false;
+export const getApiV1ListingsMeResponseDataListingsItemHostTwoPayoutsEnabledDefault = false;
 
 export const GetApiV1ListingsMeResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "host": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião — nunca o da conta.'),
   "name": zod.string().describe('Nome da conta; empresa mostra o nome fantasia.'),
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(getApiV1ListingsMeResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(getApiV1ListingsMeResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião.')]).optional(),
   "listings": zod.array(zod.object({
   "id": zod.string().uuid(),
@@ -233,7 +241,7 @@ export const GetApiV1ListingsMeResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(getApiV1ListingsMeResponseDataTwoListingsItemHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(getApiV1ListingsMeResponseDataListingsItemHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -263,6 +271,11 @@ export const GetApiV1ListingsMeResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -272,32 +285,32 @@ export const GetApiV1ListingsMeResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')).describe('Do mais novo para o mais antigo, na visão do dono. Lista vazia quando não há.')
-}).describe('Os cantinhos do anfitrião logado, ativos e inativos. O anfitrião vem <b>uma vez</b>, no topo\n— todos são dele —, e cada cantinho sai sem `host` (regra de lista "de uma pessoa", §13).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.')).describe('Do mais novo para o mais antigo, na visão do dono. Lista vazia quando não há.')
+}).describe('Os cantinhos do anfitrião logado, ativos e inativos. O anfitrião vem <b>uma vez</b>, no topo\n— todos são dele —, e cada cantinho sai sem `host` (regra de lista "de uma pessoa", §13).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * O anfitrião dono vê sempre (inclusive inativo), com endereço completo e coordenada; o
- * admin vê todos. Qualquer outra conta logada vê o cantinho ativo de anfitrião ativo, só
- * com bairro, cidade e UF. Fora isso: 404 `LISTING_NOT_FOUND`, como se não existisse.
+ * admin vê todos. Qualquer outra pessoa, logada ou não, vê o cantinho ativo de anfitrião
+ * ativo, só com bairro, cidade, UF e o ponto aproximado do mapa. Fora isso: 404
+ * `LISTING_NOT_FOUND`, como se não existisse. Sem login, nunca o selo `neighbor`.
  * @summary Um cantinho, com o anfitrião.
  */
 export const GetApiV1ListingsListingIdParams = zod.object({
   "listingId": zod.string().uuid()
 })
 
-export const getApiV1ListingsListingIdResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const getApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const GetApiV1ListingsListingIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -306,7 +319,7 @@ export const GetApiV1ListingsListingIdResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(getApiV1ListingsListingIdResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(getApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -336,6 +349,11 @@ export const GetApiV1ListingsListingIdResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -345,15 +363,14 @@ export const GetApiV1ListingsListingIdResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Campo ausente ou `null` não mexe; `""` limpa um campo opcional; lista
@@ -394,11 +411,11 @@ export const PatchApiV1ListingsListingIdBody = zod.object({
 }).describe('Endereço do cantinho (cada filial tem o seu). No PATCH também é parcial.')]).optional()
 }).describe('Corpo do cadastro (`POST /listings`) e da alteração (`PATCH /listings/{listingId}`)\ndo cantinho. O anfitrião vem do token, não daqui; a coordenada sai do endereço. No PATCH, só o\nque vier muda. As fotos não vêm aqui: têm rotas próprias (`/listings/{listingId}/photos`).')
 
-export const patchApiV1ListingsListingIdResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const patchApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const PatchApiV1ListingsListingIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -407,7 +424,7 @@ export const PatchApiV1ListingsListingIdResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(patchApiV1ListingsListingIdResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(patchApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -437,6 +454,11 @@ export const PatchApiV1ListingsListingIdResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -446,15 +468,14 @@ export const PatchApiV1ListingsListingIdResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * `petId` obrigatório (pet ativo do tutor logado). Compara o que o pet aceita
@@ -481,8 +502,8 @@ export const GetApiV1ListingsListingIdCompatibilityQueryParams = zod.object({
 })
 
 export const GetApiV1ListingsListingIdCompatibilityResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "listingId": zod.string().uuid(),
   "petId": zod.string().uuid(),
   "petName": zod.string(),
@@ -500,14 +521,9 @@ export const GetApiV1ListingsListingIdCompatibilityResponse = zod.object({
   "species": zod.string(),
   "size": zod.string().nullish()
 }).describe('Outro pet hospedado no período: nome, tipo e porte. Nada do tutor dele.')).nullish().describe('Os outros pets hospedados no período (de outros tutores), na ordem de chegada. Nulo (omitido)\nquando não vêm as datas.')
-}).describe('"Combina com seu pet": os avisos do pet no cantinho. Só avisa, não bloqueia o pedido.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('"Combina com seu pet": os avisos do pet no cantinho. Só avisa, não bloqueia o pedido.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Inativo, some da busca e de quem não é o dono, e pode voltar com `DELETE` nesta rota.
@@ -520,11 +536,11 @@ export const PostApiV1ListingsListingIdDeactivationParams = zod.object({
   "listingId": zod.string().uuid()
 })
 
-export const postApiV1ListingsListingIdDeactivationResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const postApiV1ListingsListingIdDeactivationResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const PostApiV1ListingsListingIdDeactivationResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -533,7 +549,7 @@ export const PostApiV1ListingsListingIdDeactivationResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(postApiV1ListingsListingIdDeactivationResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(postApiV1ListingsListingIdDeactivationResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -563,6 +579,11 @@ export const PostApiV1ListingsListingIdDeactivationResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -572,15 +593,14 @@ export const PostApiV1ListingsListingIdDeactivationResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Cantinho de outro anfitrião: 404 `LISTING_NOT_FOUND`. Anfitrião inativo ou suspenso:
@@ -591,11 +611,11 @@ export const DeleteApiV1ListingsListingIdDeactivationParams = zod.object({
   "listingId": zod.string().uuid()
 })
 
-export const deleteApiV1ListingsListingIdDeactivationResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const deleteApiV1ListingsListingIdDeactivationResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const DeleteApiV1ListingsListingIdDeactivationResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -604,7 +624,7 @@ export const DeleteApiV1ListingsListingIdDeactivationResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(deleteApiV1ListingsListingIdDeactivationResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(deleteApiV1ListingsListingIdDeactivationResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -634,6 +654,11 @@ export const DeleteApiV1ListingsListingIdDeactivationResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -643,15 +668,14 @@ export const DeleteApiV1ListingsListingIdDeactivationResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * `multipart/form-data` com a imagem na parte `file`: JPEG, PNG ou WebP, até 5 MB
@@ -668,11 +692,11 @@ export const PostApiV1ListingsListingIdPhotosBody = zod.object({
   "file": zod.instanceof(Blob).optional()
 })
 
-export const postApiV1ListingsListingIdPhotosResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const postApiV1ListingsListingIdPhotosResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const PostApiV1ListingsListingIdPhotosResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -681,7 +705,7 @@ export const PostApiV1ListingsListingIdPhotosResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(postApiV1ListingsListingIdPhotosResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(postApiV1ListingsListingIdPhotosResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -711,6 +735,11 @@ export const PostApiV1ListingsListingIdPhotosResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -720,15 +749,14 @@ export const PostApiV1ListingsListingIdPhotosResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Corpo: `{ "photoIds": [...] }` com <b>todas</b> as fotos do cantinho, cada uma uma vez,
@@ -744,11 +772,11 @@ export const PutApiV1ListingsListingIdPhotosOrderBody = zod.object({
   "photoIds": zod.array(zod.string().uuid()).nullish().describe('Todas as fotos do cantinho, cada uma uma vez, na ordem nova. A primeira é a capa.')
 }).describe('Corpo de `PUT /listings/{listingId}/photos/order`.')
 
-export const putApiV1ListingsListingIdPhotosOrderResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const putApiV1ListingsListingIdPhotosOrderResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const PutApiV1ListingsListingIdPhotosOrderResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -757,7 +785,7 @@ export const PutApiV1ListingsListingIdPhotosOrderResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(putApiV1ListingsListingIdPhotosOrderResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(putApiV1ListingsListingIdPhotosOrderResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -787,6 +815,11 @@ export const PutApiV1ListingsListingIdPhotosOrderResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -796,15 +829,14 @@ export const PutApiV1ListingsListingIdPhotosOrderResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * `multipart/form-data` com a imagem nova na parte `file`. A foto mantém o id e a
@@ -821,11 +853,11 @@ export const PatchApiV1ListingsListingIdPhotosPhotoIdBody = zod.object({
   "file": zod.instanceof(Blob).optional()
 })
 
-export const patchApiV1ListingsListingIdPhotosPhotoIdResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const patchApiV1ListingsListingIdPhotosPhotoIdResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const PatchApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -834,7 +866,7 @@ export const PatchApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(patchApiV1ListingsListingIdPhotosPhotoIdResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(patchApiV1ListingsListingIdPhotosPhotoIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -864,6 +896,11 @@ export const PatchApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -873,15 +910,14 @@ export const PatchApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * A imagem é apagada do bucket e as fotos de trás sobem uma posição. Foto que não é do
@@ -893,11 +929,11 @@ export const DeleteApiV1ListingsListingIdPhotosPhotoIdParams = zod.object({
   "photoId": zod.string().uuid()
 })
 
-export const deleteApiV1ListingsListingIdPhotosPhotoIdResponseDataTwoHostTwoPayoutsEnabledDefault = false;
+export const deleteApiV1ListingsListingIdPhotosPhotoIdResponseDataHostTwoPayoutsEnabledDefault = false;
 
 export const DeleteApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "hostId": zod.string().uuid(),
   "host": zod.union([zod.null(),zod.object({
@@ -906,7 +942,7 @@ export const DeleteApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(deleteApiV1ListingsListingIdPhotosPhotoIdResponseDataTwoHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(deleteApiV1ListingsListingIdPhotosPhotoIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -936,6 +972,11 @@ export const DeleteApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "latitude": zod.number(),
   "longitude": zod.number()
 }).describe('Coordenada do endereço. Só para o dono.')]).optional(),
+  "approximateLocation": zod.object({
+  "latitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "longitude": zod.number().describe('Com 3 casas (~100 m).'),
+  "radiusMeters": zod.number().int().describe('Raio do círculo: `500`.')
+}).describe('Ponto aproximado e o raio do círculo para o mapa. Para todos (o dono vê o que os tutores veem).'),
   "photos": zod.array(zod.object({
   "id": zod.string().uuid().describe('Para substituir, tirar ou reordenar: `/listings/{listingId}/photos/{id}`.'),
   "url": zod.string().describe('URL pública da imagem; abre direto no navegador.'),
@@ -945,15 +986,14 @@ export const DeleteApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
-  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.')
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Campo nulo é omitido no JSON.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+  "badges": zod.array(zod.string()).nullish().describe('Selos automáticos, só no detalhe (`GET /listings/{id}`). Omitido nas outras rotas.'),
+  "rating": zod.union([zod.null(),zod.object({
+  "average": zod.number(),
+  "count": zod.number().int()
+}).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Por padrão tudo está disponível; cada item fecha os dias de `startDate` a
@@ -967,7 +1007,7 @@ export const GetApiV1ListingsListingIdAvailabilityBlocksParams = zod.object({
 })
 
 export const GetApiV1ListingsListingIdAvailabilityBlocksResponse = zod.object({
-  "success": zod.boolean(),
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.array(zod.object({
   "id": zod.string().uuid(),
   "listingId": zod.string().uuid(),
@@ -977,13 +1017,8 @@ export const GetApiV1ListingsListingIdAvailabilityBlocksResponse = zod.object({
   "reason": zod.string().nullish().describe('Motivo — só para o anfitrião dono e o admin; para os outros, omitido.'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('Um período fechado na agenda do cantinho.')).nullish(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Corpo: `{ "startDate": "2026-12-20", "endDate": "2026-12-26", "reason": "Viagem" }`
@@ -1007,8 +1042,8 @@ export const PostApiV1ListingsListingIdAvailabilityBlocksBody = zod.object({
 }).describe('Corpo de `POST /listings/{listingId}/availability-blocks`.')
 
 export const PostApiV1ListingsListingIdAvailabilityBlocksResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "listingId": zod.string().uuid(),
   "startDate": zod.string().date().describe('Primeiro dia bloqueado (`yyyy-MM-dd`).'),
@@ -1016,14 +1051,9 @@ export const PostApiV1ListingsListingIdAvailabilityBlocksResponse = zod.object({
   "days": zod.number().int().describe('Quantos dias o bloqueio fecha.'),
   "reason": zod.string().nullish().describe('Motivo — só para o anfitrião dono e o admin; para os outros, omitido.'),
   "createdAt": zod.string().datetime({"offset":true})
-}).describe('Um período fechado na agenda do cantinho.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Um período fechado na agenda do cantinho.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Bloqueio que não é do cantinho: 404 `LISTING_AVAILABILITY_BLOCK_NOT_FOUND`.
@@ -1035,7 +1065,7 @@ export const DeleteApiV1ListingsListingIdAvailabilityBlocksBlockIdParams = zod.o
 })
 
 export const DeleteApiV1ListingsListingIdAvailabilityBlocksBlockIdResponse = zod.object({
-  "success": zod.boolean(),
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.array(zod.object({
   "id": zod.string().uuid(),
   "listingId": zod.string().uuid(),
@@ -1045,11 +1075,6 @@ export const DeleteApiV1ListingsListingIdAvailabilityBlocksBlockIdResponse = zod
   "reason": zod.string().nullish().describe('Motivo — só para o anfitrião dono e o admin; para os outros, omitido.'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('Um período fechado na agenda do cantinho.')).nullish(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

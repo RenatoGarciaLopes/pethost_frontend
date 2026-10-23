@@ -46,6 +46,21 @@ describe("casca do app", () => {
     expect(within(main).getByRole("heading", { name: "Conteúdo da página" })).toBeInTheDocument();
   });
 
+  it("REQ-LPAGE-012 visitante (página aberta do cantinho) tem o cabeçalho sem atalhos, com Entrar, e o rodapé", () => {
+    renderWithProviders(
+      <AppShell user={null}>
+        <h1>Conteúdo da página</h1>
+      </AppShell>,
+      { theme: quintalTheme },
+    );
+    const header = within(screen.getByRole("banner"));
+    expect(header.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+    expect(header.getByRole("link", { name: "PetHost" })).toHaveAttribute("href", "/");
+    expect(screen.queryByRole("navigation", { name: "Navegação principal" })).not.toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveAttribute("id", "conteudo");
+    expect(screen.getByTestId("grass-footer")).toBeInTheDocument();
+  });
+
   it("REQ-SHELL-003 menu da conta com o nome", () => {
     setup("host");
     expect(
@@ -98,4 +113,16 @@ describe("atalhos na casca", () => {
     setup("admin");
     expect(screen.getByRole("link", { name: "Contas" })).toHaveAttribute("href", "/admin/users");
   });
+});
+
+it.each([
+  ["owner", true],
+  ["host", true],
+  ["admin", false],
+] as const)("REQ-UIC-011 rodapé de gramado depois do conteúdo para %s: %s", (role, shown) => {
+  setup(role);
+  const footer = screen.queryByTestId("grass-footer");
+  if (!shown) return expect(footer).not.toBeInTheDocument();
+  expect(footer).toHaveAttribute("aria-hidden", "true");
+  expect(screen.getByRole("main").compareDocumentPosition(footer!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 });

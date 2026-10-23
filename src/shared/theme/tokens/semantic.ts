@@ -40,6 +40,12 @@ export const sceneColors = {
   skyBottom: "#F5F0DD",
   /** Gramado amplo e suave da prancha; seleção/feedback conserva quintal.grama. */
   ground: "#CFE3A0",
+  /** Camadas de terra do rodapé de gramado, da mais clara (logo abaixo da grama) à mais escura (fim da página). */
+  soilLight: "#E2C99E",
+  soilMid: "#C09566",
+  soilDeep: "#8A6240",
+  /** Pedrinhas do rodapé, mais claras que a terra para aparecerem no traço de tinta. */
+  stone: "#F1E3C6",
 } as const;
 
 /** Mapeamento de feedback do MUI para a paleta (aviso nunca é vermelho; erro tem cor própria). */

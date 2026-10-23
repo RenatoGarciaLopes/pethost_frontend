@@ -6,43 +6,45 @@ import type { ListingSummary } from "../../../api/contracts";
 import type { SearchQuery } from "../../../types";
 import type { SearchError } from "../../../lib/searchErrors";
 import { searchCopy as copy } from "../../../lib/searchCopy";
-import { ListingCard } from "../ListingCard";
+import { ListingCard, type ListingCardCompatibility } from "../ListingCard";
 
-/** Estado de apresentação e ações do consumidor. @example { query, items, totalCount, petCount, onMore, onRetry, onExpand } */
+/** Estado de apresentação e ações do consumidor. @example { query, items, petCount, onMore, onRetry, onExpand } */
 export interface SearchResultsProps {
   query: SearchQuery;
   items: ListingSummary[];
-  totalCount: number;
   petCount: number;
+  /** Conta e pets escolhidos, para o chip de compatibilidade dos cards; sem isso, sem chip. */
+  compatibility?: ListingCardCompatibility;
   isFetching?: boolean;
   hasNextPage?: boolean;
   error?: SearchError | null;
   onMore: () => void;
   onRetry: () => void;
   onExpand: (radius: number) => void;
+  /** Há um mapa ao lado: a lista fica em duas colunas no computador, em vez de três. */
+  withMap?: boolean;
 }
 /** Lista sem dependência de mapa; mantém cards e ações durante atualização/erro. @example <SearchResults {...props} /> */
 export function SearchResults({
   query,
   items,
-  totalCount,
+
   petCount,
+  compatibility,
   isFetching,
   hasNextPage,
   error,
   onMore,
   onRetry,
   onExpand,
+  withMap = false,
 }: SearchResultsProps) {
   const addressError =
     error?.code === "LISTING_SEARCH_ADDRESS_REQUIRED" || error?.code === "LISTING_SEARCH_ADDRESS_NOT_LOCATED";
-  const radius = query.radius ?? (query.where || query.state || query.neighborhood ? undefined : 10);
+  const radius = query.radius ?? (query.where || query.state ? undefined : 10);
   const bigger = radius === undefined ? undefined : radius < 10 ? 10 : radius < 20 ? 20 : radius < 50 ? 50 : undefined;
   return (
     <Stack spacing={3}>
-      <Typography component="p" aria-live="polite">
-        {copy.heading(totalCount, query)}
-      </Typography>
       {isFetching && <SniffingBanner />}
       {error && (
         <Notice
@@ -71,13 +73,17 @@ export function SearchResults({
           p: 0,
           m: 0,
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, minmax(0, 1fr))",
+            lg: `repeat(${withMap ? 2 : 3}, minmax(0, 1fr))`,
+          },
           gap: 3,
         }}
       >
         {items.map((listing) => (
           <Box component="li" key={listing.id}>
-            <ListingCard listing={listing} query={query} petCount={petCount} />
+            <ListingCard listing={listing} query={query} petCount={petCount} compatibility={compatibility} />
           </Box>
         ))}
       </Box>

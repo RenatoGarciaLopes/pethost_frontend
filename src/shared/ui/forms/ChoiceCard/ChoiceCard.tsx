@@ -4,7 +4,7 @@ import { Box, ButtonBase, Radio, Typography } from "@mui/material";
 import { quintalColors as c } from "../../../theme/tokens/colors";
 import { quintalRadii } from "../../../theme/tokens/radii";
 import { hardShadow } from "../../../theme/tokens/shadows";
-import { focusRing } from "../../../theme/overrides/Button";
+import { focusRing, keyboardFocus } from "../../../theme/focus";
 import { SPRING_ASSENTAR } from "../../../theme/tokens/springs";
 
 /** One native radio card; group selection should be owned by ChoiceCardGroup. */
@@ -42,7 +42,7 @@ export function ChoiceCard({ label, value, description, icon, checked = false, d
         boxShadow: hardShadow(checked ? 0 : 3),
         transform: checked ? "translate(3px, 3px)" : "none",
         transition: `transform ${SPRING_ASSENTAR.duration}ms ${SPRING_ASSENTAR.easing}`,
-        "&:has(input:focus-visible)": focusRing,
+        [keyboardFocus("&:has(input:focus-visible)")]: focusRing,
         "@media (prefers-reduced-motion: reduce)": { transition: "none", transform: "none" },
       }}
     >

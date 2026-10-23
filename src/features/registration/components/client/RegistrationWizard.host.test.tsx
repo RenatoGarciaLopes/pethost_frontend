@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { delay, http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
@@ -18,7 +18,13 @@ import {
   viaCepHandler,
 } from "./registrationWizardTestHelpers";
 
-const router = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }));
+const router = vi.hoisted(() => ({
+  push: vi.fn(),
+  back: vi.fn(),
+  replace: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+}));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 /**
@@ -40,7 +46,7 @@ beforeEach(() => {
 });
 
 function renderWizard(next: string | null = null) {
-  return renderWithProviders(<RegistrationWizard role="host" next={next} aside={<p>faixa lateral</p>} />, {
+  return renderWithProviders(<RegistrationWizard role="host" next={next} />, {
     theme: quintalTheme,
   });
 }
@@ -126,7 +132,10 @@ describe("RegistrationWizard anfitrião: envio e erros da API", () => {
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("Esse e-mail já tem conta de anfitrião. Quer entrar?");
     expect(heading()).toHaveTextContent(steps.person.title);
-    expect(screen.getByRole("link", { name: actions.login })).toHaveAttribute("href", "/login?as=host");
+    expect(within(screen.getByRole("alert")).getByRole("link", { name: actions.login })).toHaveAttribute(
+      "href",
+      "/login?as=host",
+    );
     await waitFor(() => expect(alert).toHaveFocus());
   });
 
@@ -139,7 +148,7 @@ describe("RegistrationWizard anfitrião: envio e erros da API", () => {
     await user.click(submitButton());
 
     await screen.findByRole("alert");
-    expect(screen.getByRole("link", { name: actions.login })).toHaveAttribute(
+    expect(within(screen.getByRole("alert")).getByRole("link", { name: actions.login })).toHaveAttribute(
       "href",
       "/login?as=host&next=%2Fhosts%2F42",
     );

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { AnnouncerProvider } from "@/shared/ui/feedback/Announcer";
-import { apiFail, apiOk } from "@/test/fixtures/session";
+import { apiFail, apiOk, sessionUserFixture } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
 import { renderWithProviders } from "@/test/render";
 import { AccountSwitchPanel } from "./AccountSwitchPanel";
@@ -95,6 +95,36 @@ describe("AccountSwitchPanel", () => {
       expect(screen.queryByLabelText(/^Senha da conta/)).not.toBeInTheDocument();
     },
   );
+
+  it("REQ-SWITCH-013 com next, o Agora não e a troca voltam para onde a pessoa estava; next inseguro cai na casa", async () => {
+    const next = "/listings/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c?from=2026-12-20&to=2026-12-25";
+    server.use(
+      http.get("*/api/users/me/accounts", () =>
+        HttpResponse.json(
+          apiOk([
+            { role: "owner", isActive: true, isCurrent: false },
+            { role: "host", isActive: true, isCurrent: true },
+          ]),
+        ),
+      ),
+      http.post("*/api/auth/sessions/switch", () =>
+        HttpResponse.json(apiOk({ user: { ...sessionUserFixture, role: "owner" } })),
+      ),
+    );
+    const panel = (value: string) => (
+      <AnnouncerProvider>
+        <AccountSwitchPanel userId="user-1" current="host" target="owner" next={value} />
+      </AnnouncerProvider>
+    );
+    const { user, rerender } = renderWithProviders(panel("//evil.example"), { theme: quintalTheme });
+    expect(await screen.findByRole("link", { name: "Agora não" })).toHaveAttribute("href", "/host");
+    rerender(panel(next));
+    expect(screen.getByRole("link", { name: "Agora não" })).toHaveAttribute("href", next);
+    await user.click(screen.getByLabelText(/^Senha da conta/));
+    await user.paste("senha existente");
+    await user.click(screen.getByRole("button", { name: "Entrar na conta de tutor" }));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledExactlyOnceWith(next));
+  });
 
   it("REQ-SWITCH-003 anuncia carregamento até o GET terminar", async () => {
     let release!: () => void;

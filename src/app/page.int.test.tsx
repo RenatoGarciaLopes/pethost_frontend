@@ -40,6 +40,8 @@ vi.mock("next/headers", () => ({
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
   useRouter: () => ({ push: vi.fn() }),
+  // A home lê a busca da URL (useSearchUrl); fora do roteador o hook devolve null.
+  useSearchParams: () => new URLSearchParams(),
   redirect: (path: string) => {
     throw new Error(`NEXT_REDIRECT ${path}`);
   },
@@ -131,7 +133,7 @@ it("REQ-HOME-003 busca pets ativos só para tutor e usa a sessão antes da lista
   );
 
   renderWithProviders(await resolveHomeContent(), { theme: quintalTheme });
-  expect(screen.getByRole("heading", { name: "Um quintal pra Mel enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pra Mel enquanto você viaja" })).toBeVisible();
   expect(screen.queryByText("Inativo")).not.toBeInTheDocument();
   expect(requestState.events).toEqual(["connection", "session", "pets"]);
 });

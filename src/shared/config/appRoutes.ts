@@ -11,9 +11,13 @@ const LOGIN_NOTICES = ["conta-pausada"] as const;
 export type LoginNotice = (typeof LOGIN_NOTICES)[number];
 
 /** Junta caminho e parâmetros, com `next` seguro e omitido quando é a raiz ou inseguro. */
-function withParams(path: string, params: { as?: AccountRole; next?: string | null; aviso?: LoginNotice }): string {
+function withParams(
+  path: string,
+  params: { as?: AccountRole; to?: PersonalRole; next?: string | null; aviso?: LoginNotice },
+): string {
   const search = new URLSearchParams();
   if (params.as) search.set("as", params.as);
+  if (params.to) search.set("to", params.to);
   if (params.aviso) search.set("aviso", params.aviso);
   const next = toSafeInternalPath(params.next, "/");
   if (next !== "/") search.set("next", next);
@@ -52,6 +56,15 @@ export function isLoginNotice(value: string | undefined): value is LoginNotice {
  */
 export function registerPath(role?: PersonalRole, next?: string | null): string {
   return withParams(role ? `/register/${role}` : "/register", { next });
+}
+
+/**
+ * Troca de conta (spec 014) já apontando a conta de destino; o `next` seguro é para onde a pessoa volta depois
+ * (REQ-SWITCH-013).
+ * @example switchAccountPath("owner", "/listings/42") // "/users/switch?to=owner&next=%2Flistings%2F42"
+ */
+export function switchAccountPath(to: PersonalRole, next?: string | null): string {
+  return withParams("/users/switch", { to, next });
 }
 
 /**

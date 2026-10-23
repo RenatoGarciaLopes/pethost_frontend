@@ -121,7 +121,7 @@ test("REQ-STAYS-008 não aceita: o motivo do anfitrião e o caminho da busca", a
   await page.goto(`/owner/bookings/${stay.id}`);
   await expect(page.getByText("Aparecida Souza não pôde receber dessa vez.")).toBeVisible();
   await expect(page.getByText("Motivo: Já estou com a casa cheia")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Procurar outro cantinho" })).toHaveAttribute("href", "/search");
+  await expect(page.getByRole("link", { name: "Procurar outro cantinho" })).toHaveAttribute("href", "/");
   await expect(page.getByRole("button", { name: "Cancelar estadia" })).toHaveCount(0);
 });
 

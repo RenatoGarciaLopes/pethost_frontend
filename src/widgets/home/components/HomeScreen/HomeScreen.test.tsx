@@ -1,59 +1,66 @@
-import { fireEvent, screen } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
+import { screen } from "@testing-library/react";
+import { http, HttpResponse } from "msw";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { pickCalendarDays } from "@/test/calendar";
+import { listingFixture } from "@/test/fixtures/search";
+import { apiOk } from "@/test/fixtures/session";
+import { server } from "@/test/msw/server";
 import { renderWithProviders } from "@/test/render";
 import { HomeScreen, type HomeScreenProps } from "./HomeScreen";
 
-const navigation = vi.hoisted(() => ({ push: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
+// O calendário nasce em "hoje": só a data é fixada, os temporizadores seguem reais.
+beforeEach(() => vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-22T12:00:00Z") }));
+afterEach(() => vi.useRealTimers());
+
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search) }));
 
 const petOptions = [
-  { id: "pet-pipoca", name: "Pipoca", species: "dog" },
-  { id: "pet-tico", name: "Tico", species: "cat" },
+  { id: "pet-pipoca", name: "Pipoca", species: "dog", size: "small" },
+  { id: "pet-tico", name: "Tico", species: "cat", size: null },
 ];
 
-function renderHome(overrides: Partial<HomeScreenProps> = {}) {
-  navigation.push.mockReset();
+function renderHome(overrides: Partial<HomeScreenProps> = {}, url = "/") {
+  window.history.replaceState(null, "", url);
   return renderWithProviders(<HomeScreen viewer="visitor" pets={[]} petsUnavailable={false} {...overrides} />, {
     theme: quintalTheme,
   });
 }
 
-it("REQ-HOME-002 visitante prepara a busca por espécie e segue pelo login com os parâmetros", async () => {
+it("REQ-HOME-002 visitante busca por espécie na própria home, sem passar pelo login", async () => {
   const { user } = renderHome();
   expect(screen.getByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja" })).toBeVisible();
-  expect(screen.getByText("Entre para ver os cantinhos disponíveis.")).toBeVisible();
+  expect(screen.getByText("Pode olhar à vontade: a conta só entra na hora de pedir.")).toBeVisible();
 
   await user.type(screen.getByRole("textbox", { name: "Onde" }), "Zona 7");
-  fireEvent.change(screen.getByLabelText("Chegada"), { target: { value: "2026-11-01" } });
-  fireEvent.change(screen.getByLabelText("Saída"), { target: { value: "2026-11-05" } });
+  await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-11-01", "2026-11-05");
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "Cão" }));
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
 
-  expect(navigation.push).toHaveBeenCalledWith(
-    "/login?next=%2Fsearch%3Fwhere%3DZona%2B7%26from%3D2026-11-01%26to%3D2026-11-05%26species%3Ddog",
+  expect(window.location.pathname + window.location.search).toBe(
+    "/?species=dog&where=Zona+7&from=2026-11-01&to=2026-11-05",
   );
-});
+}, 15_000);
 
-it("REQ-HOME-002 tutor sem pet pode escolher espécie e vai direto à busca", async () => {
+it("REQ-HOME-002 tutor sem pet pode escolher espécie e a busca fica na URL da home", async () => {
   const { user } = renderHome({ viewer: "owner" });
   expect(screen.getByText("Você pode buscar antes de cadastrar seu pet.")).toBeVisible();
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "Gato" }));
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
-  expect(navigation.push).toHaveBeenCalledWith("/search?species=cat");
+  expect(window.location.search).toBe("?species=cat");
 });
 
-it("REQ-HOME-003 tutor com pets começa personalizado e manda só os ids selecionados", async () => {
+it("REQ-HOME-003 tutor com pets começa personalizado e leva só os ids selecionados para a URL", async () => {
   const { user } = renderHome({ viewer: "owner", pets: petOptions });
-  expect(screen.getByRole("heading", { name: "Um quintal pra Pipoca enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pra Pipoca enquanto você viaja" })).toBeVisible();
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "Tico" }));
   await user.keyboard("{Escape}");
-  expect(screen.getByRole("heading", { name: "Um quintal pros seus pets enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pros seus pets enquanto você viaja" })).toBeVisible();
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
-  expect(navigation.push).toHaveBeenCalledWith("/search?pets=pet-pipoca&pets=pet-tico");
+  expect(window.location.search).toBe("?pets=pet-pipoca&pets=pet-tico");
 });
 
 it("REQ-HOME-004 anfitrião escolhe quantidade sem consultar pets da casa", async () => {
@@ -61,7 +68,7 @@ it("REQ-HOME-004 anfitrião escolhe quantidade sem consultar pets da casa", asyn
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "3 pets" }));
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
-  expect(navigation.push).toHaveBeenCalledWith("/search?pets=3");
+  expect(window.location.search).toBe("?count=3");
 });
 
 it("REQ-HOME-006 no celular a pílula expande e anuncia os campos", async () => {
@@ -73,16 +80,10 @@ it("REQ-HOME-006 no celular a pílula expande e anuncia os campos", async () => 
   expect(screen.getByRole("textbox", { name: "Onde" })).toBeInTheDocument();
 });
 
-it("REQ-UIC-007 faixa única mostra datas legíveis e mantém quatro controles rotulados", () => {
-  renderHome();
-  const from = screen.getByLabelText("Chegada");
-  const to = screen.getByLabelText("Saída");
-  fireEvent.change(from, { target: { value: "2026-12-20" } });
-  fireEvent.change(to, { target: { value: "2026-12-25" } });
-  expect(screen.getByText("20 dez, a partir das 14h")).toBeVisible();
-  expect(screen.getByText("25 dez · 5 noites")).toBeVisible();
-  expect(from).toHaveValue("2026-12-20");
-  expect(to).toHaveValue("2026-12-25");
+it("REQ-UIC-007 faixa única mostra datas legíveis e mantém três controles rotulados", async () => {
+  const { user } = renderHome();
+  await pickCalendarDays(user, screen.getByLabelText("Chegada e saída"), "2026-12-20", "2026-12-25");
+  expect(screen.getByText("20 a 25 dez · 5 noites")).toBeVisible();
   expect(screen.getByRole("textbox", { name: "Onde" })).toBeEnabled();
   expect(screen.getByRole("combobox", { name: "Pet" })).toBeEnabled();
 });
@@ -94,13 +95,11 @@ it("REQ-UIC-007 pergunta de quantidade do anfitrião fica fora da faixa de busca
   );
 });
 
-it("REQ-UIC-007 teclado alcança as quatro células sem controles nativos de seleção extras", async () => {
+it("REQ-UIC-007 teclado alcança as três células sem controles nativos de seleção extras", async () => {
   const { user } = renderHome();
   screen.getByRole("textbox", { name: "Onde" }).focus();
   await user.tab();
-  expect(screen.getByLabelText("Chegada")).toHaveFocus();
-  await user.tab();
-  expect(screen.getByLabelText("Saída")).toHaveFocus();
+  expect(screen.getByLabelText("Chegada e saída")).toHaveFocus();
   await user.tab();
   expect(screen.getByRole("combobox", { name: "Pet" })).toHaveFocus();
 });
@@ -119,4 +118,34 @@ it("REQ-HOME-010 os campos de pet não repassam atributos inválidos ao DOM", ()
   }
   expect(error.mock.calls.flat().join(" ")).not.toMatch(/non-boolean attribute/);
   error.mockRestore();
+});
+
+it("REQ-HOME-011 com filtros na URL a home mostra os resultados no lugar da vitrine, com os filtros na chamada da API", async () => {
+  const seen: URLSearchParams[] = [];
+  server.use(
+    http.get("*/api/listings", ({ request }) => {
+      seen.push(new URL(request.url).searchParams);
+      return HttpResponse.json(apiOk({ items: [listingFixture()], page: 1, pageSize: 12, totalCount: 1 }));
+    }),
+  );
+  renderHome(
+    { initialQuery: { pets: [], species: [], sizes: [], where: "Maringá", hasYard: true } },
+    "/?where=Maring%C3%A1&hasYard=true",
+  );
+  expect(screen.queryByRole("heading", { name: "Casas com vaga perto de você" })).not.toBeInTheDocument();
+  expect(await screen.findByRole("heading", { name: "1 casa com vaga perto de Maringá" })).toBeVisible();
+  expect(screen.getByRole("link", { name: /Quintal da Cida/ })).toBeVisible();
+  expect(seen[0]?.get("hasYard")).toBe("true");
+  expect(seen[0]?.get("city")).toBe("Maringá");
+});
+
+it("REQ-SRCH-014 com busca na URL a home mostra só os resultados: sem hero nem barra grande", () => {
+  server.use(
+    http.get("*/api/listings", () =>
+      HttpResponse.json(apiOk({ items: [listingFixture()], page: 1, pageSize: 12, totalCount: 1 })),
+    ),
+  );
+  renderHome({}, "/?where=Zona+7");
+  expect(screen.queryByRole("heading", { name: "Um quintal pro seu pet enquanto você viaja" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("form", { name: "Busca de cantinhos" })).not.toBeInTheDocument();
 });

@@ -29,7 +29,8 @@ describe("atalhos do cabeçalho", () => {
   it.each([
     ["/host", "Painel"],
     ["/host/application", "Minha verificação"],
-    ["/host/bookings/123", "Painel"],
+    ["/host/bookings/123", "Pedidos"],
+    ["/host/payments", "Painel"],
   ])("REQ-UIC-003 %s marks only the most specific matching host shortcut", (pathname, label) => {
     navigation.pathname = pathname;
     const { unmount } = renderWithProviders(<HeaderNav items={navItemsFor("host")} />, { theme: quintalTheme });

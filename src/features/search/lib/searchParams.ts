@@ -5,7 +5,6 @@ import { listingSpeciesSchema } from "../api/contracts";
 
 const SPECIES = listingSpeciesSchema.options;
 const SIZES = ["small", "medium", "large"];
-const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 type Params = URLSearchParams | Record<string, string | string[] | undefined>;
 
 function numberValue(value: string | null, min: number, max = Number.MAX_SAFE_INTEGER, integer = false) {
@@ -39,9 +38,8 @@ export function searchParamsToQuery(input: Params): SearchQuery {
     pets: list("pets"),
     species: list("species", SPECIES),
     sizes: list("sizes", SIZES),
-    weekdays: list("weekdays", WEEKDAYS),
   };
-  for (const key of ["where", "neighborhood"] as const) {
+  for (const key of ["where"] as const) {
     const value = params.get(key)?.trim();
     if (value && value.length <= 80) result[key] = value;
   }
@@ -61,9 +59,6 @@ export function searchParamsToQuery(input: Params): SearchQuery {
   for (const [key, min, max, integer] of [
     ["radius", 5, 50, true],
     ["count", 1, 200, true],
-    ["minCapacity", 1, 200, true],
-    ["minNightlyRate", 0, Number.MAX_SAFE_INTEGER, false],
-    ["maxNightlyRate", 0, Number.MAX_SAFE_INTEGER, false],
   ] as const) {
     const value = numberValue(params.get(key), min, max, integer);
     if (value !== undefined) result[key] = value;
@@ -74,28 +69,52 @@ export function searchParamsToQuery(input: Params): SearchQuery {
 /** Serializa apenas o estado conhecido. Listas repetem a chave. @example queryToSearchParams(query).toString() */
 export function queryToSearchParams(query: SearchQuery): URLSearchParams {
   const params = new URLSearchParams();
-  Object.entries(query).forEach(([key, value]) => {
-    if (Array.isArray(value)) value.forEach((item) => params.append(key, item));
-    else if (value !== undefined && value !== "") params.set(key, String(value));
-  });
+  const keys: (keyof SearchQuery)[] = [
+    "where",
+    "state",
+    "from",
+    "to",
+    "pets",
+    "count",
+    "radius",
+    "species",
+    "sizes",
+    "hasYard",
+    "hasKids",
+    "hasDogs",
+    "hasCats",
+    "homeType",
+  ];
+  Object.entries(query)
+    .filter(([key]) => keys.includes(key as keyof SearchQuery))
+    .forEach(([key, value]) => {
+      if (Array.isArray(value)) value.forEach((item) => params.append(key, item));
+      else if (value !== undefined && value !== "") params.set(key, String(value));
+    });
   return params;
 }
 
 /** Traduz URL para os filtros da API, derivando somente dos pets ativos conhecidos. @example toApiSearch(query, pets, 1) */
 export function toApiSearch(query: SearchQuery, pets: SearchPet[], page: number) {
   const selected = pets.filter((pet) => query.pets.includes(pet.id));
-  const { where, from, to, radius, count, pets: _ids, ...filters } = query;
+  const { where, from, to, radius, count, pets: _ids, ...filters } = searchParamsToQuery(queryToSearchParams(query));
   void _ids;
   return {
     ...filters,
     city: where,
     checkIn: from,
     checkOut: to,
-    radiusKm: radius ?? (where || query.state || query.neighborhood ? undefined : 10),
+    radiusKm: radius ?? (where || query.state ? undefined : 10),
     pets: selected.length || count || 1,
     species: [...new Set([...query.species, ...selected.map((pet) => pet.species)])],
     sizes: [...new Set([...query.sizes, ...selected.flatMap((pet) => (pet.size ? [pet.size] : []))])],
     page,
     pageSize: 12,
   };
+}
+
+/** Endereço da home com a busca na URL; busca vazia é a própria `/`. @example searchHref({ ...query, where: "Zona 7" }) // "/?where=Zona+7" */
+export function searchHref(query: SearchQuery): string {
+  const params = queryToSearchParams(query);
+  return params.size ? `/?${params}` : "/";
 }

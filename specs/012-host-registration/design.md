@@ -77,3 +77,7 @@ Tudo da 011: `features/registration`, `AddressFields`, `BirthDateField`, `strong
 | Visual      | Storybook        | `RegistrationWizard.stories.tsx` (variante host) | a11y sem violação                                             |
 | 008         | Arquitetura      | `src/test/architecture/no-token-storage.test.ts` | senha fora de storage, log e URL (padrão `password            | senha` já coberto) |
 | 010         | Integração (RSC) | `app/(auth)/register/host/page.test.ts`          | `metadata.title` e `robots.index = false`                     |
+
+## Revisão 074 (22/10/2026)
+
+Código preparado, aguardando liberação de validação. /register abre o primeiro passo com cartões; tutor vê 3 etapas visuais, sendo pet opcional após criar conta; host mantém 2 sem CPF. APIs e criação da conta ao enviar endereço mantidas. Confirmação de descarte ao trocar papel, sem rascunho compartilhado existente. Detalhes, migração e plano de testes: [cadastro fiel](../005-ui-conformance/register-fidelity-implementation.md).
