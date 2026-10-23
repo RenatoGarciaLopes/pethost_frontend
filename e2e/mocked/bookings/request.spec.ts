@@ -80,9 +80,7 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   await page.goto("/");
   await openSearch(page);
   await pickDates(page, page.getByLabel("Chegada", { exact: true }).filter({ visible: true }), from, to);
-  await page.getByRole("combobox", { name: "Pet" }).click();
-  await page.getByRole("option", { name: "Luna", exact: true }).click();
-  await page.keyboard.press("Escape");
+  // A home já parte com a primeira pet do tutor (Luna) escolhida.
   await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
   await expect(page.getByRole("heading", { level: 2, name: /casas com vaga perto/ })).toBeVisible(NAVIGATION);
 

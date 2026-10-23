@@ -27,6 +27,7 @@ const detail = {
   availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
   address: { neighborhood: "Centro", city: "Maringá", state: "PR" },
   location: null,
+  approximateLocation: { latitude: -23.425, longitude: -51.938, radiusMeters: 500 },
   photos: [{ id: "0199d2a0-0000-7000-8000-000000000043", url: "https://images.example.test/yard.webp", position: 1 }],
   isActive: true,
   deactivatedAt: null,

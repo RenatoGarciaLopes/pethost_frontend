@@ -63,9 +63,7 @@ test("REQ-SRCH-003/004/007 datas, pets e total seguem no link", async ({ page, b
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 5);
   const to = tomorrow.toISOString().slice(0, 10);
   await pickDates(page, page.getByLabel("Chegada", { exact: true }).filter({ visible: true }), from, to);
-  await page.getByRole("combobox", { name: "Pet" }).click();
-  await page.getByRole("option", { name: "Luna", exact: true }).click();
-  await page.keyboard.press("Escape");
+  // A home já parte com a primeira pet do tutor (Luna) escolhida.
   await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
   await expect(page.getByRole("heading", { level: 2, name: /casas com vaga perto/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Combina com Luna" })).toHaveAttribute("aria-pressed", "true");

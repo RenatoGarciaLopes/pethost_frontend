@@ -30,7 +30,7 @@ test("REQ-HOME-001/002 visitante vê o início e busca na própria home", async 
   await page.getByRole("option", { name: "Cão", exact: true }).click();
   await submitSearch(page);
 
-  await expect(page).toHaveURL(/\/\?where=Zona\+7&species=dog$/);
+  await expect(page).toHaveURL(/\/\?(?=.*where=Zona\+7)(?=.*species=dog)/);
   await expect(page.getByRole("heading", { level: 2, name: /casas? com vaga perto de Zona 7/ })).toBeVisible({
     timeout: 30_000,
   });
@@ -43,7 +43,7 @@ test("REQ-HOME-003 tutor com pet busca na home com o id na URL, sem dados do per
   await expandSearchOnMobile(page);
   await page.getByRole("textbox", { name: "Onde" }).fill("Maringá");
   await submitSearch(page);
-  await expect(page).toHaveURL(/\/\?where=/, { timeout: 45_000 });
+  await expect(page).toHaveURL(/\/\?.*where=/, { timeout: 45_000 });
   const params = new URL(page.url()).searchParams;
   expect(params.get("where")).toBe("Maringá");
   expect(params.getAll("pets")).toEqual(["0199d2a0-0000-7000-8000-0000000000e1"]);
@@ -116,7 +116,7 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
     .toBe(true);
   const form = page.getByRole("form", { name: "Busca de cantinhos" });
   await expect(form).toHaveCSS("box-shadow", "rgb(31, 26, 23) 0px 5px 0px 0px");
-  const lawn = form.locator("../..");
+  const lawn = form.locator("../../..");
   await expect(lawn).toHaveCSS("background-color", "rgb(207, 227, 160)");
   await expect(lawn).toHaveCSS("border-bottom-color", "rgb(31, 26, 23)");
   const wave = lawn.locator("svg").first();
