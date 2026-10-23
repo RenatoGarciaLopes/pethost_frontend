@@ -47,11 +47,11 @@ it("REQ-HOME-002 tutor sem pet pode escolher espécie e vai direto à busca", as
 
 it("REQ-HOME-003 tutor com pets começa personalizado e manda só os ids selecionados", async () => {
   const { user } = renderHome({ viewer: "owner", pets: petOptions });
-  expect(screen.getByRole("heading", { name: "Um quintal pra Pipoca enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pra Pipoca enquanto você viaja" })).toBeVisible();
   await user.click(screen.getByRole("combobox", { name: "Pet" }));
   await user.click(screen.getByRole("option", { name: "Tico" }));
   await user.keyboard("{Escape}");
-  expect(screen.getByRole("heading", { name: "Um quintal pros seus pets enquanto você viaja." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Um quintal pros seus pets enquanto você viaja" })).toBeVisible();
   await user.click(screen.getByRole("button", { name: "Achar um cantinho" }));
   expect(navigation.push).toHaveBeenCalledWith("/search?pets=pet-pipoca&pets=pet-tico");
 });
