@@ -215,3 +215,38 @@ it("REQ-NEARBY-019 reserva recusada (conta sem endereço) volta ao aviso de raio
   expect(await screen.findByText(/Ainda não achamos cantinhos num raio de 10 km. Tente outra cidade/)).toBeVisible();
   expect(screen.queryByText("Não conseguimos carregar os cantinhos agora.")).not.toBeInTheDocument();
 });
+
+it("REQ-SRCH-020 tutor com pet e datas vê o total e a compatibilidade nos cards; visitante nunca consulta", async () => {
+  const asked: URLSearchParams[] = [];
+  server.use(
+    http.get("*/api/listings", () =>
+      HttpResponse.json(apiOk({ items: [listingFixture()], page: 1, pageSize: 6, totalCount: 1 })),
+    ),
+    http.get("*/api/listings/:id/compatibility", ({ request }) => {
+      asked.push(new URL(request.url).searchParams);
+      return HttpResponse.json(
+        apiOk({
+          listingId: "0199d2a0-0000-7000-8000-000000000041",
+          petId: "0199d2a0-0000-7000-8000-0000000000e1",
+          petName: "Pipoca",
+          matches: false,
+          warnings: [{ code: "home_has_cats" }],
+        }),
+      );
+    }),
+  );
+  geo.state = { status: "granted", coords: point };
+  renderWithProviders(
+    <NearbyListings
+      scope="owner-1"
+      pets={[{ id: "0199d2a0-0000-7000-8000-0000000000e1", name: "Pipoca" }]}
+      from="2026-12-20"
+      to="2026-12-25"
+    />,
+    { theme: quintalTheme },
+  );
+  expect(await screen.findByText("! Tem gato em casa")).toBeVisible();
+  expect(screen.getByRole("link", { name: /Quintal da Cida/ }).textContent).toMatch(/R\$\s300,50 as 5 noites/);
+  expect(asked[0]?.get("petId")).toBe("0199d2a0-0000-7000-8000-0000000000e1");
+  expect(asked[0]?.get("checkIn")).toBe("2026-12-20");
+});

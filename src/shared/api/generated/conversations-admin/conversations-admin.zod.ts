@@ -20,16 +20,11 @@ export const DeleteApiV1ConversationsConversationIdModerationBlockParams = zod.o
 })
 
 export const DeleteApiV1ConversationsConversationIdModerationBlockResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "conversationId": zod.string().uuid(),
   "blocked": zod.boolean()
-}).describe('A conversa foi bloqueada ou desbloqueada (evento do hub). Não diz quem bloqueou: o app recarrega a\nconversa pelo REST (`blockedByMe`) se precisar.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A conversa foi bloqueada ou desbloqueada (evento do hub). Não diz quem bloqueou: o app recarrega a\nconversa pelo REST (`blockedByMe`) se precisar.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

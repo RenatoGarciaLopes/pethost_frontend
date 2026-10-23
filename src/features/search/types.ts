@@ -23,3 +23,9 @@ export interface SearchQuery {
   hasCats?: boolean;
   homeType?: "house" | "apartment";
 }
+
+/** Pet escolhido pelo tutor; os cards conferem a compatibilidade dele com cada cantinho. @example { id, name: "Pipoca" } */
+export interface CompatibilityPet {
+  id: string;
+  name: string;
+}

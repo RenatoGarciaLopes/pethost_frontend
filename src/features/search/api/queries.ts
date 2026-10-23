@@ -5,7 +5,7 @@ import type { Coordinates } from "@/shared/hooks/useGeolocation";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
 import type { SearchPet, SearchQuery } from "../types";
 import { toApiSearch } from "../lib/searchParams";
-import { searchPageSchema } from "./contracts";
+import { compatibilitySchema, searchPageSchema } from "./contracts";
 
 /** Raio e tamanho da vitrine "perto de você" da home. */
 export const NEARBY_RADIUS_KM = 10;
@@ -71,6 +71,33 @@ export const searchQueries = {
         transport.request(
           { method: "GET", path: "/listings", query: { pageSize: NEARBY_PAGE_SIZE }, signal },
           searchPageSchema,
+        ),
+      staleTime: 60_000,
+      retry: false,
+    }),
+  /**
+   * "Combina com seu pet": cruza um pet do tutor com um cantinho. Só avisa, não bloqueia. As datas, quando há,
+   * trazem também os hóspedes do período.
+   * @example useQuery(searchQueries.compatibility(accountId, listingId, petId, { checkIn, checkOut }))
+   */
+  compatibility: (
+    accountId: string,
+    listingId: string,
+    petId: string,
+    stay: { checkIn?: string; checkOut?: string } = {},
+    transport: Pick<HttpTransport, "request"> = bffClient,
+  ) =>
+    queryOptions({
+      queryKey: accountQueryKey(accountId, "search", "compatibility", listingId, petId, stay.checkIn, stay.checkOut),
+      queryFn: ({ signal }) =>
+        transport.request(
+          {
+            method: "GET",
+            path: `/listings/${listingId}/compatibility`,
+            query: { petId, checkIn: stay.checkIn, checkOut: stay.checkOut },
+            signal,
+          },
+          compatibilitySchema,
         ),
       staleTime: 60_000,
       retry: false,
