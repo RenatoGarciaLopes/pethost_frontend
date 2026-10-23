@@ -2,7 +2,9 @@ import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { searchMapListingsFixture, searchMapOrigin } from "@/test/fixtures/searchMap";
-import { renderWithProviders } from "@/test/render";
+import { searchQueryFixture } from "@/test/fixtures/search";
+import { createTestQueryClient, renderWithProviders } from "@/test/render";
+import { searchQueries } from "../../../api/queries";
 import { SearchMap, type SearchMapProps } from "./SearchMap";
 
 /** O jsdom não tem WebGL: um mapa de mentira com projeção em pixels e os eventos que o componente ouve. */
@@ -42,10 +44,20 @@ vi.mock("maplibre-gl", () => ({ Map: fake.FakeMap }));
 vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));
 
 const [cida, antonio] = searchMapListingsFixture;
+const PET = { id: "0199d2a0-0000-7000-8000-0000000000e1", name: "Pipoca" };
+const STAY = { checkIn: "2026-12-20", checkOut: "2026-12-25" };
 
 function setup(props: Partial<SearchMapProps> = {}) {
   const onSelect = vi.fn();
   const onMoveEnd = vi.fn();
+  const queryClient = createTestQueryClient();
+  queryClient.setQueryData(searchQueries.compatibility("owner-1", cida.id, PET.id, STAY).queryKey, {
+    listingId: cida.id,
+    petId: PET.id,
+    petName: PET.name,
+    matches: true,
+    warnings: [],
+  });
   const view = renderWithProviders(
     <SearchMap
       listings={searchMapListingsFixture}
@@ -54,10 +66,11 @@ function setup(props: Partial<SearchMapProps> = {}) {
       onMoveEnd={onMoveEnd}
       searchOnMove
       onSearchOnMoveChange={vi.fn()}
-      stay={{ nights: 5, petCount: 1 }}
+      query={searchQueryFixture({ from: STAY.checkIn, to: STAY.checkOut })}
+      petCount={1}
       {...props}
     />,
-    { theme: quintalTheme },
+    { theme: quintalTheme, queryClient },
   );
   return { ...view, onSelect, onMoveEnd };
 }
@@ -72,7 +85,7 @@ describe("mapa da busca", () => {
     const { user, onSelect } = setup({
       selectedId: cida.id,
       compatibleIds: new Set([cida.id]),
-      compatibleLabel: "Combina com a Pipoca",
+      compatibility: { accountId: "owner-1", pets: [PET] },
     });
     const pin = await screen.findByRole("button", { name: /Casa da Dona Cida, R\$\s300/ });
     expect(pin).toHaveAttribute("aria-pressed", "true");
@@ -110,6 +123,8 @@ describe("mapa da busca", () => {
         onMoveEnd={onMoveEnd}
         searchOnMove={false}
         onSearchOnMoveChange={vi.fn()}
+        query={searchQueryFixture()}
+        petCount={0}
       />,
     );
     lastMap().emit("moveend", { originalEvent: new Event("mousemove") });

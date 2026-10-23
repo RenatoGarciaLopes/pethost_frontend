@@ -37,7 +37,14 @@ const notTunnel: ExpressionSpecification = ["!=", ["get", "brunnel"], "tunnel"];
  */
 export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
   const source = "openmaptiles";
-  const roads = (id: string, classes: string[], fill: string, low: number, high: number): LayerSpecification[] => [
+  const roads = (
+    id: string,
+    classes: string[],
+    fill: string,
+    low: number,
+    high: number,
+    casing: { low: number; high: number },
+  ): LayerSpecification[] => [
     {
       id: `${id}-casing`,
       type: "line",
@@ -45,7 +52,7 @@ export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
       "source-layer": "transportation",
       filter: ["all", roadClass(classes), notTunnel],
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": palette.tinta, "line-width": zoomWidth(low + 2, high + 4) },
+      paint: { "line-color": palette.tinta, "line-width": zoomWidth(low + casing.low, high + casing.high) },
     },
     {
       id: `${id}-fill`,
@@ -101,30 +108,32 @@ export function buildMapStyle(palette: MapStylePalette): StyleSpecification {
         paint: { "line-color": palette.tinta, "line-width": 1.5 },
       },
       {
-        id: "ruas",
+        id: "locais",
         type: "line",
         source,
         "source-layer": "transportation",
-        minzoom: 13.5,
+        minzoom: 14,
         filter: ["all", roadClass(["minor", "service"]), notTunnel],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": palette.tinta, "line-opacity": 0.4, "line-width": zoomWidth(0.6, 2.5) },
+        paint: { "line-color": palette.tinta, "line-opacity": 0.14, "line-width": zoomWidth(0.5, 1.6) },
       },
-      ...roads("secundarias", ["tertiary"], palette.cartao, 1.2, 8),
-      ...roads("avenidas", ["secondary", "primary", "trunk", "motorway"], palette.gema, 2.5, 14),
+      ...roads("secundarias", ["secondary", "tertiary"], palette.cartao, 1.5, 7, { low: 1.2, high: 1.6 }),
+      ...roads("avenidas", ["primary", "trunk", "motorway"], palette.gema, 3, 14, { low: 2, high: 4 }),
       {
         id: "bairros",
         type: "symbol",
         source,
         "source-layer": "place",
-        filter: roadClass(["suburb", "neighbourhood", "quarter"]),
+        minzoom: 12,
+        filter: roadClass(["suburb"]),
         layout: {
           "text-field": ["coalesce", ["get", "name:latin"], ["get", "name"]],
           "text-font": LABEL_FONT,
           "text-transform": "uppercase",
           "text-letter-spacing": 0.18,
           "text-size": ["interpolate", ["linear"], ["zoom"], 11, 9, 16, 13],
-          "text-max-width": 7,
+          "text-max-width": 6,
+          "text-padding": 90,
         },
         paint: { "text-color": palette.texto2, "text-halo-color": palette.cartao, "text-halo-width": 1.5 },
       },

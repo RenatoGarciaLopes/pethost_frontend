@@ -1,7 +1,7 @@
 import { formatBRL, fromCents, toCents } from "@/shared/lib/money";
 
 /** Período e pets da busca; com eles o pino mostra o total, sem eles a diária. @example { nights: 5, petCount: 1 } */
-export interface MapStay {
+interface MapStay {
   nights: number;
   petCount: number;
 }

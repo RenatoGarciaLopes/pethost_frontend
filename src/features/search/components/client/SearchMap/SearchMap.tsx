@@ -3,8 +3,9 @@ import { Box, Typography } from "@mui/material";
 import { lazy, Suspense, useSyncExternalStore } from "react";
 import { mapCopy } from "../../../lib/mapCopy";
 import type { GeoPoint } from "../../../lib/mapGeometry";
-import type { MapStay } from "../../../lib/mapPrice";
 import type { ListingSummary } from "../../../api/contracts";
+import type { SearchQuery } from "../../../types";
+import type { ListingCardCompatibility } from "../ListingCard/ListingCard";
 import type { SearchMapOrigin } from "./types";
 
 /** O MapLibre só entra no cliente, quando o mapa aparece: o resto da busca não carrega esse peso. */
@@ -23,12 +24,13 @@ export interface SearchMapProps {
   onSearchOnMoveChange: (value: boolean) => void;
   /** Só quando a pessoa mexe no mapa (arrasta, dá zoom) e a opção está ligada; raio em km do recorte visível. */
   onMoveEnd?: (center: GeoPoint, radiusKm: number) => void;
-  /** Período e pets da busca: com eles o pino mostra o total da estadia. */
-  stay?: MapStay;
-  /** Cantinhos que combinam com o pet (pino e chip em verde-lima). */
+  /** Datas da busca: com período e `petCount`, o pino mostra o total da estadia (como o `ListingCard`). */
+  query: SearchQuery;
+  petCount: number;
+  /** Conta e pets a conferir: o cartão mostra o `CompatibilityChip` do `ListingCard` (mesma consulta, mesmo cache). */
+  compatibility?: ListingCardCompatibility;
+  /** Cantinhos que combinam, só para o pino ficar verde-lima; quem monta a tela sabe pela consulta de compatibilidade. */
   compatibleIds?: ReadonlySet<string>;
-  /** Texto do chip de compatibilidade ("Combina com a Pipoca"). */
-  compatibleLabel?: string;
   /** Destino do link do cartão (padrão `/listings/{id}`). */
   hrefFor?: (id: string) => string;
 }

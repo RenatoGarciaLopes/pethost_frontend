@@ -1,33 +1,58 @@
 import { Box, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { expect, within } from "storybook/test";
+import { searchQueryFixture } from "@/test/fixtures/search";
+import { searchQueries } from "../../../api/queries";
 import { searchMapListingFixture, searchMapListingsFixture, searchMapOrigin } from "@/test/fixtures/searchMap";
 import { SearchMap, type SearchMapProps } from "./SearchMap";
 
 const [cida, antonio] = searchMapListingsFixture;
-const stay = { nights: 5, petCount: 1 };
+const PET = { id: "0199d2a0-0000-7000-8000-0000000000e1", name: "Pipoca" };
+const ACCOUNT = "owner-1";
+const STAY = { checkIn: "2026-12-20", checkOut: "2026-12-25" };
+const query = searchQueryFixture({ from: STAY.checkIn, to: STAY.checkOut });
 const compatibleIds = new Set([cida.id, antonio.id]);
+
+/** Compatibilidade já no cache (como nas stories do ListingCard), para a story não depender da API. */
+function seededClient() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  for (const listing of searchMapListingsFixture) {
+    client.setQueryData(searchQueries.compatibility(ACCOUNT, listing.id, PET.id, STAY).queryKey, {
+      listingId: listing.id,
+      petId: PET.id,
+      petName: PET.name,
+      matches: compatibleIds.has(listing.id),
+      warnings: compatibleIds.has(listing.id) ? [] : [{ code: "home_has_cats" }],
+    });
+  }
+  return client;
+}
 
 /** Estado do consumidor (a tela da busca decide quando o mapa aparece); o componente em si é controlado. */
 function Frame(props: Partial<SearchMapProps> & { height?: number | string }) {
   const { height = 560, ...rest } = props;
   const [selectedId, setSelectedId] = useState<string | null>(rest.selectedId ?? null);
   const [searchOnMove, setSearchOnMove] = useState(rest.searchOnMove ?? true);
+  const [client] = useState(seededClient);
   return (
     <Box sx={{ height, width: "100%" }}>
-      <SearchMap
-        listings={searchMapListingsFixture}
-        origin={searchMapOrigin}
-        stay={stay}
-        compatibleIds={compatibleIds}
-        compatibleLabel="Combina com a Pipoca"
-        {...rest}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-        searchOnMove={searchOnMove}
-        onSearchOnMoveChange={setSearchOnMove}
-      />
+      <QueryClientProvider client={client}>
+        <SearchMap
+          listings={searchMapListingsFixture}
+          origin={searchMapOrigin}
+          query={query}
+          petCount={1}
+          compatibility={{ accountId: ACCOUNT, pets: [PET] }}
+          compatibleIds={compatibleIds}
+          {...rest}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          searchOnMove={searchOnMove}
+          onSearchOnMoveChange={setSearchOnMove}
+        />
+      </QueryClientProvider>
     </Box>
   );
 }
@@ -73,7 +98,13 @@ export const Selecionado: Story = {
 /** Sem pet escolhido: nada combina, preço é a diária e não há chip. */
 export const SemCompatibilidade: Story = {
   name: "REQ-SRCH-013 Sem compatibilidade",
-  args: { compatibleIds: new Set<string>(), stay: undefined, selectedId: antonio.id },
+  args: {
+    compatibleIds: new Set<string>(),
+    compatibility: undefined,
+    query: searchQueryFixture(),
+    petCount: 0,
+    selectedId: antonio.id,
+  },
 };
 
 /** Sem origem: sem marcador nem círculos de distância. */

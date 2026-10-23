@@ -29,4 +29,14 @@ describe("estilo do mapa da busca", () => {
     const ids = style.layers.map((layer) => layer.id);
     expect(ids.indexOf("avenidas-casing")).toBeLessThan(ids.indexOf("avenidas-fill"));
   });
+
+  it("REQ-SRCH-013 hierarquia de ruas: só vias principais em gema, secundárias em cartão, locais quase invisíveis, bairros só os maiores", () => {
+    const layer = (id: string) => style.layers.find((item) => item.id === id) as Record<string, unknown>;
+    expect(JSON.stringify(layer("avenidas-fill").filter)).toContain('["primary","trunk","motorway"]');
+    expect(JSON.stringify(layer("secundarias-fill").filter)).toContain('["secondary","tertiary"]');
+    const locais = layer("locais");
+    expect(locais.minzoom).toBeGreaterThanOrEqual(14);
+    expect((locais.paint as Record<string, number>)["line-opacity"]).toBeLessThanOrEqual(0.2);
+    expect(JSON.stringify(layer("bairros").filter)).toContain('["suburb"]');
+  });
 });

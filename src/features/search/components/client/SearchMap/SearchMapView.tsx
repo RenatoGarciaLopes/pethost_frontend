@@ -1,9 +1,10 @@
 "use client";
-import { Box, ButtonBase, Checkbox, Chip, FormControlLabel, Typography, useTheme } from "@mui/material";
+import { Box, ButtonBase, Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
 import { Map as MapLibreMap, type GeoJSONSource } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { nightsBetween } from "@/shared/lib/date/stayRules";
 import { usePrefersReducedMotion } from "@/shared/lib/motion/usePrefersReducedMotion";
 import { DoorMark } from "@/shared/ui/brand/DoorMark";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
@@ -13,14 +14,18 @@ import { boundsOf, circleRing, pointAt, radiusKmFromBounds, type GeoPoint } from
 import { buildMapStyle } from "../../../lib/mapStyle";
 import { mapPrice } from "../../../lib/mapPrice";
 import { searchCopy } from "../../../lib/searchCopy";
+import { CompatibilityChip } from "../ListingCard/CompatibilityChip";
 import type { SearchMapProps } from "./SearchMap";
 import type { ListingSummary } from "../../../api/contracts";
 
 /** Centro de Maringá (piloto), usado só quando não há nenhum ponto para enquadrar. */
 const FALLBACK_CENTER: [number, number] = [-51.9386, -23.4205];
-const RING_KM = [1, 2, 4];
-const GRID_PX = 32;
-const FIT_PADDING = { top: 72, left: 80, right: 80, bottom: 120 };
+const RING_KM = [1, 2];
+const GRID_PX = 40;
+/** Altura que o cartão do selecionado e a faixa de privacidade tomam no pé do mapa. */
+const SELECTED_CARD_HEIGHT = 230;
+/** Folga para nenhum pino ficar sob os controles (topo e direita) nem sob a faixa de privacidade (embaixo). */
+const FIT_PADDING = { top: 84, left: 56, right: 68, bottom: 108 };
 
 interface Pixel {
   x: number;
@@ -36,9 +41,10 @@ export function SearchMapView({
   searchOnMove,
   onSearchOnMoveChange,
   onMoveEnd,
-  stay,
+  query,
+  petCount,
+  compatibility,
   compatibleIds,
-  compatibleLabel,
   hrefFor = (id) => `/listings/${id}`,
 }: SearchMapProps) {
   const theme = useTheme();
@@ -59,6 +65,9 @@ export function SearchMapView({
   );
   const idsKey = listings.map((listing) => listing.id).join("|");
   const selected = listings.find((listing) => listing.id === selectedId);
+  const nights = query.from && query.to ? nightsBetween(query.from, query.to) : 0;
+  const stay = nights > 0 && petCount > 0 ? { nights, petCount } : undefined;
+  const chipStay = { checkIn: query.from, checkOut: query.to };
 
   const approxData = useMemo(
     () => ({
@@ -73,6 +82,17 @@ export function SearchMapView({
       })),
     }),
     [listings],
+  );
+  const reserveData = useMemo(
+    () => ({
+      type: "FeatureCollection" as const,
+      features: points.map((point) => ({
+        type: "Feature" as const,
+        properties: {},
+        geometry: { type: "Point" as const, coordinates: [point.longitude, point.latitude] },
+      })),
+    }),
+    [points],
   );
   const ringsData = useMemo(
     () => ({
@@ -149,6 +169,10 @@ export function SearchMapView({
     instance.on("load", () => {
       instance.addSource("aproximado", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       instance.addSource("aneis", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      instance.addSource("reserva", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      // Pinos e a origem são HTML por cima do mapa; esta camada invisível, a de cima, reserva o lugar deles
+      // para os nomes de bairro (camadas de cima ganham a colisão) saírem de baixo dos pinos.
+      instance.addImage("reserva", { width: 100, height: 56, data: new Uint8Array(100 * 56 * 4) });
       instance.addLayer({
         id: "aproximado-area",
         type: "fill",
@@ -167,6 +191,18 @@ export function SearchMapView({
         source: "aneis",
         paint: { "line-color": quintal.texto2, "line-width": 1.5, "line-dasharray": [3, 3] },
       });
+      instance.addLayer({
+        id: "reserva-pinos",
+        type: "symbol",
+        source: "reserva",
+        layout: {
+          "icon-image": "reserva",
+          "icon-anchor": "bottom",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": false,
+        },
+        paint: { "icon-opacity": 0 },
+      });
       setStyleReady(true);
     });
     setMap(instance);
@@ -184,7 +220,8 @@ export function SearchMapView({
     if (!map || !styleReady) return;
     (map.getSource("aproximado") as GeoJSONSource).setData(approxData);
     (map.getSource("aneis") as GeoJSONSource).setData(ringsData);
-  }, [map, styleReady, approxData, ringsData]);
+    (map.getSource("reserva") as GeoJSONSource).setData(reserveData);
+  }, [map, styleReady, approxData, ringsData, reserveData]);
 
   const firstFit = useRef(true);
   useEffect(() => {
@@ -208,9 +245,20 @@ export function SearchMapView({
 
   useEffect(() => {
     if (!map || !selected) return;
+    // Só move se o pino sair da área livre (abaixo dos controles, acima do cartão): mover à toa joga os outros pinos
+    // para baixo da faixa de privacidade.
+    const { x, y } = map.project([selected.approximateLocation.longitude, selected.approximateLocation.latitude]);
+    const box = containerRef.current;
+    const free = box && {
+      top: FIT_PADDING.top,
+      bottom: box.clientHeight - SELECTED_CARD_HEIGHT,
+      left: FIT_PADDING.left,
+      right: box.clientWidth - FIT_PADDING.right,
+    };
+    if (free && x >= free.left && x <= free.right && y >= free.top && y <= free.bottom) return;
     map.easeTo({
       center: [selected.approximateLocation.longitude, selected.approximateLocation.latitude],
-      padding: { bottom: 200, top: 0, left: 0, right: 0 },
+      padding: { bottom: SELECTED_CARD_HEIGHT, top: 0, left: 0, right: 0 },
       duration: latest.current.reducedMotion ? 0 : 400,
     });
     // Seguir só a seleção, não cada recarga da lista.
@@ -234,7 +282,9 @@ export function SearchMapView({
     .sort((a, b) => a.at.y - b.at.y);
   const originAt = origin ? project(origin) : null;
   const ink = theme.palette.quintal.tinta;
-  const hasTotal = Boolean(stay && stay.nights > 0 && stay.petCount > 0);
+  // Quadriculado só sugere papel milimetrado: a linha do tema com pouca força.
+  const grid = `color-mix(in srgb, ${theme.palette.quintal.linha} 45%, transparent)`;
+  const hasTotal = Boolean(stay);
 
   return (
     <Box
@@ -245,7 +295,7 @@ export function SearchMapView({
         position: "absolute",
         inset: 0,
         backgroundColor: "quintal.cartao",
-        backgroundImage: `linear-gradient(to right, ${theme.palette.quintal.linha} 1px, transparent 1px), linear-gradient(to bottom, ${theme.palette.quintal.linha} 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(to right, ${grid} 1px, transparent 1px), linear-gradient(to bottom, ${grid} 1px, transparent 1px)`,
         backgroundSize: `${GRID_PX}px ${GRID_PX}px`,
         backgroundPosition: `${gridOffset.x}px ${gridOffset.y}px`,
       }}
@@ -457,7 +507,7 @@ export function SearchMapView({
                 src={selected.coverPhotoUrl}
                 alt={searchCopy.photoAlt(selected.title)}
                 sx={{
-                  width: 112,
+                  width: { xs: 88, sm: 112 },
                   height: 84,
                   objectFit: "cover",
                   borderRadius: `${quintalRadii.media}px`,
@@ -467,7 +517,7 @@ export function SearchMapView({
             ) : (
               <Box
                 sx={{
-                  width: 112,
+                  width: { xs: 88, sm: 112 },
                   height: 84,
                   flexShrink: 0,
                   borderRadius: `${quintalRadii.media}px`,
@@ -481,7 +531,7 @@ export function SearchMapView({
                 {searchCopy.noPhoto}
               </Box>
             )}
-            <Box sx={{ minWidth: 0, display: "grid", alignContent: "center", gap: 0.5, pr: 4 }}>
+            <Box sx={{ minWidth: 0, display: "grid", alignContent: "center", gap: 0.5, pr: 5.5 }}>
               <Typography
                 component={Link}
                 href={hrefFor(selected.id)}
@@ -508,14 +558,16 @@ export function SearchMapView({
                   .filter(Boolean)
                   .join(" · ")}
               </Typography>
-              {compatibleIds?.has(selected.id) && compatibleLabel && (
-                <Chip
-                  size="small"
-                  variant="ok"
-                  label={`✓ ${compatibleLabel}`}
-                  sx={{ justifySelf: "start", maxWidth: "100%", height: 24, fontSize: 12.5 }}
-                />
-              )}
+              {compatibility?.pets.map((pet) => (
+                <Box key={pet.id}>
+                  <CompatibilityChip
+                    accountId={compatibility.accountId}
+                    listingId={selected.id}
+                    pet={pet}
+                    stay={chipStay}
+                  />
+                </Box>
+              ))}
               <Typography sx={{ fontWeight: 800 }}>
                 {mapPrice(selected.nightlyRate, stay)}{" "}
                 <Box component="span" sx={{ fontWeight: 400, fontSize: 12.5 }}>
