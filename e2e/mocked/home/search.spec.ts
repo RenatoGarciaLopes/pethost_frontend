@@ -187,13 +187,13 @@ test("REQ-SRCH-014 resultados trazem a busca minificada no cabeçalho, editável
     timeout: 30_000,
   });
   if (!mobile) {
-    await expect(map.getByRole("button", { name: /R$/ }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(map.getByRole("button", { name: /R\$/ }).first()).toBeVisible({ timeout: 30_000 });
     await page.waitForTimeout(4000);
   }
   await page.screenshot({ path: `test-results/home-088-${width}.png` });
   if (mobile) {
     await page.getByRole("button", { name: "Ver mapa" }).click();
-    await expect(map.getByRole("button", { name: /R$/ }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(map.getByRole("button", { name: /R\$/ }).first()).toBeVisible({ timeout: 30_000 });
     await page.waitForTimeout(4000);
     await page.screenshot({ path: "test-results/home-088-mapa-390.png" });
     await page.getByRole("button", { name: "Ver lista" }).click();
