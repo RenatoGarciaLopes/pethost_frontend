@@ -172,3 +172,31 @@ test.describe("vitrine perto de você", () => {
     await page.screenshot({ path: "test-results/home-fidelity/nearby.png", fullPage: true });
   });
 });
+
+test("072 mouse fecha Select sem anel na célula; Tab mantém foco em tinta", async ({ page }, info) => {
+  await page.setViewportSize({ width: info.project.use.isMobile ? 390 : 1440, height: 960 });
+  await page.goto("/");
+  await expandSearchOnMobile(page);
+  const pet = page.getByRole("combobox", { name: "Pet" });
+  const petCell = pet.locator("..").locator("..").locator("..");
+  await pet.click();
+  await page.getByRole("option", { name: "Cão", exact: true }).click();
+  await expect(pet).toBeFocused();
+  await expect(pet).toHaveCSS("outline-style", "none");
+  await expect(petCell).toHaveCSS("outline-style", "none");
+  await page.screenshot({ path: `test-results/072-select-mouse-${info.project.name}.png`, fullPage: true });
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await expect(pet).toBeFocused();
+  await expect(pet).toHaveCSS("outline-style", "none");
+  await expect(petCell).toHaveCSS("outline-color", "rgb(31, 26, 23)");
+  await expect(petCell).toHaveCSS("outline-width", "3px");
+  await expect(petCell).toHaveCSS("outline-offset", "3px");
+  await expect(petCell).toHaveCSS("border-radius", "12px");
+  await page.screenshot({ path: `test-results/072-select-tab-${info.project.name}.png`, fullPage: true });
+  await page.keyboard.press("Shift+Tab");
+  const departure = page.getByLabel("Saída", { exact: true });
+  await expect(departure).toBeFocused();
+  await expect(departure.locator("..")).toHaveCSS("outline-color", "rgb(31, 26, 23)");
+  await expect(departure.locator("..")).toHaveCSS("outline-width", "3px");
+});

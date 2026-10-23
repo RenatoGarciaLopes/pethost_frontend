@@ -1,4 +1,4 @@
-﻿---
+---
 spec: 002-design-system
 status: in-progress
 updated: 2026-10-11
@@ -37,7 +37,7 @@ nenhum primitivo chama API ou conhece entidades de produto.
 | ------ | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | T1     | `src/shared/theme/tokens/{colors,shadows,radii}.ts`; `src/shared/lib/color/contrastRatio.ts`                               | `quintalColors`, `hardShadow(0/3/5/8)`, raios e contraste WCAG para hex RGB opaco. Não calcula contraste de transparência.                                                                           |
 | T2     | `tokens/typography.ts`; `src/app/layout.tsx`; `.storybook/fonts.css`                                                       | Next usa `next/font/local` e as variáveis `--font-display`/`--font-body`. Storybook carrega os mesmos arquivos por CSS/Vite. Base 17px; h1–h4 Caprasimo.                                             |
-| T3     | `createQuintalTheme.ts`, `overrides/*.ts`, `variants/quintalVariants.ts`, `types/mui.d.ts`, `public/brand/paper-grain.png` | Tema claro CSS variables; cada override MUI em seu módulo. Primário coral/tinta, foco azul 3px e sombras sem blur. Grão PNG determinístico, local e sutil.                                           |
+| T3     | `createQuintalTheme.ts`, `overrides/*.ts`, `variants/quintalVariants.ts`, `types/mui.d.ts`, `public/brand/paper-grain.png` | Tema claro CSS variables; cada override MUI em seu módulo. Primário coral/tinta, foco de teclado em tinta 3px e sombras sem blur. Grão PNG determinístico, local e sutil.                            |
 | T3     | `src/bootstrap/providers/ThemeProviders.tsx` e pasta `ThemeProviders/`                                                     | Entrada estável reexporta a implementação com anatomia de componente. `ThemeProviders({children})` aplica cache App Router, tema e baseline. Não gerencia queries/sessão.                            |
 | T3     | `src/app/page.tsx`, `src/app/globals.css`, `.storybook/preview.ts`                                                         | Home temporária sem lógica de domínio; baseline substitui cores/fontes do scaffold. Stories recebem o mesmo tema.                                                                                    |
 | T4     | `tokens/springs.ts`; `src/shared/lib/motion/usePrefersReducedMotion.ts`                                                    | Curvas exatas da marca, assentar 340ms e acolher 660ms. Hook assina matchMedia via useSyncExternalStore; SSR/ambiente sem matchMedia prefere redução. CSS desliga transições e animações.            |
@@ -154,7 +154,7 @@ O Renato pediu para deixar os testes novos para depois. Sem teste de componente 
 - **Camada semântica de cores:** `tokens/semantic.ts`, com `accountTones`, `surfaceColors`, `sceneColors` e `feedbackColors`. No tema:
   - `palette.account` e `palette.scene` (tipados em `types/mui.d.ts`);
   - mapeamento conforme `design/09-componentes-mui.md`: `secondary` e `info` céu, `success` grama, `warning` gema, `background.paper` branco.
-- **`overrides/Link.ts`:** links em tinta com sublinhado coral (contraste AA) e foco na cor `foco`.
+- **`overrides/Link.ts`:** links em tinta com sublinhado coral (contraste AA) e foco de teclado em tinta.
 - **Dívida de testes:** `semantic.ts` sem teste de contraste para os tons de conta; sem teste do override de Link.
 
 ## Registro (2026-10-12, Claude Code)

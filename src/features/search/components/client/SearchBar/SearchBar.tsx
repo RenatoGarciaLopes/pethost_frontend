@@ -2,6 +2,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { Box, Button, Checkbox, FormControl, FormLabel, InputBase, MenuItem, Select, Typography } from "@mui/material";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { focusRing } from "@/shared/theme/overrides/Button";
 import { DOOR_TARGET_ATTR, DOOR_WARM_ATTR } from "@/shared/ui/brand/DoorScene";
 import { Surface } from "@/shared/ui/layout/Surface";
 import { validateStay } from "@/shared/lib/date/stayRules";
@@ -25,18 +26,13 @@ const cell = {
   minHeight: 56,
   px: { xs: 1, md: 2 },
   py: 0.5,
+  // Keyboard focus wraps the whole cell (icon, label and value); no colored :focus-within ring.
+  "&:has(:focus-visible)": { ...focusRing, borderRadius: `${quintalRadii.control}px` },
+  // The cell owns this indicator; don't draw a second rectangle through its label.
+  "& .MuiInputBase-root .MuiInputBase-input:focus-visible": { outline: "none" },
 } as const;
 const separator = { borderRight: { xs: "none", md: "1px dashed" }, borderColor: "divider" } as const;
-const dateCell = {
-  ...cell,
-  ...separator,
-  '&:has(input[type="date"]:focus-visible)': {
-    outline: "2px solid",
-    outlineColor: "text.primary",
-    outlineOffset: 2,
-    borderRadius: `${quintalRadii.control}px`,
-  },
-} as const;
+const dateCell = { ...cell, ...separator } as const;
 const label = {
   fontSize: 11,
   fontWeight: 800,
