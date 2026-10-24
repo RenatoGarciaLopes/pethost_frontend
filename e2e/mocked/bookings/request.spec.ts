@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { pickDates } from "../../support/calendar";
+import { calendarDayName, pickDates } from "../../support/calendar";
 import { loginAccount, resetAccountMock } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { openSearch } from "../../support/search";
+import { hostClosedBlock } from "../../support/handlers/listingPage.mjs";
 
 // Navegação no cliente: no `next dev` a primeira visita compila a rota (como em `new-pet.spec.ts`).
 const NAVIGATION = { timeout: 15_000 };
@@ -136,6 +137,44 @@ test("REQ-REQST-007 dia em que o cantinho não recebe vira frase no topo, com o 
     page.getByText(`O cantinho não recebe em domingo (${sunday.slice(8)}/${sunday.slice(5, 7)}). Tenta outras datas.`),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Pedido enviado!" })).toHaveCount(0);
+});
+
+test("REQ-LPAGE-013 o calendário do pedido risca o domingo e a agenda do anfitrião; a escolha evita os dois", async ({
+  page,
+  baseURL,
+}) => {
+  await loginAccount(page, baseURL!, "both", "owner");
+  // Datas da URL dentro da agenda fechada (segunda a quarta; a véspera é domingo, que viria antes): o campo já diz o
+  // motivo, antes de enviar.
+  const block = hostClosedBlock();
+  await page.goto(requestPath(block.startDate, block.endDate, [LUNA]));
+  const field = page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true });
+  await expect(
+    page.getByText(/^Essas datas passam por .+, e o anfitrião fechou a agenda nesse dia\. Escolhe outras\.$/),
+  ).toBeVisible(FIRST_COMPILE);
+
+  // No calendário o domingo fica riscado, sem toque, com o motivo e a legenda.
+  await waitForHydration(field);
+  await field.click();
+  const dialog = page.getByRole("dialog", { name: /^Escolher/ });
+  const sunday = plus(block.startDate, -8);
+  const closedSunday = dialog.getByRole("button", {
+    name: `${calendarDayName(sunday)}: o cantinho não recebe aos domingos`,
+  });
+  for (let guard = 0; guard < 3 && !(await closedSunday.isVisible()); guard += 1)
+    await dialog.getByRole("button", { name: "Mês anterior" }).click();
+  await expect(closedSunday).toHaveAttribute("aria-disabled", "true");
+  await expect(dialog.getByText("Não recebe aos domingos")).toBeVisible();
+  const done = dialog.getByRole("button", { name: "Pronto" });
+  if (await done.isVisible()) await done.click();
+  else await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+
+  // Segunda a sexta da semana antes da agenda fechada: sem domingo e sem bloqueio, o erro some.
+  const monday = plus(block.startDate, -7);
+  await pickDates(page, field, monday, plus(monday, 4));
+  await expect(field).toHaveValue(/ · 4 noites$/);
+  await expect(page.getByText(/^Essas datas passam por/)).toHaveCount(0);
 });
 
 test("REQ-REQST-004 REQ-REQST-010 sem marcar ração e remédios a frase aparece e o calendário bloqueia chegada com menos de 72 h", async ({

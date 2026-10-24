@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { z } from "zod";
 import { bookingCopy } from "@/features/bookings";
 import { RequestStayHostNotice } from "@/features/bookings/index.server";
-import { getListingPageDetail } from "@/features/listing-page/index.server";
+import { getListingClosedPeriods, getListingPageDetail } from "@/features/listing-page/index.server";
 import { petQueries } from "@/features/pets";
 import { queryToSearchParams, searchParamsToQuery } from "@/features/search";
 
@@ -48,9 +48,10 @@ async function RequestStayContent({ params, searchParams }: RequestStayPageProps
   // Anfitrião vê o recado com a troca de conta, não o 403 (REQ-REQST-001).
   if (user.role === "host") return <RequestStayHostNotice />;
 
-  const [listing, myPets] = await Promise.all([
+  const [listing, myPets, closedPeriods] = await Promise.all([
     getListingPageDetail(user.id, listingId),
     getQueryClient().fetchQuery(petQueries.mine(user.id, await backendForRequest())),
+    getListingClosedPeriods(listingId),
   ]);
   const cover = [...listing.photos].sort((a, b) => a.position - b.position)[0];
   return (
@@ -71,6 +72,8 @@ async function RequestStayContent({ params, searchParams }: RequestStayPageProps
         acceptsMedium: listing.acceptsMedium,
         acceptsLarge: listing.acceptsLarge,
       }}
+      availableWeekdays={listing.availableWeekdays}
+      closedPeriods={closedPeriods}
       pets={myPets.active.map(({ id, name, species, size, coverUrl }) => ({
         id,
         name,

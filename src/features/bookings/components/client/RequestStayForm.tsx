@@ -11,6 +11,7 @@ import { earliestRequestCheckIn, nightsBetween } from "@/shared/lib/date/stayRul
 import { formatBRL } from "@/shared/lib/money";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Notice } from "@/shared/ui/feedback/Notice";
+import type { CalendarClosedDay } from "@/shared/ui/forms/Calendar";
 import { DateRangeField } from "@/shared/ui/forms/DateRangeField";
 import { Surface } from "@/shared/ui/layout/Surface";
 import { toBooking } from "../../api/mappers";
@@ -54,6 +55,8 @@ export interface RequestStayFormProps {
   totalOf: (checkIn: string, checkOut: string, petCount: number) => string | null;
   /** "Agora" para o prazo de resposta; padrão: o momento do envio. */
   now?: Date;
+  /** Dias em que o cantinho não recebe, com o motivo (`listingClosedDays`, pela rota): riscados no calendário. */
+  closedDay?: (iso: string) => CalendarClosedDay | null;
 }
 
 /** "Pedido enviado!" com o prazo em Brasília e os dois caminhos (REQ-REQST-006). O foco vai para o título. */
@@ -136,7 +139,16 @@ function RequestSummary({
  *
  * @example <RequestStayForm accountId={user.id} listing={listing} pets={pets} today={today} initial={initial} totalOf={totalOf} />
  */
-export function RequestStayForm({ accountId, listing, pets, today, initial, totalOf, now }: RequestStayFormProps) {
+export function RequestStayForm({
+  accountId,
+  listing,
+  pets,
+  today,
+  initial,
+  totalOf,
+  now,
+  closedDay,
+}: RequestStayFormProps) {
   const fitting = useMemo(() => new Set(pets.filter((pet) => pet.fit.fits).map((pet) => pet.id)), [pets]);
   const { control, handleSubmit, setError, setValue, formState } = useForm<RequestStayValues>({
     resolver: zodResolver(requestStaySchema(today)),
@@ -207,6 +219,7 @@ export function RequestStayForm({ accountId, listing, pets, today, initial, tota
               checkOut={checkOut}
               today={today}
               min={earliestRequestCheckIn(today)}
+              closedDay={closedDay}
               errors={dateErrors}
               onChange={(range) => {
                 setValue("checkIn", range.checkIn, { shouldValidate: revalidate });
