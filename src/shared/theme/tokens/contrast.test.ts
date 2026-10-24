@@ -24,6 +24,15 @@ it("REQ-UIC-011 texto no rodapé de terra: tinta nas camadas claras, papel na te
   expect(contrastRatio(c.papel, sceneColors.soilDeep)).toBeGreaterThanOrEqual(4.5);
 });
 
+it("093 papel passa AA e coral/foco passam 3:1 na camada funda inteira", () => {
+  for (const background of [sceneColors.soilDeep, c.tinta]) {
+    expect(contrastRatio(c.papel, background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(c.coral, background)).toBeGreaterThanOrEqual(3);
+  }
+  expect(contrastRatio(c.papel, sceneColors.soilLight)).toBeLessThan(contrastRatio(c.papel, sceneColors.soilMid));
+  expect(contrastRatio(c.papel, sceneColors.soilMid)).toBeLessThan(contrastRatio(c.papel, sceneColors.soilDeep));
+});
+
 it.each(Object.entries(avatarTones))("076 iniciais brancas sobre %s passam AA para texto pequeno", (_name, tone) => {
   expect(contrastRatio(tone.foreground, tone.background)).toBeGreaterThanOrEqual(4.5);
 });

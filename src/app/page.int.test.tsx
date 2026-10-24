@@ -1,5 +1,5 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { afterEach, expect, it, vi } from "vitest";
 import { apiFail, apiOk, fakeJwt, nowSeconds, sessionUserFixture } from "@/test/fixtures/session";
@@ -99,7 +99,8 @@ it("renova sessão na raiz sem parâmetros", async () => {
 it("access vencido sem refresh continua visitante", async () => {
   requestState.accessToken = fakeJwt(nowSeconds() - 60);
   renderWithProviders(await resolveHomeContent(), { theme: quintalTheme });
-  expect(screen.getByRole("link", { name: "Entrar" })).toBeVisible();
+  expect(within(screen.getByRole("banner")).getByRole("link", { name: "Entrar" })).toBeVisible();
+  expect(within(screen.getByRole("contentinfo")).getByRole("link", { name: "Entrar" })).toBeVisible();
 });
 
 it("REQ-HOME-001 home pública tem metadata e não consulta sessão sem cookie", async () => {
@@ -136,6 +137,9 @@ it("REQ-HOME-003 busca pets ativos só para tutor e usa a sessão antes da lista
   expect(screen.getByRole("heading", { name: "Um quintal pra Mel enquanto você viaja" })).toBeVisible();
   expect(screen.queryByText("Inativo")).not.toBeInTheDocument();
   expect(requestState.events).toEqual(["connection", "session", "pets"]);
+  const footer = within(screen.getByRole("contentinfo"));
+  expect(footer.getByRole("link", { name: "Minhas estadias" })).toHaveAttribute("href", "/owner/bookings");
+  expect(footer.queryByRole("link", { name: "Entrar" })).not.toBeInTheDocument();
 });
 
 it("REQ-HOME-002 tutor sem pet recebe a escolha de espécie sem passo de cadastro", async () => {
@@ -154,6 +158,9 @@ it("REQ-HOME-004 anfitrião não consulta lista pessoal de pets na home", async 
   renderWithProviders(await resolveHomeContent(), { theme: quintalTheme });
   expect(screen.getByText("Quantos pets viajam com você?")).toBeVisible();
   expect(requestState.events).toEqual(["connection", "session"]);
+  const footer = within(screen.getByRole("contentinfo"));
+  expect(footer.getByRole("link", { name: "Painel" })).toHaveAttribute("href", "/host");
+  expect(footer.queryByRole("link", { name: "Criar conta" })).not.toBeInTheDocument();
 });
 
 it("REQ-HOME-009 erro na lista do tutor não impede a busca por espécie", async () => {

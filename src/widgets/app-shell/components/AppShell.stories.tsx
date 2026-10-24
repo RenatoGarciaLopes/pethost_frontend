@@ -9,7 +9,15 @@ import { accountQueryKey } from "@/shared/api/query/queryClient";
 import { AppShell } from "./AppShell";
 
 /** Cache isolado, como nas stories de AddressFields, sem chamadas ao backend. `visitor`: sem conta (página aberta). */
-function Frame({ role, scrolling = false }: { role: "owner" | "host" | "admin" | "visitor"; scrolling?: boolean }) {
+function Frame({
+  role,
+  scrolling = false,
+  mobileBottomSpace,
+}: {
+  role: "owner" | "host" | "admin" | "visitor";
+  scrolling?: boolean;
+  mobileBottomSpace?: number;
+}) {
   const [client] = useState(() => {
     const cache = new QueryClient();
     cache.setQueryData(accountQueryKey("story-account", "linked-accounts"), [
@@ -21,6 +29,7 @@ function Frame({ role, scrolling = false }: { role: "owner" | "host" | "admin" |
   return (
     <QueryClientProvider client={client}>
       <AppShell
+        mobileBottomSpace={mobileBottomSpace}
         user={
           role === "visitor"
             ? null
@@ -103,9 +112,18 @@ export const Visitante: Story = {
   args: { role: "visitor" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+    await expect(within(canvas.getByRole("banner")).getByRole("link", { name: "Entrar" })).toHaveAttribute(
+      "href",
+      "/login",
+    );
     await expect(canvas.queryByRole("navigation", { name: "Navegação principal" })).not.toBeInTheDocument();
   },
+};
+
+/** O cantinho com barra fixa reserva o fim do rodapé no celular. */
+export const VisitanteComBarraFixa: Story = {
+  args: { role: "visitor", mobileBottomSpace: 12 },
+  globals: { viewport: { value: "celular", isRotated: false } },
 };
 
 export const Celular: Story = {

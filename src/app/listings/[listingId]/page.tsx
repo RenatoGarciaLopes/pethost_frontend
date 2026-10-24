@@ -78,7 +78,7 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
       ])
     : [[]];
   return (
-    <AppShell user={user} returnTo={path}>
+    <AppShell user={user} returnTo={path} mobileBottomSpace={isOwner ? 0 : 12}>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ListingPageScreen
           listing={listing}
