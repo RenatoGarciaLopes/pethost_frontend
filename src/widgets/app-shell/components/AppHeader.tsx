@@ -18,10 +18,16 @@ interface AppHeaderProps {
 
 const HOW: NavItem = { id: "how", label: "Como funciona", href: "#como-funciona", roles: ["owner", "host"] };
 const STAYS: NavItem = { id: "stays", label: "Minhas estadias", href: "/owner/bookings", roles: ["owner"] };
+/** Na home do tutor, além das estadias, as conversas (spec 055): o mesmo item da tabela de atalhos. */
+const OWNER_HOME_ITEMS: readonly NavItem[] = [
+  HOW,
+  STAYS,
+  ...navItemsFor("owner").filter((item) => item.id === "conversations"),
+];
 
 /**
  * Cabeçalho único da casca e da home (REQ-UIC-003): largura page, linha de tinta, marca e menu reais.
- * Sem usuário oferece Entrar; home do tutor oferece estadias. Não consulta sessão nem antecipa Conversas.
+ * Sem usuário oferece Entrar; home do tutor oferece estadias e conversas. Não consulta sessão.
  * O caller compõe um único main com id conteudo; a busca de contas só ocorre ao abrir AccountMenu.
  * @example <AppHeader user={user} variant="home" />
  */
@@ -29,7 +35,7 @@ export function AppHeader({ user, variant = "shell" }: AppHeaderProps) {
   const home = variant === "home";
   const items = home
     ? user?.role === "owner"
-      ? [HOW, STAYS]
+      ? OWNER_HOME_ITEMS
       : [HOW, ...(user ? navItemsFor(user.role) : [])]
     : user
       ? navItemsFor(user.role)

@@ -25,8 +25,16 @@ it("REQ-UIC-003 tutor vê estadias e nome na pílula sem perder o menu da conta"
   });
   queryClient.setQueryData(accountQueryKey(sessionUserFixture.id, "linked-accounts"), []);
   expect(screen.getByRole("link", { name: "Minhas estadias" })).toHaveAttribute("href", "/owner/bookings");
+  expect(screen.getByRole("link", { name: "Conversas" })).toHaveAttribute("href", "/conversations");
   const account = screen.getByRole("button", { name: /Menu da conta de Camila Souza/ });
   expect(account).toHaveTextContent("Camila");
   await user.click(account);
   expect(await screen.findByRole("menuitem", { name: "Minha conta" })).toHaveAttribute("href", "/users/profile");
+});
+
+it("REQ-CHAT-001 anfitrião também tem Conversas na home, junto dos atalhos do papel", () => {
+  renderWithProviders(<AppHeader variant="home" user={{ ...sessionUserFixture, role: "host" }} />, {
+    theme: quintalTheme,
+  });
+  expect(screen.getByRole("link", { name: "Conversas" })).toHaveAttribute("href", "/conversations");
 });

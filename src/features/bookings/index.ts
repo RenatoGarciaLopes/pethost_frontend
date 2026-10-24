@@ -5,3 +5,6 @@
  */
 export { bookingCopy } from "./lib/bookingCopy";
 export { isBookingId } from "./lib/bookingId";
+export { statusLabel } from "./lib/bookingStatus";
+export { formatPeriod } from "./lib/formatStay";
+export type { Booking, BookingStatus } from "./types";
