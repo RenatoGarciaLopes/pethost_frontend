@@ -1,9 +1,9 @@
 "use client";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import Link from "next/link";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { Sticker } from "@/shared/ui/feedback/Sticker";
-import { initialsOf } from "@/shared/lib/text/initials";
+import { InitialsAvatar } from "@/shared/ui/media/InitialsAvatar";
 import { listingBadgeLabel } from "@/shared/config/listingBadges";
 import { nightsBetween } from "@/shared/lib/date/stayRules";
 import { formatBRL, fromCents, toCents } from "@/shared/lib/money";
@@ -28,17 +28,11 @@ export interface ListingCardProps {
   compatibility?: ListingCardCompatibility;
 }
 
-const AVATAR_COLORS = ["primary.main", "grama.main", "ceu.main", "gema.main"] as const;
 const BADGE_ATTRIBUTES = [
   ["fast_responder", "fast"],
   ["experienced", "experienced"],
   ["well_rated", "rated"],
 ] as const satisfies readonly (readonly [ListingSummary["badges"][number], AttributeIconName])[];
-
-/** Cor estável por anfitrião para o avatar de iniciais. */
-function avatarColor(id: string) {
-  return AVATAR_COLORS[[...id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % AVATAR_COLORS.length];
-}
 
 /** Atributos que a API devolve no resumo: tipo de casa, quintal e selos de confiança (Vizinho vai na foto). */
 function attributesOf(listing: ListingSummary): { icon: AttributeIconName; label: string }[] {
@@ -134,22 +128,12 @@ export function ListingCard({ listing, query, petCount, compatibility }: Listing
             py: 0.5,
           }}
         >
-          <Avatar
-            src={listing.host?.avatarUrl ?? undefined}
-            alt=""
-            sx={{
-              width: 28,
-              height: 28,
-              fontSize: 11,
-              fontWeight: 800,
-              color: "text.primary",
-              bgcolor: avatarColor(listing.hostId),
-              border: "2px solid",
-              borderColor: "text.primary",
-            }}
-          >
-            {initialsOf(hostName)}
-          </Avatar>
+          <InitialsAvatar
+            name={hostName}
+            src={listing.host?.avatarUrl}
+            size={28}
+            sx={{ fontWeight: 800, fontSize: 11, border: "2px solid", borderColor: "text.primary" }}
+          />
           <Typography component="span" noWrap sx={{ fontSize: 13, fontWeight: 700 }}>
             {hostName}
           </Typography>

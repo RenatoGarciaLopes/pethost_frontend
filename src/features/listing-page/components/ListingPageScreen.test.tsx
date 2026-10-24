@@ -137,3 +137,12 @@ it("REQ-LPAGE-007 outra conta de anfitrião vê o card de compra, e o pedir pass
     "/listings/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c?from=2026-12-20&to=2026-12-25",
   );
 });
+
+it("076 mant?m o nome exibido e usa iniciais sem observa??o no avatar humano", () => {
+  const base = listingDetailFixture();
+  const listing = { ...base, host: { ...base.host!, name: "Ana Souza (teste)", avatarUrl: null } };
+  render(<ListingPageScreen listing={listing} isOwner={false} accountRole="owner" reviews={[]} stay={stay} />);
+  expect(screen.getByText("AS")).toBeVisible();
+  expect(screen.getByText("Ana Souza (teste)")).toBeVisible();
+  expect(screen.queryByText("A(")).not.toBeInTheDocument();
+});

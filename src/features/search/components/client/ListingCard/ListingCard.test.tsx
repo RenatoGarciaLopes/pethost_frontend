@@ -172,3 +172,12 @@ it("REQ-SRCH-020 falha da compatibilidade não mostra chip nem derruba o card", 
   expect(await screen.findByRole("heading", { name: "Quintal da Cida" })).toBeVisible();
   expect(screen.queryByText(/Combina com|!/)).not.toBeInTheDocument();
 });
+
+it("076 mant?m o nome exibido e usa iniciais sem observa??o no avatar humano", () => {
+  const base = listingFixture();
+  const listing = { ...base, host: { ...base.host!, name: "Ana Souza (teste)", avatarUrl: null } };
+  render(<ListingCard listing={listing} query={searchQueryFixture()} petCount={0} />);
+  expect(screen.getByText("AS")).toBeVisible();
+  expect(screen.getByText("Ana Souza (teste)")).toBeVisible();
+  expect(screen.queryByText("A(")).not.toBeInTheDocument();
+});
