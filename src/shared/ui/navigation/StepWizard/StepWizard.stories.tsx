@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
+import { waitForEntrance } from "@/test/waitForEntrance";
 import { Typography } from "@mui/material";
 import { StepWizard, StepWizardActions } from "./StepWizard";
 
@@ -14,6 +15,7 @@ const meta = {
   component: StepWizard,
   tags: ["autodocs"],
   parameters: { layout: "fullscreen", design: { board: "Fluxo-Cadastro" } },
+  play: waitForEntrance,
   args: {
     steps,
     currentIndex: 0,

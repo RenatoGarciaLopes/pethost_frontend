@@ -99,7 +99,7 @@ describe("ReviewStep", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("REQ-HVER-010 'Voltar: fotos' volta um passo", async () => {
+  it("REQ-HVER-010 'Voltar' volta um passo", async () => {
     const { user, onBack } = setup();
     await user.click(screen.getByRole("button", { name: copy.review.back }));
     expect(onBack).toHaveBeenCalled();

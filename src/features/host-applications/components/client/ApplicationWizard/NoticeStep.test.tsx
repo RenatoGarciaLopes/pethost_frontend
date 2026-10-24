@@ -42,12 +42,12 @@ describe("NoticeStep", () => {
     expect(screen.getByText("Só a equipe da PetHost vê.")).toBeInTheDocument();
   });
 
-  it("REQ-HVER-003 REQ-HVER-018 sem o 'Li e concordo' não avança; o erro diz o que falta e recebe o foco", async () => {
+  it("REQ-HVER-003 REQ-HVER-018 sem o aceite não avança; o erro diz o que falta e recebe o foco", async () => {
     const { user, onNext } = renderStep();
     await user.click(screen.getByRole("button", { name: copy.notice.next }));
 
     expect(onNext).not.toHaveBeenCalled();
-    const checkbox = screen.getByRole("checkbox", { name: "Li e concordo" });
+    const checkbox = screen.getByRole("checkbox", { name: copy.notice.accept });
     expect(checkbox).toHaveFocus();
     expect(checkbox).toHaveAccessibleDescription(copy.notice.acceptMissing);
     expect(checkbox).toHaveAttribute("aria-invalid", "true");
@@ -56,7 +56,7 @@ describe("NoticeStep", () => {
   it("REQ-HVER-003 escolhe Pessoa física ou Empresa e segue com o aceite", async () => {
     const { user, onNext } = renderStep();
     await user.click(screen.getByRole("radio", { name: /^Empresa/ }));
-    await user.click(screen.getByRole("checkbox", { name: "Li e concordo" }));
+    await user.click(screen.getByRole("checkbox", { name: copy.notice.accept }));
     await user.click(screen.getByRole("button", { name: copy.notice.next }));
 
     expect(onNext).toHaveBeenCalledWith({ acceptNotice: true, personType: "pj" });
@@ -66,7 +66,7 @@ describe("NoticeStep", () => {
     const { user, onNext } = renderStep({ personType: "pj", accepted: true, locked: true });
     expect(screen.getByRole("radio", { name: /^Pessoa física/ })).toBeDisabled();
     expect(screen.getByText(copy.notice.personTypeLocked)).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "Li e concordo" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: copy.notice.accept })).toBeChecked();
     await user.click(screen.getByRole("button", { name: copy.notice.next }));
     expect(onNext).toHaveBeenCalledWith({ acceptNotice: true, personType: "pj" });
   });

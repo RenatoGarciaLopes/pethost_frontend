@@ -53,7 +53,7 @@ test("REQ-HVER-001 a REQ-HVER-013 começa, preenche, manda as 3 fotos, envia, v�
 
   await expect(page.getByText("As fotos servem só pra confirmar que você é você.")).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Etapas da verificação" })).toBeVisible();
-  await expect(page.getByText("Passo 1 de 4")).toBeVisible();
+  await expect(page.getByText("Passo 1 de 4", { exact: true })).toBeVisible();
   const next = page.getByRole("button", { name: "Continuar: seus dados" });
   await waitForHydration(next);
   await next.click();

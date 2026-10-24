@@ -26,8 +26,8 @@ const PROGRESS = STEPS.map((id, index) => ({
   description: copy.wizard.stepDescriptions[index]!,
 }));
 const TITLES = [copy.notice.heading, copy.data.heading, copy.photos.heading, copy.review.heading] as const;
-/** Frase de apoio sob o título; "Antes de começar" e "Seus dados" explicam no próprio conteúdo. */
-const INTROS = [undefined, undefined, copy.photos.intro, copy.review.intro] as const;
+/** Frase de apoio sob o título, como no cadastro. */
+const INTROS = [copy.notice.intro, copy.data.intro, copy.photos.intro, copy.review.intro] as const;
 type StepIndex = 0 | 1 | 2 | 3;
 
 export interface ApplicationWizardProps {

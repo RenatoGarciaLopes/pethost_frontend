@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { Box, ButtonBase, Typography } from "@mui/material";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
+import { SelectedBadge } from "@/shared/ui/forms/ChoiceCard";
 import { quintalColors as c } from "@/shared/theme/tokens/colors";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
@@ -54,24 +55,7 @@ export function RegisterChoice({ role, onChoose }: RegisterChoiceProps) {
             <Typography component="span" sx={{ fontSize: 13, fontWeight: 600, color: "text.secondary" }}>
               {registrationCopy.choice[option].description}
             </Typography>
-            {selected && (
-              <Box
-                aria-hidden="true"
-                sx={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                  width: 22,
-                  height: 22,
-                  borderRadius: "50%",
-                  bgcolor: "text.primary",
-                  color: "success.main",
-                  fontWeight: 800,
-                }}
-              >
-                ✓
-              </Box>
-            )}
+            {selected && <SelectedBadge />}
           </ButtonBase>
         );
       })}

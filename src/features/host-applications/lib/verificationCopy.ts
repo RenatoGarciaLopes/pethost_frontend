@@ -28,6 +28,7 @@ export const verificationCopy = {
 
   notice: {
     heading: "Antes de começar",
+    intro: "Antes de pedir seus dados, a gente conta como as fotos são usadas.",
     /** Aviso de uso das fotos por versão; versão sem texto aqui usa o mais recente (`latestNoticeVersion`). */
     versions: {
       "2026-10-10": [
@@ -44,7 +45,7 @@ export const verificationCopy = {
       pj: { label: "Empresa", description: "Hospedagem ou negócio com CNPJ." },
     },
     personTypeLocked: "O tipo fica como foi escolhido quando a verificação começou.",
-    accept: "Li e concordo",
+    accept: "Li e concordo com o uso das fotos só para a verificação",
     acceptMissing: "Pra seguir, marca o “Li e concordo”.",
     back: "Voltar",
     next: "Continuar: seus dados",
@@ -52,6 +53,7 @@ export const verificationCopy = {
 
   data: {
     heading: "Seus dados",
+    intro: "Agora o CPF e o documento que você vai fotografar.",
     cpf: "CPF",
     cpfHelp: { pf: "O seu CPF.", pj: "O CPF de quem representa a empresa: você." },
     cpfMissing: "Falta o CPF.",
@@ -122,7 +124,7 @@ export const verificationCopy = {
     documentType: "Documento",
     company: "Empresa",
     missing: "Pra enviar, faltam fotos. Volta e completa as três vagas.",
-    back: "Voltar: fotos",
+    back: "Voltar",
     submit: "Enviar pra análise",
     submitting: "Enviando…",
     sent: "Pronto, enviada! Agora é com a gente.",
