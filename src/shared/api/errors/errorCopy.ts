@@ -138,6 +138,15 @@ export const errorCopy: Record<string, CopyEntry> = {
   BOOKING_NOT_IN_PROGRESS: "Só dá pra marcar a volta de estadia que está acontecendo.",
   BOOKING_CONFLICT: "A estadia mudou enquanto você olhava. Confere de novo.",
 
+  // Conversas (spec 055)
+  CONVERSATION_NOT_FOUND: "Não achamos essa conversa.",
+  CONVERSATION_BLOCKED: "Essa conversa está bloqueada: ninguém envia mensagem nova.",
+  CONVERSATION_BLOCKED_BY_MODERATION: "A equipe da PetHost bloqueou essa conversa depois de uma denúncia.",
+  CONVERSATION_RECIPIENT_SUSPENDED: "Essa conta está suspensa e não recebe mensagens agora.",
+  CONVERSATION_OWNER_DEACTIVATED: "Sua conta de tutor está pausada. Reative a conta pra mandar mensagem.",
+  CONVERSATION_HOST_DEACTIVATED: "Sua conta de anfitrião está pausada. Reative a conta pra mandar mensagem.",
+  CONVERSATION_CONFLICT: "A conversa mudou enquanto você escrevia. Tenta de novo.",
+
   // Transversais da API
   VALIDATION_ERROR: "Alguns campos precisam de ajuste. Confere as mensagens embaixo de cada um.",
   UNAUTHORIZED: "Sua sessão terminou. Entra de novo pra continuar.",
