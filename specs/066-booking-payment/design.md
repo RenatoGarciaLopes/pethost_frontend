@@ -12,7 +12,7 @@ Estender `src/features/bookings/`, sem feature paralela para a mesma reserva. A 
 
 Recursos descobertos no catálogo e conferidos no código: `bookingQueries`, `bookingDtoSchema`, `bookingPaths`, `StayDetail`, `OWNER_TABS` (já inclui accepted), `StatusTimeline`, `formatPeriod`, `formatDeadline`, `formatBRL`, `toCents`/`fromCents`, `Notice`, `ErrorState`, `Announcer`, `bffClient`, `HttpTransport`, `unwrapData`, `accountQueryKey`, `getErrorMessage` e `applyFieldErrors`. Não duplicar tradução, cliente HTTP, providers ou formatadores.
 
-Recursos novos planejados (nomes/path definitivos serão conferidos contra a implementação):
+Recursos da implementação em validação (conferir execução e estado final em `validation.md`):
 
 - `api/paymentContracts.ts`: schemas de dados extraídos dos quatro envelopes gerados BookingPayment; tipos inferidos, status estreitados e limites de plano conforme contrato.
 - `api/paymentQueries.ts`: query account-scoped do pagamento, transporte injetável para servidor/testes.
@@ -26,14 +26,16 @@ Recursos novos planejados (nomes/path definitivos serão conferidos contra a imp
 
 `StayDetail` ganha entrada contextual em accepted e acesso a parcelas abertas. Mudança de trilha/rótulo só se necessária para não apresentar accepted como pagamento já confirmado. Privacidade de `ContactCard` preservada e testada.
 
+Referência do SDK: [Stripe confirmPayment](https://docs.stripe.com/js/payment_intents/confirm_payment?type=card), consultada em 23/10/2026. O SDK pode acrescentar identificadores/segredo na URL de retorno; a rota usa no-referrer e o hook remove essa query antes de prosseguir.
+
 ## Contratos e segurança
 
-| Operação | Uso |
-| --- | --- |
-| GET `/bookings/{bookingId}/payment` | Estado, opções, parcelas, valores e prazo. |
-| PUT `/bookings/{bookingId}/payment` | `{ installmentCount }`; resposta substitui estado de pagamento. |
+| Operação                                                                              | Uso                                                                         |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| GET `/bookings/{bookingId}/payment`                                                   | Estado, opções, parcelas, valores e prazo.                                  |
+| PUT `/bookings/{bookingId}/payment`                                                   | `{ installmentCount }`; resposta substitui estado de pagamento.             |
 | POST `/bookings/{bookingId}/payment/installments/{installmentNumber}/payment-session` | Sessão Stripe: clientSecret, amount, lateFee, pixExpiresAt, paymentMethods. |
-| POST `/bookings/{bookingId}/payment/synchronization` | Reconciliar; depois reler reserva. |
+| POST `/bookings/{bookingId}/payment/synchronization`                                  | Reconciliar; depois reler reserva.                                          |
 
 As quatro rotas aparecem em `bffRoutes` após o merge de dev; conferir testes de classificação e manter bloqueadas as demais sem consumidor. Não liberar ganhos/admin por conveniência. Schemas gerados nunca são editados manualmente.
 
@@ -47,14 +49,14 @@ Status `active` permite pagar parcelas restantes; não significa quitação inte
 
 ## Matriz de testes planejados
 
-| REQ | Nível / casos | Arquivos previstos |
-| --- | --- | --- |
-| 003/004/005/011 | Unitário: schemas, elegibilidade, ordem, prazo limite, centavos e configuração ausente | `paymentContracts.test.ts`, `paymentState.test.ts` quando houver regra extraída |
-| 001/002/006/010 | Funcional: CTA, resumo, lembrete, teclado, loading, sem foto e erro | `StayDetail.test.tsx`, `BookingPayment.test.tsx`, `StripePaymentForm.test.tsx` |
-| 004/005/007/008/009/011 | Integração DOM/MSW: providers + HTTP + SDK simulado; plano válido/inválido, clique duplo, processing, 409, 422, 503, sync pendente e confirmação real do mock | `BookingPayment.int.test.tsx` |
-| 001/005/009 | Integração Node: schemas, rotas permitidas, autorização e envelope do mock | suítes BFF existentes e `src/test/msw/bookingPaymentMock.int.test.ts` |
-| 001 a 011 | E2E Playwright com backend e Stripe simulados: entrada por Minhas estadias, cartão/Pix, retorno, reload, expiração, falha e parcelas seguintes | `e2e/mocked/bookings/payment.spec.ts` |
-| 002/010 | Stories por estado e prints 1440/390 comparados à prancha | stories ao lado dos componentes; `test-results/066/` |
+| REQ                     | Nível / casos                                                                                                                                                 | Arquivos previstos                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 003/004/005/011         | Unitário: schemas, elegibilidade, ordem, prazo limite, centavos e configuração ausente                                                                        | `paymentContracts.test.ts`, `paymentState.test.ts` quando houver regra extraída |
+| 001/002/006/010         | Funcional: CTA, resumo, lembrete, teclado, loading, sem foto e erro                                                                                           | `StayDetail.test.tsx`, `BookingPayment.test.tsx`, `StripePaymentForm.test.tsx`  |
+| 004/005/007/008/009/011 | Integração DOM/MSW: providers + HTTP + SDK simulado; plano válido/inválido, clique duplo, processing, 409, 422, 503, sync pendente e confirmação real do mock | `BookingPayment.int.test.tsx`                                                   |
+| 001/005/009             | Integração Node: schemas, rotas permitidas, autorização e envelope do mock                                                                                    | suítes BFF existentes e `src/test/msw/bookingPaymentMock.int.test.ts`           |
+| 001 a 011               | E2E Playwright com backend e Stripe simulados: entrada por Minhas estadias, cartão/Pix, retorno, reload, expiração, falha e parcelas seguintes                | `e2e/mocked/bookings/payment.spec.ts`                                           |
+| 002/010                 | Stories por estado e prints 1440/390 comparados à prancha                                                                                                     | stories ao lado dos componentes; `test-results/066/`                            |
 
 Fixtures sintéticas em `src/test/fixtures/`; handlers no MSW existente e mock E2E em `e2e/support/handlers/`. SDK simulado somente pela infraestrutura de testes existente ou adaptador com isolamento verificável; produção sempre usa SDK real, sem flag pública que confirme pagamento fictício. E2E simulado não valida Stripe/banco reais; eventual E2E real depende de ambiente de teste e credenciais, com limitação registrada.
 

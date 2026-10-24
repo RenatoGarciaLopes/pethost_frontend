@@ -14,9 +14,10 @@ import { Notice } from "@/shared/ui/feedback/Notice";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
-import { ownerBookingsPath, SEARCH_PATH } from "../../lib/bookingPaths";
+import { ownerBookingsPath, ownerBookingPaymentPath, SEARCH_PATH } from "../../lib/bookingPaths";
 import { statusLabel, trailSteps } from "../../lib/bookingStatus";
 import { formatDeadline, formatPeriod } from "../../lib/formatStay";
+import { paymentCopy } from "../../lib/paymentCopy";
 import type { Booking, BookingStatus } from "../../types";
 import { CancelStayDialog } from "./CancelStayDialog";
 
@@ -148,6 +149,16 @@ export function StayDetail({ accountId, bookingId, now }: StayDetailProps) {
         <dd>{copy.bill(nightly, booking.nights, booking.petCount, total)}</dd>
       </Box>
       <ContactCard booking={booking} />
+      {["accepted", "confirmed", "in_progress", "completed"].includes(booking.status) && (
+        <Box>
+          <Button
+            href={ownerBookingPaymentPath(booking.id)}
+            variant={booking.status === "accepted" ? "contained" : "outlined"}
+          >
+            {booking.status === "accepted" ? paymentCopy.payStay : paymentCopy.viewPayment}
+          </Button>
+        </Box>
+      )}
       {booking.status === "declined" && (
         <Stack spacing={1}>
           <Typography>{copy.declined(host)}</Typography>

@@ -1,5 +1,40 @@
 # Estrutura real do frontend
 
+## Pagamento da estadia (066)
+
+Implementação na feature bookings existente, em validação. Não há módulo global novo de pagamentos.
+
+```text
+src/app/(owner)/owner/bookings/[bookingId]/payment/
+  page.tsx                         guarda owner, UUID, metadata e capa opcional via listing-page
+  page.test.tsx                    composição, autorização e fallback da capa
+src/features/bookings/
+  api/paymentContracts.ts          schemas derivados dos contratos gerados
+  api/paymentQueries.ts            query de pagamento isolada por conta
+  api/client/paymentMutations.client.ts  plano, sessão e sincronização pelo BFF
+  hooks/useBookingPayment.ts       orquestração, cache, retorno Stripe e prazo
+  lib/paymentState.ts              próxima parcela, prazo e confirmação
+  lib/paymentState.test.ts         regras e limites
+  lib/paymentCopy.ts               copy do fluxo sem tradução paralela
+  components/BookingPaymentScreen.tsx  RSC e hidratação da reserva
+  components/client/BookingPayment.tsx  composição client e BookingPaymentView
+  components/client/BookingPayment.int.test.tsx  HTTP/cache/UI com MSW
+  components/client/BookingPayment.stories.tsx   estados isolados da tela
+  components/client/StripePaymentForm.tsx        fronteira Elements/PaymentElement
+  components/client/StripePaymentForm.test.tsx   wrapper real com SDK sintético
+  components/client/StripePaymentForm.stories.tsx  configuração indisponível/mobile
+src/test/fixtures/bookingPayment.ts fixtures sintéticas de pagamento/sessão
+src/test/stripeSdk.ts               SDK DOM sintético exclusivo de testes
+src/test/msw/bookingPaymentMock.int.test.ts contrato/autorização do mock
+e2e/support/stripePayment.ts        instalação/interceptação do SDK no browser do teste
+e2e/support/handlers/bookings.mjs   operações de pagamento e controle externo paid no mock existente
+e2e/mocked/bookings/payment.spec.ts jornadas desktop/mobile e capturas
+playwright.payment.config.ts       runner focado, dev 3177 webpack, backend 5099 exclusivo
+specs/066-booking-payment/          requirements, design, tasks e validação real
+```
+
+`StayDetail` liga para `ownerBookingPaymentPath`, exportado pelo índice neutro; a lista de cards pertence à 094. Sessões Stripe ficam em memória, fora de cache hidratado. Recursos e limites: vault `development/resources/booking-payment.md`. E2E/prints e checks finais ainda pendentes.
+
 ## Fidelidade da home (005, T7, primeiro lote)
 
 `src/widgets/app-shell/components/AppHeader.tsx` extrai o cabeçalho comum; `src/widgets/app-shell/index.ts` oferece sua API síncrona à rota pública, enquanto index.server mantém a casca dos layouts. Home e casca compartilham header sem um widget importar outro. `src/app/HomeFidelity.stories.tsx` compõe os dois widgets como a rota; o HomeScreen continua responsável por um único main.

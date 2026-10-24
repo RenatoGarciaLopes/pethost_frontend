@@ -9,6 +9,18 @@ const operations = Object.entries(openApi.paths as Record<string, Record<string,
 const key = (route: { method: string; pattern: string }) => `${route.method} ${route.pattern}`;
 
 describe("matchBffRoute", () => {
+  it("REQ-PAY-005 permite apenas operações do checkout, sem ganhos/admin", () => {
+    for (const [method, path] of [
+      ["GET", "/bookings/abc/payment"],
+      ["PUT", "/bookings/abc/payment"],
+      ["POST", "/bookings/abc/payment/installments/1/payment-session"],
+      ["POST", "/bookings/abc/payment/synchronization"],
+    ]) {
+      expect(matchBffRoute(method!, path!)).toBeDefined();
+    }
+    expect(matchBffRoute("GET", "/payments/payouts/me")).toBeUndefined();
+    expect(matchBffRoute("GET", "/payments/issues")).toBeUndefined();
+  });
   it("REQ-HTTP-009 casa padrões com parâmetros", () => {
     expect(matchBffRoute("GET", "/pets/me")).toMatchObject({ pattern: "/pets/me" });
     expect(

@@ -30,5 +30,8 @@ export const ownerBookingsPath = (tab: string) => `${OWNER_BOOKINGS_PATH}?aba=${
  */
 export const ownerBookingPath = (bookingId: string) => `${OWNER_BOOKINGS_PATH}/${encodeURIComponent(bookingId)}`;
 
+/** Checkout owner (066); o card mostra o total, e a tela consulta planos/parcelas na API. */
+export const ownerBookingPaymentPath = (bookingId: string) => `${ownerBookingPath(bookingId)}/payment`;
+
 /** A busca de cantinhos mora na home (spec 041, revisão 079). */
 export const SEARCH_PATH = "/";

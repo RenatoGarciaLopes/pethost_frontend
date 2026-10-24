@@ -210,7 +210,140 @@ function createRequest(user, body) {
  * pets de um pedido do anfitrião (antes do mock de pets; outros pets seguem para ele).
  * @example app.use(createMiddleware(...bookingsHandlers, ...petsHandlers));
  */
+/** Plano sintético de pagamento (066). O mock confirma só pelo controle de teste, nunca pela sincronização. */
+function paymentOf(entry) {
+  if (entry.payment) return entry.payment;
+  const deadline = entry.booking.paymentDeadline ?? new Date(Date.now() + 20 * 60 * 60 * 1000).toISOString();
+  const total = entry.booking.totalPrice;
+  entry.payment = {
+    bookingId: entry.booking.id,
+    status: "not_started",
+    totalAmount: total,
+    paidAmount: 0,
+    refundedAmount: 0,
+    currency: "brl",
+    installmentCount: null,
+    paymentDeadline: deadline,
+    installments: [],
+    options: Array.from({ length: Math.max(1, Math.min(6, Math.floor(total / 50))) }, (_, i) => {
+      const count = i + 1;
+      const cents = Math.round(total * 100);
+      const other = Math.floor(cents / count);
+      const installments = Array.from({ length: count }, (_, n) => ({
+        number: n + 1,
+        amount: (other + (n === 0 ? cents % count : 0)) / 100,
+        dueAt: new Date(Date.parse(deadline) + n * 30 * DAY_MS).toISOString(),
+      }));
+      return { count, firstAmount: installments[0].amount, otherAmount: other / 100, installments };
+    }),
+  };
+  return entry.payment;
+}
+
+function paymentAccess(request, bookingId, onlyOwner = true) {
+  const result = ownBooking(request, bookingId, onlyOwner ? "owner" : undefined);
+  if (result.error) return result;
+  const payment = paymentOf(result.entry);
+  if (["cancelled", "expired"].includes(result.booking.status)) payment.status = "cancelled";
+  return { ...result, payment };
+}
+
 export const bookingsHandlers = [
+  // Exclusivo do backend simulado: representa a confirmação externa feita pelo banco/Stripe.
+  http.post("http://localhost:5099/__e2e/payments/:bookingId/paid", async ({ params, request }) => {
+    const entry = bookings.get(params.bookingId);
+    if (!entry) return fail(404, "PAYMENT_BOOKING_NOT_FOUND");
+    const { number = 1, processing = false } = await request.json();
+    const payment = paymentOf(entry);
+    const installment = payment.installments.find((i) => i.number === number);
+    if (!installment) return fail(404, "PAYMENT_INSTALLMENT_NOT_FOUND");
+    installment.status = processing ? "processing" : "paid";
+    if (!processing) {
+      payment.paidAmount = payment.installments
+        .filter((i) => i.status === "paid")
+        .reduce((sum, i) => sum + i.amount, 0);
+      payment.status = payment.installments.every((i) => i.status === "paid") ? "paid" : "active";
+      payment.options = null;
+      if (number === 1) {
+        entry.booking.status = "confirmed";
+        entry.booking.contact = {
+          phone: "44988887777",
+          address: {
+            zipCode: "87020000",
+            street: "Avenida Brasil",
+            number: "120",
+            complement: null,
+            neighborhood: "Zona 01",
+            city: "Maringá",
+            state: "PR",
+          },
+        };
+      }
+    }
+    return ok(payment);
+  }),
+  http.get(`${API}/bookings/:bookingId/payment`, ({ request, params }) => {
+    const result = paymentAccess(request, params.bookingId, false);
+    if (result.error) return result.error;
+    if (result.side === "host") return ok({ ...result.payment, options: undefined });
+    return ok(result.payment);
+  }),
+  http.put(`${API}/bookings/:bookingId/payment`, async ({ request, params }) => {
+    const result = paymentAccess(request, params.bookingId);
+    if (result.error) return result.error;
+    const { payment, booking } = result;
+    if (booking.status !== "accepted") return fail(422, "PAYMENT_BOOKING_NOT_AWAITING_PAYMENT");
+    if (Date.parse(payment.paymentDeadline) <= Date.now()) return fail(422, "PAYMENT_WINDOW_CLOSED");
+    if (payment.paidAmount > 0) return fail(422, "PAYMENT_PLAN_LOCKED");
+    const { installmentCount } = await request.json();
+    const option = payment.options.find((o) => o.count === installmentCount);
+    if (!option) return fail(422, "PAYMENT_INSTALLMENT_COUNT_NOT_ALLOWED");
+    Object.assign(payment, {
+      id: booking.id,
+      status: "pending",
+      installmentCount,
+      installments: option.installments.map((i) => ({
+        ...i,
+        status: "pending",
+        amountDue: i.amount,
+        lateFee: 0,
+        refundStatus: "none",
+        payoutStatus: "held",
+        disputeStatus: "none",
+      })),
+    });
+    return ok(payment);
+  }),
+  http.post(`${API}/bookings/:bookingId/payment/installments/:number/payment-session`, ({ request, params }) => {
+    const result = paymentAccess(request, params.bookingId);
+    if (result.error) return result.error;
+    const { payment } = result;
+    if (payment.status === "cancelled") return fail(422, "PAYMENT_CLOSED");
+    const installment = payment.installments.find((i) => i.number === Number(params.number));
+    if (!installment) return fail(404, "PAYMENT_INSTALLMENT_NOT_FOUND");
+    if (installment.status === "paid") return fail(422, "PAYMENT_INSTALLMENT_ALREADY_PAID");
+    if (installment.status === "processing") return fail(422, "PAYMENT_INSTALLMENT_PROCESSING");
+    if (payment.installments.some((i) => i.number < installment.number && i.status !== "paid"))
+      return fail(422, "PAYMENT_INSTALLMENT_OUT_OF_ORDER");
+    if (installment.number === 1 && Date.parse(payment.paymentDeadline) <= Date.now())
+      return fail(422, "PAYMENT_WINDOW_CLOSED");
+    return ok({
+      bookingId: params.bookingId,
+      installmentNumber: installment.number,
+      installmentCount: payment.installmentCount,
+      amount: installment.amountDue,
+      lateFee: installment.lateFee,
+      clientSecret: `pi_${params.bookingId}_secret_synthetic`,
+      paymentIntentId: `pi_${params.bookingId}`,
+      publishableKey: "pk_test_synthetic",
+      pixExpiresAt: Math.floor(Date.parse(installment.dueAt) / 1000),
+      paymentMethods: ["card", "pix"],
+    });
+  }),
+  http.post(`${API}/bookings/:bookingId/payment/synchronization`, ({ request, params }) => {
+    const result = paymentAccess(request, params.bookingId);
+    return result.error ?? ok(result.payment);
+  }),
   http.post(`${API}/bookings`, async ({ request }) => {
     const user = sessionUserOf(request);
     if (!user) return fail(401, "UNAUTHORIZED");

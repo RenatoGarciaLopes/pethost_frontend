@@ -48,6 +48,8 @@ const publicReviewsNoScreen =
  * chamar a rota, ela sai daqui e entra em `bffRoutes` na mesma entrega.
  */
 export const deniedRoutes: readonly DeniedRoute[] = [
+  denied("GET", "/payments/payouts/me", "Ganhos do anfitrião ainda não tem tela consumidora."),
+  denied("GET", "/payments/issues", adminNoScreen),
   // Admin
   denied("GET", "/bookings", adminNoScreen),
   denied("POST", "/host-applications/identity-blocks/release", adminNoScreen),
@@ -158,7 +160,6 @@ export const bffRoutes: readonly BffRoute[] = [
   route("PUT", "/bookings/{bookingId}/payment"),
   route("POST", "/bookings/{bookingId}/payment/installments/{installmentNumber}/payment-session"),
   route("POST", "/bookings/{bookingId}/payment/synchronization"),
-  route("GET", "/payments/payouts/me"),
 
   // Conversas (a escrita é REST; o aviso em tempo real é o hub, fora do proxy)
   route("POST", "/conversations"),
@@ -208,7 +209,6 @@ export const bffRoutes: readonly BffRoute[] = [
   route("POST", "/owners/{ownerId}/suspension"),
   route("DELETE", "/owners/{ownerId}/suspension"),
   route("POST", "/owners/{ownerId}/cpf-release"),
-  route("GET", "/payments/issues"),
   route("GET", "/conversations/reports"),
   route("GET", "/conversations/reports/{reportId}"),
   route("PUT", "/conversations/reports/{reportId}/resolution"),

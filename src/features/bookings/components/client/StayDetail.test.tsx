@@ -36,6 +36,14 @@ function setup(overrides: Record<string, unknown>) {
 }
 
 describe("StayDetail", () => {
+  it("REQ-PAY-001 aceita oferece checkout e mantém contato privado", () => {
+    setup({ status: "accepted", contact: hostContact });
+    expect(screen.getByRole("link", { name: "Pagar estadia" })).toHaveAttribute(
+      "href",
+      `/owner/bookings/${BOOKING_ID}/payment`,
+    );
+    expect(screen.queryByRole("region", { name: copy.contact })).not.toBeInTheDocument();
+  });
   it("REQ-STAYS-004 trilha com o passo atual, resumo com a conta e o prazo do anfitrião", () => {
     setup({});
     const trail = screen.getByRole("list", { name: copy.trail });
