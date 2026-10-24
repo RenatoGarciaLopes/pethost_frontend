@@ -1,7 +1,6 @@
 /** Copy da 066; mensagens de falha continuam no tradutor global existente. */
 export const paymentCopy = {
   pageTitle: "Pagamento da estadia",
-  payStay: "Pagar estadia",
   viewPayment: "Ver pagamento e parcelas",
   title: "Confirme e pague",
   back: "Voltar para a estadia",

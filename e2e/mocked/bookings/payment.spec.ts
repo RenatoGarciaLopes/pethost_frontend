@@ -54,7 +54,7 @@ test("REQ-PAY-001/002/004/005/006/008 cartão: da estadia aceita à confirmada p
   const stripe = await mockStripePayment(page, { holdConfirm: true });
   const booking = await seed(page);
   await page.goto(`/owner/bookings/${booking.id}`);
-  const action = page.getByRole("link", { name: "Pagar estadia" });
+  const action = page.getByRole("link", { name: /^Pagar R\$/ });
   await waitForHydration(action);
   await action.click();
   await expect(page.getByRole("heading", { name: "Confirme e pague" })).toBeVisible({ timeout: 60000 });

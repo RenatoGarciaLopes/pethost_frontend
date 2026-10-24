@@ -20,6 +20,23 @@ describe("toBooking", () => {
     });
   });
 
+  it("REQ-STAYS-010 o prazo de pagamento e a resposta do anfitrião chegam ao modelo", () => {
+    const accepted = toBooking(
+      bookingDtoSchema.parse(
+        bookingDto({
+          status: "accepted",
+          respondedAt: "2026-12-10T13:00:00+00:00",
+          paymentDeadline: "2026-12-11T13:00:00+00:00",
+        }),
+      ),
+    );
+    expect(accepted).toMatchObject({
+      paymentDeadline: "2026-12-11T13:00:00+00:00",
+      respondedAt: "2026-12-10T13:00:00+00:00",
+    });
+    expect(toBooking(bookingDtoSchema.parse(bookingDto())).paymentDeadline).toBeNull();
+  });
+
   it("REQ-HREQ-004 o contato só existe depois da confirmação", () => {
     expect(
       toBooking(bookingDtoSchema.parse(bookingDto({ status: "confirmed", contact: ownerContactDto }))).contact,

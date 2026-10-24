@@ -33,6 +33,7 @@ export function bookingDto(overrides: Record<string, unknown> = {}) {
     totalPrice: 300,
     requestedAt: "2026-12-10T12:00:00+00:00",
     responseDeadline: "2026-12-11T12:00:00+00:00",
+    paymentDeadline: null,
     respondedAt: null,
     confirmedAt: null,
     checkedInAt: null,

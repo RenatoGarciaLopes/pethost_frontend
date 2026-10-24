@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDeadline, formatPeriod, isDeadlineNear } from "./formatStay";
+import { formatDeadline, formatMoment, formatPeriod, formatStayDay, isDeadlineNear } from "./formatStay";
 
 describe("formatPeriod", () => {
   it("REQ-HREQ-002 período curto, no mesmo mês ou atravessando meses e anos", () => {
@@ -27,5 +27,13 @@ describe("isDeadlineNear", () => {
     expect(isDeadlineNear("2026-12-10T15:00:00Z", now)).toBe(false);
     expect(isDeadlineNear("2026-12-10T11:59:00Z", now)).toBe(false);
     expect(isDeadlineNear(null, now)).toBe(false);
+  });
+});
+
+describe("formatStayDay e formatMoment", () => {
+  it("REQ-STAYS-011 o dia com a semana e o momento curto em Brasília", () => {
+    expect(formatStayDay("2026-12-20")).toBe("dom., 20 de dez.");
+    expect(formatMoment("2026-12-10T17:30:00Z")).toBe("10 de dez., 14h30");
+    expect(formatMoment("2026-12-10T12:00:00Z")).toBe("10 de dez., 9h");
   });
 });

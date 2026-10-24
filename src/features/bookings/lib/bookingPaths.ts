@@ -19,12 +19,6 @@ export const hostBookingPath = (bookingId: string) => `${HOST_BOOKINGS_PATH}/${e
 export const OWNER_BOOKINGS_PATH = "/owner/bookings";
 
 /**
- * Lista do tutor numa aba.
- * @example ownerBookingsPath("anteriores") // "/owner/bookings?aba=anteriores"
- */
-export const ownerBookingsPath = (tab: string) => `${OWNER_BOOKINGS_PATH}?aba=${tab}`;
-
-/**
  * Detalhe de uma estadia do tutor.
  * @example ownerBookingPath(booking.id)
  */
