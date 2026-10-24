@@ -16853,7 +16853,10 @@
           },
           "message": {
             "type": "string",
-            "description": "Mensagem em ingl\u00EAs, para log."
+            "description": "Mensagem em ingl\u00EAs, para log. N\u00E3o leia valores dela: use params."
+          },
+          "params": {
+            "$ref": "#/components/schemas/ApiErrorParams"
           },
           "details": {
             "oneOf": [
@@ -17351,6 +17354,23 @@
         "type": "string",
         "description": "C\u00F3digo est\u00E1vel de erro (SCREAMING_SNAKE_CASE). Os de topo (error.code) e os de valida\u00E7\u00E3o (details[].errors[].code) est\u00E3o aqui, gerados das classes *Errors."
       },
+      "ApiErrorParams": {
+        "type": "object",
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "description": "Valores que a frase do erro cita (limites, datas yyyy-MM-dd, ids de recurso: max, date, petId...). S\u00F3 n\u00FAmero, texto ou booleano, nunca dado pessoal. Ausente quando o erro n\u00E3o tem par\u00E2metros."
+      },
       "ApiErrorResponse": {
         "required": [
           "success",
@@ -17389,21 +17409,7 @@
             "$ref": "#/components/schemas/ApiErrorCode"
           },
           "params": {
-            "type": "object",
-            "additionalProperties": {
-              "oneOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "description": "Limites e formatos da regra (ex.: max, min, format). Nunca o valor enviado. Ausente quando a regra n\u00E3o tem par\u00E2metros."
+            "$ref": "#/components/schemas/ApiErrorParams"
           }
         },
         "description": "A regra de valida\u00E7\u00E3o que falhou, com os par\u00E2metros que a frase dela usa."
