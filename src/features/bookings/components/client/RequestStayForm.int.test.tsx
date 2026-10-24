@@ -204,13 +204,10 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     const { user } = setup();
     await checkCare(user);
     await user.click(screen.getByRole("button", { name: copy.submit }));
-    const tooSoon =
-      "A chegada precisa ser com pelo menos 72 horas de antecedência. O anfitrião tem até 24 horas pra responder.";
+    const tooSoon = "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.";
     expect(await screen.findByText(tooSoon)).toBeInTheDocument();
     expect(screen.getByLabelText("Chegada e saída")).toHaveAccessibleDescription(tooSoon);
-    expect(
-      screen.getByText("Confirma que você vai levar a comida do pet e entregar os remédios dele ao anfitrião."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Marca os dois pra confirmar que a ração e os remédios vão junto.")).toBeInTheDocument();
     expect(screen.queryByText(/Check-in must|Confirm that/)).not.toBeInTheDocument();
   });
 

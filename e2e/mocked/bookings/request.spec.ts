@@ -216,13 +216,9 @@ test("REQ-REQST-007 REQ-HTTP-005 a API recusa a antecedência e os termos: as du
   await page.getByRole("button", { name: "Pedir estadia" }).click();
 
   await expect(
-    page.getByText(
-      "A chegada precisa ser com pelo menos 72 horas de antecedência. O anfitrião tem até 24 horas pra responder.",
-    ),
+    page.getByText("A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder."),
   ).toBeVisible();
-  await expect(
-    page.getByText("Confirma que você vai levar a comida do pet e entregar os remédios dele ao anfitrião."),
-  ).toBeVisible();
+  await expect(page.getByText("Marca os dois pra confirmar que a ração e os remédios vão junto.")).toBeVisible();
   await expect(page.getByText(/Check-in must|Confirm that/)).toHaveCount(0);
   await page.screenshot({ path: `test-results/request-090-erros-${testInfo.project.name}.png`, fullPage: true });
 });

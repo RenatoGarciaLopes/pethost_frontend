@@ -1,3 +1,4 @@
+import { translateCode } from "@/shared/api/errors/translateError";
 import { PLATFORM_FEE_PERCENT } from "@/shared/lib/money";
 
 /** Textos de pedidos e estadias (specs 050 e 052 a 054), na voz da PetHost. Sem gênero presumido. */
@@ -189,7 +190,7 @@ export const bookingCopy = {
     checklist: "Combinou de levar?",
     food: "A ração de costume",
     meds: "Os remédios e como dar",
-    careTerms: "Marca os dois pra confirmar que a ração e os remédios vão junto.",
+    careTerms: translateCode("BOOKING_CARE_TERMS_NOT_ACCEPTED"),
     holdNotice: (host: string) => `O pedido não segura a vaga: ${host} tem até 24 horas pra responder.`,
     theHost: "o anfitrião",
     submit: "Pedir estadia",

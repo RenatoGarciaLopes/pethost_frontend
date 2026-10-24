@@ -197,15 +197,17 @@ const issue = (code: string | null, params: FieldIssue["params"] = {}): FieldIss
 describe("translateFieldIssue", () => {
   it("REQ-HTTP-005 traduz o código do campo com os params", () => {
     expect(translateFieldIssue(issue("BOOKING_CHECK_IN_TOO_SOON", { minimumHours: 72, responseHours: 24 }))).toBe(
-      "A chegada precisa ser com pelo menos 72 horas de antecedência. O anfitrião tem até 24 horas pra responder.",
+      "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.",
     );
     expect(translateFieldIssue(issue("PET_NAME_TOO_LONG", { max: 1500 }))).toBe("O nome aceita até 1.500 caracteres.");
-    expect(translateFieldIssue(issue("BOOKING_CARE_TERMS_NOT_ACCEPTED"))).toMatch(/comida do pet/);
+    expect(translateFieldIssue(issue("BOOKING_CARE_TERMS_NOT_ACCEPTED"))).toBe(
+      "Marca os dois pra confirmar que a ração e os remédios vão junto.",
+    );
   });
 
-  it("REQ-HTTP-005 params ausentes não quebram a frase", () => {
+  it("REQ-HTTP-005 params ausentes não quebram a frase: valem os 72 h e 24 h da regra", () => {
     expect(translateFieldIssue(issue("BOOKING_CHECK_IN_TOO_SOON"))).toBe(
-      "A chegada precisa ser com pelo menos mais tempo de antecedência.",
+      "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.",
     );
   });
 
@@ -258,7 +260,7 @@ describe("translateFieldErrors", () => {
     });
 
     expect(translateFieldErrors(error)).toEqual({
-      checkIn: "A chegada precisa ser com pelo menos 72 horas de antecedência.",
+      checkIn: "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.",
       name: "Falta o e-mail.",
     });
     expect(translateFieldErrors(new Error("x"))).toEqual({});

@@ -1,4 +1,4 @@
-import { formatHours } from "../formatErrorParams";
+import { requestLeadMessage } from "@/shared/lib/date/stayRules";
 import type { CopyCatalog } from "../copyTypes";
 
 /** Reservas e estadias (specs 050 a 054). */
@@ -29,16 +29,12 @@ export const bookingErrorCopy = {
   BOOKING_CONFLICT: "A estadia mudou enquanto você olhava. Confere de novo.",
 
   // Regras do pedido de estadia, validadas por campo
-  BOOKING_CHECK_IN_TOO_SOON: ({ params }) => {
-    const minimum = typeof params.minimumHours === "number" ? formatHours(params.minimumHours) : "mais tempo";
-    const response =
-      typeof params.responseHours === "number"
-        ? ` O anfitrião tem até ${formatHours(params.responseHours)} pra responder.`
-        : "";
-    return `A chegada precisa ser com pelo menos ${minimum} de antecedência.${response}`;
-  },
-  BOOKING_CARE_TERMS_NOT_ACCEPTED:
-    "Confirma que você vai levar a comida do pet e entregar os remédios dele ao anfitrião.",
+  BOOKING_CHECK_IN_TOO_SOON: ({ params }) =>
+    requestLeadMessage(
+      typeof params.minimumHours === "number" ? params.minimumHours : undefined,
+      typeof params.responseHours === "number" ? params.responseHours : undefined,
+    ),
+  BOOKING_CARE_TERMS_NOT_ACCEPTED: "Marca os dois pra confirmar que a ração e os remédios vão junto.",
   BOOKING_DATES_BLOCKED: "O anfitrião não recebe em alguma dessas datas. Tenta outras.",
   BOOKING_LISTING_NOT_BOOKABLE: "Esse cantinho não está recebendo pedidos agora.",
   BOOKING_NOT_AWAITING_PAYMENT: "Essa estadia não está esperando pagamento.",
