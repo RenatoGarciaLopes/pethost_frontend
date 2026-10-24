@@ -68,7 +68,13 @@ test("REQ-STAYS-001 a REQ-STAYS-005 da lista à estadia confirmada, com a trilha
   await stay.click();
   await expect(page).toHaveURL(/\/owner\/bookings\/[0-9a-f-]+$/, NAVIGATION);
 
-  await expect(page.getByRole("list", { name: "Andamento da estadia" })).toBeVisible(NAVIGATION);
+  await expect(page.getByRole("heading", { name: "Pipoca na casa de Aparecida Souza", level: 1 })).toBeVisible(
+    NAVIGATION,
+  );
+  const trail = page.getByRole("list", { name: "Andamento da estadia" });
+  await expect(trail).toBeVisible();
+  await expect(trail.getByRole("listitem").nth(1)).toHaveAttribute("aria-current", "step");
+  await expect(page.getByRole("region", { name: "Resumo" })).toContainText("R$ 60,00 × 5 noites × 1 pet");
   const contact = page.getByRole("region", { name: "Contato do anfitrião" });
   await expect(contact.getByRole("link", { name: "(44) 98888-7777" })).toHaveAttribute("href", "tel:44988887777");
   await expect(contact).toContainText("Avenida Brasil, 120, Casa 2");

@@ -7,7 +7,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import { formatBRL, fromCents } from "@/shared/lib/money";
-import { DoorMark } from "@/shared/ui/brand/DoorMark";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
@@ -18,30 +17,9 @@ import { bookingCopy } from "../../lib/bookingCopy";
 import { ownerBookingPaymentPath, ownerBookingPath, SEARCH_PATH } from "../../lib/bookingPaths";
 import { ownerStayView, sortOwnerStays } from "../../lib/ownerStayCard";
 import type { Booking } from "../../types";
+import { StayPhotoFrame } from "./StayPhotoFrame";
 
 const copy = bookingCopy.owner;
-
-/** Moldura da foto do cantinho: a API ainda não manda foto na reserva, então a porta da casa ocupa o lugar. */
-function StayPhotoFrame() {
-  return (
-    <Box
-      aria-hidden
-      sx={(theme) => ({
-        display: "grid",
-        placeItems: "center",
-        flexShrink: 0,
-        width: { xs: 88, md: 120 },
-        height: { xs: 72, md: 96 },
-        bgcolor: theme.palette.quintal.luz,
-        border: "2px solid",
-        borderColor: "text.primary",
-        borderRadius: `${quintalRadii.card}px`,
-      })}
-    >
-      <DoorMark width={36} interactive={false} />
-    </Box>
-  );
-}
 
 /**
  * Uma estadia na lista: o título é o link para o detalhe e se estende pelo card inteiro (REQ-STAYS-002); a ação

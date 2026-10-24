@@ -47,6 +47,10 @@ export interface Booking {
   petCount: number;
   nightlyRateCents: number;
   totalCents: number;
+  /** Quando o pedido foi feito (ISO). */
+  requestedAt: string;
+  /** Quando a estadia foi confirmada (ISO). */
+  confirmedAt: string | null;
   /** Só enquanto `requested`: até quando o anfitrião responde (ISO). */
   responseDeadline: string | null;
   /** Só enquanto `accepted`: até quando o tutor paga a 1ª parcela (ISO); sem pagar, a reserva expira. */

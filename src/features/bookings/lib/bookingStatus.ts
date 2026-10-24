@@ -42,7 +42,7 @@ export function hostTabOf(id: string | undefined): BookingTab {
   return HOST_TABS.find((tab) => tab.id === id) ?? HOST_TABS[0]!;
 }
 
-const TRAIL = ["Pedido", "Confirmada", "Chegou", "Voltou pra casa"] as const;
+export const TRAIL_LABELS = ["Pedido", "Confirmada", "Chegou", "Voltou pra casa"] as const;
 const TRAIL_POSITION: Partial<Record<BookingStatus, number>> = {
   requested: 0,
   accepted: 1,
@@ -60,7 +60,7 @@ const TRAIL_POSITION: Partial<Record<BookingStatus, number>> = {
 export function trailSteps(status: BookingStatus): TimelineStep[] | null {
   const position = TRAIL_POSITION[status];
   if (position === undefined) return null;
-  return TRAIL.map((label, index) => ({
+  return TRAIL_LABELS.map((label, index) => ({
     id: label,
     label,
     state: index < position ? "done" : index === position ? "current" : "todo",

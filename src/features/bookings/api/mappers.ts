@@ -31,6 +31,8 @@ export function toBooking(dto: BookingDto): Booking {
     petCount: dto.petCount,
     nightlyRateCents: toCents(dto.nightlyRate),
     totalCents: toCents(dto.totalPrice),
+    requestedAt: dto.requestedAt,
+    confirmedAt: dto.confirmedAt ?? null,
     responseDeadline: dto.responseDeadline ?? null,
     paymentDeadline: dto.paymentDeadline ?? null,
     respondedAt: dto.respondedAt ?? null,
