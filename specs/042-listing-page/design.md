@@ -68,6 +68,17 @@ Pedido do Renato: sem estar logado, ver as páginas de venda dos cantinhos; o lo
 - **Mock E2E:** `GET /listings/{id}` do mock da página ficou aberto, como a API.
 - **Pendente:** decidir se a página aberta deve ser indexada (segue `noindex`).
 
+## Revisão 092: calendário com os dias fechados (23/10/2026)
+
+Pedido do Renato: no pedido, escolheu 8 a 15 nov e só ao enviar veio "O cantinho não recebe em domingo (08/11)". O calendário já deve mostrar isso.
+
+- **Regra (backend):** `BookableListing.FirstUnavailableDay` e `FirstBlockedDay` olham cada dia de `StayPeriod.EachDay()`, da chegada à saída inclusive. Então dia fechado não serve de chegada, de saída nem fica no meio.
+- **Shared (`Calendar`, REQ-CAL-010 no vault):** prop genérica `closedDay(iso) => { reason, legend } | null`, sem saber de cantinho. Dia fechado: riscado e apagado, `aria-disabled`, focável (o teclado passa por ele e anuncia "dia: motivo"); legenda das razões dos meses à vista no rodapé. Com a chegada escolhida, a saída para antes do primeiro dia fechado (como o limite de 30 noites); o rodapé diz "dá pra ficar até {dia}, porque o dia seguinte está fechado" ou, na véspera de um dia fechado, pede outra chegada. `StayCalendar` e `DateRangeField` repassam a prop; o campo mostra "Essas datas passam por {dia}, e {motivo}. Escolhe outras." quando o período (da URL) já atravessa um dia fechado.
+- **Feature (`listingClosedDays(availableWeekdays, blocks)`, listing-page lib):** dias da semana fechados viram "o cantinho não recebe aos sábados e aos domingos" (legenda "Não recebe…"), blocos viram "o anfitrião fechou a agenda nesse dia". `getListingClosedPeriods(listingId)` (servidor) lê a agenda; erro vira lista vazia (a API segue barrando no envio).
+- **Quem usa:** `StayBookingCard` (props `availableWeekdays` e `closedPeriods`; a rota da página busca a agenda só com conta e quando não é o dono) e o pedido (`RequestStayComposer` monta o `closedDay` e passa ao `RequestStayForm`, que só repassa ao campo). A busca não usa.
+- **Visitante:** sem conta não há agenda (a API pede login); o calendário dele risca só os dias da semana.
+- **Mock E2E:** `GET /listings/{id}/availability-blocks` no handler da página, com `hostClosedBlock()` (segunda a quarta daqui a umas três semanas, longe das datas dos outros testes).
+
 ## Revisão 089: card de compra para todos (23/10/2026)
 
 Pedido do Renato: logado como anfitrião, a lateral do cantinho alheio mostrava a diária, "Pra pedir uma estadia, entra com a conta de tutor." e "Trocar de conta". Ele quer o componente normal de compra e a troca só quando apertar para contratar.

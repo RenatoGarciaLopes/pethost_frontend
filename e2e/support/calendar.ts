@@ -1,12 +1,15 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-const dayName = new Intl.DateTimeFormat("pt-BR", {
+const dayFormat = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "UTC",
   weekday: "long",
   day: "numeric",
   month: "long",
   year: "numeric",
 });
+
+/** Nome do dia como o calendário diz. @example calendarDayName("2026-11-08") // "domingo, 8 de novembro de 2026" */
+export const calendarDayName = (iso: string) => dayFormat.format(new Date(`${iso}T00:00:00Z`));
 
 /**
  * Abre o calendário pelo campo, toca nos dias ISO dados (avançando de mês em mês até achar cada um) e fecha:
@@ -20,7 +23,7 @@ export async function pickDates(page: Page, field: Locator, ...days: string[]) {
   await expect(dialog).toBeVisible();
   for (const iso of days) {
     const day = dialog.getByRole("button", {
-      name: new RegExp(`^${dayName.format(new Date(`${iso}T00:00:00Z`))}(,|$)`),
+      name: new RegExp(`^${calendarDayName(iso)}(,|$)`),
     });
     for (let guard = 0; guard < 14 && !(await day.isVisible()); guard += 1) {
       await dialog.getByRole("button", { name: "Próximo mês" }).click();
