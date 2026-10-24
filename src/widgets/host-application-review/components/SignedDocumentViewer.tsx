@@ -15,7 +15,7 @@ import { alpha } from "@mui/material/styles";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Surface } from "@/shared/ui/layout/Surface";
 import { Notice } from "@/shared/ui/feedback/Notice";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { adminReviewCopy as copy } from "@/features/admin-host-applications";
 const MAX_TIMEOUT_MS = 2_147_483_647;
 
@@ -131,7 +131,7 @@ export function SignedDocumentViewer({ label, illustration, load }: SignedDocume
           {loading ? (
             <Skeleton variant="rectangular" height={260} aria-label={copy.loading} />
           ) : error ? (
-            <Notice tone="erro">{getErrorMessage(error)}</Notice>
+            <Notice tone="erro">{translateError(error)}</Notice>
           ) : photo ? (
             <>
               <Typography role="status">

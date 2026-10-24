@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import {
   addListingPhoto,
   removeListingPhoto,
@@ -44,7 +44,7 @@ export function useListingPhotoMutations(accountId: string, listing: Listing) {
     } catch (error) {
       if (hasErrorCode(error, "LISTING_PHOTO_NOT_FOUND"))
         await client.invalidateQueries({ queryKey: listingQueries.detail(accountId, listing.id).queryKey });
-      else setError(slot, getErrorMessage(error));
+      else setError(slot, translateError(error));
     } finally {
       lock.current = false;
       setBusySlot(null);

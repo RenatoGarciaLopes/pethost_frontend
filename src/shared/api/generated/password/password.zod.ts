@@ -16,7 +16,7 @@ import * as zod from 'zod';
  */
 export const PostApiV1AuthPasswordForgotBody = zod.object({
   "email": zod.string().nullish(),
-  "role": zod.string().nullish().describe('Obrigatório pelo mesmo motivo do login: o e-mail sozinho não identifica a conta,\nporque a mesma pessoa pode ter conta `owner` e `host`.')
+  "role": zod.string().nullish().describe('Obrigatório pelo mesmo motivo do login: o e-mail sozinho não identifica a conta,\r\nporque a mesma pessoa pode ter conta `owner` e `host`.')
 }).describe('"Esqueci a senha": pede o envio do token de troca por e-mail.')
 
 export const PostApiV1AuthPasswordForgotResponse = zod.object({

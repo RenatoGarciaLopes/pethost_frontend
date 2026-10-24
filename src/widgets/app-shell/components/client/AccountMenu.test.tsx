@@ -114,3 +114,11 @@ describe("menu da conta", () => {
     expect(queryClient.getQueryData(["account", USER.id, "profile"])).toBeUndefined();
   });
 });
+
+it("076 ignora a observa??o nas iniciais e preserva o nome acess?vel", () => {
+  renderWithProviders(<AccountMenu user={{ ...USER, role: "owner", fullName: "Ana Souza (teste)" }} />, {
+    theme: quintalTheme,
+  });
+  expect(screen.getByRole("button", { name: "AS Ana Menu da conta de Ana Souza (teste)" })).toBeVisible();
+  expect(screen.queryByText("A(")).not.toBeInTheDocument();
+});

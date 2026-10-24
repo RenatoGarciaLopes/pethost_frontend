@@ -11,4 +11,4 @@ type Story = StoryObj<typeof meta>;
 export const PessoaFisica: Story = {};
 export const Empresa: Story = { args: { personType: "pj" } };
 export const Salvando: Story = { args: { busy: true } };
-export const ErroNoMotivo: Story = { args: { fieldErrors: { reason: ["Escreva o motivo da decisão."] } } };
+export const ErroNoMotivo: Story = { args: { fieldErrors: { reason: "Escreva o motivo da decisão." } } };

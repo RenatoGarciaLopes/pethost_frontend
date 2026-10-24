@@ -2,7 +2,7 @@ import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
-import { errorCopy } from "@/shared/api/errors/errorCopy";
+import { translateCode } from "@/shared/api/errors/translateError";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { AnnouncerProvider } from "@/shared/ui/feedback/Announcer";
 import { apiFail, apiOk, sessionUserFixture } from "@/test/fixtures/session";
@@ -124,11 +124,11 @@ describe("falhas e envio da troca", () => {
     await user.click(field());
     await user.paste("errada");
     await user.click(screen.getByRole("button", { name: "Entrar na conta de anfitrião" }));
-    expect(await screen.findByText(errorCopy.AUTH_LINKED_ACCOUNT_NOT_FOUND as string)).toBeVisible();
+    expect(await screen.findByText(translateCode("AUTH_LINKED_ACCOUNT_NOT_FOUND"))).toBeVisible();
     expect(field()).toHaveValue("");
     expect(field()).toHaveFocus();
     expect(field()).toHaveAttribute("aria-invalid", "true");
-    expect(field()).toHaveAccessibleDescription(errorCopy.AUTH_LINKED_ACCOUNT_NOT_FOUND as string);
+    expect(field()).toHaveAccessibleDescription(translateCode("AUTH_LINKED_ACCOUNT_NOT_FOUND"));
     expect(screen.queryByText(/ainda não tem conta/)).not.toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(router.replace).not.toHaveBeenCalled();
@@ -146,7 +146,13 @@ describe("falhas e envio da troca", () => {
     server.use(
       http.post("*/api/auth/sessions/switch", () =>
         HttpResponse.json(
-          apiFail("VALIDATION_ERROR", "Inválido", [{ field: "password", messages: ["Confira a senha informada."] }]),
+          apiFail("VALIDATION_ERROR", "Inválido", [
+            {
+              field: "password",
+              messages: ["Confira a senha informada."],
+              errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
+            },
+          ]),
           { status: 400 },
         ),
       ),
@@ -156,7 +162,7 @@ describe("falhas e envio da troca", () => {
     await user.click(field());
     await user.paste("senha existente");
     await user.click(screen.getByRole("button", { name: "Entrar na conta de anfitrião" }));
-    expect(await screen.findByText("Confira a senha informada.")).toBeVisible();
+    expect(await screen.findByText("Confere o e-mail: o formato não é válido.")).toBeVisible();
     expect(field()).toHaveValue("senha existente");
     expect(field()).toHaveFocus();
   });
@@ -168,7 +174,7 @@ describe("falhas e envio da troca", () => {
     await user.click(field());
     await user.paste("senha existente");
     await user.click(screen.getByRole("button", { name: "Entrar na conta de anfitrião" }));
-    await waitFor(() => expect(screen.getByText(errorCopy.NETWORK_ERROR as string)).toBeVisible());
+    await waitFor(() => expect(screen.getByText(translateCode("NETWORK_ERROR"))).toBeVisible());
     expect(field()).toHaveValue("senha existente");
     expect(router.replace).not.toHaveBeenCalled();
   });

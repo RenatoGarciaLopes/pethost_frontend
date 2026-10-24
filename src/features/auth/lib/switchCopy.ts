@@ -1,7 +1,7 @@
 /**
  * Textos de trocar de conta (spec 014, seção Microcopy). Recebem o nome da conta já pronto
  * ("tutor", "anfitrião", de `roleLabel`), que é neutro de propósito: a API não tem campo de tratamento.
- * O erro da senha que não confere vem de `getErrorMessage` (`AUTH_LINKED_ACCOUNT_NOT_FOUND`).
+ * O erro da senha que não confere vem de `translateError` (`AUTH_LINKED_ACCOUNT_NOT_FOUND`).
  */
 export const switchCopy = {
   pageTitle: "Trocar de conta · PetHost",

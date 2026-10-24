@@ -11,8 +11,8 @@ import {
 } from "@/features/admin-host-applications";
 import { useDecision } from "@/features/admin-host-applications/index.client";
 import { documentDrawings } from "@/features/host-applications";
-import { hasErrorCode, isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { hasErrorCode } from "@/shared/api/errors/ApiError";
+import { translateError, translateFieldErrors } from "@/shared/api/errors/translateError";
 import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
 import { Hint } from "@/shared/ui/feedback/Hint";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -52,7 +52,7 @@ export function HostApplicationReview({ accountId, applicationId }: { accountId:
   const existingHosts = useQuery({ ...adminHostQueries.list(accountId), enabled: duplicateDocument });
   const wide = useMediaQuery("(min-width:900px)");
   if (detail.isPending) return <SniffLoader />;
-  if (detail.isError) return <ErrorState title={getErrorMessage(detail.error)} onRetry={() => void detail.refetch()} />;
+  if (detail.isError) return <ErrorState title={translateError(detail.error)} onRetry={() => void detail.refetch()} />;
   const app = detail.data;
   const conflict =
     hasErrorCode(decision.error, "HOST_APPLICATION_CONFLICT") ||
@@ -110,7 +110,7 @@ export function HostApplicationReview({ accountId, applicationId }: { accountId:
           decision.isError && (
             <Notice
               tone="erro"
-              title={getErrorMessage(decision.error, { adminReview: true })}
+              title={translateError(decision.error, { adminReview: true })}
               action={
                 duplicateDocument && (
                   <ExistingHostLinks
@@ -158,7 +158,7 @@ export function HostApplicationReview({ accountId, applicationId }: { accountId:
             personType={app.personType}
             busy={decision.isPending}
             onDecide={decision.mutate}
-            fieldErrors={isApiError(decision.error) ? decision.error.fieldErrors : undefined}
+            fieldErrors={translateFieldErrors(decision.error)}
           />
         ) : (
           <Notice tone="info">{copy.mobile}</Notice>

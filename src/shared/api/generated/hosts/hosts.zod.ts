@@ -63,7 +63,7 @@ export const GetApiV1HostsMeResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -178,7 +178,7 @@ export const PostApiV1HostsMeApplicationResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -238,7 +238,7 @@ export const PatchApiV1HostsMeApplicationResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -280,7 +280,7 @@ export const DeleteApiV1HostsMeApplicationResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -336,7 +336,7 @@ export const PutApiV1HostsMeApplicationDocumentsResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -379,7 +379,7 @@ export const PostApiV1HostsMeApplicationSubmissionResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

@@ -15,10 +15,13 @@ const validationError = new ApiError({
   status: 400,
   code: "VALIDATION_ERROR",
   message: "Validation failed",
-  fieldErrors: {
-    email: ["Email is required."],
-    "address.zipCode": ["Zip code is invalid.", "Zip code is required."],
-    unknownField: ["ignored"],
+  fieldIssues: {
+    email: [{ code: "AUTH_EMAIL_REQUIRED", params: {}, message: "Email is required." }],
+    "address.zipCode": [
+      { code: "AUTH_ZIP_CODE_INVALID", params: { digits: 8 }, message: "Zip code is invalid." },
+      { code: "AUTH_CITY_REQUIRED", params: {}, message: "City is required." },
+    ],
+    unknownField: [{ code: "PET_NAME_TOO_LONG", params: { max: 80 }, message: "ignored" }],
   },
 });
 
@@ -60,8 +63,9 @@ describe("applyFieldErrors", () => {
 
     await user.click(screen.getByRole("button", { name: "aplicar" }));
 
-    expect(screen.getByTestId("email-error")).toHaveTextContent("Email is required.");
-    expect(screen.getByTestId("zip-error")).toHaveTextContent("Zip code is invalid. Zip code is required.");
+    expect(screen.getByTestId("email-error")).toHaveTextContent("Falta o e-mail.");
+    expect(screen.getByTestId("email-error")).not.toHaveTextContent("Email is required.");
+    expect(screen.getByTestId("zip-error")).toHaveTextContent("O CEP precisa ter 8 dígitos. Falta a cidade.");
     expect(screen.getByTestId("password-error")).toBeEmptyDOMElement();
     expect(screen.getByLabelText("E-mail")).toHaveFocus();
     expect(onApplied).toHaveBeenCalledWith(["email", "address.zipCode"]);
@@ -72,10 +76,10 @@ describe("applyFieldErrors", () => {
 
     await user.click(screen.getByRole("button", { name: "aplicar" }));
 
-    expect(screen.getByTestId("root-error")).toHaveTextContent("ignored");
+    expect(screen.getByTestId("root-error")).toHaveTextContent("O nome aceita até 80 caracteres.");
   });
 
-  it("REQ-HTTP-006 erro sem fieldErrors não mexe no formulário", async () => {
+  it("REQ-HTTP-006 erro sem motivos de campo não mexe no formulário", async () => {
     const onApplied = vi.fn();
     const { user } = renderWithProviders(<Form error={new Error("x")} onApplied={onApplied} />);
 

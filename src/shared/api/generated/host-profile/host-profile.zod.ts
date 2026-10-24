@@ -95,7 +95,7 @@ export const PatchApiV1HostsMeResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -159,7 +159,7 @@ export const PutApiV1HostsMeAvatarResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -217,7 +217,7 @@ export const DeleteApiV1HostsMeAvatarResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -265,7 +265,7 @@ export const PostApiV1HostsMeDeletionResponse = zod.object({
 export const PostApiV1HostsReactivateBody = zod.object({
   "email": zod.string().nullish(),
   "password": zod.string().nullish()
-}).describe('Reativa a conta de anfitrião (e o perfil, se já aprovado) com as credenciais do login, e\nabre a sessão. Anônimo: conta inativa não consegue entrar para pedir isso logada.')
+}).describe('Reativa a conta de anfitrião (e o perfil, se já aprovado) com as credenciais do login, e\r\nabre a sessão. Anônimo: conta inativa não consegue entrar para pedir isso logada.')
 
 export const PostApiV1HostsReactivateResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),

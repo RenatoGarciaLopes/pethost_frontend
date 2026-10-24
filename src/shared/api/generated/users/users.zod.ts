@@ -36,7 +36,7 @@ export const PostApiV1UsersRegisterResponse = zod.object({
   "data": zod.object({
   "accessToken": zod.string(),
   "refreshToken": zod.string(),
-  "expiresAt": zod.number().int().describe('Instante em que o access token expira, em Unix time (segundos desde 1970-01-01 UTC) —\no mesmo valor do claim `exp` do JWT. É o campo que o cliente usa para agendar o refresh.'),
+  "expiresAt": zod.number().int().describe('Instante em que o access token expira, em Unix time (segundos desde 1970-01-01 UTC) —\r\no mesmo valor do claim `exp` do JWT. É o campo que o cliente usa para agendar o refresh.'),
   "user": zod.object({
   "id": zod.string().uuid(),
   "fullName": zod.string(),
@@ -55,8 +55,8 @@ export const PostApiV1UsersRegisterResponse = zod.object({
   "state": zod.string().nullish()
 }).describe('Endereço como vem na request e como sai na resposta.')]).optional(),
   "isActive": zod.boolean()
-}).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\nSão os dados da própria pessoa, então o endereço vai completo.')
-}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\nRetorno de cadastro, login e refresh — o cliente trata os três igual.'),
+}).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\r\nSão os dados da própria pessoa, então o endereço vai completo.')
+}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\r\nRetorno de cadastro, login e refresh — o cliente trata os três igual.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -83,7 +83,7 @@ export const GetApiV1UsersMeResponse = zod.object({
   "state": zod.string().nullish()
 }).describe('Endereço como vem na request e como sai na resposta.')]).optional(),
   "isActive": zod.boolean()
-}).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\nSão os dados da própria pessoa, então o endereço vai completo.'),
+}).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\r\nSão os dados da própria pessoa, então o endereço vai completo.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -104,7 +104,7 @@ export const PostApiV1UsersMePasswordResponse = zod.object({
   "data": zod.object({
   "accessToken": zod.string(),
   "refreshToken": zod.string(),
-  "expiresAt": zod.number().int().describe('Instante em que o access token expira, em Unix time (segundos desde 1970-01-01 UTC) —\no mesmo valor do claim `exp` do JWT. É o campo que o cliente usa para agendar o refresh.'),
+  "expiresAt": zod.number().int().describe('Instante em que o access token expira, em Unix time (segundos desde 1970-01-01 UTC) —\r\no mesmo valor do claim `exp` do JWT. É o campo que o cliente usa para agendar o refresh.'),
   "user": zod.object({
   "id": zod.string().uuid(),
   "fullName": zod.string(),
@@ -123,8 +123,8 @@ export const PostApiV1UsersMePasswordResponse = zod.object({
   "state": zod.string().nullish()
 }).describe('Endereço como vem na request e como sai na resposta.')]).optional(),
   "isActive": zod.boolean()
-}).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\nSão os dados da própria pessoa, então o endereço vai completo.')
-}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\nRetorno de cadastro, login e refresh — o cliente trata os três igual.'),
+}).describe('Dados do usuário que acompanham a sessão. Nunca inclui hash de senha (§15).\r\nSão os dados da própria pessoa, então o endereço vai completo.')
+}).describe('Sessão autenticada: o par de tokens, quando o access token expira e quem é o usuário.\r\nRetorno de cadastro, login e refresh — o cliente trata os três igual.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

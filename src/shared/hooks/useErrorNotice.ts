@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { useCountdown } from "@/shared/hooks/useCountdown";
 
 type ErrorNotice = { kind: "error"; message: string } | { kind: "rateLimited"; error: ApiError };
@@ -27,7 +27,7 @@ export function useErrorNotice() {
     // Falha do próprio front (bug), não da API: aparece no console em desenvolvimento.
     if (!isApiError(error) && process.env.NODE_ENV !== "production")
       console.error("[formulário] falha inesperada", error);
-    setNotice({ kind: "error", message: getErrorMessage(error) });
+    setNotice({ kind: "error", message: translateError(error) });
   }
 
   // Fim da contagem do limite: o aviso some e o envio volta.
@@ -37,7 +37,7 @@ export function useErrorNotice() {
     message: !visible
       ? null
       : visible.kind === "rateLimited"
-        ? getErrorMessage(new ApiError({ ...visible.error.toJSON(), retryAfterSeconds: countdown.remaining }))
+        ? translateError(new ApiError({ ...visible.error.toJSON(), retryAfterSeconds: countdown.remaining }))
         : visible.message,
     tone: visible?.kind === "rateLimited" ? ("atencao" as const) : ("erro" as const),
     blocked: countdown.isRunning,

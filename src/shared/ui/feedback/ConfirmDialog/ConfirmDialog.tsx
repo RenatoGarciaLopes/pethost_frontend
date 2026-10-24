@@ -42,7 +42,7 @@ export interface ConfirmDialogProps {
  *   confirmLabel="Tirar da lista"
  *   cancelLabel="Deixar como está"
  *   busy={deactivate.isPending}
- *   error={deactivate.error ? getErrorMessage(deactivate.error) : null}
+ *   error={deactivate.error ? translateError(deactivate.error) : null}
  *   onConfirm={() => deactivate.mutate()}
  *   onCancel={() => setAsking(false)}
  * />

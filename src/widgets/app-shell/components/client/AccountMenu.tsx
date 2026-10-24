@@ -1,12 +1,12 @@
 "use client";
 
-import { Avatar, Box, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useId, useState } from "react";
 import { useLinkedAccounts } from "@/features/auth/index.client";
 import type { AccountRole } from "@/shared/auth/contracts/session";
 import { roleLabel } from "@/shared/config/roleLabels";
-import { initialsOf } from "@/shared/lib/text/initials";
+import { InitialsAvatar } from "@/shared/ui/media/InitialsAvatar";
 import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { useLogout } from "../../hooks/useLogout";
@@ -65,13 +65,7 @@ export function AccountMenu({ user }: AccountMenuProps) {
         }}
       >
         {/* O nome do botão começa pelas iniciais visíveis e segue com o texto escondido (WCAG 2.5.3). */}
-        <Avatar
-          src={user.avatarUrl ?? undefined}
-          alt=""
-          sx={{ bgcolor: "primary.main", color: "primary.contrastText", width: 32, height: 32 }}
-        >
-          {initialsOf(user.fullName)}
-        </Avatar>{" "}
+        <InitialsAvatar name={user.fullName} src={user.avatarUrl} size={32} />{" "}
         <Typography component="span" sx={{ fontWeight: 700, display: { xs: "none", md: "inline" } }}>
           {user.fullName.split(" ")[0]}
         </Typography>{" "}

@@ -47,7 +47,7 @@ describe("password.client", () => {
     await expect(resetPassword({ token: "valido", newPassword: "Abcdef1!" }, transport)).rejects.toMatchObject({
       status: 400,
       code: "VALIDATION_ERROR",
-      fieldErrors: { newPassword: ["Senha fraca."] },
+      fieldIssues: { newPassword: [expect.objectContaining({ message: "Senha fraca." })] },
     });
   });
   it("REQ-PWD-010 propaga token inválido", async () => {
