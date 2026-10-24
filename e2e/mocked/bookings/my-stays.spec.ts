@@ -88,7 +88,7 @@ test("REQ-STAYS-004 pedido esperando: prazo do anfitrião e nenhum contato", asy
   await expect(page.getByRole("region", { name: "Contato do anfitrião" })).toHaveCount(0);
 });
 
-test("REQ-STAYS-006 REQ-STAYS-007 cancela a estadia confirmada com motivo e vê o reembolso; ela vai para Anteriores", async ({
+test("REQ-STAYS-006 REQ-STAYS-007 cancela a estadia confirmada com motivo e vê o reembolso; ela aparece como cancelada na lista", async ({
   page,
 }) => {
   const stay = await seedStay(page, {
@@ -136,7 +136,7 @@ test("REQ-STAYS-010 a lista única põe o que falta pagar primeiro, com 'Pagar' 
   await expect(cards).toHaveCount(3);
   await expect(cards.nth(0)).toContainText("Aceita · falta pagar");
   await expect(cards.nth(0)).toContainText(/Pague até .* pra garantir a vaga./);
-  await expect(cards.nth(0).getByRole("link", { name: /^Pagar R$s300,00$/ })).toHaveAttribute(
+  await expect(cards.nth(0).getByRole("link", { name: /^Pagar R\$\s300,00$/ })).toHaveAttribute(
     "href",
     `/owner/bookings/${toPay.id}/payment`,
   );
