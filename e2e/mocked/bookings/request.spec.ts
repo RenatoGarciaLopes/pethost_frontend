@@ -144,9 +144,10 @@ test("REQ-LPAGE-013 o calendário do pedido risca o domingo e a agenda do anfitr
   baseURL,
 }) => {
   await loginAccount(page, baseURL!, "both", "owner");
-  // Datas da URL que passam pela agenda fechada: o campo já diz o motivo, antes de enviar.
+  // Datas da URL dentro da agenda fechada (segunda a quarta; a véspera é domingo, que viria antes): o campo já diz o
+  // motivo, antes de enviar.
   const block = hostClosedBlock();
-  await page.goto(requestPath(plus(block.startDate, -1), plus(block.startDate, 1), [LUNA]));
+  await page.goto(requestPath(block.startDate, block.endDate, [LUNA]));
   const field = page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true });
   await expect(
     page.getByText(/^Essas datas passam por .+, e o anfitrião fechou a agenda nesse dia\. Escolhe outras\.$/),
