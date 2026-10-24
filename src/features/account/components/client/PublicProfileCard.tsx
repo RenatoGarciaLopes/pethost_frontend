@@ -1,7 +1,7 @@
-import { Avatar, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { formatMemberSince } from "@/shared/lib/date/formatMemberSince";
-import { initialsOf } from "@/shared/lib/text/initials";
+import { InitialsAvatar } from "@/shared/ui/media/InitialsAvatar";
 import { accountCopy } from "../../lib/accountCopy";
 import type { AccountProfile } from "../../types/accountProfile";
 
@@ -25,13 +25,12 @@ export function PublicProfileCard({ profile, photo }: PublicProfileCardProps) {
   return (
     <Stack spacing={1.5} sx={{ alignItems: "center", textAlign: "center" }}>
       {photo ?? (
-        <Avatar
-          src={profile.avatarUrl ?? undefined}
+        <InitialsAvatar
+          name={profile.fullName}
+          src={profile.avatarUrl}
           alt={profile.avatarUrl ? profile.fullName : undefined}
-          sx={{ width: 96, height: 96, fontSize: 32, bgcolor: "primary.main", color: "primary.contrastText" }}
-        >
-          {initialsOf(profile.fullName)}
-        </Avatar>
+          size={96}
+        />
       )}
       <Typography variant="h2" sx={{ fontSize: 22 }}>
         {profile.fullName}

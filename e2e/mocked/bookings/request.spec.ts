@@ -210,3 +210,53 @@ test("REQ-REQST-001 id que não é de cantinho apresenta o 404 da casca", async 
   await page.goto("/listings/nao-e-um-id/request");
   await expect(page.getByRole("heading", { name: "Esse cantinho não existe", exact: true })).toBeVisible();
 });
+
+test("REQ-REQST-007 REQ-HTTP-005 a API recusa a antecedência e os termos: as duas frases chegam em português", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  await loginAccount(page, baseURL!, "both", "owner");
+  const monday = nextMonday();
+  // A tela já impede esses dois erros; a recusa da API (regra mudou, tela antiga aberta) é forçada na rota.
+  await page.route("**/api/bookings", async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    await route.fulfill({
+      status: 400,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "One or more fields are invalid.",
+          details: [
+            {
+              field: "checkIn",
+              messages: ["Check-in must be at least 72 hours ahead."],
+              errors: [
+                { code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72, responseHours: 24, acceptHours: 48 } },
+              ],
+            },
+            {
+              field: "careTermsAccepted",
+              messages: ["Confirm that you will bring the pet's food and hand over its medicines to the host."],
+              errors: [{ code: "BOOKING_CARE_TERMS_NOT_ACCEPTED" }],
+            },
+          ],
+        },
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  });
+  await page.goto(requestPath(monday, plus(monday, 2), [LUNA]));
+  const checklist = page.getByRole("group", { name: "Combinou de levar?" });
+  await waitForHydration(checklist.getByRole("checkbox").first());
+  for (const box of await checklist.getByRole("checkbox").all()) await box.check();
+  await page.getByRole("button", { name: "Pedir estadia" }).click();
+
+  await expect(
+    page.getByText("A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder."),
+  ).toBeVisible();
+  await expect(page.getByText("Marca os dois pra confirmar que a ração e os remédios vão junto.")).toBeVisible();
+  await expect(page.getByText(/Check-in must|Confirm that/)).toHaveCount(0);
+  await page.screenshot({ path: `test-results/request-090-erros-${testInfo.project.name}.png`, fullPage: true });
+});

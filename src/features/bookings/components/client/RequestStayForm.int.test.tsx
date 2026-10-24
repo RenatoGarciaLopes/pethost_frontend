@@ -183,22 +183,40 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     expect(bodies).toHaveLength(0);
   });
 
-  it("REQ-REQST-007 400 da API volta ao campo", async () => {
+  it("REQ-REQST-007 400 da API volta ao campo e ao grupo, traduzido por código e nunca em inglês", async () => {
     serve(() =>
       HttpResponse.json(
-        apiFail("VALIDATION_ERROR", "VALIDATION_ERROR", [{ field: "checkIn", messages: ["A chegada já passou."] }]),
+        apiFail("VALIDATION_ERROR", "One or more fields are invalid.", [
+          {
+            field: "checkIn",
+            messages: ["Check-in must be at least 72 hours ahead."],
+            errors: [{ code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72, responseHours: 24 } }],
+          },
+          {
+            field: "careTermsAccepted",
+            messages: ["Confirm that you will bring the pet's food and hand over its medicines to the host."],
+            errors: [{ code: "BOOKING_CARE_TERMS_NOT_ACCEPTED" }],
+          },
+        ]),
         { status: 400 },
       ),
     );
     const { user } = setup();
     await checkCare(user);
     await user.click(screen.getByRole("button", { name: copy.submit }));
-    expect(await screen.findByText("A chegada já passou.")).toBeInTheDocument();
-    expect(screen.getByLabelText("Chegada e saída")).toHaveAccessibleDescription("A chegada já passou.");
+    const tooSoon = "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.";
+    expect(await screen.findByText(tooSoon)).toBeInTheDocument();
+    expect(screen.getByLabelText("Chegada e saída")).toHaveAccessibleDescription(tooSoon);
+    expect(screen.getByText("Marca os dois pra confirmar que a ração e os remédios vão junto.")).toBeInTheDocument();
+    expect(screen.queryByText(/Check-in must|Confirm that/)).not.toBeInTheDocument();
   });
 
   it("REQ-REQST-007 regra da API vira frase no topo com o dado: a noite sem vaga", async () => {
-    serve(() => HttpResponse.json(apiFail("BOOKING_CAPACITY_EXCEEDED", "No room on 2026-12-22."), { status: 422 }));
+    serve(() =>
+      HttpResponse.json(apiFail("BOOKING_CAPACITY_EXCEEDED", "No room.", undefined, { date: "2026-12-22" }), {
+        status: 422,
+      }),
+    );
     const { user } = setup();
     await checkCare(user);
     await user.click(screen.getByRole("button", { name: copy.submit }));

@@ -4,7 +4,7 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { useFlashMessageOnce } from "@/shared/hooks/useFlashMessage";
 import { Celebration } from "@/shared/ui/brand/Celebration";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
@@ -174,7 +174,7 @@ export function ApplicationStatusView({ accountId }: { accountId: string }) {
     return (
       <ErrorState
         title={verificationCopy.loadError}
-        description={getErrorMessage(query.error)}
+        description={translateError(query.error)}
         onRetry={() => void query.refetch()}
       />
     );

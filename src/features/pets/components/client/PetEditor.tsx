@@ -4,7 +4,7 @@ import { Box, Divider, Link, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { useCallback, useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { useUnsavedChangesGuard } from "@/shared/hooks/useUnsavedChangesGuard";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { petQueries } from "../../api/queries";
@@ -77,7 +77,7 @@ export function PetEditor({ accountId, petId }: { accountId: string; petId: stri
     return (
       <ErrorState
         title={copy.loadError}
-        description={getErrorMessage(query.error)}
+        description={translateError(query.error)}
         onRetry={() => void query.refetch()}
       />
     );

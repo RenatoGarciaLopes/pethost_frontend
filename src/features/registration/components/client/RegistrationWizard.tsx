@@ -8,7 +8,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { FormProvider, get, useForm, type FieldErrors } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { loginRedirectPath, registerPath } from "@/shared/config/appRoutes";
 import { useCountdown } from "@/shared/hooks/useCountdown";
@@ -110,7 +110,7 @@ export function RegistrationWizard({ role, next }: RegistrationWizardProps) {
   }
 
   function handleApiError(error: unknown) {
-    const message = getErrorMessage(error, { role });
+    const message = translateError(error, { role });
     if (!isApiError(error)) {
       // Falha do próprio front (bug), não da API: aparece no console em desenvolvimento.
       if (process.env.NODE_ENV !== "production") console.error("[cadastro] falha inesperada", error);
@@ -245,7 +245,7 @@ export function RegistrationWizard({ role, next }: RegistrationWizardProps) {
                   }
                 >
                   {visibleNotice.kind === "rateLimited"
-                    ? getErrorMessage(
+                    ? translateError(
                         new ApiError({ ...visibleNotice.error.toJSON(), retryAfterSeconds: countdown.remaining }),
                       )
                     : visibleNotice.message}

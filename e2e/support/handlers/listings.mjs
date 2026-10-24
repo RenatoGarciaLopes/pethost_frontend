@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http } from "msw";
 import { randomUUID } from "node:crypto";
 import { hostIsCompany, hostPayoutsEnabled } from "./accountProfile.mjs";
@@ -51,26 +52,31 @@ function ownedListing(request, listingId) {
 /** Regras da seção 4 de `modulo-listings.md` (todas juntas num 400), sem consultar o mapa. */
 function validate(body, isCompany) {
   const errors = [];
-  const reject = (field, message) => errors.push({ field, messages: [message] });
-  if (!body.title?.trim() || body.title.length > 80) reject("title", "Título obrigatório, até 80.");
-  if (!body.description?.trim() || body.description.length > 4000) reject("description", "Descrição obrigatória.");
-  if (!isCompany && !["house", "apartment"].includes(body.homeType)) reject("homeType", "Tipo da casa obrigatório.");
+  const reject = (field, message, code, params) => errors.push(fieldIssue(field, message, code, params));
+  if (!body.title?.trim() || body.title.length > 80)
+    reject("title", "Título obrigatório, até 80.", "LISTING_TITLE_REQUIRED");
+  if (!body.description?.trim() || body.description.length > 4000)
+    reject("description", "Descrição obrigatória.", "LISTING_DESCRIPTION_REQUIRED");
+  if (!isCompany && !["house", "apartment"].includes(body.homeType))
+    reject("homeType", "Tipo da casa obrigatório.", "LISTING_HOME_TYPE_INVALID");
   for (const field of ["hasYard", "hasDogs", "hasCats", "hasKids", "acceptsSmall", "acceptsMedium", "acceptsLarge"])
-    if (typeof body[field] !== "boolean") reject(field, "Obrigatório.");
+    if (typeof body[field] !== "boolean")
+      reject(field, "Obrigatório.", `LISTING_${field.replace(/[A-Z]/g, (c) => `_${c}`).toUpperCase()}_REQUIRED`);
   if (
     !Array.isArray(body.acceptedSpecies) ||
     body.acceptedSpecies.length === 0 ||
     body.acceptedSpecies.some((item) => !SPECIES.includes(item))
   )
-    reject("acceptedSpecies", "Ao menos um tipo.");
+    reject("acceptedSpecies", "Ao menos um tipo.", "LISTING_ACCEPTED_SPECIES_REQUIRED");
   const max = isCompany ? 200 : 10;
   if (!Number.isInteger(body.capacity) || body.capacity < 1 || body.capacity > max)
-    reject("capacity", `De 1 a ${max}.`);
-  if (!(body.nightlyRate >= 10 && body.nightlyRate <= 10000)) reject("nightlyRate", "De 10 a 10000.");
+    reject("capacity", `De 1 a ${max}.`, "LISTING_CAPACITY_OUT_OF_RANGE", { max });
+  if (!(body.nightlyRate >= 10 && body.nightlyRate <= 10000))
+    reject("nightlyRate", "De 10 a 10000.", "LISTING_NIGHTLY_RATE_OUT_OF_RANGE", { min: 10, max: 10000 });
   if (!Array.isArray(body.availableWeekdays) || body.availableWeekdays.length === 0)
-    reject("availableWeekdays", "Ao menos um dia.");
+    reject("availableWeekdays", "Ao menos um dia.", "LISTING_AVAILABLE_WEEKDAYS_REQUIRED");
   if (!/^\d{8}$/.test(String(body.address?.zipCode ?? "").replace(/\D/g, "")))
-    reject("address.zipCode", "CEP inválido.");
+    reject("address.zipCode", "CEP inválido.", "LISTING_ZIP_CODE_INVALID", { digits: 8 });
   return errors;
 }
 
@@ -92,7 +98,9 @@ function touch(listing, changes) {
 async function photoOf(request) {
   const file = (await request.formData()).get("file");
   if (!file || !IMAGE_TYPES.includes(file.type))
-    return { error: fail(400, "VALIDATION_ERROR", [{ field: "file", messages: ["Envie JPG, PNG ou WebP."] }]) };
+    return {
+      error: fail(400, "VALIDATION_ERROR", [fieldIssue("file", "Envie JPG, PNG ou WebP.", "IMAGE_UNSUPPORTED_FORMAT")]),
+    };
   return {
     url: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}`,
     size: file.size,
@@ -191,7 +199,9 @@ export const listingsHandlers = [
     const { photoIds } = (await request.json().catch(() => null)) ?? {};
     const current = result.listing.photos;
     if (!Array.isArray(photoIds) || photoIds.length !== current.length || new Set(photoIds).size !== current.length)
-      return fail(400, "VALIDATION_ERROR", [{ field: "photoIds", messages: ["Mande todas as fotos, uma vez cada."] }]);
+      return fail(400, "VALIDATION_ERROR", [
+        fieldIssue("photoIds", "Mande todas as fotos, uma vez cada.", "LISTING_PHOTO_ORDER_INVALID"),
+      ]);
     const reordered = photoIds.map((id) => current.find((photo) => photo.id === id));
     if (reordered.some((photo) => !photo)) return fail(404, "LISTING_PHOTO_NOT_FOUND");
     return touch(result.listing, { photos: reordered });

@@ -41,7 +41,7 @@ export function PasswordChangeForm({ role }: { role: PersonalRole }) {
 
   function handleApiError(error: unknown) {
     if (isApiError(error) && error.code === "VALIDATION_ERROR") {
-      if (error.fieldErrors.currentPassword) resetField("currentPassword");
+      if (error.fieldIssues.currentPassword) resetField("currentPassword");
       return applyFieldErrors(setError, error, { fields: ["currentPassword", "newPassword"] });
     }
     notice.report(error);

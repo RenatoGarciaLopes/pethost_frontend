@@ -3,7 +3,7 @@
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useEffect, useId, useState, type ReactNode } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { brasiliaToday } from "@/shared/lib/date/stayRules";
 import { DoorScene, type DoorSceneState } from "@/shared/ui/brand/DoorScene";
 import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
@@ -157,7 +157,7 @@ export function StayMilestones({ accountId, booking, now }: StayMilestonesProps)
         confirmLabel={copy.confirm}
         cancelLabel={copy.keep}
         busy={mutation.isPending}
-        error={mutation.isError ? getErrorMessage(mutation.error) : null}
+        error={mutation.isError ? translateError(mutation.error) : null}
         onConfirm={confirm}
         onCancel={() => {
           mutation.reset();

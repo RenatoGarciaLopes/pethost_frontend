@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http } from "msw";
 import { validateImageFile } from "../../../src/shared/lib/files/validateImageFile.ts";
 import { isStrongPassword } from "../../../src/shared/lib/validation/password.ts";
@@ -75,7 +76,8 @@ function profileOf(user) {
   }
   return profile;
 }
-const fieldError = (field, message) => fail(400, "VALIDATION_ERROR", [{ field, messages: [message] }]);
+const fieldError = (field, message, code, params) =>
+  fail(400, "VALIDATION_ERROR", [fieldIssue(field, message, code, params)]);
 function authorized(request, role) {
   const user = sessionUserOf(request);
   return !user
@@ -99,7 +101,8 @@ function handlersFor(role) {
       const profile = profileOf(user);
       if (!profile) return fail(404, "HOST_NOT_FOUND");
       const body = await request.json().catch(() => null);
-      if (!body || typeof body !== "object") return fieldError("fullName", "Confira os dados.");
+      if (!body || typeof body !== "object")
+        return fieldError("fullName", "Confira os dados.", "AUTH_FULL_NAME_REQUIRED");
       const changed = (field, current) => body[field] !== undefined && body[field] !== current;
       const cpfChanged = changed("cpf", profile.cpf);
       const birthChanged = changed("birthDate", user.birthDate);
@@ -108,7 +111,7 @@ function handlersFor(role) {
         if (paid && cpfChanged) return fail(422, "OWNER_CPF_LOCKED");
         if (paid && birthChanged) return fail(422, "OWNER_BIRTH_DATE_LOCKED");
         if ((cpfChanged || birthChanged) && body.currentPassword !== accountOf(user)?.password)
-          return fieldError("currentPassword", "Confere sua senha atual.");
+          return fieldError("currentPassword", "Confere sua senha atual.", "AUTH_CURRENT_PASSWORD_INCORRECT");
         if (
           cpfChanged &&
           (body.cpf === TAKEN_CPF ||
@@ -149,10 +152,11 @@ function handlersFor(role) {
       if (Number(request.headers.get("content-length")) > 8 * 1024 * 1024) return fail(413, "PAYLOAD_TOO_LARGE");
       const body = await request.formData().catch(() => null);
       const file = body?.get("file");
-      if (!(file instanceof File)) return fieldError("file", "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.");
+      if (!(file instanceof File))
+        return fieldError("file", "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.", "IMAGE_UNSUPPORTED_FORMAT");
       if (file.size > 8 * 1024 * 1024) return fail(413, "PAYLOAD_TOO_LARGE");
       if (!validateImageFile(file).ok)
-        return fieldError("file", "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.");
+        return fieldError("file", "Essa foto não serve: use JPG, PNG ou WebP de até 5 MB.", "IMAGE_UNSUPPORTED_FORMAT");
       user.avatarUrl = `https://images.example.test/${user.id}-${++photoVersion}.png`;
       return ok(profile);
     }),
@@ -194,13 +198,13 @@ export const accountProfileHandlers = [
     const body = await request.json().catch(() => null);
     const account = accountOf(user);
     if (!account || body?.currentPassword !== account.password)
-      return fieldError("currentPassword", "Confere sua senha atual.");
+      return fieldError("currentPassword", "Confere sua senha atual.", "AUTH_CURRENT_PASSWORD_INCORRECT");
     if (
       typeof body?.newPassword !== "string" ||
       !isStrongPassword(body.newPassword) ||
       body.newPassword === account.password
     )
-      return fieldError("newPassword", "A senha ainda não cumpre a régua.");
+      return fieldError("newPassword", "A senha ainda não cumpre a régua.", "AUTH_PASSWORD_MISSING_DIGIT");
     account.password = body.newPassword;
     revokeUserSessions(user.id);
     return ok(issueSession(user));

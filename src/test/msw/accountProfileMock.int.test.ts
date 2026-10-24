@@ -55,7 +55,11 @@ it("REQ-ACC-005/008 tutor sem pagamento exige senha e recusa CPF de outra conta"
   });
   expect(error.status).toBe(400);
   expect((await error.json()).error.details).toEqual([
-    { field: "currentPassword", messages: ["Confere sua senha atual."] },
+    {
+      field: "currentPassword",
+      messages: ["Confere sua senha atual."],
+      errors: [{ code: "AUTH_CURRENT_PASSWORD_INCORRECT" }],
+    },
   ]);
   const conflict = await call(session.accessToken, "/owners/me", "PATCH", {
     cpf: TAKEN_CPF,

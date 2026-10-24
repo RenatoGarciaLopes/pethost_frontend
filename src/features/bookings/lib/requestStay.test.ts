@@ -11,7 +11,8 @@ const pets = [
 ];
 
 const CARE = { food: true, meds: true };
-const apiError = (code: string, message = "", status = 422) => new ApiError({ status, code, message });
+const apiError = (code: string, params: Record<string, string> = {}, status = 422) =>
+  new ApiError({ status, code, message: "english from the API", params });
 
 describe("requestStaySchema", () => {
   const schema = requestStaySchema(TODAY);
@@ -118,31 +119,31 @@ it("REQ-REQST-005 corpo do POST com o cantinho, os pets, as datas e o aceite do 
 });
 
 describe("requestStayErrorMessage", () => {
-  it("REQ-REQST-007 dia fechado: o dia da semana que a API cita", () => {
-    const error = apiError("BOOKING_WEEKDAY_NOT_AVAILABLE", "The listing does not receive on 2026-12-20.");
+  it("REQ-REQST-007 dia fechado: o dia da semana de params.date", () => {
+    const error = apiError("BOOKING_WEEKDAY_NOT_AVAILABLE", { date: "2026-12-20" });
     expect(requestStayErrorMessage(error, pets)).toBe("O cantinho não recebe em domingo (20/12). Tenta outras datas.");
   });
 
-  it("REQ-REQST-007 noite cheia: a noite que a API cita", () => {
-    const error = apiError("BOOKING_CAPACITY_EXCEEDED", "No room on the night of 2026-12-22.");
+  it("REQ-REQST-007 noite cheia: a noite de params.date", () => {
+    const error = apiError("BOOKING_CAPACITY_EXCEEDED", { date: "2026-12-22" });
     expect(requestStayErrorMessage(error, pets)).toBe(
       "Não tem vaga pra todos na noite de 22/12. Tenta outras datas ou menos pets.",
     );
   });
 
-  it("REQ-REQST-007 pet em conflito: o nome do pet que a API cita", () => {
-    const error = apiError("BOOKING_PET_PERIOD_CONFLICT", `Pet ${OTHER} already has a booking.`, 409);
+  it("REQ-REQST-007 pet em conflito: o nome do pet do petId", () => {
+    const error = apiError("BOOKING_PET_PERIOD_CONFLICT", { petId: OTHER }, 409);
     expect(requestStayErrorMessage(error, pets)).toBe("Thor já tem outra estadia nessas datas.");
   });
 
-  it("REQ-REQST-007 sem o dado na mensagem, a frase geral do errorCopy", () => {
+  it("REQ-REQST-007 sem o dado em params, a frase geral do errorCopy", () => {
     expect(requestStayErrorMessage(apiError("BOOKING_CAPACITY_EXCEEDED"), pets)).toBe(
       "Não cabe mais ninguém nessas noites.",
     );
-    expect(requestStayErrorMessage(apiError("BOOKING_PET_PERIOD_CONFLICT", "", 409), pets)).toBe(
+    expect(requestStayErrorMessage(apiError("BOOKING_PET_PERIOD_CONFLICT", {}, 409), pets)).toBe(
       "Esse pet já tem outra estadia nessas datas.",
     );
-    expect(requestStayErrorMessage(apiError("BOOKING_LISTING_NOT_FOUND", "", 404), pets)).toBe(
+    expect(requestStayErrorMessage(apiError("BOOKING_LISTING_NOT_FOUND", {}, 404), pets)).toBe(
       "Esse cantinho não está recebendo pedidos agora.",
     );
   });

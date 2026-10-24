@@ -119,7 +119,9 @@ it("REQ-ACC-020/028 senha errada e 429 preservam cache e detalhes", async () => 
   const probe = setup(useChangePasswordMutation);
   act(() => probe.current().mutate({ currentPassword: "errada", newPassword: "Abcdef1!" }));
   await waitFor(() =>
-    expect(probe.current().error).toMatchObject({ fieldErrors: { currentPassword: ["Confira a senha."] } }),
+    expect(probe.current().error).toMatchObject({
+      fieldIssues: { currentPassword: [expect.objectContaining({ message: "Confira a senha." })] },
+    }),
   );
   server.use(
     http.post("*/api/users/me/password", () =>

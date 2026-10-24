@@ -1,6 +1,6 @@
 /**
  * Textos de "Minha conta" (spec 015, seção Microcopy). Recebem o nome da conta já pronto ("tutor",
- * "anfitrião", de `roleLabel`), neutro de propósito. Erros da API vêm de `getErrorMessage`.
+ * "anfitrião", de `roleLabel`), neutro de propósito. Erros da API vêm de `translateError`.
  */
 export const accountCopy = {
   nav: { label: "Minha conta", profile: "Perfil", password: "Senha", deactivate: "Pausar conta" },

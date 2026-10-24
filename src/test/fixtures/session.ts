@@ -33,8 +33,8 @@ export function sessionFixture(overrides: { refreshToken?: string; role?: string
 export const apiOk = (data: unknown) => ({ success: true, data, timestamp: new Date().toISOString() });
 
 /** Envelope de erro da API. */
-export const apiFail = (code: string, message = code, details?: unknown) => ({
+export const apiFail = (code: string, message = code, details?: unknown, params?: Record<string, string | number>) => ({
   success: false,
-  error: { code, message, ...(details ? { details } : {}) },
+  error: { code, message, ...(params ? { params } : {}), ...(details ? { details } : {}) },
   timestamp: new Date().toISOString(),
 });

@@ -42,7 +42,7 @@ describe("listingMutations.client", () => {
     );
     await expect(createListing({}, transport)).rejects.toMatchObject({
       code: "VALIDATION_ERROR",
-      fieldErrors: { "address.zipCode": ["CEP"] },
+      fieldIssues: { "address.zipCode": [expect.objectContaining({ message: "CEP" })] },
     });
   });
 

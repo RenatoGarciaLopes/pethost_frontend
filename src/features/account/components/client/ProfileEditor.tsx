@@ -5,7 +5,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorCopy, getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateCode, translateError } from "@/shared/api/errors/translateError";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -48,7 +48,7 @@ export function ProfileEditor({ userId, role }: ProfileEditorProps) {
     return (
       <ErrorState
         title={copy.loadError}
-        description={getErrorMessage(query.error)}
+        description={translateError(query.error)}
         onRetry={() => void query.refetch()}
       />
     );
@@ -58,8 +58,8 @@ export function ProfileEditor({ userId, role }: ProfileEditorProps) {
   const photoBusy = upload.isPending || remove.isPending;
 
   function reportPhotoError(error: unknown) {
-    const tooBig = isApiError(error) && (error.code === "PAYLOAD_TOO_LARGE" || Boolean(error.fieldErrors.file));
-    setPhotoError(tooBig ? getErrorCopy("PAYLOAD_TOO_LARGE") : getErrorMessage(error));
+    const tooBig = isApiError(error) && (error.code === "PAYLOAD_TOO_LARGE" || Boolean(error.fieldIssues.file));
+    setPhotoError(tooBig ? translateCode("PAYLOAD_TOO_LARGE") : translateError(error));
   }
 
   const photoActions = { onSuccess: () => router.refresh(), onError: reportPhotoError };
@@ -78,7 +78,7 @@ export function ProfileEditor({ userId, role }: ProfileEditorProps) {
             </Button>
           }
         >
-          {getErrorCopy("HOST_NOT_FOUND")}
+          {translateCode("HOST_NOT_FOUND")}
         </Notice>
       )}
       <Box
