@@ -36,14 +36,45 @@ function setup(overrides: Record<string, unknown>) {
 }
 
 describe("StayDetail", () => {
-  it("REQ-STAYS-004 trilha com o passo atual, resumo com a conta e o prazo do anfitrião", () => {
+  it("REQ-STAYS-004 cabeçalho humano, trilha com o passo atual, resumo com a conta e o prazo do anfitrião", () => {
     setup({});
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Pipoca na casa de Aparecida Souza");
+    expect(screen.getByText("Casa da Cida · Zona 01, Maringá")).toBeInTheDocument();
     const trail = screen.getByRole("list", { name: copy.trail });
     expect(within(trail).getAllByRole("listitem")[0]).toHaveAttribute("aria-current", "step");
-    expect(screen.getByText("Casa da Cida")).toBeInTheDocument();
-    expect(screen.getByText("20 a 25 de dez.")).toBeInTheDocument();
-    expect(screen.getByText(/R\$\s60,00 × 5 noites × 1 pet = R\$\s300,00/)).toBeInTheDocument();
-    expect(screen.getByText("Aparecida Souza responde até amanhã às 9h")).toBeInTheDocument();
+    const summary = screen.getByRole("region", { name: copy.summary });
+    expect(summary).toHaveTextContent("dom., 20 de dez.");
+    expect(summary).toHaveTextContent("sex., 25 de dez.");
+    expect(summary.textContent).toMatch(/R\$\s60,00 × 5 noites × 1 pet/);
+    expect(summary.textContent).toMatch(/Total\s*R\$\s300,00/);
+    expect(screen.getByText("Aparecida Souza responde até amanhã às 9h.")).toBeInTheDocument();
+    expect(screen.getByText("O pedido ainda não segura a vaga.")).toBeInTheDocument();
+  });
+
+  it("REQ-STAYS-010 aceita: o prazo de pagamento e o botão Pagar com o total levam ao checkout", () => {
+    setup({ status: "accepted", responseDeadline: null, paymentDeadline: "2026-12-10T21:30:00Z" });
+    expect(screen.getByText("Pague até hoje às 18h30 pra garantir a vaga.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^Pagar R\$\s300,00$/ })).toHaveAttribute(
+      "href",
+      `/owner/bookings/${BOOKING_ID}/payment`,
+    );
+  });
+
+  it("REQ-STAYS-011 concluída e em andamento: só a frase, nenhuma ação sem tela", () => {
+    setup({
+      status: "completed",
+      responseDeadline: null,
+      checkedInAt: "2026-12-20T15:00:00Z",
+      checkedOutAt: "2026-12-25T15:00:00Z",
+    });
+    expect(screen.getByText("Estadia concluída. Obrigado por confiar em Aparecida Souza.")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Pagar|Avaliar/ })).not.toBeInTheDocument();
+  });
+
+  it('REQ-STAYS-006 "Cancelar estadia" só em pedido e confirmada', () => {
+    setup({ status: "in_progress", responseDeadline: null });
+    expect(screen.queryByRole("button", { name: "Cancelar estadia" })).not.toBeInTheDocument();
   });
 
   it.each(["confirmed", "in_progress", "completed"])(
@@ -70,6 +101,8 @@ describe("StayDetail", () => {
   it("REQ-STAYS-008 recusada: o motivo do anfitrião e o caminho de procurar outro cantinho", () => {
     setup({ status: "declined", responseDeadline: null, declineReason: "Já estou com a casa cheia" });
     expect(screen.getByText("Aparecida Souza não pôde receber dessa vez.")).toBeInTheDocument();
+    expect(screen.getByText("Nada foi cobrado.")).toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: copy.trail })).not.toBeInTheDocument();
     expect(screen.getByText("Motivo: Já estou com a casa cheia")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: copy.searchAgain })).toHaveAttribute("href", "/");
   });

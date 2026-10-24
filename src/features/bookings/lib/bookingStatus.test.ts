@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BOOKING_STATUSES } from "../api/contracts";
-import { HOST_TABS, hostTabOf, OWNER_TABS, ownerTabOf, statusLabel, trailSteps } from "./bookingStatus";
+import { HOST_TABS, hostTabOf, statusLabel, trailSteps } from "./bookingStatus";
 
 describe("bookingStatus", () => {
   it("REQ-HREQ-001 toda situação tem nome curto", () => {
@@ -30,19 +30,6 @@ describe("bookingStatus", () => {
       expired: "Expirou",
       cancelled: "Cancelada",
     });
-  });
-
-  it("REQ-STAYS-001 abas do tutor: cada status cai numa aba só; desconhecida cai em Próximas", () => {
-    expect(OWNER_TABS.map((tab) => [tab.id, tab.label, tab.statuses])).toEqual([
-      ["proximas", "Próximas", ["requested", "accepted", "confirmed"]],
-      ["acontecendo", "Acontecendo", ["in_progress"]],
-      ["anteriores", "Anteriores", ["completed", "declined", "expired", "cancelled"]],
-    ]);
-    expect(
-      BOOKING_STATUSES.every((status) => OWNER_TABS.filter((tab) => tab.statuses.includes(status)).length === 1),
-    ).toBe(true);
-    expect(ownerTabOf("anteriores").id).toBe("anteriores");
-    expect(ownerTabOf("pedidos").id).toBe("proximas");
   });
 
   it("REQ-HREQ-001 aba da URL desconhecida cai em Pedidos", () => {

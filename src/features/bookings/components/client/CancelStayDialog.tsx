@@ -32,7 +32,7 @@ export function CancelStayDialog({ accountId, booking, onConflict }: CancelStayD
   const [reason, setReason] = useState("");
   return (
     <Box>
-      <Button variant="quiet" onClick={() => setOpen(true)}>
+      <Button variant="outlined" color="error" onClick={() => setOpen(true)}>
         {copy.open}
       </Button>
       <ConfirmDialog

@@ -21,6 +21,13 @@ const weekdayDate = new Intl.DateTimeFormat("pt-BR", {
   month: "2-digit",
   timeZone: BRASILIA,
 });
+const weekdayDay = new Intl.DateTimeFormat("pt-BR", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
+const dayMonthBrasilia = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", timeZone: BRASILIA });
 const NEAR_MS = 3 * 60 * 60 * 1000;
 
 const asDate = (date: string) => new Date(`${date}T00:00:00Z`);
@@ -65,4 +72,21 @@ export function isDeadlineNear(deadline: string | null, now: Date = new Date()):
   if (!deadline) return false;
   const left = Date.parse(deadline) - now.getTime();
   return left > 0 && left < NEAR_MS;
+}
+
+/**
+ * Dia de calendário com o dia da semana: "sáb., 20 de dez.".
+ * @example formatStayDay(booking.checkIn)
+ */
+export function formatStayDay(date: string): string {
+  return weekdayDay.format(asDate(date));
+}
+
+/**
+ * Um momento curto em Brasília, para a linha do tempo: "10 de dez., 14h30".
+ * @example formatMoment(booking.confirmedAt)
+ */
+export function formatMoment(moment: string): string {
+  const date = new Date(moment);
+  return `${dayMonthBrasilia.format(date)}, ${timeOf(date)}`;
 }

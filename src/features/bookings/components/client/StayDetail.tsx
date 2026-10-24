@@ -8,17 +8,19 @@ import { useId, useState } from "react";
 import { translateError } from "@/shared/api/errors/translateError";
 import { maskCep, maskPhone } from "@/shared/lib/masks";
 import { formatBRL, fromCents } from "@/shared/lib/money";
-import { StatusTimeline } from "@/shared/ui/data-display/StatusTimeline";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
-import { ownerBookingsPath, SEARCH_PATH } from "../../lib/bookingPaths";
-import { statusLabel, trailSteps } from "../../lib/bookingStatus";
-import { formatDeadline, formatPeriod } from "../../lib/formatStay";
+import { OWNER_BOOKINGS_PATH, ownerBookingPaymentPath, SEARCH_PATH } from "../../lib/bookingPaths";
+import { ownerStayView } from "../../lib/ownerStayCard";
+import { stayNow, stayTrail, type StayNow } from "../../lib/stayDetailView";
 import type { Booking, BookingStatus } from "../../types";
 import { CancelStayDialog } from "./CancelStayDialog";
+import { StayPhotoFrame } from "./StayPhotoFrame";
+import { StaySummary } from "./StaySummary";
+import { StayTimeline } from "./StayTimeline";
 
 const copy = bookingCopy.stay;
 /** Só nestes status o contato do anfitrião aparece (REQ-STAYS-005). */
@@ -29,10 +31,13 @@ const CANCELLABLE: readonly BookingStatus[] = ["requested", "confirmed"];
  * O contato do anfitrião depois da confirmação (REQ-STAYS-005): telefone formatado com `tel:` e o endereço exato.
  * @example <ContactCard booking={booking} />
  */
+/** O contato só aparece depois da confirmação e se a API o mandou. */
+const showsContact = (booking: Booking) => Boolean(booking.contact) && CONTACT_STATUSES.includes(booking.status);
+
 function ContactCard({ booking }: { booking: Booking }) {
   const headingId = useId();
   const contact = booking.contact;
-  if (!contact || !CONTACT_STATUSES.includes(booking.status)) return null;
+  if (!contact || !showsContact(booking)) return null;
   const { address } = contact;
   return (
     <Box
@@ -62,6 +67,34 @@ function ContactCard({ booking }: { booking: Booking }) {
   );
 }
 
+/** "O que acontece agora" (spec 097): a frase da etapa, o apoio e a ação que existe (pagar ou procurar outro cantinho). */
+function NowPanel({ now, booking }: { now: StayNow; booking: Booking }) {
+  const action =
+    now.action === "pay" ? (
+      <Button component={NextLink} href={ownerBookingPaymentPath(booking.id)} variant="contained">
+        {copy.now.pay(formatBRL(fromCents(booking.totalCents)))}
+      </Button>
+    ) : now.action === "search" ? (
+      <Button component={NextLink} href={SEARCH_PATH} variant="contained">
+        {copy.searchAgain}
+      </Button>
+    ) : undefined;
+  return (
+    <Stack spacing={1}>
+      <Typography component="h2" variant="overline" color="text.secondary">
+        {now.heading}
+      </Typography>
+      <Notice tone={now.tone} title={now.title} action={action}>
+        {now.details.map((line) => (
+          <Typography key={line} component="p">
+            {line}
+          </Typography>
+        ))}
+      </Notice>
+    </Stack>
+  );
+}
+
 export interface StayDetailProps {
   accountId: string;
   bookingId: string;
@@ -70,9 +103,9 @@ export interface StayDetailProps {
 }
 
 /**
- * A estadia do tutor (spec 052, REQ-STAYS-004 a 009): a trilha Pedido → Confirmada → Chegou → Voltou pra casa, o resumo
- * com a conta do total e, enquanto espera, até quando o anfitrião responde. Contato só depois da confirmação; recusada
- * ou expirada explicam e levam à busca; "Cancelar estadia" em pedido e confirmada.
+ * A estadia do tutor (specs 052 e 097): cabeçalho com a casa e o selo, a linha do tempo com os momentos, "o que acontece
+ * agora" com a ação da etapa, o resumo na lateral (abaixo no celular), o contato só depois da confirmação e "Cancelar
+ * estadia" em pedido e confirmada. Recusada, expirada e cancelada trocam a trilha pelo aviso do que houve.
  *
  * @example <StayDetail accountId={user.id} bookingId={id} />
  */
@@ -92,81 +125,70 @@ export function StayDetail({ accountId, bookingId, now }: StayDetailProps) {
     );
 
   const booking = query.data;
-  const host = booking.host?.name ?? copy.theHost;
-  const steps = trailSteps(booking.status);
-  const nightly = formatBRL(fromCents(booking.nightlyRateCents));
-  const total = formatBRL(fromCents(booking.totalCents));
+  const view = ownerStayView(booking, moment);
+  const trail = stayTrail(booking);
+  const cancellable = CANCELLABLE.includes(booking.status);
+  const contact = showsContact(booking);
+  const left = [trail && "trail", "now", contact && "contact", cancellable && "actions"].filter(Boolean) as string[];
+  const mobileAreas = [trail && "trail", "now", "summary", contact && "contact", cancellable && "actions"].filter(
+    Boolean,
+  );
 
   return (
     <Stack spacing={3}>
-      <Link component={NextLink} href={ownerBookingsPath("proximas")} sx={{ alignSelf: "flex-start" }}>
+      <Link component={NextLink} href={OWNER_BOOKINGS_PATH} sx={{ alignSelf: "flex-start" }}>
         {copy.back}
       </Link>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
-        <Typography variant="h1" sx={{ fontSize: { xs: 28, md: 36 } }}>
-          {booking.listing?.title ?? bookingCopy.owner.listingGone}
-        </Typography>
-        <StatusPill label={statusLabel[booking.status]} />
-      </Stack>
-      {booking.status === "cancelled" && (
-        <Notice
-          tone="ok"
-          title={copy.cancelled}
-          action={booking.refundPercentage !== null ? <span>{copy.refund(booking.refundPercentage)}</span> : undefined}
-        />
-      )}
-      {conflict && <Notice tone="atencao" title={conflict} />}
-      {steps && <StatusTimeline label={copy.trail} steps={steps} />}
-      {booking.status === "requested" && booking.responseDeadline && (
-        <Typography sx={{ fontWeight: 700 }}>
-          {copy.deadline(host, formatDeadline(booking.responseDeadline, moment))}
-        </Typography>
-      )}
-      <Box
-        component="dl"
-        aria-label={copy.summary}
-        sx={{
-          m: 0,
-          display: "grid",
-          gridTemplateColumns: "max-content 1fr",
-          columnGap: 3,
-          rowGap: 1,
-          "& dd": { m: 0 },
-        }}
-      >
-        <dt>{copy.period}</dt>
-        <dd>{formatPeriod(booking.checkIn, booking.checkOut)}</dd>
-        <dt>{copy.pets}</dt>
-        <dd>{booking.pets.map((pet) => pet.name ?? bookingCopy.unknownPet).join(", ")}</dd>
-        {booking.listing && (
-          <>
-            <dt>{copy.listing}</dt>
-            <dd>{`${booking.listing.neighborhood}, ${booking.listing.city}`}</dd>
-          </>
-        )}
-        <dt>{bookingCopy.detail.total}</dt>
-        <dd>{copy.bill(nightly, booking.nights, booking.petCount, total)}</dd>
-      </Box>
-      <ContactCard booking={booking} />
-      {booking.status === "declined" && (
-        <Stack spacing={1}>
-          <Typography>{copy.declined(host)}</Typography>
-          {booking.declineReason && (
-            <Typography color="text.secondary">{copy.declinedReason(booking.declineReason)}</Typography>
+      <Stack direction="row" spacing={2.5} sx={{ alignItems: "center" }}>
+        <StayPhotoFrame size="header" />
+        <Stack spacing={0.75} sx={{ minWidth: 0 }}>
+          <StatusPill label={view.statusLabel} tone={view.tone} />
+          <Typography variant="h1" sx={{ fontSize: { xs: 26, md: 36 }, lineHeight: 1.15 }}>
+            {view.title}
+          </Typography>
+          {booking.listing && (
+            <Typography color="text.secondary">
+              {`${booking.listing.title} · ${booking.listing.neighborhood}, ${booking.listing.city}`}
+            </Typography>
           )}
         </Stack>
-      )}
-      {booking.status === "expired" && <Typography>{copy.expired(host)}</Typography>}
-      {(booking.status === "declined" || booking.status === "expired") && (
-        <Box>
-          <Button component={NextLink} href={SEARCH_PATH} variant="contained">
-            {copy.searchAgain}
-          </Button>
+      </Stack>
+      {conflict && <Notice tone="atencao" title={conflict} />}
+      <Box
+        sx={{
+          display: "grid",
+          gap: 3,
+          alignItems: "start",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) 340px" },
+          gridTemplateAreas: {
+            xs: mobileAreas.map((area) => `"${area}"`).join(" "),
+            md: left.map((area) => `"${area} summary"`).join(" "),
+          },
+          gridTemplateRows: { md: `${"auto ".repeat(left.length - 1)}1fr` },
+        }}
+      >
+        {trail && (
+          <Box sx={{ gridArea: "trail" }}>
+            <StayTimeline label={copy.trail} steps={trail} />
+          </Box>
+        )}
+        <Box sx={{ gridArea: "now" }}>
+          <NowPanel now={stayNow(booking, moment)} booking={booking} />
         </Box>
-      )}
-      {CANCELLABLE.includes(booking.status) && (
-        <CancelStayDialog accountId={accountId} booking={booking} onConflict={setConflict} />
-      )}
+        <Box sx={{ gridArea: "summary" }}>
+          <StaySummary booking={booking} />
+        </Box>
+        {contact && (
+          <Box sx={{ gridArea: "contact" }}>
+            <ContactCard booking={booking} />
+          </Box>
+        )}
+        {cancellable && (
+          <Box sx={{ gridArea: "actions" }}>
+            <CancelStayDialog accountId={accountId} booking={booking} onConflict={setConflict} />
+          </Box>
+        )}
+      </Box>
     </Stack>
   );
 }

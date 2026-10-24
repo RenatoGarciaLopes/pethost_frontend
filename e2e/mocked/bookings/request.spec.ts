@@ -73,7 +73,10 @@ test("REQ-REQST-002 a REQ-REQST-006 pede a estadia com o que veio da URL e acomp
   await expect(page.getByText(/^Casa Cida responde até /)).toBeVisible();
   await page.getByRole("link", { name: "Ver minhas estadias" }).click();
   await expect(page).toHaveURL("/owner/bookings", NAVIGATION);
-  await expect(page.getByRole("link", { name: /^Quintal da Cida/ })).toContainText("Esperando resposta", NAVIGATION);
+  await expect(page.getByRole("list", { name: "Estadias" }).getByRole("listitem")).toContainText(
+    "Esperando resposta",
+    NAVIGATION,
+  );
 });
 
 test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas e o pet da busca", async ({
