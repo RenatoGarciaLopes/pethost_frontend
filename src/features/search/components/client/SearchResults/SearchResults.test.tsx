@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
-import { searchQueryFixture } from "@/test/fixtures/search";
+import { listingFixture, searchQueryFixture } from "@/test/fixtures/search";
 import { SearchResults } from "./SearchResults";
 it("REQ-SRCH-005/010 vazio oferece raio maior", async () => {
   const onExpand = vi.fn();
@@ -53,3 +53,40 @@ it.each([searchQueryFixture({ radius: 50 }), searchQueryFixture({ where: "Curiti
     expect(screen.queryByRole("button", { name: /Bora olhar/ })).not.toBeInTheDocument();
   },
 );
+
+it.each([searchQueryFixture({ where: "Curitiba" }), searchQueryFixture({ radius: 50 })])(
+  "096 lista preenchida não sugere trocar datas ou filtros",
+  (query) => {
+    renderWithProviders(
+      <SearchResults
+        query={query}
+        items={[listingFixture(), listingFixture({ id: "second" })]}
+        petCount={1}
+        onMore={vi.fn()}
+        onRetry={vi.fn()}
+        onExpand={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.queryByText("Tenta outras datas ou tira um filtro.")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Bora olhar/ })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+  },
+);
+
+it("096 fim de lista preenchida conserva a ampliação do raio", async () => {
+  const onExpand = vi.fn();
+  const { user } = renderWithProviders(
+    <SearchResults
+      query={searchQueryFixture({ radius: 10 })}
+      items={[listingFixture()]}
+      petCount={1}
+      onMore={vi.fn()}
+      onRetry={vi.fn()}
+      onExpand={onExpand}
+    />,
+    { theme: quintalTheme },
+  );
+  await user.click(screen.getByRole("button", { name: "Bora olhar até 20 km" }));
+  expect(onExpand).toHaveBeenCalledWith(20);
+});

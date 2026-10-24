@@ -32,3 +32,14 @@ export const SemEndereco: Story = {
 };
 export const Erro: Story = { args: { error: { code: "LISTING_GEOCODER_UNAVAILABLE", status: 503, fields: {} } } };
 export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };
+
+/** Fim de uma lista com duas casas: sem mensagem sugerindo trocar datas ou filtros. */
+export const DuasCasas: Story = {
+  args: {
+    query: searchQueryFixture({ where: "Maringá" }),
+    items: [listingFixture(), listingFixture({ id: "second" })],
+  },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).queryByText("Tenta outras datas ou tira um filtro.")).not.toBeInTheDocument();
+  },
+};
