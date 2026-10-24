@@ -1,9 +1,9 @@
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
 import { isListingBadge, listingBadgeLabel } from "@/shared/config/listingBadges";
 import { formatMemberSince } from "@/shared/lib/date/formatMemberSince";
-import { initialsOf } from "@/shared/lib/text/initials";
+import { InitialsAvatar } from "@/shared/ui/media/InitialsAvatar";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { PageContainer } from "@/shared/ui/layout/PageContainer";
@@ -165,21 +165,12 @@ export function ListingPageScreen({
         <Stack spacing={3} sx={{ gridArea: "body", minWidth: 0 }}>
           <Section title={copy.sections.host}>
             <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
-              <Avatar
-                src={listing.host?.avatarUrl ?? undefined}
-                alt=""
-                sx={{
-                  width: 56,
-                  height: 56,
-                  fontWeight: 800,
-                  color: "text.primary",
-                  bgcolor: "grama.main",
-                  border: "2px solid",
-                  borderColor: "text.primary",
-                }}
-              >
-                {initialsOf(hostName)}
-              </Avatar>
+              <InitialsAvatar
+                name={hostName}
+                src={listing.host?.avatarUrl}
+                size={56}
+                sx={{ fontWeight: 800, border: "2px solid", borderColor: "text.primary" }}
+              />
               <Box sx={{ minWidth: 0 }}>
                 <Typography sx={{ fontWeight: 700 }}>{hostName}</Typography>
                 {listing.host?.isCompany && (

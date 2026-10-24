@@ -25,7 +25,12 @@ export function PublicProfileCard({ profile, photo }: PublicProfileCardProps) {
   return (
     <Stack spacing={1.5} sx={{ alignItems: "center", textAlign: "center" }}>
       {photo ?? (
-        <InitialsAvatar name={profile.fullName} src={profile.avatarUrl} alt={profile.avatarUrl ? profile.fullName : undefined} size={96} />
+        <InitialsAvatar
+          name={profile.fullName}
+          src={profile.avatarUrl}
+          alt={profile.avatarUrl ? profile.fullName : undefined}
+          size={96}
+        />
       )}
       <Typography variant="h2" sx={{ fontSize: 22 }}>
         {profile.fullName}

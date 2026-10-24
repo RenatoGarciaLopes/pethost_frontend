@@ -20,7 +20,15 @@ export interface InitialsAvatarProps extends Omit<AvatarProps, "children" | "src
  * fornecer alt ou role="img" com aria-label. Não faz upload nem busca dados.
  * @example <InitialsAvatar name="Ana Souza (teste)" src={avatarUrl} size={32} />
  */
-export function InitialsAvatar({ name, src, size = 40, tone = "coral", sx = [], alt = "", ...props }: InitialsAvatarProps) {
+export function InitialsAvatar({
+  name,
+  src,
+  size = 40,
+  tone = "coral",
+  sx = [],
+  alt = "",
+  ...props
+}: InitialsAvatarProps) {
   return (
     <Avatar
       {...props}

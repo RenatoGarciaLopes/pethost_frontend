@@ -92,7 +92,11 @@ function AvatarPicker({ name, avatarUrl, busy, error, onUpload, onRemove, disabl
           position: "relative",
           display: "inline-flex",
           borderRadius: `${quintalRadii.control}px`,
-          [keyboardFocus("&:has(input:focus-visible)")]: { outline: "2px solid", outlineColor: "text.primary", outlineOffset: 3 },
+          [keyboardFocus("&:has(input:focus-visible)")]: {
+            outline: "2px solid",
+            outlineColor: "text.primary",
+            outlineOffset: 3,
+          },
         }}
       >
         <Button component="label" role={undefined} tabIndex={-1} htmlFor={id} disabled={blocked} variant="outlined">
