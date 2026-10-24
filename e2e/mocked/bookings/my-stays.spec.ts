@@ -58,7 +58,7 @@ test("REQ-STAYS-001 a REQ-STAYS-005 da lista à estadia confirmada, com a trilha
   await seedStay(page, { status: "confirmed", responseDeadline: null, contact: HOST_CONTACT });
   await page.goto("/owner/bookings");
   await expect(page.getByRole("heading", { name: "Suas viagens e as deles.", level: 1 })).toBeVisible();
-  await expect(page.getByText("Minhas estadias", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("main").getByText("Minhas estadias", { exact: true })).toBeVisible();
 
   const stay = page
     .getByRole("list", { name: "Estadias" })
