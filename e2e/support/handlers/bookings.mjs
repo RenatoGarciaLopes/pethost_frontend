@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http, HttpResponse } from "msw";
 import { randomUUID } from "node:crypto";
 import { publicListing } from "./listingPage.mjs";
@@ -119,22 +120,24 @@ function touch(booking, changes) {
 }
 
 const OWNER_CONTACT = { phone: "44999990000", address: null };
-/** Erro de regra com a mensagem da API, que cita a data ou o pet (a tela extrai o dado dela). */
-const failWith = (status, code, message) =>
-  HttpResponse.json({ success: false, error: { code, message }, timestamp: new Date().toISOString() }, { status });
+/** Erro de regra no formato da API (095): a mensagem em inglês é só log e o dado que a frase cita vem em `params`. */
+const failWith = (status, code, message, params) =>
+  HttpResponse.json(
+    { success: false, error: { code, message, ...(params ? { params } : {}) }, timestamp: new Date().toISOString() },
+    { status },
+  );
 const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Campos do corpo de `POST /bookings` (400 com todos juntos), sem as regras de negócio. */
 function requestFieldErrors(body) {
   const errors = [];
-  const reject = (field, message, code = "AUTH_EMAIL_INVALID_FORMAT", params) =>
-    errors.push({ field, messages: [message], errors: [{ code, ...(params ? { params } : {}) }] });
+  const reject = (field, message, code, params) => errors.push(fieldIssue(field, message, code, params));
   const petIds = Array.isArray(body.petIds) ? body.petIds : [];
   if (petIds.length < 1 || petIds.length > 10 || new Set(petIds).size !== petIds.length)
-    reject("petIds", "Escolhe de 1 a 10 pets, sem repetir.");
-  if (!DATE.test(body.checkIn ?? "")) reject("checkIn", "Data de chegada inválida.");
-  else if (body.checkIn < brasiliaToday()) reject("checkIn", "A chegada já passou.");
+    reject("petIds", "Escolhe de 1 a 10 pets, sem repetir.", "BOOKING_PET_IDS_INVALID");
+  if (!DATE.test(body.checkIn ?? "")) reject("checkIn", "Data de chegada inválida.", "BOOKING_CHECK_IN_INVALID");
+  else if (body.checkIn < brasiliaToday()) reject("checkIn", "A chegada já passou.", "BOOKING_CHECK_IN_IN_THE_PAST");
   // `Booking.MinimumRequestNotice`: 72 h até a meia-noite da chegada em Brasília, ou seja, hoje + 4 dias na régua de dias.
   else if (body.checkIn < addDays(brasiliaToday(), 4))
     reject(
@@ -144,7 +147,7 @@ function requestFieldErrors(body) {
       { minimumHours: 72, responseHours: 24, acceptHours: 48 },
     );
   if (!DATE.test(body.checkOut ?? "") || (DATE.test(body.checkIn ?? "") && body.checkOut <= body.checkIn))
-    reject("checkOut", "A saída precisa ser depois da chegada.");
+    reject("checkOut", "A saída precisa ser depois da chegada.", "BOOKING_CHECK_OUT_NOT_AFTER_CHECK_IN");
   if (body.careTermsAccepted !== true)
     reject(
       "careTermsAccepted",
@@ -182,11 +185,16 @@ function createRequest(user, body) {
         body.checkIn < booking.checkOut,
     ),
   );
-  if (busy) return failWith(409, "BOOKING_PET_PERIOD_CONFLICT", `Pet ${busy.id} already has a booking in this period.`);
+  if (busy)
+    return failWith(409, "BOOKING_PET_PERIOD_CONFLICT", `Pet ${busy.id} already has a booking in this period.`, {
+      petId: busy.id,
+    });
   for (let day = body.checkIn; day <= body.checkOut; day = addDays(day, 1)) {
     const weekday = WEEKDAYS[new Date(`${day}T00:00:00Z`).getUTCDay()];
     if (!listing.availableWeekdays.includes(weekday))
-      return failWith(422, "BOOKING_WEEKDAY_NOT_AVAILABLE", `The listing does not receive on ${day}.`);
+      return failWith(422, "BOOKING_WEEKDAY_NOT_AVAILABLE", `The listing does not receive on ${day}.`, {
+        date: day,
+      });
   }
   const booking = seedBooking(
     null,

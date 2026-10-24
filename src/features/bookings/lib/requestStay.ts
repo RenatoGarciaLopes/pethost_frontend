@@ -8,7 +8,6 @@ import { bookingErrorDetail } from "./bookingErrorDetail";
 const copy = bookingCopy.request;
 /** Limite da API: de 1 a 10 pets por pedido. */
 const MAX_PETS = 10;
-const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
 const weekdayName = new Intl.DateTimeFormat("pt-BR", { weekday: "long", timeZone: "UTC" });
 
 /**
@@ -56,7 +55,7 @@ export function toRequestBookingBody(listingId: string, values: RequestStayValue
 export type RequestBookingBody = ReturnType<typeof toRequestBookingBody>;
 
 /**
- * Frase da PetHost para um erro de regra do pedido (REQ-REQST-007), com o dado que a API cita na mensagem: o dia
+ * Frase da PetHost para um erro de regra do pedido (REQ-REQST-007), com o dado que a API manda em `params`: o dia
  * fechado, a noite sem vaga ou o pet em conflito. Sem o dado, a frase geral do `errorCopy`.
  *
  * @example setNotice(requestStayErrorMessage(error, pets));
@@ -67,8 +66,8 @@ export function requestStayErrorMessage(error: unknown, pets: readonly { id: str
     return copy.weekday(`${weekdayName.format(new Date(`${detail.date}T00:00:00Z`))} (${detail.dateLabel})`);
   if (detail && hasErrorCode(error, "BOOKING_CAPACITY_EXCEEDED")) return copy.capacity(detail.dateLabel);
   if (isApiError(error) && hasErrorCode(error, "BOOKING_PET_PERIOD_CONFLICT")) {
-    const cited = new Set((error.message.match(UUID) ?? []).map((id) => id.toLowerCase()));
-    const pet = pets.find((item) => cited.has(item.id.toLowerCase()));
+    const petId = String(error.params.petId ?? "").toLowerCase();
+    const pet = pets.find((item) => item.id.toLowerCase() === petId);
     if (pet) return copy.petConflict(pet.name);
   }
   return translateError(error);

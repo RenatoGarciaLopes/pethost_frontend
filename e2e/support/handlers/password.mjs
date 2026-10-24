@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http } from "msw";
 import { isStrongPassword } from "../../../src/shared/lib/validation/password.ts";
 import { fail, ok } from "./session.mjs";
@@ -16,7 +17,9 @@ export const passwordHandlers = [
     const body = await request.json().catch(() => ({}));
     if (body?.token === "expirado") return fail(401, "AUTH_PASSWORD_RESET_TOKEN_INVALID");
     if (typeof body?.newPassword !== "string" || !isStrongPassword(body.newPassword)) {
-      return fail(400, "VALIDATION_ERROR", [{ field: "newPassword", messages: ["A senha ainda não cumpre a régua."] }]);
+      return fail(400, "VALIDATION_ERROR", [
+        fieldIssue("newPassword", "A senha ainda não cumpre a régua.", "AUTH_PASSWORD_MISSING_DIGIT"),
+      ]);
     }
     return ok({});
   }),

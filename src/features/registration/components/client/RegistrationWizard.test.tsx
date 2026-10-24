@@ -204,7 +204,11 @@ describe("RegistrationWizard: envio e erros da API", () => {
       http.post(REGISTER_URL, () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "inválido", [
-            { field: "email", messages: ["E-mail recusado pela API."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
+            {
+              field: "email",
+              messages: ["E-mail recusado pela API."],
+              errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
+            },
           ]),
           { status: 400 },
         ),

@@ -43,7 +43,7 @@ export function translateCode(code: string, context: ErrorCopyContext = {}, para
  */
 export function translateError(error: unknown, context: ErrorCopyContext = {}): string {
   if (!isApiError(error)) return GENERIC_ERROR_MESSAGE;
-  const phrase = resolve(error.code, { params: {}, context, retryAfterSeconds: error.retryAfterSeconds });
+  const phrase = resolve(error.code, { params: error.params, context, retryAfterSeconds: error.retryAfterSeconds });
   if (phrase === undefined) warnUntranslated(error.code);
   return phrase ?? GENERIC_ERROR_MESSAGE;
 }

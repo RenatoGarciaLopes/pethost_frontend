@@ -70,6 +70,17 @@ describe("ApiError.fromEnvelope", () => {
     expect(error.fieldIssues.a?.map((issue) => issue.code)).toEqual([null, null]);
   });
 
+  it("REQ-HTTP-002 guarda os params do erro de topo", () => {
+    const error = ApiError.fromEnvelope(422, {
+      code: "BOOKING_CAPACITY_EXCEEDED",
+      message: "x",
+      params: { date: "2026-12-22" },
+    });
+
+    expect(error.params).toEqual({ date: "2026-12-22" });
+    expect(ApiError.fromEnvelope(422, { code: "BOOKING_CONFLICT", message: "x" }).params).toEqual({});
+  });
+
   it("REQ-HTTP-002 lê o traceId e o Retry-After", () => {
     expect(
       ApiError.fromEnvelope(500, { code: "UNEXPECTED_ERROR", message: "x", details: { traceId: "0HN7" } }).traceId,
@@ -136,6 +147,7 @@ describe("guards", () => {
       code: "AUTH_EMAIL_ALREADY_REGISTERED",
       message: "x",
       fieldIssues: {},
+      params: {},
       retryAfterSeconds: undefined,
       traceId: undefined,
       invalidPaths: [],

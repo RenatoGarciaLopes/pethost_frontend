@@ -1,4 +1,5 @@
 import type { CopyCatalog } from "../copyTypes";
+import { numberParam } from "./phrases";
 
 /** Cantinho. */
 export const listingErrorCopy = {
@@ -8,7 +9,8 @@ export const listingErrorCopy = {
   LISTING_HOST_DEACTIVATED: "Sua conta de anfitrião está pausada. Reative a conta pra mexer no cantinho.",
   LISTING_GEOCODER_UNAVAILABLE: "Não conseguimos achar o endereço no mapa agora. Tenta de novo em alguns minutos.",
   LISTING_ADDRESS_NOT_LOCATED: "Não achamos esse endereço no mapa. Confere o CEP, a rua e o número.",
-  LISTING_PHOTO_LIMIT_REACHED: "Já tem 5 fotos. Tira uma pra colocar outra.",
+  LISTING_PHOTO_LIMIT_REACHED: ({ params }) =>
+    `Já tem ${numberParam(params, "max") ?? 5} fotos. Tira uma pra colocar outra.`,
   LISTING_PHOTO_ALREADY_EXISTS: "Essa foto já está no cantinho.",
   LISTING_NOT_FOUND: "Não achamos esse cantinho.",
   LISTING_AVAILABILITY_BLOCK_LIMIT_REACHED: "Já tem bloqueios demais no calendário. Remove algum pra criar outro.",

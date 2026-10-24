@@ -123,7 +123,11 @@ describe("ForgotPasswordFlow", () => {
       http.post("*/api/auth/password/forgot", () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "Inválido", [
-            { field: "email", messages: ["Confira o endereço informado."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
+            {
+              field: "email",
+              messages: ["Confira o endereço informado."],
+              errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
+            },
           ]),
           { status: 400 },
         ),

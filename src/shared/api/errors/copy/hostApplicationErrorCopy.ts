@@ -1,8 +1,10 @@
 import type { CopyCatalog } from "../copyTypes";
+import { numberParam } from "./phrases";
 
 /** Verificação de anfitrião. */
 export const hostApplicationErrorCopy = {
-  HOST_APPLICATION_ATTEMPTS_EXCEEDED: "Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.",
+  HOST_APPLICATION_ATTEMPTS_EXCEEDED: ({ params }) =>
+    `Já foram ${numberParam(params, "max") ?? 3} tentativas. Agora a gente continua pelo suporte, com calma.`,
   HOST_APPLICATION_BLOCKED: "Não foi possível confirmar sua identidade. Fala com o suporte.",
   HOST_APPLICATION_DOCUMENT_ALREADY_EXISTS: "Essa foto já foi usada em outra vaga. Tira uma foto nova.",
   HOST_APPLICATION_DOCUMENTS_MISSING: "Ainda falta foto. Confere as três vagas antes de enviar.",

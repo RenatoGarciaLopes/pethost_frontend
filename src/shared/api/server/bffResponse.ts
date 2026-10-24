@@ -54,7 +54,12 @@ function toEnvelopeError(error: unknown): { status: number; body: ApiErrorBody; 
 
   return {
     status: error.status,
-    body: { code: error.code, message: error.message, ...(details ? { details } : {}) },
+    body: {
+      code: error.code,
+      message: error.message,
+      ...(Object.keys(error.params).length > 0 ? { params: error.params } : {}),
+      ...(details ? { details } : {}),
+    },
     retryAfterSeconds: error.retryAfterSeconds,
   };
 }

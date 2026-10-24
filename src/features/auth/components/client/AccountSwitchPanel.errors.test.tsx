@@ -147,7 +147,11 @@ describe("falhas e envio da troca", () => {
       http.post("*/api/auth/sessions/switch", () =>
         HttpResponse.json(
           apiFail("VALIDATION_ERROR", "Inválido", [
-            { field: "password", messages: ["Confira a senha informada."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
+            {
+              field: "password",
+              messages: ["Confira a senha informada."],
+              errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
+            },
           ]),
           { status: 400 },
         ),

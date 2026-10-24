@@ -23,6 +23,8 @@ const apiFieldErrorSchema = z.object({
 const apiErrorBodySchema = z.object({
   code: z.string(),
   message: z.string(),
+  /** Dado que a frase do erro de topo cita (data, petId, limite); nunca dado pessoal. */
+  params: errorParamsSchema.optional(),
   details: z.union([z.array(apiFieldErrorSchema), z.object({ traceId: z.string() }).passthrough()]).optional(),
 });
 

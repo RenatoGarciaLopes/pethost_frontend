@@ -140,6 +140,12 @@ describe("translateError", () => {
     expect(translateError(error)).toBe("Esse e-mail já tem conta. Quer entrar?");
   });
 
+  it("REQ-HTTP-005 o erro de topo entrega os params à frase", () => {
+    const error = apiError("HOST_APPLICATION_ATTEMPTS_EXCEEDED", { params: { max: 3 } });
+
+    expect(translateError(error)).toBe("Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.");
+  });
+
   it("REQ-HTTP-005 limite de tentativas mostra os segundos do Retry-After", () => {
     expect(translateError(apiError("TOO_MANY_REQUESTS", { retryAfterSeconds: 30 }))).toBe(
       "Muitas tentativas seguidas. Respira e tenta de novo em 30 segundos.",

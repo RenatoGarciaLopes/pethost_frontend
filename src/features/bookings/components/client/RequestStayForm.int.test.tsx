@@ -215,7 +215,11 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
   });
 
   it("REQ-REQST-007 regra da API vira frase no topo com o dado: a noite sem vaga", async () => {
-    serve(() => HttpResponse.json(apiFail("BOOKING_CAPACITY_EXCEEDED", "No room on 2026-12-22."), { status: 422 }));
+    serve(() =>
+      HttpResponse.json(apiFail("BOOKING_CAPACITY_EXCEEDED", "No room.", undefined, { date: "2026-12-22" }), {
+        status: 422,
+      }),
+    );
     const { user } = setup();
     await checkCare(user);
     await user.click(screen.getByRole("button", { name: copy.submit }));

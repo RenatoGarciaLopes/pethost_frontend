@@ -24,6 +24,7 @@ interface ApiErrorInit {
   code: string;
   message: string;
   fieldIssues?: FieldIssues;
+  params?: ErrorParams;
   retryAfterSeconds?: number;
   traceId?: string;
   invalidPaths?: string[];
@@ -41,6 +42,8 @@ export class ApiError extends Error {
   /** Código da API (`AUTH_INVALID_CREDENTIALS`) ou local (`NETWORK_ERROR`). */
   readonly code: string;
   readonly fieldIssues: FieldIssues;
+  /** Dado que a frase do erro de topo cita (`date`, `petId`, `max`...). */
+  readonly params: ErrorParams;
   /** Segundos do cabeçalho `Retry-After` (429). */
   readonly retryAfterSeconds?: number;
   /** Identificador do erro 500 para o suporte. */
@@ -54,6 +57,7 @@ export class ApiError extends Error {
     this.status = init.status;
     this.code = init.code;
     this.fieldIssues = init.fieldIssues ?? {};
+    this.params = init.params ?? {};
     this.retryAfterSeconds = init.retryAfterSeconds;
     this.traceId = init.traceId;
     this.invalidPaths = init.invalidPaths ?? [];
@@ -85,6 +89,7 @@ export class ApiError extends Error {
       code: body.code,
       message: body.message,
       fieldIssues,
+      params: body.params,
       traceId,
       retryAfterSeconds: extra.retryAfterSeconds,
     });
@@ -127,6 +132,7 @@ export class ApiError extends Error {
       code: this.code,
       message: this.message,
       fieldIssues: this.fieldIssues,
+      params: this.params,
       retryAfterSeconds: this.retryAfterSeconds,
       traceId: this.traceId,
       invalidPaths: this.invalidPaths,
