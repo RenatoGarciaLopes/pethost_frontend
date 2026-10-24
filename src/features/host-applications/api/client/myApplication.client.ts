@@ -35,7 +35,7 @@ export function patchApplication(
 /**
  * Manda as fotos num pedido só (REQ-HVER-008), uma parte por vaga, na ordem frente, verso, selfie. O `FormData` é
  * montado na hora, a partir dos `File` da memória: no 401, renova a sessão uma vez e monta de novo. Tudo ou nada na
- * API: o erro aponta a vaga (`fieldErrors.back`).
+ * API: o erro aponta a vaga (`fieldIssues.back`).
  * @example await uploadDocuments({ front, back, selfie });
  */
 export function uploadDocuments(

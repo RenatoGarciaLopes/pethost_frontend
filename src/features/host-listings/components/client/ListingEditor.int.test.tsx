@@ -88,16 +88,25 @@ describe("ListingEditor", { timeout: 20000 }, () => {
   it("REQ-LIST-012 erro de campo da API aparece no campo da seção", async () => {
     server.use(
       http.patch(`*/api/listings/${ID}`, () =>
-        HttpResponse.json(apiFail("VALIDATION_ERROR", "x", [{ field: "capacity", messages: ["Acima do limite."] }]), {
-          status: 400,
-        }),
+        HttpResponse.json(
+          apiFail("VALIDATION_ERROR", "x", [
+            {
+              field: "capacity",
+              messages: ["Acima do limite."],
+              errors: [{ code: "LISTING_CAPACITY_OUT_OF_RANGE", params: { max: 10 } }],
+            },
+          ]),
+          {
+            status: 400,
+          },
+        ),
       ),
     );
     const { user } = setup();
     const guests = section(copy.sections.guests);
     await user.click(within(guests).getByRole("button", { name: `Aumentar ${copy.guests.capacity}` }));
     await user.click(within(guests).getByRole("button", { name: copy.save(copy.sections.guests) }));
-    expect(await within(guests).findByText("Acima do limite.")).toBeInTheDocument();
+    expect(await within(guests).findByText("O cantinho recebe de 1 a 10 pets por noite.")).toBeInTheDocument();
   });
 
   it("REQ-LIST-013 sair com alteração não salva pergunta antes (fechar a aba)", async () => {

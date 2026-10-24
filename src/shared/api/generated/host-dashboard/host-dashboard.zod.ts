@@ -130,7 +130,7 @@ export const GetApiV1HostsMeDashboardResponse = zod.object({
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando responder. Só nos pedidos.'),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o pet chegou. Só nas estadias em andamento.')
 }).describe('Uma reserva no painel. Sem telefone nem endereço do tutor.'))
-}).describe('Estadias pagas com a chegada já passada e sem check-in, da mais antiga: marque "Chegou" ou, se o\npet não veio, a plataforma cancela no dia de saída.'),
+}).describe('Estadias pagas com a chegada já passada e sem check-in, da mais antiga: marque "Chegou" ou, se o\r\npet não veio, a plataforma cancela no dia de saída.'),
   "upcomingStays": zod.object({
   "count": zod.number().int(),
   "items": zod.array(zod.object({
@@ -191,7 +191,7 @@ export const GetApiV1HostsMeDashboardResponse = zod.object({
 }).describe('O que ainda vai entrar das parcelas por pagar. Não depende de Month.'),
   "payoutsEnabled": zod.boolean().describe('O Stripe libera os repasses. `false`: o dinheiro fica guardado até liberar.')
 }).describe('Quanto o anfitrião recebeu no mês pedido, contado pela data do repasse (horário de Brasília).')
-}).describe('Painel do anfitrião: pedidos novos, estadias em andamento, próximas estadias e quanto recebeu no\nmês. As listas trazem só as primeiras (int HostDashboardBookingsResponse.Count é o\ntotal); as completas ficam em `GET /bookings/me?status=...`. Valores em reais. As reservas\nsão sempre as de agora; só os ganhos (HostDashboardEarningsResponse HostDashboardResponse.Earnings) dependem do mês pedido.'),
+}).describe('Painel do anfitrião: pedidos novos, estadias em andamento, próximas estadias e quanto recebeu no\r\nmês. As listas trazem só as primeiras (int HostDashboardBookingsResponse.Count é o\r\ntotal); as completas ficam em `GET /bookings/me?status=...`. Valores em reais. As reservas\r\nsão sempre as de agora; só os ganhos (HostDashboardEarningsResponse HostDashboardResponse.Earnings) dependem do mês pedido.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

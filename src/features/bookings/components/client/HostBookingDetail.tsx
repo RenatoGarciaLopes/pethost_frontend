@@ -4,7 +4,7 @@ import { Box, Divider, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { useId, useState, type ReactNode } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { formatBRL, fromCents, splitEarnings } from "@/shared/lib/money";
 import { StatusTimeline } from "@/shared/ui/data-display/StatusTimeline";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
@@ -94,7 +94,7 @@ export function HostBookingDetail({ accountId, bookingId, petProfiles, now }: Ho
     return (
       <ErrorState
         title={bookingCopy.detailLoadError}
-        description={getErrorMessage(query.error)}
+        description={translateError(query.error)}
         onRetry={() => void query.refetch()}
       />
     );

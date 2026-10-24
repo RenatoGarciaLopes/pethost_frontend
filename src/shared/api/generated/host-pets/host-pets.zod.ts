@@ -62,8 +62,8 @@ export const GetApiV1HostsHostIdPetsResponse = zod.object({
   "deactivatedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('O pet com a ficha inteira e quem é o dono. Nas listas (KeeperPetsResponse)\no dono vem uma vez no topo, e os três campos do dono saem omitidos de cada pet.')).describe('Do mais novo para o mais antigo. Lista vazia quando não há pets.')
-}).describe('Os pets de um tutor ou anfitrião. O dono vem <b>uma vez</b>, no topo — todos os pets da\nlista são dele —, e cada pet sai sem `ownerId`, `hostId` e `keeper`.'),
+}).describe('O pet com a ficha inteira e quem é o dono. Nas listas (KeeperPetsResponse)\r\no dono vem uma vez no topo, e os três campos do dono saem omitidos de cada pet.')).describe('Do mais novo para o mais antigo. Lista vazia quando não há pets.')
+}).describe('Os pets de um tutor ou anfitrião. O dono vem <b>uma vez</b>, no topo — todos os pets da\r\nlista são dele —, e cada pet sai sem `ownerId`, `hostId` e `keeper`.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

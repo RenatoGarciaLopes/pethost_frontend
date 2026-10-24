@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http } from "msw";
 import { fail, ok, sessionUserOf } from "./session.mjs";
 
@@ -82,7 +83,10 @@ export const searchHandlers = [
     if (city === "Sem endereço") return fail(422, "LISTING_SEARCH_ADDRESS_REQUIRED");
     if (city === "Fora do mapa") return fail(422, "LISTING_SEARCH_ADDRESS_NOT_LOCATED");
     if (city === "Indisponível") return fail(503, "LISTING_GEOCODER_UNAVAILABLE");
-    if (city === "Inválida") return fail(400, "VALIDATION_ERROR", [{ field: "city", messages: ["invalid"] }]);
+    if (city === "Inválida")
+      return fail(400, "VALIDATION_ERROR", [
+        fieldIssue("city", "invalid", "LISTING_CITY_FILTER_TOO_LONG", { max: 120 }),
+      ]);
     // O mapa sintético fica em Maringá: coordenada a mais de meio grau dali não tem cantinho no raio.
     const offMap =
       byCoordinates &&

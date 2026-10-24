@@ -30,6 +30,40 @@ describe("bffErrorResponse", () => {
     expect(typeof body.timestamp).toBe("string");
   });
 
+  it("REQ-HTTP-010 repassa os códigos e params dos motivos, e só quando todos têm código", async () => {
+    const body = await bffErrorResponse(
+      ApiError.fromEnvelope(400, {
+        code: "VALIDATION_ERROR",
+        message: "x",
+        details: [
+          {
+            field: "checkIn",
+            messages: ["a"],
+            errors: [{ code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72 } }],
+          },
+          { field: "name", messages: ["b"] },
+        ],
+      }),
+    ).json();
+
+    expect(body.error.details).toEqual([
+      {
+        field: "checkIn",
+        messages: ["a"],
+        errors: [{ code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72 } }],
+      },
+      { field: "name", messages: ["b"] },
+    ]);
+  });
+
+  it("REQ-HTTP-010 repassa os params do erro de topo", async () => {
+    const body = await bffErrorResponse(
+      ApiError.fromEnvelope(422, { code: "BOOKING_CAPACITY_EXCEEDED", message: "x", params: { date: "2026-12-22" } }),
+    ).json();
+
+    expect(body.error.params).toEqual({ date: "2026-12-22" });
+  });
+
   it("REQ-HTTP-002 preserva o traceId do 500", async () => {
     const body = await bffErrorResponse(
       ApiError.fromEnvelope(500, { code: "UNEXPECTED_ERROR", message: "x", details: { traceId: "T1" } }),

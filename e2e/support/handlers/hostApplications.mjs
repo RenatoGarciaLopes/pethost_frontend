@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http } from "msw";
 import { randomUUID } from "node:crypto";
 import { fail, ok, sessionUserOf } from "./session.mjs";
@@ -113,11 +114,12 @@ export const hostApplicationsHandlers = [
     if (!mine(state).canStartNew) return fail(422, "HOST_APPLICATION_ATTEMPTS_EXCEEDED");
     const body = (await request.json().catch(() => null)) ?? {};
     const errors = [];
-    if (body.acceptNotice !== true) errors.push({ field: "acceptNotice", messages: ["Aceite o aviso."] });
+    if (body.acceptNotice !== true)
+      errors.push(fieldIssue("acceptNotice", "Aceite o aviso.", "HOST_NOTICE_NOT_ACCEPTED"));
     if (String(body.cpf ?? "").replace(/\D/g, "").length !== 11)
-      errors.push({ field: "cpf", messages: ["CPF inválido."] });
+      errors.push(fieldIssue("cpf", "CPF inválido.", "HOST_CPF_INVALID"));
     if (!["rg", "cnh", "cin"].includes(body.documentType))
-      errors.push({ field: "documentType", messages: ["Escolha o documento."] });
+      errors.push(fieldIssue("documentType", "Escolha o documento.", "HOST_DOCUMENT_TYPE_INVALID"));
     if (errors.length) return fail(400, "VALIDATION_ERROR", errors);
     state.application = { ...newApplication(body), attemptNumber: MAX_ATTEMPTS - state.remainingAttempts + 1 };
     return ok(state.application, { status: 201 });
@@ -138,10 +140,12 @@ export const hostApplicationsHandlers = [
     const data = await request.formData();
     const parts = KINDS.filter((kind) => data.get(kind));
     if (parts.length === 0)
-      return fail(400, "VALIDATION_ERROR", [{ field: "documents", messages: ["Envie as fotos."] }]);
+      return fail(400, "VALIDATION_ERROR", [fieldIssue("documents", "Envie as fotos.", "HOST_DOCUMENTS_REQUIRED")]);
     const refused = parts.find((kind) => !IMAGE_TYPES.includes(data.get(kind).type));
     if (refused)
-      return fail(400, "VALIDATION_ERROR", [{ field: refused, messages: ["Envie uma foto JPG, PNG ou WebP."] }]);
+      return fail(400, "VALIDATION_ERROR", [
+        fieldIssue(refused, "Envie uma foto JPG, PNG ou WebP.", "IMAGE_UNSUPPORTED_FORMAT"),
+      ]);
     const { application } = result.state;
     const uploadedAt = new Date().toISOString();
     const documents = [

@@ -4,7 +4,7 @@ import { Button, Stack } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError, translateFieldErrors } from "@/shared/api/errors/translateError";
 import { useErrorNotice } from "@/shared/hooks/useErrorNotice";
 import { useSessionDraft } from "@/shared/hooks/useSessionDraft";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
@@ -119,7 +119,7 @@ export function PetWizard({ accountId, role = "owner" }: { accountId: string; ro
         uploaded.current[index] = true;
       } catch (error) {
         failed = true;
-        store.getState().setPhotoError(index, getErrorMessage(error));
+        store.getState().setPhotoError(index, translateError(error));
       }
     }
     if (failed) return setSave({ phase: "photoFailed" });
@@ -152,15 +152,13 @@ export function PetWizard({ accountId, role = "owner" }: { accountId: string; ro
       await sendPhotos(pet.id);
     } catch (error) {
       setSave({ phase: "editing" });
-      if (isApiError(error) && Object.keys(error.fieldErrors).length > 0) {
-        const errors = Object.fromEntries(
-          Object.entries(error.fieldErrors).map(([field, messages]) => [field, messages.join(" ")]),
-        );
+      const errors = translateFieldErrors(error);
+      if (Object.keys(errors).length > 0) {
         const first = Math.min(...Object.keys(errors).map((field) => FIELD_STEP[field] ?? 7));
         return store.getState().showServerErrors(first, errors);
       }
       if (isApiError(error) && error.code === "PET_MICROCHIP_ALREADY_REGISTERED") {
-        return store.getState().showServerErrors(4, { microchip: getErrorMessage(error) });
+        return store.getState().showServerErrors(4, { microchip: translateError(error) });
       }
       notice.report(error);
     }

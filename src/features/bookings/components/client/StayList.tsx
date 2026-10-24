@@ -5,7 +5,7 @@ import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { formatBRL, fromCents } from "@/shared/lib/money";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
@@ -123,7 +123,7 @@ export function StayList({ accountId, tab, pageSize }: StayListProps) {
       ) : query.isError ? (
         <ErrorState
           title={bookingCopy.loadError}
-          description={getErrorMessage(query.error)}
+          description={translateError(query.error)}
           onRetry={() => void query.refetch()}
         />
       ) : stays.length === 0 ? (

@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { randomUUID } from "node:crypto";
 import { DEMO, fail, issueSession } from "./session.mjs";
 
@@ -12,7 +13,9 @@ export const INVALID_ZIP = "00000000";
 export function rejectRegistration(body) {
   if (body?.email === DEMO.email) return fail(409, "AUTH_EMAIL_ALREADY_REGISTERED");
   if (body?.address?.zipCode === INVALID_ZIP) {
-    return fail(400, "VALIDATION_ERROR", [{ field: "address.zipCode", messages: ["CEP não existe."] }]);
+    return fail(400, "VALIDATION_ERROR", [
+      fieldIssue("address.zipCode", "CEP não existe.", "AUTH_ZIP_CODE_INVALID", { digits: 8 }),
+    ]);
   }
   return undefined;
 }

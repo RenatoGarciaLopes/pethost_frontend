@@ -30,7 +30,7 @@ export const PostApiV1OwnersRegisterBody = zod.object({
   "city": zod.string().nullish(),
   "state": zod.string().nullish()
 }).describe('Endereço como vem na request e como sai na resposta.')]).optional()
-}).describe('Cadastro de tutor num pedido só: a conta (Auth) e o perfil de tutor (Owners).\nO papel é sempre `owner`, por isso não vem na request.')
+}).describe('Cadastro de tutor num pedido só: a conta (Auth) e o perfil de tutor (Owners).\r\nO papel é sempre `owner`, por isso não vem na request.')
 
 export const PostApiV1OwnersRegisterResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
@@ -67,8 +67,8 @@ export const PostApiV1OwnersRegisterResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')
-}).describe('Sessão aberta no cadastro mais o tutor completo (CPF e dados da conta): o cadastro\njá entra na conta.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.')
+}).describe('Sessão aberta no cadastro mais o tutor completo (CPF e dados da conta): o cadastro\r\njá entra na conta.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -107,7 +107,7 @@ export const GetApiV1OwnersMeResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -169,7 +169,7 @@ export const PatchApiV1OwnersMeResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -215,7 +215,7 @@ export const PutApiV1OwnersMeAvatarResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -254,7 +254,7 @@ export const DeleteApiV1OwnersMeAvatarResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -302,7 +302,7 @@ export const PostApiV1OwnersMeDeletionResponse = zod.object({
 export const PostApiV1OwnersReactivateBody = zod.object({
   "email": zod.string().nullish(),
   "password": zod.string().nullish()
-}).describe('Reativa o tutor: a conta e o perfil de tutor. Pede as credenciais do login, porque\nconta inativa não consegue entrar para pedir isso logada. Já devolve a sessão.')
+}).describe('Reativa o tutor: a conta e o perfil de tutor. Pede as credenciais do login, porque\r\nconta inativa não consegue entrar para pedir isso logada. Já devolve a sessão.')
 
 export const PostApiV1OwnersReactivateResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
@@ -339,8 +339,8 @@ export const PostApiV1OwnersReactivateResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')
-}).describe('Sessão aberta no cadastro mais o tutor completo (CPF e dados da conta): o cadastro\njá entra na conta.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.')
+}).describe('Sessão aberta no cadastro mais o tutor completo (CPF e dados da conta): o cadastro\r\njá entra na conta.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -382,7 +382,7 @@ export const GetApiV1OwnersOwnerIdResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -431,7 +431,7 @@ export const PostApiV1OwnersOwnerIdSuspensionResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -475,7 +475,7 @@ export const DeleteApiV1OwnersOwnerIdSuspensionResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -525,7 +525,7 @@ export const PostApiV1OwnersOwnerIdCpfReleaseResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.'),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -563,7 +563,7 @@ export const GetApiV1OwnersResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta. Nulo só se a conta sumiu do Auth — não deveria acontecer.')]).optional()
-}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\nMesmo formato para o próprio tutor e para o admin.')).nullish(),
+}).describe('Tutor completo: o perfil de tutor (CPF) junto com os dados da conta, lidos do Auth.\r\nMesmo formato para o próprio tutor e para o admin.')).nullish(),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
