@@ -2,7 +2,9 @@
 import { Box, Link, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useEffect, useRef } from "react";
+import type { AccountRole } from "@/shared/auth/contracts/session";
 import { CONTACT_CHANNELS } from "@/shared/config/contact";
+import { NAV_ITEMS } from "@/shared/config/navigation";
 import { usePrefersReducedMotion } from "@/shared/lib/motion/usePrefersReducedMotion";
 import { keyboardFocus } from "@/shared/theme/focus";
 import { PageContainer } from "@/shared/ui/layout/PageContainer";
@@ -19,16 +21,15 @@ const footerLink = {
   [keyboardFocus()]: { outlineColor: "quintal.papel" },
 } as const;
 
-/** Quanto a terra escurece (brilho), no máximo, quando o rodapé aparece inteiro (fim da rolagem). */
+/** Mistura máxima de tinta nas cores da terra quando o rodapé aparece inteiro. */
 const MAX_DARKEN = 0.3;
 
-/** Só a terra escurece (a grama não): o filtro vai nos dois svgs de terra, lido de `--descida`. */
+/** Geometria da terra; cores dinâmicas compartilhadas pela ilustração e pelo conteúdo. */
 const soilLayer = {
   position: "absolute",
   inset: 0,
   width: "100%",
   height: "100%",
-  filter: `brightness(calc(1 - var(--descida) * ${MAX_DARKEN}))`,
 } as const;
 
 /** Quanto do rodapé já subiu na tela: 0 antes de aparecer, 1 com ele inteiro à vista. */
@@ -41,15 +42,30 @@ function descentProgress(rect: DOMRect, viewportHeight: number) {
  * e terra funda, com pedrinhas e raízes no traço de tinta. Quem rola até o fim "entra debaixo da terra": a terra
  * escurece conforme o rodapé sobe na tela. Com `prefers-reduced-motion`, fica só o degradê estático.
  * Landmark `contentinfo` com navegação e contatos aprovados de `shared/config/contact`.
- * Texto em papel sobre base de terra estável, fora do filtro de escurecimento.
- * Sem canais aprovados, a coluna de contato fica oculta e o desktop usa duas colunas.
+ * Texto em papel dentro da última camada; o mesmo tom acompanha a onda e o conteúdo, sem emenda.
+ * Sem canais aprovados, a coluna de contato fica oculta e a navegação se distribui em duas colunas.
  *
  * @param mobileBottomSpace Reserva em unidades de espaçamento do tema para uma barra fixa no celular.
+ * @param accountRole Papel confirmado pela sessão; ausente indica visitante. Somente visitante vê entrar/cadastro.
  * @example <GrassFooter mobileBottomSpace={12} />
  */
-export function GrassFooter({ mobileBottomSpace = 0 }: { mobileBottomSpace?: number }) {
+export function GrassFooter({
+  mobileBottomSpace = 0,
+  accountRole,
+}: {
+  mobileBottomSpace?: number;
+  accountRole?: AccountRole;
+}) {
   const ref = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const links = [
+    ...copy.links,
+    ...(accountRole
+      ? NAV_ITEMS.filter(
+          (item) => item.roles.includes(accountRole) && (item.id === "owner-stays" || item.id === "host-home"),
+        )
+      : copy.visitorLinks),
+  ];
 
   useEffect(() => {
     const footer = ref.current;
@@ -83,22 +99,22 @@ export function GrassFooter({ mobileBottomSpace = 0 }: { mobileBottomSpace?: num
         mt: { xs: 6, md: 8 },
         "--descida": 0,
         "--ink": theme.palette.quintal.tinta,
+        "--soil-light": `color-mix(in srgb, ${theme.palette.scene.soilLight}, ${theme.palette.quintal.tinta} calc(var(--descida) * ${MAX_DARKEN * 100}%))`,
+        "--soil-mid": `color-mix(in srgb, ${theme.palette.scene.soilMid}, ${theme.palette.quintal.tinta} calc(var(--descida) * ${MAX_DARKEN * 100}%))`,
+        "--soil-deep": `color-mix(in srgb, ${theme.palette.scene.soilDeep}, ${theme.palette.quintal.tinta} calc(var(--descida) * ${MAX_DARKEN * 100}%))`,
+        "--stone": `color-mix(in srgb, ${theme.palette.scene.stone}, ${theme.palette.quintal.tinta} calc(var(--descida) * ${MAX_DARKEN * 100}%))`,
       })}
     >
       <GroundLine variant="wave" height={44} />
       <Box
+        data-testid="grass-footer-layers"
         aria-hidden="true"
-        sx={(theme) => ({
+        sx={{
           position: "relative",
           height: { xs: 220, md: 300 },
           overflow: "hidden",
           bgcolor: "scene.ground",
-          borderBottom: "2px solid var(--ink)",
-          "--soil-light": theme.palette.scene.soilLight,
-          "--soil-mid": theme.palette.scene.soilMid,
-          "--soil-deep": theme.palette.scene.soilDeep,
-          "--stone": theme.palette.scene.stone,
-        })}
+        }}
       >
         <Box component="svg" viewBox="0 0 1440 300" preserveAspectRatio="none" focusable="false" sx={soilLayer}>
           <path
@@ -115,9 +131,10 @@ export function GrassFooter({ mobileBottomSpace = 0 }: { mobileBottomSpace?: num
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
           />
+          <path d="M0 242C240 226 420 256 680 240S1020 224 1240 246 1390 238 1440 242V300H0Z" fill="var(--soil-deep)" />
           <path
-            d="M0 242C240 226 420 256 680 240S1020 224 1240 246 1390 238 1440 242V300H0Z"
-            fill="var(--soil-deep)"
+            d="M0 242C240 226 420 256 680 240S1020 224 1240 246 1390 238 1440 242"
+            fill="none"
             stroke="var(--ink)"
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
@@ -146,28 +163,38 @@ export function GrassFooter({ mobileBottomSpace = 0 }: { mobileBottomSpace?: num
           </g>
         </Box>
       </Box>
-      <Box sx={{ bgcolor: "scene.soilContent", color: "quintal.papel" }}>
+      <Box data-testid="grass-footer-earth" sx={{ bgcolor: "var(--soil-deep)", color: "quintal.papel" }}>
         <PageContainer sx={{ pt: { xs: 4, md: 5 }, pb: { xs: 3 + mobileBottomSpace, md: 3 } }}>
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: CONTACT_CHANNELS.length ? "1.2fr 1fr 1fr" : "1.2fr 1fr" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: CONTACT_CHANNELS.length ? "1fr 1fr 1fr" : "minmax(0, 1fr) minmax(0, 2fr)",
+              },
               gap: { xs: 4, md: 8 },
             }}
           >
             <Box>
-              <Typography variant="h3" component="p" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <DoorMark width={32} interactive={false} />
-                {copy.brand}
-              </Typography>
+              <DoorMark withWordmark wordmarkColor="quintal.papel" interactive={false} />
               <Typography sx={{ mt: 2, maxWidth: 300 }}>{copy.tagline}</Typography>
             </Box>
             <Box component="nav" aria-label={copy.navigation}>
               <Typography component="h2" variant="h4" sx={{ mb: 1 }}>
                 {copy.navigation}
               </Typography>
-              <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
-                {copy.links.map(({ label, href }) => (
+              <Box
+                component="ul"
+                sx={{
+                  listStyle: "none",
+                  m: 0,
+                  p: 0,
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: CONTACT_CHANNELS.length ? "1fr" : "repeat(2, minmax(0, 1fr))" },
+                  columnGap: 3,
+                }}
+              >
+                {links.map(({ label, href }) => (
                   <li key={href}>
                     <Link component={NextLink} href={href} sx={footerLink}>
                       {label}

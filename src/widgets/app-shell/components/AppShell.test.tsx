@@ -124,5 +124,10 @@ it.each([
   const footer = screen.queryByTestId("grass-footer");
   if (!shown) return expect(footer).not.toBeInTheDocument();
   expect(footer).toBe(screen.getByRole("contentinfo"));
+  expect(within(footer!).queryByRole("link", { name: "Entrar" })).not.toBeInTheDocument();
+  expect(within(footer!).getByRole("link", { name: role === "owner" ? "Minhas estadias" : "Painel" })).toHaveAttribute(
+    "href",
+    role === "owner" ? "/owner/bookings" : "/host",
+  );
   expect(screen.getByRole("main").compareDocumentPosition(footer!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 });

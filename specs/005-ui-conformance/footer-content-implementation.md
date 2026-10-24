@@ -1,46 +1,43 @@
-# 093: conteúdo no rodapé de terra
+﻿# 093: conteúdo no rodapé de terra
 
-Implementado na worktree `pethost_frontend-093`, branch `feat/093-footer-content`.
+Implementação na worktree `pethost_frontend-093`, branch `feat/093-footer-content`. A revisão de acabamento solicitada antes do merge substitui a base em painel pela camada de terra contínua e adapta os links à conta.
 
 ## Interface e reutilização
 
-`GrassFooter` aceita `mobileBottomSpace?: number` (padrão 0, unidades do tema, só mobile) e usa `GroundLine`, `DoorMark`, `PageContainer`, `MuiLink`, `keyboardFocus`, `registerPath` e `LOGIN_PATH`. Sua raiz agora é um `footer` com landmark `contentinfo`; apenas a ilustração permanece escondida da leitura assistiva. Consumidores: home e AppShell público/tutor/anfitrião, incluindo cantinho aberto; auth/admin continuam fora. Não contém transporte HTTP, cache ou permissões próprias. Depende do tema Quintal e dos providers existentes. Exemplo: `<GrassFooter />`.
+`GrassFooter` usa `GroundLine`, `DoorMark` com wordmark, `PageContainer`, `MuiLink`, `keyboardFocus`, `registerPath`, `LOGIN_PATH` e `NAV_ITEMS`. Raiz `footer` com landmark `contentinfo`; somente desenho é aria-hidden. Consumidores: home, AppShell público/tutor/anfitrião e cantinho aberto; admin/auth ficam fora. Sem HTTP, cache, permissões próprias ou consulta de sessão. Depende do tema Quintal e providers existentes.
 
-`src/shared/ui/brand/GrassFooter/grassFooterCopy.ts` centraliza textos e cinco destinos existentes: `/`, `/#como-funciona`, `/register/host`, `/login`, `/register/owner`. O fragmento é absoluto para funcionar também no cantinho. Termos e privacidade não têm rotas implementadas e continuam sem links.
+Props opcionais: `accountRole?: AccountRole` (ausente: visitante; caller passa papel confirmado da sessão), `mobileBottomSpace?: number` (padrão 0, unidades do tema, apenas abaixo de md). Exemplo: `<GrassFooter accountRole="owner" mobileBottomSpace={12} />`.
 
-`src/shared/config/contact.ts` exporta `ContactChannel` (label e href mailto/tel/https) e `CONTACT_CHANNELS`, lista readonly de canais públicos aprovados. O rodapé lê diretamente essa fonte. Lista vazia oculta integralmente a coluna de contato, sem placeholder; nenhuma informação foi presumida. Dados aguardam aprovação pelo Renato via coordenador. Só usar canais públicos aprovados. Não contém HTTP, estado, cache ou credenciais.
+`src/shared/ui/brand/GrassFooter/grassFooterCopy.ts` centraliza textos e três destinos comuns: `/`, `/#como-funciona`, `/register/host`. O fragmento absoluto funciona no cantinho. Apenas visitante recebe `/login` e `/register/owner`; tutor recebe Minhas estadias `/owner/bookings`; anfitrião recebe Painel `/host`. Atalhos pessoais são lidos de NAV_ITEMS. Admin na home pública não recebe links de autenticação nem atalhos pessoais. Termos e privacidade não têm rotas implementadas e continuam sem links. O wordmark digitado foi removido do copy.
 
-`sceneColors.soilContent` é a base estável de terra escura do conteúdo; papel no texto e foco, coral no sublinhado. Fica fora do filtro de escurecimento dos SVGs. Contraste WCAG medido: papel 11,33:1, coral 3,90:1; mínimos testados 4,5:1 para texto e 3:1 para indicadores. Títulos display, três colunas a partir de md quando há contato, duas sem contato, e uma no celular. Alvos de links com altura mínima 44px. Direitos usam o ano corrente do ambiente de renderização. DoorMark acompanha a marca sem interação decorativa.
+`src/shared/config/contact.ts` exporta `ContactChannel` (label e href mailto/tel/https) e `CONTACT_CHANNELS`, lista readonly de canais públicos aprovados. O rodapé lê essa fonte. Lista vazia oculta integralmente a coluna de contato, sem placeholder. Dados aguardam aprovação pelo Renato via coordenador. Não contém HTTP, estado, cache ou credenciais.
 
-Sem diretórios técnicos novos ou recursos duplicados. Configuração cabe em shared/config; copy interna permanece junto ao componente. Inventário atualizado em `docs/folder-structure.md` e recursos/decisão/catálogo/linha do tempo do vault.
+## Terra contínua e layout
+
+A última camada inteira usa `sceneColors.soilDeep`, escurecida para papel 11,33:1 e coral 3,90:1 antes da animação; mínimos testados 4,5:1/3:1. `soilContent` foi removido, migrar para `soilDeep`. O mesmo `--soil-deep` preenche a onda e continua sob os textos. O desenho não tem borderBottom reta; preenchimento profundo sem stroke inferior, somente contorno ondulado no topo. Não há painel de tom separado.
+
+Rolagem mistura cada tom de terra/pedras com tinta em até 30% via `color-mix`, compartilhando variáveis CSS entre SVG e fundo do conteúdo. O texto não recebe filtro e mantém papel; a grama não escurece. Movimento reduzido mantém tons estáticos sem listeners de scroll. A progressão de light/mid/deep continua testada. `--descida` é atualizada por RAF, sem re-render a cada evento.
+
+Sem contato: marca ocupa uma fração e navegação duas no desktop; links em duas colunas, aproveitando a largura. Com contato: três colunas principais, links em uma. No mobile, tudo empilhado; links com altura mínima 44px. Direitos usam ano corrente.
+
+Marca usa `<DoorMark withWordmark wordmarkColor="quintal.papel" interactive={false} />`, a mesma assinatura minúscula do cabeçalho. `DoorMarkProps.wordmarkColor?: string` é novo e opcional, preservando `text.primary` no cabeçalho; a cor só altera o wordmark, mantendo folha coral/luz.
+
+A captura inicial revelou direitos sob a barra Pedir estadia no cantinho. `AppShell` repassa mobileBottomSpace ao GrassFooter. A rota do cantinho usa 12 com barra (`!isOwner`), 0 no cantinho próprio, reservando o fim da terra escura no mobile. Nenhuma regra de compra foi alterada.
+
+Sem diretórios técnicos novos ou recursos duplicados. Inventário atualizado em `docs/folder-structure.md`; recursos, catálogo, decisão e linha do tempo no vault.
 
 ## Testes e limites
 
-- Unitário: `src/shared/theme/tokens/contrast.test.ts`, contraste de texto e indicadores.
-- Funcional: `GrassFooter.test.tsx`, landmark, cinco destinos, ano, contato vazio/configurado (dados sintéticos), preservação da animação e movimento reduzido.
-- Integração de composição: `AppShell.test.tsx`, landmark depois do main para tutor/anfitrião e ausência no admin, usando providers reais de teste. `src/app/page.int.test.tsx` cobre a home real com MSW; seletor Entrar agora restrito ao banner. MSW isolado não se aplica ao rodapé, que não usa HTTP.
-- Browser/a11y: stories do rodapé e da casca com axe em modo error, navegação, celular e movimento reduzido.
-- E2E mocked: `e2e/mocked/grass-footer.spec.ts`, home, cantinho, navegação ao fragmento, foco só por Tab, ausência em auth/admin e capturas em 1440/390. `e2e/mocked/home/home.spec.ts` restringe Entrar ao banner para não confundir com o novo atalho do footer. Não representa integração com API real.
+- Unitário: `src/shared/theme/tokens/contrast.test.ts`, contraste e progressão dos tons.
+- Funcional: `GrassFooter.test.tsx`, landmark, assinatura, destinos por papel, ano, contato vazio/configurado (dados sintéticos), animação e movimento reduzido; `brand.test.tsx`, DoorMark padrão/papel, escala e semântica.
+- Integração: `AppShell.test.tsx`, passagem do papel e posição/ausência do footer; `src/app/page.int.test.tsx`, home real com MSW e papel da sessão; `src/app/listings/[listingId]/page.int.test.tsx`, composição pública do cantinho. MSW isolado do rodapé/símbolo N/A: não usam HTTP. Unitário de lógica separada da marca N/A: comportamento coberto na composição.
+- Browser/a11y: stories de GrassFooter (visitante/tutor/anfitrião/mobile/reserva/redução de movimento), AppShell (papéis e reserva mobile), DoorMark (assinatura em terra); axe em modo error.
+- E2E mocked: `e2e/mocked/grass-footer.spec.ts`, animação, links por sessão, igualdade das cores calculadas da onda/fundo, ausência de borda reta/stroke inferior, assinatura em papel, direitos acima do CTA, navegação ao fragmento e ausência auth/admin. Capturas de home/cantinho × 1440/390 × visitante/logado (tutor). `home/home.spec.ts` verifica composição responsiva da home. Não representa integração com API real.
 
 ## Validação
 
-- `npx vitest run src/shared/ui/brand/GrassFooter/GrassFooter.test.tsx src/shared/theme/tokens/contrast.test.ts src/widgets/app-shell/components/AppShell.test.tsx --maxWorkers=1`: 24 testes em 3 arquivos aprovados. Após ocultar contato vazio e reutilizar DoorMark, repetidos GrassFooter/AppShell: 20 aprovados; tokens sem alterações posteriores.
-- `npx vitest run src/app/page.int.test.tsx --maxWorkers=1`: 11 testes de integração aprovados.
-- `npx vitest run --config vitest.footer-temp.config.ts src/shared/ui/brand/GrassFooter/GrassFooter.stories.tsx --maxWorkers=1`: 3 stories aprovadas com axe antes da reserva mobile; rodada final de GrassFooter e AppShell: 10 stories aprovadas com axe. Config temporária permitiu o destino real da junction em server.fs.allow; removida da entrega. O comando com config padrão falhou antes por restrição de acesso do Vite, sem executar stories.
-- `npx tsc --noEmit`: aprovado. ESLint dos arquivos tocados e `git diff --check`: aprovados.
-- E2E final: 6 testes do rodapé + 2 da composição home aprovados em desktop/mobile, com Next webpack na 3178 e mock na 5099, após liberação pelo Rivet. Prints finais inspecionados em `test-results/093-prints/`: home/cantinho 1440/390, páginas completas e recortes do rodapé. A rodada inicial revelou sobreposição dos direitos pela barra fixa, corrigida com reserva mobile; também teve timeouts durante compilação fria e espera de conteúdo após navegação ao fragmento. A repetição passou com rotas aquecidas, DOMContentLoaded nas páginas da casca e limites locais adequados.
+Entrega inicial (commit 81a82af): 36 testes unitários/funcionais/integração, 10 stories com axe e 8 E2Es aprovados; tsc/lint aprovados. Capturas iniciais em `test-results/093-prints/` foram revisadas pelo coordenador e motivaram a revisão visual acima. Rodada inicial teve timeouts de compilação fria e revelou direitos sob a barra mobile, corrigidos antes do commit.
 
-Referência visual inspecionada: `assets/pranchas/quintal-casas.png` do vault. A prancha termina com faixa de gramado sem texto; a extensão em camadas de terra da 073 e a base de conteúdo da 093 são diferenças intencionais solicitadas por Renato. Não se declara equivalência pixel a pixel.
+Revisão de acabamento: 48 testes em 6 arquivos aprovados (GrassFooter, AppShell, brand, contraste, integração da home e do cantinho). Contraste repetido após o ajuste dos extremos da mistura: 4 aprovados. GrassFooter/AppShell/DoorMark: 17 stories aprovadas no Chromium, incluindo axe nos cenários definidos. Typecheck/lint aprovados. Em 24/10/2026, o coordenador determinou encerrar os processos locais e entregar o commit; a validação E2E e os novos prints desta revisão ficam pendentes para o agente cloud/coordenador. Configurações temporárias Storybook/Playwright removidas. Nenhum servidor ou teste novo foi iniciado nessa entrega final. Não executar npm install/ci: node_modules é junction compartilhada.
 
-## Reserva mobile para barra fixa
-
-A captura inicial revelou direitos cobertos pela barra Pedir estadia no cantinho. `GrassFooter` e `AppShell` aceitam agora `mobileBottomSpace?: number` (padrão 0), em unidades do tema e aplicado somente abaixo de md. A rota do cantinho usa 12 quando há barra (`!isOwner`), 0 no cantinho próprio. A reserva fica dentro da base escura. Stories novas documentam o estado; E2E verifica a posição dos direitos acima do CTA e a integração do cantinho cobre a composição. O uso sem props permanece válido.
-
-Rodada final após a reserva: GrassFooter/AppShell/integração do cantinho, 21 testes aprovados em 3 arquivos. Somando home (11) e contraste (4), são 36 testes relevantes sem repetições.
-
-E2E final, com `CI=1` e configuração temporária para webpack na 3178/mock na 5099:
-
-- `npx playwright test --config playwright.footer-temp.config.ts e2e/mocked/grass-footer.spec.ts --project=mocked-desktop --project=mocked-mobile --workers=1`: 6 aprovados.
-- `npx playwright test --config playwright.footer-temp.config.ts e2e/mocked/home/home.spec.ts --grep 'home tem casa' --project=mocked-desktop --project=mocked-mobile --workers=1 --output=test-results/093-home-validation`: 2 aprovados.
-
-Configurações temporárias removidas. Contato aguarda valores aprovados; coluna oculta, sem placeholder.
+Referência inspecionada: `assets/pranchas/quintal-casas.png` do vault. A prancha termina em gramado sem texto; camadas de terra e conteúdo são extensões intencionais solicitadas por Renato. Não se declara equivalência pixel a pixel.

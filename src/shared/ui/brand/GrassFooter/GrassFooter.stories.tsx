@@ -39,6 +39,19 @@ export const Celular: Story = {
   globals: { viewport: { value: "celular", isRotated: false } },
 };
 
+/** A sessão controla os destinos; tutor não recebe convite para entrar ou criar conta. */
+export const Tutor: Story = {
+  args: { accountRole: "owner" },
+  play: async ({ canvasElement }) => {
+    const footer = within(within(canvasElement).getByRole("contentinfo"));
+    await expect(footer.getByRole("link", { name: "Minhas estadias" })).toHaveAttribute("href", "/owner/bookings");
+    await expect(footer.queryByRole("link", { name: "Entrar" })).not.toBeInTheDocument();
+  },
+};
+
+/** Anfitrião volta ao painel existente. */
+export const Anfitriao: Story = { args: { accountRole: "host" } };
+
 /** Reserva para barra fixa da página, sem cobrir os direitos ou os atalhos no fim da rolagem. */
 export const CelularComBarraFixa: Story = {
   globals: { viewport: { value: "celular", isRotated: false } },

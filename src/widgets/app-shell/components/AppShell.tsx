@@ -32,7 +32,7 @@ export function AppShell({ user, children, returnTo, mobileBottomSpace }: AppShe
       <Box component="main" id="conteudo" tabIndex={-1} sx={{ outline: "none", flexGrow: 1 }}>
         {children}
       </Box>
-      {user?.role !== "admin" && <GrassFooter mobileBottomSpace={mobileBottomSpace} />}
+      {user?.role !== "admin" && <GrassFooter accountRole={user?.role} mobileBottomSpace={mobileBottomSpace} />}
     </Box>
   );
 }

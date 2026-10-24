@@ -31,36 +31,65 @@ test("REQ-UIC-011 o início termina no rodapé de gramado e a terra escurece ao 
   await expect.poll(() => descida(page)).toBeGreaterThan(0.95);
 });
 
-test("093 navega do cantinho para Como funciona e registra rodapé responsivo", async ({ page }, testInfo) => {
-  test.setTimeout(90_000);
+test("093 navega do cantinho para Como funciona e registra rodapé responsivo", async ({ page, baseURL }, testInfo) => {
+  test.setTimeout(150_000);
   const width = testInfo.project.name === "mocked-mobile" ? 390 : 1440;
   await page.setViewportSize({ width, height: 1000 });
-  for (const [label, path] of [
-    ["home", "/"],
-    ["cantinho", `/listings/${LISTING_ID}`],
-  ]) {
-    await page.goto(path);
-    const footer = page.getByRole("contentinfo");
-    await footer.scrollIntoViewIfNeeded();
-    await expect(footer.getByRole("link", { name: "Abrir meu cantinho" })).toHaveAttribute("href", "/register/host");
-    await expect(footer.getByText(/Todos os direitos reservados/)).toBeVisible();
-    await scrollToEnd(page);
-    const rights = footer.getByText(/Todos os direitos reservados/);
-    await expect(rights).toBeInViewport();
-    if (label === "cantinho" && width === 390) {
-      const bounds = await rights.boundingBox();
-      const request = await page
-        .getByRole("link", { name: "Pedir estadia", exact: true })
-        .filter({ visible: true })
-        .boundingBox();
-      expect(bounds!.y + bounds!.height).toBeLessThan(request!.y);
+  for (const session of ["visitante", "logado"] as const) {
+    if (session === "logado") await loginAccount(page, baseURL!);
+    for (const [label, path] of [
+      ["home", "/"],
+      ["cantinho", `/listings/${LISTING_ID}`],
+    ]) {
+      await page.goto(path);
+      const footer = page.getByRole("contentinfo");
+      await footer.scrollIntoViewIfNeeded();
+      await expect(footer.getByRole("link", { name: "Abrir meu cantinho" })).toHaveAttribute("href", "/register/host");
+      await expect(footer.getByText(/Todos os direitos reservados/)).toBeVisible();
+      if (session === "visitante") {
+        await expect(footer.getByRole("link", { name: "Entrar", exact: true })).toHaveAttribute("href", "/login");
+        await expect(footer.getByRole("link", { name: "Criar conta", exact: true })).toBeVisible();
+      } else {
+        await expect(footer.getByRole("link", { name: "Entrar", exact: true })).toHaveCount(0);
+        await expect(footer.getByRole("link", { name: "Criar conta", exact: true })).toHaveCount(0);
+        await expect(footer.getByRole("link", { name: "Minhas estadias" })).toHaveAttribute("href", "/owner/bookings");
+      }
+      await expect(footer.getByText("pethost", { exact: true })).toHaveCSS("color", "rgb(254, 250, 243)");
+      if (width === 1440 && (await footer.getByRole("heading", { name: "Fale com a gente" }).count()) === 0) {
+        const first = await footer.getByRole("link", { name: "Início / Buscar" }).boundingBox();
+        const second = await footer.getByRole("link", { name: "Como funciona" }).boundingBox();
+        expect(second!.x).toBeGreaterThan(first!.x + first!.width);
+        expect(Math.abs(second!.y - first!.y)).toBeLessThan(1);
+      }
+      await scrollToEnd(page);
+      const rights = footer.getByText(/Todos os direitos reservados/);
+      await expect(rights).toBeInViewport();
+      if (label === "cantinho" && width === 390) {
+        const bounds = await rights.boundingBox();
+        const request = await page
+          .getByRole("link", { name: "Pedir estadia", exact: true })
+          .filter({ visible: true })
+          .boundingBox();
+        expect(bounds!.y + bounds!.height).toBeLessThan(request!.y);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await expect(page.getByTestId("grass-footer-layers")).toHaveCSS("border-bottom-width", "0px");
+      await expect
+        .poll(() =>
+          footer.evaluate((element) => {
+            const wave = element.querySelector('path[fill="var(--soil-deep)"]')!;
+            const earth = element.querySelector('[data-testid="grass-footer-earth"]')!;
+            return getComputedStyle(wave).fill === getComputedStyle(earth).backgroundColor;
+          }),
+        )
+        .toBe(true);
+      await expect(footer.locator('path[fill="var(--soil-deep)"]')).toHaveCSS("stroke", "none");
+      await page.screenshot({ path: testInfo.outputPath(`093-${label}-${session}-${width}.png`), fullPage: true });
+      await footer.screenshot({ path: testInfo.outputPath(`093-${label}-${session}-${width}-footer.png`) });
     }
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await page.screenshot({ path: testInfo.outputPath(`093-${label}-${width}.png`), fullPage: true });
-    await footer.screenshot({ path: testInfo.outputPath(`093-${label}-${width}-footer.png`) });
   }
   // O clique só prepara a modalidade: o foco programático não deve desenhar anel.
-  await page.getByRole("contentinfo").getByText("PetHost", { exact: true }).click();
+  await page.getByRole("contentinfo").getByText("pethost", { exact: true }).click();
   const firstLink = page.getByRole("contentinfo").getByRole("link", { name: "Início / Buscar" });
   await firstLink.focus();
   await expect(firstLink).toHaveCSS("outline-style", "none");

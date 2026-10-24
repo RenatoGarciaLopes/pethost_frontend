@@ -38,9 +38,8 @@ export const sceneColors = {
   /** Camadas de terra do rodapé de gramado, da mais clara (logo abaixo da grama) à mais escura (fim da página). */
   soilLight: "#E2C99E",
   soilMid: "#C09566",
-  soilDeep: "#8A6240",
-  /** Base estável do conteúdo do rodapé: papel e indicadores coral passam AA. */
-  soilContent: "#493323",
+  /** Última camada, contínua sob o conteúdo: papel e indicadores coral passam AA. */
+  soilDeep: "#493323",
   /** Pedrinhas do rodapé, mais claras que a terra para aparecerem no traço de tinta. */
   stone: "#F1E3C6",
 } as const;

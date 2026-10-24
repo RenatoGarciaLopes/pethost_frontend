@@ -40,6 +40,7 @@ it("093 expõe um landmark com destinos existentes e direitos do ano corrente", 
   renderWithProviders(<GrassFooter />, { theme: quintalTheme });
   const footer = screen.getByRole("contentinfo");
   expect(footer).not.toHaveAttribute("aria-hidden");
+  expect(within(footer).getByText("pethost", { exact: true })).toBeVisible();
   const nav = within(within(footer).getByRole("navigation", { name: "Navegue" }));
   for (const [name, href] of [
     ["Início / Buscar", "/"],
@@ -54,6 +55,29 @@ it("093 expõe um landmark com destinos existentes e direitos do ano corrente", 
   ).toBeVisible();
   expect(within(footer).getAllByRole("link")).toHaveLength(5);
   expect(within(footer).queryByRole("heading", { name: "Fale com a gente" })).not.toBeInTheDocument();
+});
+
+it.each([
+  ["owner", "Minhas estadias", "/owner/bookings"],
+  ["host", "Painel", "/host"],
+] as const)("093 conta %s recebe seu atalho em vez de entrar e criar conta", (accountRole, name, href) => {
+  stubMotion(true);
+  renderWithProviders(<GrassFooter accountRole={accountRole} />, { theme: quintalTheme });
+  const footer = within(screen.getByRole("contentinfo"));
+  expect(footer.queryByRole("link", { name: "Entrar" })).not.toBeInTheDocument();
+  expect(footer.queryByRole("link", { name: "Criar conta" })).not.toBeInTheDocument();
+  expect(footer.getByRole("link", { name })).toHaveAttribute("href", href);
+});
+
+it("093 conta admin na home pública não recebe links de autenticação ou atalhos pessoais", () => {
+  stubMotion(true);
+  renderWithProviders(<GrassFooter accountRole="admin" />, { theme: quintalTheme });
+  const footer = within(screen.getByRole("contentinfo"));
+  expect(footer.queryByRole("link", { name: "Entrar" })).not.toBeInTheDocument();
+  expect(footer.queryByRole("link", { name: "Criar conta" })).not.toBeInTheDocument();
+  expect(footer.queryByRole("link", { name: "Minhas estadias" })).not.toBeInTheDocument();
+  expect(footer.queryByRole("link", { name: "Painel" })).not.toBeInTheDocument();
+  expect(footer.getAllByRole("link")).toHaveLength(3);
 });
 
 it("093 lê os canais da configuração e mostra a coluna de contato quando há dados", () => {

@@ -14,6 +14,8 @@ export interface DoorMarkProps {
   width?: number;
   /** Mostra "pethost" em Caprasimo ao lado (assinatura). */
   withWordmark?: boolean;
+  /** Cor semântica do wordmark no tema MUI. Padrão text.primary; papel permite assinatura sobre terra escura. */
+  wordmarkColor?: string;
   /**
    * Nome acessível. Sem ele, o símbolo é decorativo (`aria-hidden`), como quando já está dentro
    * de um link com texto. Com `withWordmark`, o texto visível já nomeia a marca.
@@ -37,7 +39,14 @@ const sizes: Record<DoorMarkSize, { width: number; stroke: number; knob: number 
  * <Link href="/" aria-label="PetHost, início"><DoorMark withWordmark /></Link>
  * <DoorMark size="large" title="PetHost" />
  */
-export function DoorMark({ size = "header", width, withWordmark = false, title, interactive = true }: DoorMarkProps) {
+export function DoorMark({
+  size = "header",
+  width,
+  withWordmark = false,
+  wordmarkColor = "text.primary",
+  title,
+  interactive = true,
+}: DoorMarkProps) {
   const spec = sizes[size];
   const symbolWidth = width ?? spec.width;
   const decorative = !title;
@@ -101,7 +110,7 @@ export function DoorMark({ size = "header", width, withWordmark = false, title, 
             fontFamily: theme.typography.h1.fontFamily,
             fontSize: `${Math.round(symbolWidth * 0.78)}px`,
             lineHeight: 1,
-            color: "text.primary",
+            color: wordmarkColor,
             letterSpacing: "-0.01em",
           })}
         >
