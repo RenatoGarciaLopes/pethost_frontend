@@ -1,18 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Divider,
-  FormControl,
-  FormLabel,
-  Link,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Divider, FormControl, InputLabel, Link, Select, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -101,7 +89,7 @@ export function BookingPaymentView({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "minmax(0, 2fr) minmax(280px, 1fr)" },
+          gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) 340px" },
           gap: 4,
           alignItems: "start",
         }}
@@ -135,27 +123,23 @@ export function BookingPaymentView({
               ) : (
                 <>
                   {!state.session && !!payment.options?.length && (
-                    <FormControl>
-                      <FormLabel id="payment-plan">{copy.plan}</FormLabel>
-                      <RadioGroup
-                        aria-labelledby="payment-plan"
+                    <FormControl fullWidth disabled={state.busy}>
+                      <InputLabel htmlFor="payment-plan">{copy.plan}</InputLabel>
+                      <Select
+                        native
+                        label={copy.plan}
+                        inputProps={{ id: "payment-plan" }}
                         value={selected}
                         onChange={(e) => setCount(Number(e.target.value))}
                       >
                         {payment.options.map((plan) => (
-                          <FormControlLabel
-                            key={plan.count}
-                            value={plan.count}
-                            control={<Radio />}
-                            label={
-                              plan.count === 1
-                                ? copy.atSight(formatBRL(plan.firstAmount))
-                                : copy.planLabel(plan.count, formatBRL(plan.firstAmount))
-                            }
-                            disabled={state.busy}
-                          />
+                          <option key={plan.count} value={plan.count}>
+                            {plan.count === 1
+                              ? copy.atSight(formatBRL(plan.firstAmount))
+                              : copy.planLabel(plan.count, formatBRL(plan.firstAmount))}
+                          </option>
                         ))}
-                      </RadioGroup>
+                      </Select>
                       <Typography variant="body2" color="text.secondary">
                         {copy.separate}
                       </Typography>
@@ -262,7 +246,7 @@ export function BookingPaymentView({
             />
           ) : (
             <Box
-              sx={{ minHeight: 150, bgcolor: "secondary.light", display: "grid", placeItems: "center", gap: 1, p: 3 }}
+              sx={{ minHeight: 150, bgcolor: "background.paper", display: "grid", placeItems: "center", gap: 1, p: 3 }}
             >
               <DoorMark width={48} interactive={false} />
               <Typography color="text.secondary" sx={{ textAlign: "center" }}>

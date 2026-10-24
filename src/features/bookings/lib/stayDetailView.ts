@@ -81,7 +81,12 @@ export function stayNow(booking: Booking, moment: Date): StayNow {
     case "confirmed":
       return { ...base, tone: "ok", title: now.confirmed(formatStayDay(booking.checkIn)), action: "viewPayment" };
     case "in_progress":
-      return { ...base, tone: "info", title: now.inProgress(host, formatStayDay(booking.checkOut)), action: "viewPayment" };
+      return {
+        ...base,
+        tone: "info",
+        title: now.inProgress(host, formatStayDay(booking.checkOut)),
+        action: "viewPayment",
+      };
     case "completed":
       return { ...base, tone: "ok", title: now.completed(host), action: "viewPayment" };
     case "declined":

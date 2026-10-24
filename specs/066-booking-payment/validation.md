@@ -1,8 +1,21 @@
 # 066 · Validação em andamento
 
+## Encerramento solicitado pelo coordenador (24/10/2026)
+
+Nenhum teste ou servidor novo foi iniciado após a ordem de encerramento. O runner anterior não está mais disponível na ferramenta de processos; não há listener na 3177. A 5099 está com PID 30680, diferente do mock iniciado nesta tarefa; não foi encerrado por não ser possível atribuí-lo à 066 com segurança. Validação final foi transferida para agente cloud.
+
+A última execução deixou 24 PNGs em `test-results/066/` (12 estados em 1440 e 390). Há duas falhas registradas na jornada da parcela seguinte, uma por projeto: ao voltar do detalhe para o pagamento, o teste não encontra “Confirme e pague”. Investigar preservação do estado de celebração na navegação/cache; não declarar REQ-PAY-011 E2E aprovado. Os demais resultados completos precisam ser conferidos pelo agente cloud. Não houve reexecução de lint/typecheck após o último ajuste visual e o merge 094/097.
+
+Conferência visual realizada nos PNGs desktop ready/success: largura útil alinhada à prancha, coluna lateral de 340 px, planos compactados em select e fallback sem bloco azul. Diferenças: casca/tipografia/rodapé atuais do Quintal, planos e prazo adicionais exigidos pela API, lembrete sem checkbox conforme aprovação, foto ausente na fixture e campos internos do Stripe simulados. Conferência final de todos os estados/mobile permanece para cloud.
+
 Data: 2026-10-23. Branch `feat/066-booking-payment`; worktree `pethost_frontend-066`.
 
 ## Executado
+
+- Após liberação dos checks leves: `npx tsc --noEmit --incremental` aprovado; rodada focada com `--maxWorkers=1` aprovou 43 testes em sete arquivos (regras/BFF/SDK/detalhe/rota/integração/mock). O matcher e a ausência de dependências anteriores foram resolvidos. Mudanças posteriores no helper E2E e integração da 094/097 exigem os checks finais correspondentes.
+- ESLint focado encontrou dois imports de teste fora da API pública da feature; corrigidos com exports públicos dos contratos/tipos e imports pelo índice. Reexecução pendente.
+- Integração com 094/097: merge `fbb6cdb`, preservando o layout novo da Sage e ligando action `viewPayment` de `stayNow` ao slot NowPanel. Entrada accepted agora usa “Pagar R$ total”. Testes de consumidor foram atualizados.
+- E2E iniciou na vez das portas liberada pelo coordenador; ainda aguardando resultado/capturas.
 
 - `git merge dev`: concluído no commit `9002094`. Snapshot de dev já contém todas as rotas de pagamento, todos os schemas atuais e o envelope de sucesso novo; `ErrorResponse` antigo foi substituído por `ApiErrorResponse`. Schemas foram regenerados, preservando dependências Stripe da branch.
 - `npm run api:generate`: Orval concluído. Nenhum schema gerado editado manualmente.

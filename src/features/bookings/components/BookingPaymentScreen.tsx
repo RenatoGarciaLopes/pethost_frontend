@@ -21,7 +21,7 @@ export async function BookingPaymentScreen({
     await getBookingDetail(accountId, bookingId),
   );
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+    <Container maxWidth={false} sx={{ maxWidth: 1104, py: { xs: 3, md: 4 } }}>
       <HydrationBoundary state={dehydrate(client)}>
         <BookingPayment accountId={accountId} bookingId={bookingId} coverUrl={coverUrl} />
       </HydrationBoundary>

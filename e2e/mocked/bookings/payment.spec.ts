@@ -39,6 +39,7 @@ async function capture(page: Page, state: string, mobile: boolean) {
     path: `test-results/066/${state}-${mobile ? 390 : 1440}.png`,
     fullPage: true,
     animations: "disabled",
+    style: "nextjs-portal { display: none !important; }",
   });
 }
 
@@ -144,7 +145,7 @@ test("REQ-PAY-010 SDK indisponível e loading têm retorno acessível", async ({
   await expect(page.getByText("Um cantinho esperando por seus pets")).toBeVisible();
   await capture(page, "no-photo", isMobile);
   await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
-  await expect(page.getByRole("alert")).toContainText("O pagamento ainda não está disponível");
+  await expect(page.getByRole("alert").filter({ hasText: "O pagamento ainda não está disponível" })).toBeVisible();
   await capture(page, "sdk-error", isMobile);
 });
 
@@ -155,7 +156,7 @@ test("REQ-PAY-009 recusa do SDK permite tentar novamente sem expor mensagem téc
   await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
   const pay = page.getByRole("button", { name: /Pagar R\$/ });
   await pay.click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.locator("main [role=alert]")).toBeVisible();
   await expect(page.getByText("synthetic raw decline")).toHaveCount(0);
   await expect(pay).toBeEnabled();
   await expect(page.getByRole("heading", { name: "Fechado!" })).toHaveCount(0);
@@ -166,14 +167,14 @@ test("REQ-PAY-011 parcela seguinte preserva plano e não repete celebração", a
   await mockStripePayment(page);
   const booking = await seed(page);
   await page.goto(`/owner/bookings/${booking.id}/payment`);
-  await page.getByRole("radio", { name: /^3 parcelas/ }).check();
+  await page.getByRole("combobox", { name: "Como você prefere pagar?" }).selectOption("3");
   await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
   await page.getByRole("button", { name: /Pagar R\$\s*100,00/ }).click();
   await expect(page.getByRole("heading", { name: "Fechado!" })).toBeVisible();
   await page.getByRole("link", { name: "Ver a estadia" }).click();
   await page.getByRole("link", { name: "Ver pagamento e parcelas" }).click();
   await expect(page.getByRole("heading", { name: "Confirme e pague" })).toBeVisible();
-  await expect(page.getByRole("radio", { name: /^3 parcelas/ })).toHaveCount(0);
+  await expect(page.getByRole("combobox", { name: "Como você prefere pagar?" })).toHaveCount(0);
   await capture(page, "next-installment", isMobile);
   await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
   await page.getByRole("button", { name: /Pagar R\$\s*100,00/ }).click();

@@ -81,7 +81,7 @@ function Frame({ mode = "ready", coverUrl }: { mode?: Mode; coverUrl?: string })
   });
   return (
     <QueryClientProvider client={client}>
-      <Container component="main" maxWidth="lg" sx={{ py: 4 }}>
+      <Container component="main" maxWidth={false} sx={{ maxWidth: 1104, py: 4 }}>
         <Content mode={mode} coverUrl={coverUrl} />
       </Container>
     </QueryClientProvider>
