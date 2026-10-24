@@ -1,4 +1,4 @@
-/** Textos da ficha e da edição do pet (spec 022, seção Microcopy). Erros da API vêm de `getErrorMessage`. */
+/** Textos da ficha e da edição do pet (spec 022, seção Microcopy). Erros da API vêm de `translateError`. */
 export const petEditCopy = {
   pageTitle: (name: string) => `${name} · Meus pets`,
   backToList: "Meus pets",

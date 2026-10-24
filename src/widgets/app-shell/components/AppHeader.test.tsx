@@ -25,21 +25,29 @@ it("REQ-UIC-003 tutor vê estadias e nome na pílula sem perder o menu da conta"
   });
   queryClient.setQueryData(accountQueryKey(sessionUserFixture.id, "linked-accounts"), []);
   expect(screen.getByRole("link", { name: "Minhas estadias" })).toHaveAttribute("href", "/owner/bookings");
+  expect(screen.getByRole("link", { name: "Conversas" })).toHaveAttribute("href", "/conversations");
   const account = screen.getByRole("button", { name: /Menu da conta de Camila Souza/ });
   expect(account).toHaveTextContent("Camila");
   await user.click(account);
   expect(await screen.findByRole("menuitem", { name: "Minha conta" })).toHaveAttribute("href", "/users/profile");
 });
 
-it("REQ-SHELL-002 REQ-UIC-003 na casca o tutor vê Buscar (home), Meus pets e Minhas estadias, e a pílula com o nome", () => {
+it("REQ-CHAT-001 anfitrião também tem Conversas na home, junto dos atalhos do papel", () => {
+  renderWithProviders(<AppHeader variant="home" user={{ ...sessionUserFixture, role: "host" }} />, {
+    theme: quintalTheme,
+  });
+  expect(screen.getByRole("link", { name: "Conversas" })).toHaveAttribute("href", "/conversations");
+});
+
+it("REQ-SHELL-002 REQ-UIC-003 na casca o tutor vê Buscar (home), Meus pets, Minhas estadias e Conversas, e a pílula com o nome", () => {
   renderWithProviders(<AppHeader user={sessionUserFixture} />, { theme: quintalTheme });
   const nav = within(screen.getByRole("navigation", { name: "Navegação principal" }));
   expect(nav.getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
     ["Buscar", "/"],
     ["Meus pets", "/pets"],
     ["Minhas estadias", "/owner/bookings"],
+    ["Conversas", "/conversations"],
   ]);
-  expect(nav.queryByRole("link", { name: "Conversas" })).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Menu da conta de Camila Souza/ })).toHaveTextContent("Camila");
 });
 

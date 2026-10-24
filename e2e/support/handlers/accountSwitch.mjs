@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http } from "msw";
 import { fail, issueSession, ok, sessionUserOf } from "./session.mjs";
 import { switchAccounts } from "./switchAccounts.mjs";
@@ -22,9 +23,9 @@ export const accountSwitchHandlers = [
     if (!current) return fail(401, "UNAUTHORIZED");
     const body = await request.json().catch(() => null);
     if (body?.role !== "owner" && body?.role !== "host")
-      return fail(400, "VALIDATION_ERROR", [{ field: "role", messages: ["Escolha tutor ou anfitrião."] }]);
+      return fail(400, "VALIDATION_ERROR", [fieldIssue("role", "Escolha tutor ou anfitrião.", "AUTH_ROLE_INVALID")]);
     if (typeof body?.password !== "string" || !body.password.trim())
-      return fail(400, "VALIDATION_ERROR", [{ field: "password", messages: ["Falta a senha."] }]);
+      return fail(400, "VALIDATION_ERROR", [fieldIssue("password", "Falta a senha.", "AUTH_PASSWORD_REQUIRED")]);
     const destination = switchAccounts.find(
       (account) =>
         account.user.email === current.email &&

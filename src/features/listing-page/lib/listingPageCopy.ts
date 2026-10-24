@@ -39,6 +39,21 @@ export const listingPageCopy = {
   whoGoes: "Quem vai",
   noPets: "Pra pedir, cadastra seu pet primeiro.",
   newPet: "Cadastrar pet",
+  closedDays: {
+    weekdays: (days: string) => `o cantinho não recebe ${days}`,
+    weekdaysLegend: (days: string) => `Não recebe ${days}`,
+    blocked: "o anfitrião fechou a agenda nesse dia",
+    blockedLegend: "Dias que o anfitrião fechou na agenda",
+    weekdayPlural: {
+      monday: "às segundas",
+      tuesday: "às terças",
+      wednesday: "às quartas",
+      thursday: "às quintas",
+      friday: "às sextas",
+      saturday: "aos sábados",
+      sunday: "aos domingos",
+    },
+  },
   breakdown: (rate: string, nights: number, pets: number) =>
     `${rate} × ${nights} ${nights === 1 ? "noite" : "noites"} × ${pets} ${pets === 1 ? "pet" : "pets"}`,
   total: "Total",

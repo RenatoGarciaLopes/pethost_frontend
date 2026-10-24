@@ -6,7 +6,7 @@ import NextLink from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { payoutQueries } from "../../../api/queries";
 import { useStartOnboarding } from "../../../hooks/useStartOnboarding";
@@ -154,7 +154,7 @@ export function HostPayouts({ accountId }: HostPayoutsProps) {
     return (
       <Notice
         tone="atencao"
-        title={getErrorMessage(account.error)}
+        title={translateError(account.error)}
         action={<Button onClick={() => void account.refetch()}>{copy.retry}</Button>}
       />
     );
@@ -177,7 +177,7 @@ export function HostPayouts({ accountId }: HostPayoutsProps) {
       {actionError != null && (
         <Notice
           tone="atencao"
-          title={getErrorMessage(actionError)}
+          title={translateError(actionError)}
           action={
             !blocked ? (
               <Button disabled={busy} onClick={retry}>

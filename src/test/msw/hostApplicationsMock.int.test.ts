@@ -79,7 +79,9 @@ describe("mock de verificação do anfitrião", () => {
     data.append("back", new File(["texto"], "verso.txt", { type: "text/plain" }));
     const refused = await call(`${PATH}/documents`, "PUT", data);
     expect(refused.status).toBe(400);
-    expect(refused.body.error.details).toEqual([{ field: "back", messages: ["Envie uma foto JPG, PNG ou WebP."] }]);
+    expect(refused.body.error.details).toEqual([
+      { field: "back", messages: ["Envie uma foto JPG, PNG ou WebP."], errors: [{ code: "IMAGE_UNSUPPORTED_FORMAT" }] },
+    ]);
     expect((await call(PATH)).body.data.application.documents).toEqual([]);
   });
 

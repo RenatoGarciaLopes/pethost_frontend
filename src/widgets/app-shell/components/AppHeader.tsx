@@ -26,15 +26,17 @@ interface AppHeaderProps {
 }
 
 const HOW: NavItem = { id: "how", label: "Como funciona", href: "#como-funciona", roles: ["owner", "host"] };
-/** Na home o tutor já tem a busca na faixa principal: o cabeçalho só leva às estadias. */
-const HOME_OWNER_ITEMS = navItemsFor("owner").filter((item) => item.id === "owner-stays");
+/** Na home o tutor já tem a busca na faixa principal: o cabeçalho leva às estadias e às conversas (spec 055). */
+const HOME_OWNER_ITEMS = navItemsFor("owner").filter(
+  (item) => item.id === "owner-stays" || item.id === "conversations",
+);
 
 /**
  * Cabeçalho único da casca e da home (REQ-UIC-003): largura page, linha de tinta, marca, atalhos do papel à
- * direita e a pílula da conta com avatar e primeiro nome. Sem usuário oferece Entrar. Não consulta sessão nem
- * antecipa Conversas. Mantém seu espaço no fluxo ao grudar no topo; ResizeObserver publica a altura
- * total (inclusive busca/chips) em --app-header-height, removida ao desmontar. O caller compõe um único main com id conteudo; a busca de contas só ocorre ao abrir
- * AccountMenu.
+ * direita e a pílula da conta com avatar e primeiro nome. Sem usuário oferece Entrar. Não consulta sessão.
+ * Mantém seu espaço no fluxo ao grudar no topo; ResizeObserver publica a altura total (inclusive busca/chips)
+ * em --app-header-height, removida ao desmontar. O caller compõe um único main com id conteudo; a busca de
+ * contas só ocorre ao abrir AccountMenu. Os atalhos incluem Conversas para tutor e anfitrião (spec 055).
  * @example <AppHeader user={user} variant="home" />
  */
 export function AppHeader({ user, variant = "shell", search, filters, returnTo }: AppHeaderProps) {

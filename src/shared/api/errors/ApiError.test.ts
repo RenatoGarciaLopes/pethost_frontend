@@ -15,9 +15,12 @@ describe("ApiError.fromEnvelope", () => {
     expect(error).toBeInstanceOf(ApiError);
     expect(error.status).toBe(400);
     expect(error.code).toBe("VALIDATION_ERROR");
-    expect(error.fieldErrors).toEqual({
-      email: ["Email is required."],
-      "address.zipCode": ["Zip code is invalid.", "Zip code is required."],
+    expect(error.fieldIssues).toEqual({
+      email: [{ code: null, params: {}, message: "Email is required." }],
+      "address.zipCode": [
+        { code: null, params: {}, message: "Zip code is invalid." },
+        { code: null, params: {}, message: "Zip code is required." },
+      ],
     });
     expect(error.traceId).toBeUndefined();
   });
@@ -32,7 +35,50 @@ describe("ApiError.fromEnvelope", () => {
       ],
     });
 
-    expect(error.fieldErrors).toEqual({ password: ["a", "b"] });
+    expect(error.fieldIssues.password?.map((issue) => issue.message)).toEqual(["a", "b"]);
+  });
+
+  it("REQ-HTTP-002 casa errors[i] com messages[i] e guarda código e params", () => {
+    const error = ApiError.fromEnvelope(400, {
+      code: "VALIDATION_ERROR",
+      message: "x",
+      details: [
+        {
+          field: "checkIn",
+          messages: ["Check-in must be at least 72 hours ahead."],
+          errors: [{ code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72 } }],
+        },
+      ],
+    });
+
+    expect(error.fieldIssues.checkIn).toEqual([
+      {
+        code: "BOOKING_CHECK_IN_TOO_SOON",
+        params: { minimumHours: 72 },
+        message: "Check-in must be at least 72 hours ahead.",
+      },
+    ]);
+  });
+
+  it("REQ-HTTP-002 errors com tamanho diferente de messages é ignorado (sem código)", () => {
+    const error = ApiError.fromEnvelope(400, {
+      code: "VALIDATION_ERROR",
+      message: "x",
+      details: [{ field: "a", messages: ["x", "y"], errors: [{ code: "AUTH_EMAIL_REQUIRED" }] }],
+    });
+
+    expect(error.fieldIssues.a?.map((issue) => issue.code)).toEqual([null, null]);
+  });
+
+  it("REQ-HTTP-002 guarda os params do erro de topo", () => {
+    const error = ApiError.fromEnvelope(422, {
+      code: "BOOKING_CAPACITY_EXCEEDED",
+      message: "x",
+      params: { date: "2026-12-22" },
+    });
+
+    expect(error.params).toEqual({ date: "2026-12-22" });
+    expect(ApiError.fromEnvelope(422, { code: "BOOKING_CONFLICT", message: "x" }).params).toEqual({});
   });
 
   it("REQ-HTTP-002 lê o traceId e o Retry-After", () => {
@@ -100,7 +146,8 @@ describe("guards", () => {
       status: 409,
       code: "AUTH_EMAIL_ALREADY_REGISTERED",
       message: "x",
-      fieldErrors: {},
+      fieldIssues: {},
+      params: {},
       retryAfterSeconds: undefined,
       traceId: undefined,
       invalidPaths: [],

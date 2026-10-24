@@ -79,7 +79,7 @@ export const GetApiV1HostApplicationsResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta (nome, nascimento, endereço) para comparar com o documento.')]).optional()
-}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).')).nullish(),
+}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\r\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\r\ndevolve o link assinado).')).nullish(),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -153,7 +153,7 @@ export const GetApiV1HostApplicationsApplicationIdResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta (nome, nascimento, endereço) para comparar com o documento.')]).optional()
-}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).'),
+}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\r\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\r\ndevolve o link assinado).'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -173,8 +173,8 @@ export const GetApiV1HostApplicationsApplicationIdDocumentsKindResponse = zod.ob
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
   "kind": zod.string().describe('`front`, `back` ou `selfie`.'),
-  "url": zod.string().describe('URL assinada direto no bucket privado: vai no `src` da imagem, sem token. Depois de\nExpiresAt o bucket responde 403 e é preciso pedir outro link.'),
-  "expiresAt": zod.number().int().describe('Quando a URL vence, em Unix time (segundos, UTC) — como o `expiresAt` da sessão. Use\npara pedir outro link antes de vencer.')
+  "url": zod.string().describe('URL assinada direto no bucket privado: vai no `src` da imagem, sem token. Depois de\r\nExpiresAt o bucket responde 403 e é preciso pedir outro link.'),
+  "expiresAt": zod.number().int().describe('Quando a URL vence, em Unix time (segundos, UTC) — como o `expiresAt` da sessão. Use\r\npara pedir outro link antes de vencer.')
 }).describe('Link temporário para o admin abrir uma foto da solicitação.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
@@ -256,7 +256,7 @@ export const PostApiV1HostApplicationsApplicationIdApprovalResponse = zod.object
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta (nome, nascimento, endereço) para comparar com o documento.')]).optional()
-}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).'),
+}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\r\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\r\ndevolve o link assinado).'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -338,7 +338,7 @@ export const PostApiV1HostApplicationsApplicationIdRejectionResponse = zod.objec
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta (nome, nascimento, endereço) para comparar com o documento.')]).optional()
-}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\ndevolve o link assinado).'),
+}).describe('A solicitação como o admin vê para decidir: tudo o que a pessoa enviou, os dados da conta\r\npara comparar com o documento, a nota do admin e o caminho de cada foto (rota auditada que\r\ndevolve o link assinado).'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

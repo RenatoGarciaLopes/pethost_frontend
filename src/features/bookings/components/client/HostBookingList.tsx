@@ -5,7 +5,7 @@ import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { formatBRL, fromCents } from "@/shared/lib/money";
 import { InitialsAvatar } from "@/shared/ui/media/InitialsAvatar";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
@@ -140,7 +140,7 @@ export function HostBookingList({ accountId, tab, page, now }: HostBookingListPr
       ) : query.isError ? (
         <ErrorState
           title={bookingCopy.loadError}
-          description={getErrorMessage(query.error)}
+          description={translateError(query.error)}
           onRetry={() => void query.refetch()}
         />
       ) : query.data.items.length === 0 ? (

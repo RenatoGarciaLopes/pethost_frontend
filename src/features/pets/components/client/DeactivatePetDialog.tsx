@@ -3,7 +3,7 @@
 import { Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { useFlashMessage } from "@/shared/hooks/useFlashMessage";
 import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
 import { useDeactivatePet } from "../../hooks/usePetMutations";
@@ -43,7 +43,7 @@ export function DeactivatePetDialog({ accountId, petId, name }: { accountId: str
         confirmLabel={copy.confirm}
         cancelLabel={copy.cancel}
         busy={deactivate.isPending}
-        error={deactivate.isError ? getErrorMessage(deactivate.error) : null}
+        error={deactivate.isError ? translateError(deactivate.error) : null}
         onCancel={() => setOpen(false)}
         onConfirm={() =>
           deactivate.mutate(undefined, {

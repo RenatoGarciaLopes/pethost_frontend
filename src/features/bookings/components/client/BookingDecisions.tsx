@@ -2,7 +2,7 @@
 
 import { Box, Button, Stack, TextField } from "@mui/material";
 import { useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
 import { ChipPicker } from "@/shared/ui/forms/ChipPicker";
 import { useAcceptBooking, useCancelBooking, useDeclineBooking } from "../../hooks/useBookingMutations";
@@ -41,7 +41,7 @@ export function AcceptDialog({ accountId, booking, onAccepted }: DecisionProps &
         confirmLabel={copy.confirm}
         cancelLabel={copy.keep}
         busy={accept.isPending}
-        error={accept.isError ? getErrorMessage(accept.error) : null}
+        error={accept.isError ? translateError(accept.error) : null}
         onConfirm={() =>
           accept.mutate(undefined, {
             onSuccess: () => {
@@ -82,7 +82,7 @@ export function DeclineDialog({ accountId, booking }: DecisionProps) {
         confirmLabel={copy.confirm}
         cancelLabel={copy.keep}
         busy={decline.isPending}
-        error={decline.isError ? getErrorMessage(decline.error) : null}
+        error={decline.isError ? translateError(decline.error) : null}
         onConfirm={() => decline.mutate(reason, { onSuccess: () => setOpen(false) })}
         onCancel={() => {
           decline.reset();
@@ -131,7 +131,7 @@ export function CancelBookingDialog({ accountId, booking }: DecisionProps) {
         confirmLabel={copy.confirm}
         cancelLabel={copy.keep}
         busy={cancel.isPending}
-        error={cancel.isError ? getErrorMessage(cancel.error) : null}
+        error={cancel.isError ? translateError(cancel.error) : null}
         onConfirm={() => cancel.mutate("", { onSuccess: () => setOpen(false) })}
         onCancel={() => {
           cancel.reset();

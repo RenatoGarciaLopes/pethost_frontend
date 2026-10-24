@@ -35,24 +35,6 @@ export const HOST_TABS: readonly BookingTab[] = [
 ];
 
 /**
- * Abas de "Minhas estadias" do tutor (REQ-STAYS-001): cada situação cai numa aba só.
- * @example OWNER_TABS.map((tab) => tab.label)
- */
-export const OWNER_TABS: readonly BookingTab[] = [
-  { id: "proximas", label: "Próximas", statuses: ["requested", "accepted", "confirmed"] },
-  { id: "acontecendo", label: "Acontecendo", statuses: ["in_progress"] },
-  { id: "anteriores", label: "Anteriores", statuses: ["completed", "declined", "expired", "cancelled"] },
-];
-
-/**
- * A aba do tutor pelo valor da URL; desconhecido cai em "Próximas".
- * @example ownerTabOf(searchParams.aba)
- */
-export function ownerTabOf(id: string | undefined): BookingTab {
-  return OWNER_TABS.find((tab) => tab.id === id) ?? OWNER_TABS[0]!;
-}
-
-/**
  * A aba pelo valor da URL; desconhecido cai em "Pedidos".
  * @example hostTabOf(searchParams.aba)
  */
@@ -60,7 +42,7 @@ export function hostTabOf(id: string | undefined): BookingTab {
   return HOST_TABS.find((tab) => tab.id === id) ?? HOST_TABS[0]!;
 }
 
-const TRAIL = ["Pedido", "Confirmada", "Chegou", "Voltou pra casa"] as const;
+export const TRAIL_LABELS = ["Pedido", "Confirmada", "Chegou", "Voltou pra casa"] as const;
 const TRAIL_POSITION: Partial<Record<BookingStatus, number>> = {
   requested: 0,
   accepted: 1,
@@ -78,7 +60,7 @@ const TRAIL_POSITION: Partial<Record<BookingStatus, number>> = {
 export function trailSteps(status: BookingStatus): TimelineStep[] | null {
   const position = TRAIL_POSITION[status];
   if (position === undefined) return null;
-  return TRAIL.map((label, index) => ({
+  return TRAIL_LABELS.map((label, index) => ({
     id: label,
     label,
     state: index < position ? "done" : index === position ? "current" : "todo",

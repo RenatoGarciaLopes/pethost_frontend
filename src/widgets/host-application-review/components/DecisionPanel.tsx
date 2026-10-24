@@ -20,7 +20,8 @@ interface DecisionPanelProps {
     reason: string;
     rejectionReason?: (typeof commonRejectionSchema.options)[number] | "suspected_fraud";
   }) => void;
-  fieldErrors?: Record<string, string[]>;
+  /** Frase já traduzida de cada campo (`translateFieldErrors`). */
+  fieldErrors?: Record<string, string>;
 }
 /** Caixa de decisão (spec 005, REQ-UIC-002): checklist efêmero, motivo, "Aprovar" em grama, recusa por motivo com a
  * frase que a pessoa vai ler numa caixa de orientação e a fraude separada, em vermelho de erro e com confirmação.
@@ -69,7 +70,7 @@ export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: Decis
         onChange={setReason}
         helperText={copy.reasonHelp}
         disabled={busy}
-        error={fieldErrors?.reason?.join(" ")}
+        error={fieldErrors?.reason}
       />
       <Typography variant="body2" color="text.secondary">
         {copy.checklistHelp}
@@ -90,7 +91,7 @@ export function DecisionPanel({ personType, busy, onDecide, fieldErrors }: Decis
         disabled={busy}
         onPick={(label) => setRejection(commonRejectionSchema.options.find((key) => copy.rejection[key] === label))}
       />
-      {fieldErrors?.rejectionReason && <Typography role="alert">{fieldErrors.rejectionReason.join(" ")}</Typography>}
+      {fieldErrors?.rejectionReason && <Typography role="alert">{fieldErrors.rejectionReason}</Typography>}
       {rejection && (
         <Notice tone="atencao" title={copy.recipientLabel}>
           {copy.recipient[rejection]}

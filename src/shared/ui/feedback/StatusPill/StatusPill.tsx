@@ -6,23 +6,25 @@ import type { Theme } from "@mui/material/styles";
 import { toneIcon, type FeedbackTone } from "../feedbackIcons";
 import { toneSurface } from "../toneStyles";
 
-export type StatusPillTone = FeedbackTone | "neutro";
+export type StatusPillTone = FeedbackTone | "neutro" | "gema";
 
 export interface StatusPillProps {
   /** Texto do status ("Em análise", "Aprovada", "Pausada"). É ele que comunica; a cor só reforça. */
   label: string;
-  /** Tom visual. `neutro` não leva ícone. */
+  /** Tom visual. `neutro` e `gema` não levam ícone. */
   tone?: StatusPillTone;
   /** Tamanho; `sm` para tabelas. */
   size?: "sm" | "md";
 }
 
-/** Selo das pranchas: `ok` grama cheio, `info` (espera) céu cheio, `atencao` tracejado, `neutro` contorno de tinta. */
+/** Selo das pranchas: `ok` grama cheio, `info` céu cheio, `gema` gema cheia (pede uma ação), `atencao` tracejado, `neutro` contorno de tinta. */
 function pillSurface(theme: Theme, tone: StatusPillTone) {
   const ink = `2px solid ${theme.palette.quintal.tinta}`;
   switch (tone) {
     case "neutro":
       return { background: theme.palette.background.paper, border: ink, icon: "" };
+    case "gema":
+      return { background: theme.palette.gema.main, border: ink, icon: "" };
     case "ok":
       return { background: theme.palette.grama.main, border: ink, icon: theme.palette.quintal.tinta };
     case "info":
@@ -38,7 +40,7 @@ function pillSurface(theme: Theme, tone: StatusPillTone) {
  * @example <StatusPill tone="info" label="Em análise" />
  */
 export function StatusPill({ label, tone = "neutro", size = "md" }: StatusPillProps) {
-  const Icon = tone === "neutro" ? undefined : toneIcon[tone];
+  const Icon = tone === "neutro" || tone === "gema" ? undefined : toneIcon[tone];
   return (
     <Box
       component="span"

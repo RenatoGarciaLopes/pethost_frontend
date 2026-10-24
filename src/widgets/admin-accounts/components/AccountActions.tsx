@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { Box, Button, Stack } from "@mui/material";
 import { ReasonActionDialog } from "@/shared/ui/feedback/ReasonActionDialog";
 import { Notice } from "@/shared/ui/feedback/Notice";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import type { AccountAction } from "../hooks/useAccountAction";
 import type { AccountRow } from "../lib/accountRows";
 import { accountsCopy as copy } from "../lib/accountsCopy";
@@ -44,7 +44,7 @@ export function AccountActions({ row, busy, onAction, onBegin, reasonError }: Ac
         (target ?? region.current)?.focus();
       });
     } catch (cause) {
-      setError(getErrorMessage(cause, { adminAccounts: true }));
+      setError(translateError(cause, { adminAccounts: true }));
     }
   }
   return (

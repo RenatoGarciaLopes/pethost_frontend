@@ -1,4 +1,4 @@
-import { nightsBetween } from "@/shared/lib/date/stayRules";
+import { addDays, nightsBetween } from "@/shared/lib/date/stayRules";
 
 /** Mês de calendário (1 a 12), sem dia nem fuso. */
 export interface CalendarMonth {
@@ -101,6 +101,15 @@ export function stayLabel(start: string, end: string): string {
   if (!isIsoDate(start)) return "";
   if (!isIsoDate(end) || end <= start) return shortDate(start);
   return `${span(start, end)} · ${nightsLabel(start, end)}`;
+}
+
+/**
+ * O primeiro dia de `start` a `end` (inclusive) que passa no teste, ou `undefined`.
+ * @example firstDayWhere("2026-11-07", "2026-11-15", (iso) => weekdayOf(iso) === 0) // "2026-11-08"
+ */
+export function firstDayWhere(start: string, end: string, test: (iso: string) => boolean): string | undefined {
+  for (let iso = start; iso <= end; iso = addDays(iso, 1)) if (test(iso)) return iso;
+  return undefined;
 }
 
 /** Dia da semana, 0 = domingo. @example weekdayOf("2026-12-25") // 5 */

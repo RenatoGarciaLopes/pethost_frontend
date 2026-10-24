@@ -62,6 +62,47 @@ src/test/fixtures/listingPage.ts          detalhe, fotos e avaliações sintéti
 e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
 ```
 
+## Conversas, interface (spec 055 em rascunho, 23/10/2026)
+
+Interface (também no Storybook, `Conversas/Prévia sem backend`) e rotas `/conversations` e `/conversations/[conversationId]` ligadas à API. Sem o hub de tempo real: a conversa aberta se atualiza a cada 5 s e a lista a cada 15 s. Requisitos e divergências do design: [spec 055](../specs/055-conversations/requirements.md).
+
+```text
+src/app/(account)/conversations/
+  page.tsx, [conversationId]/page.tsx     sessão, id e composição; testes de metadata
+src/features/conversations/
+  index.ts, index.client.ts, index.server.ts
+  types.ts                                 conversa, mensagem, página por cursor e envio
+  api/contracts.ts, mappers.ts             estreita o gerado (sentBy owner/host) e converte
+  api/queries.ts                           lista, contador, detalhe e mensagens por cursor, com consulta periódica
+  api/client/conversations.client.ts       texto, foto em multipart e marcar como lida
+  api/server/conversations.server.ts       detalhe (404 da casca) e prefetch
+  hooks/useConversationMutations.ts        envio entra no cache; lida zera o contador
+  lib/                                     copy, hora/dia de Brasília, linha do tempo, prévia, bloqueio, limite
+  components/client/
+    ConversationList/                      lista com prévia, hora e não lidas
+    ConversationHeader/                    foto, nome, apoio, selo e voltar no celular
+    MessageThread/                         dias, balões, foto com legenda, acontecimentos
+    MessageComposer/                       câmera, texto, Enter envia
+    MyConversations/                       lista vinda da API (carregando, erro, lista)
+src/widgets/conversation-panel/
+  index.ts, index.client.ts, index.server.ts
+  lib/stayContext.ts                       cantinho, dia da estadia, faixa, chegada; reserva da conversa
+  components/client/ConversationPanel/     conversa + contexto da estadia + campo ou bloqueio
+  components/client/ConversationRoom/      painel ligado à API (envio, anteriores, lidas)
+  components/server/ConversationsScreen/   prefetch da lista, conversa, mensagens e estadia
+  components/server/StayBanner/            faixa céu da estadia
+  components/server/ConversationsLayout/   duas colunas; no celular, uma por vez
+src/features/bookings/index.ts             passa a expor formatPeriod, statusLabel, Booking e BookingStatus
+src/shared/config/navigation.ts            atalho Conversas para tutor e anfitrião
+src/widgets/app-shell/components/AppHeader.tsx  Conversas também na home do tutor
+src/shared/api/errors/errorCopy.ts         códigos CONVERSATION_*
+src/test/fixtures/conversations.ts         DTOs sintéticos da prancha
+src/test/conversationsPreview.ts           dados mapeados e envio só na memória das stories
+src/app/ConversationsPreview.stories.tsx   tela inteira com a casca real
+```
+
+O widget compõe `conversations` e `bookings` pelos índices públicos; a feature não conhece a estadia (recebe acontecimentos prontos). `ConversationRoom` e `ConversationsScreen` não têm story: só buscam dados, e o visual está nas stories do painel, do layout e da prévia. E2E simulado pendente (o backend simulado ainda não tem handlers de conversa). Catálogo e notas do vault pendentes: o vault não estava acessível nesta máquina.
+
 ## Início público (spec 040, 15/10/2026)
 
 ```text

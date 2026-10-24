@@ -1,6 +1,6 @@
 "use client";
 import { addDays } from "@/shared/lib/date/stayRules";
-import { Calendar } from "./Calendar";
+import { Calendar, type CalendarClosedDay } from "./Calendar";
 import { calendarCopy } from "./calendarCopy";
 import { CalendarPopover } from "./CalendarPopover";
 
@@ -15,6 +15,8 @@ export interface StayCalendarProps {
   today: string;
   /** Primeira chegada que o calendário deixa escolher; sem ela, hoje. */
   min?: string;
+  /** Dias em que não dá pra estar hospedado, com o motivo (dias da semana e agenda do cantinho, pela feature). */
+  closedDay?: (iso: string) => CalendarClosedDay | null;
   onChange: (value: { checkIn: string; checkOut: string }) => void;
   /** `complete` é verdadeiro quando o toque escolheu a saída e fechou o intervalo. */
   onClose: (complete: boolean) => void;
@@ -34,6 +36,7 @@ export function StayCalendar({
   checkOut,
   today,
   min = today,
+  closedDay,
   onChange,
   onClose,
 }: StayCalendarProps) {
@@ -55,6 +58,7 @@ export function StayCalendar({
           max={addDays(today, 365)}
           today={today}
           maxNights={30}
+          closedDay={closedDay}
           onChange={(range, complete) => {
             onChange({ checkIn: range.start, checkOut: range.end });
             if (complete && !compact) onClose(true);

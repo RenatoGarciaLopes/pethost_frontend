@@ -13,6 +13,7 @@ import { houseLine, houseRuleItems } from "../lib/listingFacts";
 import { listingPageCopy as copy } from "../lib/listingPageCopy";
 import { searchOriginHref } from "../lib/searchOrigin";
 import { ListingPageActions } from "./client/ListingPageActions";
+import type { ListingClosedPeriod } from "../lib/listingClosedDays";
 import { StayBookingCard, type StayBookingPet } from "./client/StayBookingCard";
 import { ListingGallery } from "./ListingGallery";
 import { NightlyPrice } from "./NightlyPrice";
@@ -31,6 +32,8 @@ export interface ListingPageStay {
   count?: number;
   /** Pets ativos do tutor; vazio para o visitante e o anfitrião, que pedem passando pelo login ou pela troca. */
   pets: StayBookingPet[];
+  /** Períodos que o anfitrião fechou na agenda (exige conta: vazio para o visitante). */
+  closedPeriods: ListingClosedPeriod[];
 }
 
 export interface ListingPageScreenProps {
@@ -162,6 +165,8 @@ export function ListingPageScreen({
                 petIds={stay.petIds}
                 count={stay.count}
                 pets={stay.pets}
+                availableWeekdays={listing.availableWeekdays}
+                closedPeriods={stay.closedPeriods}
               />
             ) : (
               <NightlyPrice nightlyRate={listing.nightlyRate} />

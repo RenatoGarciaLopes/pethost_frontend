@@ -160,7 +160,13 @@ describe("ListingDraft", { timeout: 20000 }, () => {
     server.use(
       http.post("*/api/listings", () =>
         HttpResponse.json(
-          apiFail("VALIDATION_ERROR", "x", [{ field: "address.zipCode", messages: ["CEP não encontrado."] }]),
+          apiFail("VALIDATION_ERROR", "x", [
+            {
+              field: "address.zipCode",
+              messages: ["CEP não encontrado."],
+              errors: [{ code: "LISTING_ZIP_CODE_INVALID", params: { digits: 8 } }],
+            },
+          ]),
           { status: 400 },
         ),
       ),
@@ -171,7 +177,7 @@ describe("ListingDraft", { timeout: 20000 }, () => {
     const address = screen.getByRole("region", { name: copy.sections.address });
     await waitFor(() => expect(within(address).getByRole("heading", { level: 2 })).toHaveFocus());
     expect(within(address).getByRole("textbox", { name: "CEP" })).toHaveAccessibleDescription(
-      expect.stringContaining("CEP não encontrado."),
+      expect.stringContaining("O CEP precisa ter 8 dígitos."),
     );
     expect(screen.getByText("Falta 1 coisa pro seu cantinho abrir")).toBeInTheDocument();
   });

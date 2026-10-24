@@ -30,7 +30,7 @@ export const PostApiV1ListingsBody = zod.object({
   "hasDogs": zod.boolean().nullish(),
   "hasCats": zod.boolean().nullish(),
   "hasKids": zod.boolean().nullish(),
-  "acceptedSpecies": zod.array(zod.string()).nullish().describe('Ao menos um: `dog`, `cat`, `cockatiel`, `parrot`, `parakeet`, `canary`,\n`rabbit`, `hamster`, `guinea_pig`, `fish`, `turtle`, `exotic`.'),
+  "acceptedSpecies": zod.array(zod.string()).nullish().describe('Ao menos um: `dog`, `cat`, `cockatiel`, `parrot`, `parakeet`, `canary`,\r\n`rabbit`, `hamster`, `guinea_pig`, `fish`, `turtle`, `exotic`.'),
   "acceptsSmall": zod.boolean().nullish().describe('Porte pequeno. Com cachorro ou gato aceito, ao menos um porte é obrigatório.'),
   "acceptsMedium": zod.boolean().nullish(),
   "acceptsLarge": zod.boolean().nullish(),
@@ -47,7 +47,7 @@ export const PostApiV1ListingsBody = zod.object({
   "city": zod.string().nullish(),
   "state": zod.string().nullish().describe('UF, ex.: `PR`.')
 }).describe('Endereço do cantinho (cada filial tem o seu). No PATCH também é parcial.')]).optional()
-}).describe('Corpo do cadastro (`POST /listings`) e da alteração (`PATCH /listings/{listingId}`)\ndo cantinho. O anfitrião vem do token, não daqui; a coordenada sai do endereço. No PATCH, só o\nque vier muda. As fotos não vêm aqui: têm rotas próprias (`/listings/{listingId}/photos`).')
+}).describe('Corpo do cadastro (`POST /listings`) e da alteração (`PATCH /listings/{listingId}`)\r\ndo cantinho. O anfitrião vem do token, não daqui; a coordenada sai do endereço. No PATCH, só o\r\nque vier muda. As fotos não vêm aqui: têm rotas próprias (`/listings/{listingId}/photos`).')
 
 export const postApiV1ListingsResponseDataHostTwoPayoutsEnabledDefault = false;
 
@@ -62,7 +62,7 @@ export const PostApiV1ListingsResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(postApiV1ListingsResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(postApiV1ListingsResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -111,7 +111,7 @@ export const PostApiV1ListingsResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -178,8 +178,8 @@ export const GetApiV1ListingsResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(getApiV1ListingsResponseDataItemsItemHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
-}).describe('Quem é o anfitrião do cantinho, para exibição. Sem e-mail, telefone nem endereço: o contato\nsó é liberado depois do pagamento (escopo, regra 7).')]).optional(),
+  "payoutsEnabled": zod.boolean().default(getApiV1ListingsResponseDataItemsItemHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+}).describe('Quem é o anfitrião do cantinho, para exibição. Sem e-mail, telefone nem endereço: o contato\r\nsó é liberado depois do pagamento (escopo, regra 7).')]).optional(),
   "title": zod.string(),
   "neighborhood": zod.string(),
   "city": zod.string(),
@@ -205,7 +205,7 @@ export const GetApiV1ListingsResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores (média com 1 casa e contagem). Omitida enquanto ninguém avaliou.')]).optional()
-}).describe('Um cantinho na lista da busca: o cartão com a capa, o bairro e a distância ("Jardim Alvorada ·\n2 km de você") e o ponto aproximado para o mapa. Sem endereço nem coordenada exata. O detalhe\nsai em `GET /listings/{id}`.')),
+}).describe('Um cantinho na lista da busca: o cartão com a capa, o bairro e a distância ("Jardim Alvorada ·\r\n2 km de você") e o ponto aproximado para o mapa. Sem endereço nem coordenada exata. O detalhe\r\nsai em `GET /listings/{id}`.')),
   "page": zod.number().int(),
   "pageSize": zod.number().int(),
   "totalCount": zod.number().int(),
@@ -230,7 +230,7 @@ export const GetApiV1ListingsMeResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(getApiV1ListingsMeResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(getApiV1ListingsMeResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião.')]).optional(),
   "listings": zod.array(zod.object({
   "id": zod.string().uuid(),
@@ -241,7 +241,7 @@ export const GetApiV1ListingsMeResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(getApiV1ListingsMeResponseDataListingsItemHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(getApiV1ListingsMeResponseDataListingsItemHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -290,8 +290,8 @@ export const GetApiV1ListingsMeResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.')).describe('Do mais novo para o mais antigo, na visão do dono. Lista vazia quando não há.')
-}).describe('Os cantinhos do anfitrião logado, ativos e inativos. O anfitrião vem <b>uma vez</b>, no topo\n— todos são dele —, e cada cantinho sai sem `host` (regra de lista "de uma pessoa", §13).'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.')).describe('Do mais novo para o mais antigo, na visão do dono. Lista vazia quando não há.')
+}).describe('Os cantinhos do anfitrião logado, ativos e inativos. O anfitrião vem <b>uma vez</b>, no topo\r\n— todos são dele —, e cada cantinho sai sem `host` (regra de lista "de uma pessoa", §13).'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -319,7 +319,7 @@ export const GetApiV1ListingsListingIdResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(getApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(getApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -368,7 +368,7 @@ export const GetApiV1ListingsListingIdResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -392,7 +392,7 @@ export const PatchApiV1ListingsListingIdBody = zod.object({
   "hasDogs": zod.boolean().nullish(),
   "hasCats": zod.boolean().nullish(),
   "hasKids": zod.boolean().nullish(),
-  "acceptedSpecies": zod.array(zod.string()).nullish().describe('Ao menos um: `dog`, `cat`, `cockatiel`, `parrot`, `parakeet`, `canary`,\n`rabbit`, `hamster`, `guinea_pig`, `fish`, `turtle`, `exotic`.'),
+  "acceptedSpecies": zod.array(zod.string()).nullish().describe('Ao menos um: `dog`, `cat`, `cockatiel`, `parrot`, `parakeet`, `canary`,\r\n`rabbit`, `hamster`, `guinea_pig`, `fish`, `turtle`, `exotic`.'),
   "acceptsSmall": zod.boolean().nullish().describe('Porte pequeno. Com cachorro ou gato aceito, ao menos um porte é obrigatório.'),
   "acceptsMedium": zod.boolean().nullish(),
   "acceptsLarge": zod.boolean().nullish(),
@@ -409,7 +409,7 @@ export const PatchApiV1ListingsListingIdBody = zod.object({
   "city": zod.string().nullish(),
   "state": zod.string().nullish().describe('UF, ex.: `PR`.')
 }).describe('Endereço do cantinho (cada filial tem o seu). No PATCH também é parcial.')]).optional()
-}).describe('Corpo do cadastro (`POST /listings`) e da alteração (`PATCH /listings/{listingId}`)\ndo cantinho. O anfitrião vem do token, não daqui; a coordenada sai do endereço. No PATCH, só o\nque vier muda. As fotos não vêm aqui: têm rotas próprias (`/listings/{listingId}/photos`).')
+}).describe('Corpo do cadastro (`POST /listings`) e da alteração (`PATCH /listings/{listingId}`)\r\ndo cantinho. O anfitrião vem do token, não daqui; a coordenada sai do endereço. No PATCH, só o\r\nque vier muda. As fotos não vêm aqui: têm rotas próprias (`/listings/{listingId}/photos`).')
 
 export const patchApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault = false;
 
@@ -424,7 +424,7 @@ export const PatchApiV1ListingsListingIdResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(patchApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(patchApiV1ListingsListingIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -473,7 +473,7 @@ export const PatchApiV1ListingsListingIdResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -509,7 +509,7 @@ export const GetApiV1ListingsListingIdCompatibilityResponse = zod.object({
   "petName": zod.string(),
   "matches": zod.boolean().describe('Nenhum aviso: "A Pipoca combina com essa casa".'),
   "warnings": zod.array(zod.object({
-  "code": zod.string().describe('`species_not_accepted`, `size_not_accepted`, `home_has_dogs`, `home_has_cats`,\n        `home_has_kids`, `guest_is_dog`, `guest_is_cat`, `guest_dislikes_dogs`,\n        `guest_dislikes_cats` ou `guest_large_dog`.'),
+  "code": zod.string().describe('`species_not_accepted`, `size_not_accepted`, `home_has_dogs`, `home_has_cats`,\r\n        `home_has_kids`, `guest_is_dog`, `guest_is_cat`, `guest_dislikes_dogs`,\r\n        `guest_dislikes_cats` ou `guest_large_dog`.'),
   "guest": zod.union([zod.null(),zod.object({
   "name": zod.string(),
   "species": zod.string(),
@@ -520,7 +520,7 @@ export const GetApiV1ListingsListingIdCompatibilityResponse = zod.object({
   "name": zod.string(),
   "species": zod.string(),
   "size": zod.string().nullish()
-}).describe('Outro pet hospedado no período: nome, tipo e porte. Nada do tutor dele.')).nullish().describe('Os outros pets hospedados no período (de outros tutores), na ordem de chegada. Nulo (omitido)\nquando não vêm as datas.')
+}).describe('Outro pet hospedado no período: nome, tipo e porte. Nada do tutor dele.')).nullish().describe('Os outros pets hospedados no período (de outros tutores), na ordem de chegada. Nulo (omitido)\r\nquando não vêm as datas.')
 }).describe('"Combina com seu pet": os avisos do pet no cantinho. Só avisa, não bloqueia o pedido.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
@@ -549,7 +549,7 @@ export const PostApiV1ListingsListingIdDeactivationResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(postApiV1ListingsListingIdDeactivationResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(postApiV1ListingsListingIdDeactivationResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -598,7 +598,7 @@ export const PostApiV1ListingsListingIdDeactivationResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -624,7 +624,7 @@ export const DeleteApiV1ListingsListingIdDeactivationResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(deleteApiV1ListingsListingIdDeactivationResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(deleteApiV1ListingsListingIdDeactivationResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -673,7 +673,7 @@ export const DeleteApiV1ListingsListingIdDeactivationResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -705,7 +705,7 @@ export const PostApiV1ListingsListingIdPhotosResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(postApiV1ListingsListingIdPhotosResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(postApiV1ListingsListingIdPhotosResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -754,7 +754,7 @@ export const PostApiV1ListingsListingIdPhotosResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -785,7 +785,7 @@ export const PutApiV1ListingsListingIdPhotosOrderResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(putApiV1ListingsListingIdPhotosOrderResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(putApiV1ListingsListingIdPhotosOrderResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -834,7 +834,7 @@ export const PutApiV1ListingsListingIdPhotosOrderResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -866,7 +866,7 @@ export const PatchApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(patchApiV1ListingsListingIdPhotosPhotoIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(patchApiV1ListingsListingIdPhotosPhotoIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -915,7 +915,7 @@ export const PatchApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -942,7 +942,7 @@ export const DeleteApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "avatarUrl": zod.string().nullish(),
   "isCompany": zod.boolean().describe('Pessoa jurídica.'),
   "isAvailable": zod.boolean().describe('Ativo e sem suspensão.'),
-  "payoutsEnabled": zod.boolean().default(deleteApiV1ListingsListingIdPhotosPhotoIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
+  "payoutsEnabled": zod.boolean().default(deleteApiV1ListingsListingIdPhotosPhotoIdResponseDataHostTwoPayoutsEnabledDefault).describe('O Stripe liberou os repasses do anfitrião. Sem isso os cantinhos dele não aparecem para os\r\noutros — o próprio anfitrião vê `false` enquanto o cadastro de recebimento não termina.')
 }).describe('Nome e foto do anfitrião. Omitido em "meus cantinhos", onde vem uma vez no topo.')]).optional(),
   "title": zod.string(),
   "description": zod.string(),
@@ -991,7 +991,7 @@ export const DeleteApiV1ListingsListingIdPhotosPhotoIdResponse = zod.object({
   "average": zod.number(),
   "count": zod.number().int()
 }).describe('Nota dos tutores, só no detalhe. Omitida nas outras rotas e enquanto ninguém avaliou.')]).optional()
-}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\nCampo nulo é omitido no JSON.'),
+}).describe('O cantinho inteiro. O dono (e o admin) recebe tudo; os outros recebem a <b>visão pública</b>:\r\nsem rua, número, complemento, CEP e coordenada (só o bairro, a cidade e a UF — escopo,\r\nregra 7). Para o mapa, todos recebem o ponto aproximado (ListingApproximateLocationResponse ListingResponse.ApproximateLocation).\r\nCampo nulo é omitido no JSON.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

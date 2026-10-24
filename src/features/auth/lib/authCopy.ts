@@ -3,7 +3,7 @@ import type { PersonalRole } from "@/shared/auth/contracts/session";
 
 /**
  * Textos da tela de entrar (spec 010, seção Microcopy). Erros vindos da API não ficam aqui:
- * a frase de cada código vem de `getErrorMessage` (`shared/api/errors/errorCopy.ts`).
+ * a frase de cada código vem de `translateError` (`shared/api/errors/translateError.ts`).
  */
 export const authCopy = {
   title: "Entra que a porta tá aberta",
