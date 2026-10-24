@@ -23,6 +23,7 @@ export interface SearchResultsSectionProps {
  * com "Mostrar mais cantinhos". A URL de `/` é a fonte dos filtros; ativar um chip refaz a busca na API.
  * Com região na busca (`where` ou `state`) e resultados, o mapa (`SearchMap`) entra à direita da lista no computador
  * e, no celular, abre em tela cheia pelo botão "Ver mapa".
+ * O mapa sticky usa --app-header-height e 24px de respiro; a altura disponível desconta o cabeçalho.
  * @example <SearchResultsSection accountId={id} pets={pets} initialQuery={query} />
  */
 export function SearchResultsSection({ accountId, pets, initialQuery, initialError }: SearchResultsSectionProps) {
@@ -88,7 +89,15 @@ export function SearchResultsSection({ accountId, pets, initialQuery, initialErr
           withMap={hasMap && desktop}
         />
         {hasMap && desktop && (
-          <Box sx={{ position: "sticky", top: 24, height: "calc(100vh - 48px)", maxHeight: 760, minHeight: 480 }}>
+          <Box
+            sx={{
+              position: "sticky",
+              top: "calc(var(--app-header-height, 0px) + 24px)",
+              height: "calc(100dvh - var(--app-header-height, 0px) - 48px)",
+              maxHeight: 760,
+              minHeight: 0,
+            }}
+          >
             {map}
           </Box>
         )}

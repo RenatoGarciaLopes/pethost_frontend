@@ -55,8 +55,9 @@ function formatAverage(average: number) {
 /**
  * Página do cantinho fiel à prancha (spec 042, revisão 078): "voltar" para a busca de origem, galeria com moldura,
  * título display com a casa em poucas palavras, selos em pílula, caixa de compatibilidade, seções com divisória
- * tracejada (Quem cuida, Quem mora aqui, Regras da casa, O que os tutores contam) e a lateral fixa de reserva. Os
- * slots `compatibility` e `residents` são compostos pela rota, porque vêm de outras features.
+ * tracejada (Quem cuida, Quem mora aqui, Regras da casa, O que os tutores contam) e a lateral fixa de reserva.
+ * A lateral sticky usa --app-header-height e 24px de respiro; o CTA móvel continua no rodapé.
+ * Os slots `compatibility` e `residents` são compostos pela rota, porque vêm de outras features.
  * @example <ListingPageScreen listing={listing} isOwner={false} accountRole="owner" reviews={reviews} stay={stay} />
  */
 export function ListingPageScreen({
@@ -140,7 +141,13 @@ export function ListingPageScreen({
           {compatibility}
         </Stack>
 
-        <Box sx={{ gridArea: "aside", position: { md: "sticky" }, top: { md: 24 } }}>
+        <Box
+          sx={{
+            gridArea: "aside",
+            position: { md: "sticky" },
+            top: { md: "calc(var(--app-header-height, 0px) + 24px)" },
+          }}
+        >
           <Surface component="aside" elevation="lg" sx={{ p: 3 }}>
             {stay ? (
               <StayBookingCard

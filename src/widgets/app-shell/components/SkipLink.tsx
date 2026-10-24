@@ -4,7 +4,7 @@ import { shellCopy } from "../lib/shellCopy";
 
 /**
  * "Pular para o conteúdo" (REQ-SHELL-007): o primeiro foco da página, escondido até receber o foco do teclado,
- * leva ao `<main id="conteudo">` da casca.
+ * permanece fixo na viewport para funcionar mesmo após rolar. Leva ao `<main id="conteudo">` da casca.
  *
  * @example <SkipLink />
  */
@@ -13,7 +13,7 @@ export function SkipLink() {
     <Link
       href="#conteudo"
       sx={{
-        position: "absolute",
+        position: "fixed",
         left: 16,
         top: -64,
         zIndex: "tooltip",

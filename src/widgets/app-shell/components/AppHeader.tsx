@@ -1,5 +1,7 @@
+"use client";
+
 import { Box, Button } from "@mui/material";
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import NextLink from "next/link";
 import type { SessionUser } from "@/shared/auth/contracts/session";
 import { homeOf, loginRedirectPath } from "@/shared/config/appRoutes";
@@ -30,11 +32,26 @@ const HOME_OWNER_ITEMS = navItemsFor("owner").filter((item) => item.id === "owne
 /**
  * Cabeçalho único da casca e da home (REQ-UIC-003): largura page, linha de tinta, marca, atalhos do papel à
  * direita e a pílula da conta com avatar e primeiro nome. Sem usuário oferece Entrar. Não consulta sessão nem
- * antecipa Conversas. O caller compõe um único main com id conteudo; a busca de contas só ocorre ao abrir
+ * antecipa Conversas. Mantém seu espaço no fluxo ao grudar no topo; ResizeObserver publica a altura
+ * total (inclusive busca/chips) em --app-header-height, removida ao desmontar. O caller compõe um único main com id conteudo; a busca de contas só ocorre ao abrir
  * AccountMenu.
  * @example <AppHeader user={user} variant="home" />
  */
 export function AppHeader({ user, variant = "shell", search, filters, returnTo }: AppHeaderProps) {
+  const headerRef = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const root = document.documentElement;
+    const measure = () => root.style.setProperty("--app-header-height", `${header.getBoundingClientRect().height}px`);
+    measure();
+    const observer = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(measure);
+    observer?.observe(header);
+    return () => {
+      observer?.disconnect();
+      root.style.removeProperty("--app-header-height");
+    };
+  }, []);
   const home = variant === "home";
   const items = home
     ? user?.role === "owner"
@@ -48,8 +65,12 @@ export function AppHeader({ user, variant = "shell", search, filters, returnTo }
       <SkipLink />
       <Box
         component="header"
+        ref={headerRef}
         data-account={user?.role ?? "visitor"}
         sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: (theme) => theme.zIndex.appBar,
           minHeight: { xs: 74, md: 80 },
           bgcolor: `account.${user?.role ?? "visitor"}`,
           borderBottom: 2,
