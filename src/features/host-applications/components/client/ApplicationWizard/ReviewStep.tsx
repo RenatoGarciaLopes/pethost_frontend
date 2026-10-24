@@ -8,8 +8,7 @@ import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import { useFlashMessage } from "@/shared/hooks/useFlashMessage";
 import { useObjectUrl } from "@/shared/hooks/useObjectUrl";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
-import { FormActions } from "@/shared/ui/forms/FormActions";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { StepWizardActions } from "@/shared/ui/navigation/StepWizard";
 import { DOCUMENT_KINDS } from "../../../api/contracts";
 import { useSubmitApplication } from "../../../hooks/useApplicationMutations";
 import { APPLICATION_PATH } from "../../../lib/applicationPaths";
@@ -58,7 +57,7 @@ function PhotoSummary({
 }
 
 /**
- * "Confere e envia" (REQ-HVER-010): as três fotos (miniatura da memória ou "enviada ✓"), o CPF mascarado, o
+ * Conteúdo de "Confere e envia" (REQ-HVER-010; título e frase de apoio são da casca): as três fotos (miniatura da memória ou "enviada ✓"), o CPF mascarado, o
  * documento e, na empresa, o nome fantasia. "Enviar pra análise" só habilita sem foto faltando; depois de enviar,
  * volta ao status com o aviso "Pronto, enviada!".
  *
@@ -84,8 +83,6 @@ export function ReviewStep({ accountId, application, photos, onBack }: ReviewSte
 
   return (
     <Stack spacing={3}>
-      <StepHeading>{copy.heading}</StepHeading>
-      <Typography>{copy.intro}</Typography>
       <ErrorNotice message={error} tone="erro" />
       <Box component="section" aria-label={copy.photos}>
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" } }}>
@@ -116,7 +113,7 @@ export function ReviewStep({ accountId, application, photos, onBack }: ReviewSte
           </>
         )}
       </Box>
-      <FormActions
+      <StepWizardActions
         backLabel={copy.back}
         nextLabel={submit.isPending ? copy.submitting : copy.submit}
         onBack={onBack}

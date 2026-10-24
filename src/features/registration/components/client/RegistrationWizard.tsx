@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Button, Link, Typography } from "@mui/material";
-import { motion } from "motion/react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -12,12 +11,9 @@ import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { loginRedirectPath, registerPath } from "@/shared/config/appRoutes";
 import { useCountdown } from "@/shared/hooks/useCountdown";
-import { MOTION_ASSENTAR } from "@/shared/theme/tokens/springs";
 import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
 import { Notice } from "@/shared/ui/feedback/Notice";
-import { FormActions } from "@/shared/ui/forms/FormActions";
-import { Reveal } from "@/shared/ui/motion/Reveal";
-import { WizardProgress } from "@/shared/ui/navigation/WizardProgress";
+import { StepWizard, StepWizardActions } from "@/shared/ui/navigation/StepWizard";
 import type { RegisterBody } from "../../api/contracts/registerBodies";
 import { useRegisterMutation } from "../../hooks/useRegisterMutation";
 import { registrationCopy } from "../../lib/registrationCopy";
@@ -177,114 +173,64 @@ export function RegistrationWizard({ role, next }: RegistrationWizardProps) {
   // Fim da contagem do limite: o aviso some e o envio volta.
   const visibleNotice = notice?.kind === "rateLimited" && !blocked ? null : notice;
 
-  return (
-    <Box
-      sx={{
-        display: "grid",
-        gap: { xs: 3, md: 6 },
-        gridTemplateColumns: { xs: "1fr", md: "272px minmax(0, 720px)" },
-        justifyContent: "center",
-        alignItems: "start",
-        "& .MuiOutlinedInput-root": { boxShadow: "none" },
-      }}
+  const notices = visibleNotice && (
+    <Notice
+      ref={noticeRef}
+      tone={visibleNotice.kind === "rateLimited" ? "atencao" : "erro"}
+      action={
+        visibleNotice.kind === "emailTaken" ? (
+          <Button variant="contained" component={NextLink} href={loginRedirectPath(next, role)}>
+            {actions.login}
+          </Button>
+        ) : undefined
+      }
     >
-      <Reveal order={0}>
-        <Typography
-          sx={{
-            display: { xs: "none", md: "block" },
-            textTransform: "uppercase",
-            fontSize: 13,
-            fontWeight: 800,
-            letterSpacing: ".06em",
-            mb: 1.5,
-            px: 1.5,
-          }}
-        >
-          {registrationCopy.progress.label}
-        </Typography>
-        <WizardProgress steps={progressSteps} currentIndex={stepIndex} appearance="cards" />
-      </Reveal>
+      {visibleNotice.kind === "rateLimited"
+        ? getErrorMessage(new ApiError({ ...visibleNotice.error.toJSON(), retryAfterSeconds: countdown.remaining }))
+        : visibleNotice.message}
+    </Notice>
+  );
 
-      <Reveal order={1}>
-        <Box>
-          <motion.div
-            key={step.id}
-            initial={{ opacity: 0, x: stepIndex === 0 ? -16 : 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={MOTION_ASSENTAR}
-          >
-            <Typography
-              sx={{ textTransform: "uppercase", fontSize: 13, fontWeight: 800, letterSpacing: ".06em", mb: 1 }}
-            >
-              {registrationCopy.progress.position(stepIndex + 1, progressSteps.length)}
-            </Typography>
-            <Typography
-              ref={headingRef}
-              variant="h1"
-              tabIndex={-1}
-              sx={{ fontSize: { xs: 32, md: 40 }, mb: 1, "&:focus": { outline: "none" } }}
-            >
-              {step.title}
-            </Typography>
-
+  return (
+    <>
+      <StepWizard
+        steps={progressSteps}
+        currentIndex={stepIndex}
+        progressTitle={registrationCopy.progress.label}
+        position={registrationCopy.progress.position(stepIndex + 1, progressSteps.length)}
+        title={step.title}
+        titleRef={headingRef}
+        intro={stepIndex === 0 ? registrationCopy.steps.person.intro : undefined}
+        notice={notices}
+        footer={
+          <Typography>
+            {registrationCopy.choice.hasAccount}{" "}
+            <Link component={NextLink} href={loginRedirectPath(next, role)}>
+              {registrationCopy.choice.login}
+            </Link>
+          </Typography>
+        }
+      >
+        <FormProvider {...form}>
+          <Box component="form" noValidate onSubmit={isLastStep ? submit : continueToAddress}>
             {stepIndex === 0 && (
-              <Typography sx={{ mb: 3, color: "text.secondary" }}>{registrationCopy.steps.person.intro}</Typography>
-            )}
-
-            {visibleNotice && (
               <Box sx={{ mb: 3 }}>
-                <Notice
-                  ref={noticeRef}
-                  tone={visibleNotice.kind === "rateLimited" ? "atencao" : "erro"}
-                  action={
-                    visibleNotice.kind === "emailTaken" ? (
-                      <Button variant="contained" component={NextLink} href={loginRedirectPath(next, role)}>
-                        {actions.login}
-                      </Button>
-                    ) : undefined
-                  }
-                >
-                  {visibleNotice.kind === "rateLimited"
-                    ? getErrorMessage(
-                        new ApiError({ ...visibleNotice.error.toJSON(), retryAfterSeconds: countdown.remaining }),
-                      )
-                    : visibleNotice.message}
-                </Notice>
+                <RegisterChoice role={role} onChoose={chooseRole} />
               </Box>
             )}
-
-            <FormProvider {...form}>
-              <Box component="form" noValidate onSubmit={isLastStep ? submit : continueToAddress}>
-                {stepIndex === 0 && (
-                  <Box sx={{ mb: 3 }}>
-                    <RegisterChoice role={role} onChoose={chooseRole} />
-                  </Box>
-                )}
-                {isLastStep ? <AddressStep variant={variant} /> : <PersonStep variant={variant} />}
-                <ServerFormError />
-                <Box sx={{ mt: 4, pt: 3, borderTop: "1px dashed", borderColor: "divider" }}>
-                  <FormActions
-                    backLabel={actions.back}
-                    nextLabel={
-                      isLastStep ? (mutation.isPending ? actions.submitting : actions.submit) : actions.toAddress
-                    }
-                    nextType="submit"
-                    busy={mutation.isPending}
-                    disabledReason={blocked ? actions.countdown(countdown.remaining) : undefined}
-                    onBack={() => (stepIndex === 0 ? router.back() : goToStep(0, "heading"))}
-                  />
-                </Box>
-              </Box>
-            </FormProvider>
-            <Typography sx={{ mt: 3, pb: { xs: 10, md: 0 } }}>
-              {registrationCopy.choice.hasAccount}{" "}
-              <Link component={NextLink} href={loginRedirectPath(next, role)}>
-                {registrationCopy.choice.login}
-              </Link>
-            </Typography>
-          </motion.div>
-        </Box>
-      </Reveal>
+            {isLastStep ? <AddressStep variant={variant} /> : <PersonStep variant={variant} />}
+            <ServerFormError />
+            <StepWizardActions
+              backLabel={actions.back}
+              nextLabel={isLastStep ? (mutation.isPending ? actions.submitting : actions.submit) : actions.toAddress}
+              nextType="submit"
+              busy={mutation.isPending}
+              disabledReason={blocked ? actions.countdown(countdown.remaining) : undefined}
+              onBack={() => (stepIndex === 0 ? router.back() : goToStep(0, "heading"))}
+            />
+          </Box>
+        </FormProvider>
+      </StepWizard>
 
       <ConfirmDialog
         open={pendingRole !== null}
@@ -298,6 +244,6 @@ export function RegistrationWizard({ role, next }: RegistrationWizardProps) {
           setPendingRole(null);
         }}
       />
-    </Box>
+    </>
   );
 }

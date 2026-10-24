@@ -12,9 +12,8 @@ import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { AddressFields } from "@/shared/ui/forms/AddressFields";
 import { ChoiceCardGroup } from "@/shared/ui/forms/ChoiceCardGroup";
 import { CpfField } from "@/shared/ui/forms/CpfField";
-import { FormActions } from "@/shared/ui/forms/FormActions";
 import { MaskedTextField } from "@/shared/ui/forms/MaskedTextField";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { StepWizardActions } from "@/shared/ui/navigation/StepWizard";
 import { DOCUMENT_TYPES } from "../../../api/contracts";
 import { useSaveApplicationData } from "../../../hooks/useApplicationMutations";
 import { verificationCopy } from "../../../lib/verificationCopy";
@@ -62,7 +61,7 @@ export interface DataStepProps {
 }
 
 /**
- * "Seus dados" (REQ-HVER-004/005): CPF com máscara e dígitos conferidos e o documento em três cartões; na empresa,
+ * Conteúdo de "Seus dados" (REQ-HVER-004/005; o título é da casca): CPF com máscara e dígitos conferidos e o documento em três cartões; na empresa,
  * também CNPJ (aceita o alfanumérico), razão social, nome fantasia e endereço com preenchimento por CEP. Confirmar
  * abre a solicitação na primeira vez e depois manda só o que mudou. Erro de campo da API vai para o campo, com foco.
  *
@@ -103,7 +102,6 @@ export function DataStep({ accountId, personType, draft, onBack, onNext }: DataS
   return (
     <FormProvider {...form}>
       <Stack component="form" noValidate spacing={3} onSubmit={submit}>
-        <StepHeading>{copy.heading}</StepHeading>
         <ErrorNotice message={notice} tone="erro" />
         <Controller
           control={form.control}
@@ -143,7 +141,7 @@ export function DataStep({ accountId, personType, draft, onBack, onNext }: DataS
           )}
         />
         {personType === "pj" && <CompanyFields />}
-        <FormActions
+        <StepWizardActions
           backLabel={copy.back}
           nextLabel={save.isPending ? copy.saving : copy.next}
           onBack={onBack}

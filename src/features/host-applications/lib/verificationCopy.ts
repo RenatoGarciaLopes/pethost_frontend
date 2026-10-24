@@ -14,8 +14,16 @@ export const verificationCopy = {
   loadError: "Não deu pra abrir sua verificação.",
 
   wizard: {
+    progressTitle: "Verificação",
     progressLabel: "Etapas da verificação",
     stepLabels: ["Antes de começar", "Seus dados", "Fotos", "Confere"],
+    stepDescriptions: [
+      "Como as fotos são usadas",
+      "CPF e documento",
+      "Frente, verso e selfie",
+      "Último olhar antes de enviar",
+    ],
+    position: (current: number, total: number) => `Passo ${current} de ${total}`,
   },
 
   notice: {
@@ -31,10 +39,14 @@ export const verificationCopy = {
     } as Readonly<Record<string, readonly string[]>>,
     latestNoticeVersion: "2026-10-10",
     personType: "Quem vai receber os pets?",
-    personTypes: { pf: "Pessoa física", pj: "Empresa" },
+    personTypes: {
+      pf: { label: "Pessoa física", description: "Você mesmo recebe os pets." },
+      pj: { label: "Empresa", description: "Hospedagem ou negócio com CNPJ." },
+    },
     personTypeLocked: "O tipo fica como foi escolhido quando a verificação começou.",
     accept: "Li e concordo",
     acceptMissing: "Pra seguir, marca o “Li e concordo”.",
+    back: "Voltar",
     next: "Continuar: seus dados",
   },
 

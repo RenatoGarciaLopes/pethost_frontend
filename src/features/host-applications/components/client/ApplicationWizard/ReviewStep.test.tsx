@@ -44,7 +44,6 @@ function setup(overrides: Record<string, unknown> = complete, photos: PhotoState
 describe("ReviewStep", () => {
   it("REQ-HVER-010 mostra as miniaturas da memória ou 'enviada', o CPF mascarado e o documento", () => {
     setup(complete, { front: { file: new File(["f"], "frente.jpg", { type: "image/jpeg" }), sent: true } });
-    expect(screen.getByRole("heading", { level: 1, name: copy.review.heading })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Foto da frente do documento" })).toHaveAttribute("src", "blob:frente");
     expect(screen.getByText("Foto do verso do documento: enviada ✓")).toBeInTheDocument();
     expect(screen.getByText("Selfie segurando o documento: enviada ✓")).toBeInTheDocument();

@@ -1,14 +1,16 @@
 "use client";
 
-import { Box, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import { useUnsavedChangesGuard } from "@/shared/hooks/useUnsavedChangesGuard";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
-import { WizardProgress } from "@/shared/ui/navigation/WizardProgress";
+import { StepWizard } from "@/shared/ui/navigation/StepWizard";
 import { myApplicationQueries } from "../../../api/queries";
+import { APPLICATION_PATH } from "../../../lib/applicationPaths";
 import { verificationCopy } from "../../../lib/verificationCopy";
 import type { MyApplication, PersonType, WizardEntry } from "../../../types";
 import { DataStep } from "./DataStep";
@@ -18,7 +20,14 @@ import { ReviewStep } from "./ReviewStep";
 
 const copy = verificationCopy;
 const STEPS = ["notice", "data", "photos", "review"] as const;
-const PROGRESS = STEPS.map((id, index) => ({ id, label: copy.wizard.stepLabels[index]! }));
+const PROGRESS = STEPS.map((id, index) => ({
+  id,
+  label: copy.wizard.stepLabels[index]!,
+  description: copy.wizard.stepDescriptions[index]!,
+}));
+const TITLES = [copy.notice.heading, copy.data.heading, copy.photos.heading, copy.review.heading] as const;
+/** Frase de apoio sob o título; "Antes de começar" e "Seus dados" explicam no próprio conteúdo. */
+const INTROS = [undefined, undefined, copy.photos.intro, copy.review.intro] as const;
 type StepIndex = 0 | 1 | 2 | 3;
 
 export interface ApplicationWizardProps {
@@ -64,12 +73,13 @@ function WizardFlow({ accountId, entry, mine }: ApplicationWizardProps & { mine:
   const [personType, setPersonType] = useState<PersonType>(draft?.personType ?? "pf");
   const [photos, setPhotos] = useState<PhotoState>({});
   const { dialog } = useUnsavedChangesGuard(Object.values(photos).some((photo) => photo && !photo.sent));
-  const content = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const heading = useRef<HTMLHeadingElement>(null);
   const moved = useRef(false);
 
   // Troca de passo: o foco vai para o título novo (o leitor de tela anuncia onde está). Não na abertura.
   useEffect(() => {
-    if (moved.current) content.current?.querySelector<HTMLElement>("h1")?.focus();
+    if (moved.current) heading.current?.focus();
   }, [step]);
 
   function go(next: StepIndex) {
@@ -85,6 +95,7 @@ function WizardFlow({ accountId, entry, mine }: ApplicationWizardProps & { mine:
           personType={personType}
           accepted={draft !== null}
           locked={draft !== null}
+          onBack={() => router.push(APPLICATION_PATH)}
           onNext={(values) => {
             setPersonType(values.personType);
             go(1);
@@ -118,10 +129,20 @@ function WizardFlow({ accountId, entry, mine }: ApplicationWizardProps & { mine:
   }
 
   return (
-    <Stack spacing={4}>
-      <WizardProgress steps={PROGRESS} currentIndex={step} label={copy.wizard.progressLabel} />
-      <Box ref={content}>{renderStep()}</Box>
+    <>
+      <StepWizard
+        steps={PROGRESS}
+        currentIndex={step}
+        progressTitle={copy.wizard.progressTitle}
+        progressLabel={copy.wizard.progressLabel}
+        position={copy.wizard.position(step + 1, PROGRESS.length)}
+        title={TITLES[step]}
+        titleRef={heading}
+        intro={INTROS[step]}
+      >
+        {renderStep()}
+      </StepWizard>
       {dialog}
-    </Stack>
+    </>
   );
 }
