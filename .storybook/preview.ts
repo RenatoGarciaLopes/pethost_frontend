@@ -2,17 +2,20 @@ import type { Preview } from "@storybook/nextjs-vite";
 import { createElement, Fragment } from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { quintalTheme } from "../src/shared/theme/createQuintalTheme";
+import { useInputModality } from "../src/shared/hooks/useInputModality";
 import "./fonts.css";
 
 /** Isolated stories use the same Quintal theme as the app, without Next SSR cache. */
 const preview: Preview = {
   decorators: [
-    (Story) =>
-      createElement(
+    function ThemeDecorator(Story) {
+      useInputModality();
+      return createElement(
         ThemeProvider,
         { theme: quintalTheme },
         createElement(Fragment, null, createElement(CssBaseline), createElement(Story)),
-      ),
+      );
+    },
   ],
   parameters: {
     layout: "padded",

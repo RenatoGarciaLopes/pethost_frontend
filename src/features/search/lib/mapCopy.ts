@@ -1,0 +1,21 @@
+/** Microcopy do mapa da busca (tom PetHost). @example mapCopy.searchOnMove */
+export const mapCopy = {
+  region: "Mapa dos cantinhos",
+  searchOnMove: "Buscar quando eu mexer no mapa",
+  zoomIn: "Aproximar o mapa",
+  zoomOut: "Afastar o mapa",
+  closeCard: "Fechar o cartão do cantinho",
+  privacy: "O pino mostra o bairro, não a casa. O endereço chega depois do pagamento.",
+  attribution: "Mapa: OpenFreeMap · © OpenStreetMap",
+  loading: "Abrindo o mapa…",
+  unavailable: "Não deu pra abrir o mapa agora. A lista continua aqui do lado.",
+  origin: (label: string) => `Você · ${label}`,
+  originFallback: "Você",
+  pinLabel: (title: string, price: string) => `${title}, ${price}`,
+  ringLabel: (km: number) => `${km} km`,
+  noRating: "Sem notas ainda",
+  rating: (average: string, count: number) => `★ ${average} (${count})`,
+  distance: (km: string) => `${km} km`,
+  total: "no total",
+  perNight: "a diária por pet",
+};

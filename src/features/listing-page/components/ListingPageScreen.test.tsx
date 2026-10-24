@@ -1,129 +1,148 @@
-import { screen } from "@testing-library/react";
-import { expect, it } from "vitest";
+import { screen, within } from "@testing-library/react";
+import { expect, it, vi } from "vitest";
+import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { listingDetailFixture, listingPhotosFixture, listingReviewFixture } from "@/test/fixtures/listingPage";
 import { renderWithProviders } from "@/test/render";
-import type { ListingDetail } from "../api/contracts";
-import { ListingPageScreen } from "./ListingPageScreen";
+import { ListingPageScreen, type ListingPageStay } from "./ListingPageScreen";
 
-const listing = {
-  id: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c",
-  hostId: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1d",
-  host: {
-    id: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1d",
-    name: "Casa Cida",
-    avatarUrl: null,
-    isCompany: false,
-    isAvailable: true,
-    payoutsEnabled: true,
-  },
-  title: "Quintal da Cida",
-  description: "Um espaço calmo para brincar.",
-  homeType: "house",
-  hasYard: true,
-  hasDogs: false,
-  hasCats: true,
-  hasKids: false,
-  acceptedSpecies: ["dog", "cat"],
-  acceptsSmall: true,
-  acceptsMedium: false,
-  acceptsLarge: true,
-  capacity: 3,
-  nightlyRate: 60.1,
-  houseRules: "Sem subir no sofá.",
-  availableWeekdays: ["monday", "friday"],
-  address: { neighborhood: "Centro", city: "Curitiba", state: "PR" },
-  photos: [{ id: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1e", url: "/cover.webp", position: 1 }],
-  isActive: true,
-  deactivatedAt: null,
-  createdAt: "2026-10-15T12:00:00Z",
-  updatedAt: "2026-10-15T12:00:00Z",
-  badges: ["yard"],
-} as ListingDetail;
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 
-it("REQ-LPAGE-001/003/005 mostra conteúdo público sem rua e sinaliza cada pet escolhido", () => {
-  renderWithProviders(
+const stay: ListingPageStay = {
+  today: "2026-12-01",
+  search: "where=Zona+7&pets=pet-1&from=2026-12-20&to=2026-12-25",
+  where: "Zona 7",
+  from: "2026-12-20",
+  to: "2026-12-25",
+  petIds: ["pet-1"],
+  pets: [{ id: "pet-1", name: "Pipoca", coverUrl: null }],
+};
+const render = (ui: React.ReactElement) => renderWithProviders(ui, { theme: quintalTheme });
+
+it("REQ-LPAGE-001/003/010 mostra a casa como na prancha, em português, sem rua e com as avaliações", () => {
+  render(
     <ListingPageScreen
-      listing={listing}
-      query={{ pets: ["pet-1", "pet-2"], from: "2026-10-15", to: "2026-10-20" }}
-      requestSearch="from=2026-10-15&to=2026-10-20&pets=pet-1&pets=pet-2"
-      selectedPets={[
-        { id: "pet-1", name: "Luna", species: "dog", size: "small" },
-        { id: "pet-2", name: "Piu", species: "parrot", size: null },
-      ]}
+      listing={listingDetailFixture({ rating: { average: 4.9, count: 18 } })}
       isOwner={false}
       accountRole="owner"
+      reviews={[listingReviewFixture()]}
+      stay={stay}
     />,
   );
-  expect(screen.getByRole("heading", { name: "Quintal da Cida" })).toBeVisible();
-  expect(screen.getByText("Centro, Curitiba · PR")).toBeVisible();
-  expect(screen.getByText("O endereço chega quando a estadia for confirmada.")).toBeVisible();
-  expect(screen.queryByText(/Rua/)).not.toBeInTheDocument();
-  expect(screen.getByText("Combina com Luna")).toBeVisible();
-  expect(screen.getByText("! Piu: esse cantinho não recebe papagaio")).toBeVisible();
-  const href = screen.getByRole("link", { name: "Pedir estadia" }).getAttribute("href")!;
-  const params = new URL(href, "http://test").searchParams;
-  expect(params.get("from")).toBe("2026-10-15");
-  expect(params.get("to")).toBe("2026-10-20");
-  expect(params.getAll("pets")).toEqual(["pet-1", "pet-2"]);
-  expect(screen.getByText(/601,00/)).toBeVisible();
-  expect(screen.getByAltText("Foto 1 de Quintal da Cida")).toBeVisible();
+  expect(screen.getByRole("heading", { level: 1, name: "Casa da Dona Cida" })).toBeVisible();
+  expect(screen.getByText("Jd. Alvorada, Maringá · PR · casa com quintal · tem cachorro")).toBeVisible();
+  expect(screen.getByText("O endereço chega quando a estadia for confirmada.", { exact: false })).toBeVisible();
+  for (const label of ["Verificada", "Responde rápido", "Casa com quintal", "Experiente", "Vizinho"])
+    expect(screen.getByText(label)).toBeVisible();
+  expect(screen.queryByText(/neighbor|fast_responder/)).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Nota 4,9 em 18 avaliações")).toHaveTextContent("★ 4,9 (18)");
+  expect(screen.getByText("As fotos da casa ainda estão chegando.")).toBeVisible();
+
+  expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+    "Quem cuida",
+    "Regras da casa",
+    "O que os tutores contam",
+  ]);
+  const rules = screen.getByRole("heading", { name: "Regras da casa" }).parentElement!;
+  expect(
+    within(rules)
+      .getAllByRole("listitem")
+      .map((item) => item.textContent),
+  ).toEqual([
+    "Pode subir no sofá, não na cama",
+    "Buscar até as 18h",
+    "Recebe cachorro e gato, de porte pequeno e médio",
+    "Até 2 pets por vez",
+    "Recebe nos dias: segunda, sexta e sábado",
+  ]);
+  const review = screen.getByRole("heading", { name: "O que os tutores contam" }).parentElement!;
+  expect(review).toHaveTextContent("Marina");
+  expect(review).toHaveTextContent("novembro de 2026");
+  expect(within(review).getByRole("img", { name: "Nota 5 de 5" })).toHaveTextContent("★★★★★");
+  expect(screen.getByText(/Aqui o pet fica solto no quintal/)).toBeVisible();
 });
 
-it("REQ-LPAGE-003/006 só mostra a rua na visão verificada da pessoa anfitriã", () => {
-  const withStreet = {
-    ...listing,
-    address: { ...listing.address, street: "Rua da Casa", number: "10" },
-  } as ListingDetail;
-  const { rerender } = renderWithProviders(
+it("REQ-LPAGE-011 o voltar leva à home com a busca de origem, nunca a /search", () => {
+  render(
+    <ListingPageScreen listing={listingDetailFixture()} isOwner={false} accountRole="owner" reviews={[]} stay={stay} />,
+  );
+  expect(screen.getByRole("link", { name: "← Casas perto de Zona 7" })).toHaveAttribute("href", `/?${stay.search}`);
+});
+
+it("REQ-LPAGE-001 galeria com a capa primeiro e o selo Vizinho; sem avaliação, a seção some", () => {
+  render(
     <ListingPageScreen
-      listing={withStreet}
-      query={{ pets: [] }}
-      requestSearch=""
-      selectedPets={[]}
+      listing={listingDetailFixture({ photos: [...listingPhotosFixture].reverse() })}
       isOwner={false}
       accountRole="owner"
+      reviews={[]}
+      stay={stay}
     />,
   );
-  expect(screen.queryByText("Rua da Casa, 10")).not.toBeInTheDocument();
-  rerender(
+  const gallery = screen.getByRole("list", { name: "Fotos de Casa da Dona Cida" });
+  expect(
+    within(gallery)
+      .getAllByRole("img")
+      .map((img) => img.getAttribute("alt")),
+  ).toEqual(["Foto 1 de Casa da Dona Cida", "Foto 2 de Casa da Dona Cida", "Foto 3 de Casa da Dona Cida"]);
+  expect(within(gallery).getAllByRole("listitem")[0]).toHaveTextContent("Vizinho");
+  expect(screen.queryByRole("heading", { name: "O que os tutores contam" })).not.toBeInTheDocument();
+});
+
+it("REQ-LPAGE-005 a caixa de compatibilidade da rota aparece logo abaixo dos selos", () => {
+  render(
     <ListingPageScreen
-      listing={withStreet}
-      query={{ pets: [] }}
-      requestSearch=""
-      selectedPets={[]}
-      isOwner
-      accountRole="host"
+      listing={listingDetailFixture()}
+      isOwner={false}
+      accountRole="owner"
+      reviews={[]}
+      stay={stay}
+      compatibility={<p>Caixa de compatibilidade</p>}
     />,
   );
+  expect(screen.getByText("Caixa de compatibilidade")).toBeVisible();
+});
+
+it("REQ-LPAGE-003/006 só mostra a rua na visão da pessoa anfitriã dona do cantinho, sem pedir estadia", () => {
+  const listing = listingDetailFixture({
+    address: { neighborhood: "Jd. Alvorada", city: "Maringá", state: "PR", street: "Rua da Casa", number: "10" },
+  });
+  render(<ListingPageScreen listing={listing} isOwner accountRole="host" reviews={[]} />);
   expect(screen.getByText("Rua da Casa, 10")).toBeVisible();
-});
-
-it("REQ-LPAGE-006/007 omite pedido para anfitrião dono e orienta outro anfitrião a trocar de conta", () => {
-  const { rerender } = renderWithProviders(
-    <ListingPageScreen
-      listing={listing}
-      query={{ pets: [] }}
-      requestSearch=""
-      selectedPets={[]}
-      isOwner
-      accountRole="host"
-    />,
-  );
   expect(screen.getByRole("status")).toHaveTextContent("É assim que os tutores veem seu cantinho (sem a rua)");
   expect(screen.getByRole("link", { name: "Editar" })).toHaveAttribute(
     "href",
     "/host/listings/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c/edit",
   );
   expect(screen.queryByRole("link", { name: "Pedir estadia" })).not.toBeInTheDocument();
-  rerender(
+  expect(screen.queryByRole("link", { name: /Voltar|Casas perto/ })).not.toBeInTheDocument();
+});
+
+it("REQ-LPAGE-007 outra conta de anfitrião vê o card de compra, e o pedir passa pela troca para a conta de tutor", () => {
+  render(
     <ListingPageScreen
-      listing={listing}
-      query={{ pets: [] }}
-      requestSearch=""
-      selectedPets={[]}
+      listing={listingDetailFixture()}
       isOwner={false}
       accountRole="host"
+      reviews={[]}
+      stay={{ ...stay, search: "from=2026-12-20&to=2026-12-25", petIds: [], pets: [] }}
     />,
   );
-  expect(screen.getByText("Pra pedir uma estadia, entra com a conta de tutor.")).toBeVisible();
-  expect(screen.getByRole("link", { name: "Trocar de conta" })).toHaveAttribute("href", "/users/switch");
+  expect(screen.getByLabelText("Chegada e saída")).toBeVisible();
+  expect(screen.queryByText("Quem vai")).not.toBeInTheDocument();
+  expect(screen.queryByText(/Pra pedir uma estadia|Trocar de conta/)).not.toBeInTheDocument();
+  const url = new URL(screen.getAllByRole("link", { name: "Pedir estadia" })[0]!.getAttribute("href")!, "http://test");
+  expect(url.pathname).toBe("/users/switch");
+  expect(url.searchParams.get("to")).toBe("owner");
+  expect(url.searchParams.get("next")).toBe(
+    "/listings/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c?from=2026-12-20&to=2026-12-25",
+  );
+});
+
+it("076 mant?m o nome exibido e usa iniciais sem observa??o no avatar humano", () => {
+  const base = listingDetailFixture();
+  const listing = { ...base, host: { ...base.host!, name: "Ana Souza (teste)", avatarUrl: null } };
+  render(<ListingPageScreen listing={listing} isOwner={false} accountRole="owner" reviews={[]} stay={stay} />);
+  expect(screen.getByText("AS")).toBeVisible();
+  expect(screen.getByText("Ana Souza (teste)")).toBeVisible();
+  expect(screen.queryByText("A(")).not.toBeInTheDocument();
 });

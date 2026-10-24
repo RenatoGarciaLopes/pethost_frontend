@@ -1,236 +1,261 @@
-import { quintalRadii } from "@/shared/theme/tokens/radii";
-import { Avatar, Box, Chip, Container, Divider, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+import NextLink from "next/link";
 import type { ReactNode } from "react";
-import { formatBRL } from "@/shared/lib/money";
-import type { ListingDetail } from "../api/contracts";
-import { ListingPageActions } from "./client/ListingPageActions";
-import { petFitsListing } from "../lib/petFitsListing";
-import { stayTotal } from "../lib/stayTotal";
+import { isListingBadge, listingBadgeLabel } from "@/shared/config/listingBadges";
+import { formatMemberSince } from "@/shared/lib/date/formatMemberSince";
+import { InitialsAvatar } from "@/shared/ui/media/InitialsAvatar";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { StatusPill } from "@/shared/ui/feedback/StatusPill";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
+import { Surface } from "@/shared/ui/layout/Surface";
+import type { ListingDetail, ListingReview } from "../api/contracts";
+import { houseLine, houseRuleItems } from "../lib/listingFacts";
 import { listingPageCopy as copy } from "../lib/listingPageCopy";
+import { searchOriginHref } from "../lib/searchOrigin";
+import { ListingPageActions } from "./client/ListingPageActions";
+import { StayBookingCard, type StayBookingPet } from "./client/StayBookingCard";
+import { ListingGallery } from "./ListingGallery";
+import { NightlyPrice } from "./NightlyPrice";
+
+/** O que já foi escolhido (da URL) e os pets do tutor. Não existe para o anfitrião dono do cantinho. */
+export interface ListingPageStay {
+  /** Hoje em Brasília, para o campo de datas. */
+  today: string;
+  /** Parâmetros da busca de origem, serializados (vão para o "voltar" e para o pedido). */
+  search: string;
+  /** Lugar da busca de origem, para o texto do "voltar". */
+  where?: string;
+  from?: string;
+  to?: string;
+  petIds: string[];
+  count?: number;
+  /** Pets ativos do tutor; vazio para o visitante e o anfitrião, que pedem passando pelo login ou pela troca. */
+  pets: StayBookingPet[];
+}
 
 export interface ListingPageScreenProps {
   listing: ListingDetail;
-  query: { pets: string[]; count?: number; from?: string; to?: string };
-  requestSearch: string;
-  selectedPets: { id: string; name: string; species: string; size: string | null }[];
-  selectionControl?: ReactNode;
   isOwner: boolean;
-  accountRole: "owner" | "host";
+  /** Quem vê: o visitante (sem conta) e o anfitrião veem a mesma lateral, e o pedido leva ao login ou à troca. */
+  accountRole: "owner" | "host" | "visitor";
+  /** Avaliações mais novas dos tutores; vazio esconde a seção. */
+  reviews: ListingReview[];
+  /** Contexto da lateral de reserva; sem ele (dono do cantinho) a lateral mostra só a diária. */
+  stay?: ListingPageStay;
+  /** Caixa "Combina com essa casa" composta pela rota (compatibilidade vem da busca). */
+  compatibility?: ReactNode;
+  /** `HouseResidents` composto pela rota (pets da casa vêm da feature pets). */
   residents?: ReactNode;
 }
 
-/** Página de detalhes do cantinho. O slot `residents` recebe HouseResidents na composição da rota. */
+function formatAverage(average: number) {
+  return average.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+/**
+ * Página do cantinho fiel à prancha (spec 042, revisão 078): "voltar" para a busca de origem, galeria com moldura,
+ * título display com a casa em poucas palavras, selos em pílula, caixa de compatibilidade, seções com divisória
+ * tracejada (Quem cuida, Quem mora aqui, Regras da casa, O que os tutores contam) e a lateral fixa de reserva. Os
+ * slots `compatibility` e `residents` são compostos pela rota, porque vêm de outras features.
+ * @example <ListingPageScreen listing={listing} isOwner={false} accountRole="owner" reviews={reviews} stay={stay} />
+ */
 export function ListingPageScreen({
   listing,
-  query,
-  requestSearch,
-  selectedPets,
-  selectionControl,
   isOwner,
   accountRole,
+  reviews,
+  stay,
+  compatibility,
   residents,
 }: ListingPageScreenProps) {
-  const location = listing.address;
+  const address = listing.address;
   const ownerNotice = isOwner && accountRole === "host";
-  const petCount = query.pets.length > 0 ? selectedPets.length : (query.count ?? 0);
-  const total = stayTotal(listing.nightlyRate, query.from, query.to, petCount);
-  const requestHref = `/listings/${listing.id}/request${requestSearch ? `?${requestSearch}` : ""}`;
+  const hostName = listing.host?.name ?? copy.noHost;
   const photos = [...listing.photos].sort((a, b) => a.position - b.position).slice(0, 5);
+  const house = houseLine(listing);
+  // Vizinho vai na foto; "Bem avaliado" só sem a pílula da nota, que já diz mais.
+  const badges = (listing.badges ?? [])
+    .filter(isListingBadge)
+    .filter((badge) => badge !== "neighbor" && !(badge === "well_rated" && listing.rating));
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
+    <PageContainer width="page" sx={{ py: { xs: 3, md: 4 }, pb: { xs: stay ? 14 : 4, md: 6 } }}>
       {ownerNotice && (
-        <ListingPageActions
-          listingId={listing.id}
-          requestHref=""
-          isOwnerView
-          accountRole="host"
-          hasTotal={false}
-          placement="notice"
-        />
+        <Box sx={{ mb: 3 }}>
+          <ListingPageActions listingId={listing.id} />
+        </Box>
       )}
-      <ListingGallery title={listing.title} photos={photos} />
-      <Stack spacing={3} sx={{ mt: 4 }}>
-        <Stack spacing={1}>
-          <Typography component="h1" variant="h3">
+      {stay && (
+        <Typography sx={{ mb: 2, fontWeight: 700, fontSize: "0.95rem", "& a": { color: "text.primary" } }}>
+          <NextLink href={searchOriginHref(stay.search)}>{copy.back(stay.where)}</NextLink>
+        </Typography>
+      )}
+      <ListingGallery title={listing.title} photos={photos} neighbor={Boolean(listing.badges?.includes("neighbor"))} />
+      <Box
+        sx={{
+          mt: 4,
+          display: "grid",
+          gap: { xs: 4, md: 6 },
+          alignItems: "start",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) 360px" },
+          gridTemplateAreas: { xs: '"head" "aside" "body"', md: '"head aside" "body aside"' },
+        }}
+      >
+        <Stack spacing={2} sx={{ gridArea: "head", minWidth: 0 }}>
+          <Typography component="h1" variant="h2" sx={{ fontSize: { xs: "2rem", md: "2.5rem" }, lineHeight: 1.1 }}>
             {listing.title}
           </Typography>
-          <Typography>{copy.neighborhood(location.neighborhood, location.city, location.state)}</Typography>
-          {isOwner ? (
-            location.street && (
-              <Typography>
-                {[location.street, location.number, location.complement].filter(Boolean).join(", ")}
-              </Typography>
-            )
-          ) : (
-            <Typography variant="body2">{copy.addressPrivacy}</Typography>
+          <Typography color="text.secondary">
+            {[copy.place(address.neighborhood, address.city, address.state), house].filter(Boolean).join(" · ")}
+          </Typography>
+          {isOwner && address.street && (
+            <Typography>{[address.street, address.number, address.complement].filter(Boolean).join(", ")}</Typography>
           )}
-          {listing.badges && listing.badges.length > 0 && (
-            <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1 }}>
-              {listing.badges.map((badge) => (
-                <Chip key={badge} label={badge.replaceAll("_", " ")} />
-              ))}
-            </Stack>
-          )}
+          <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1 }}>
+            {listing.host && <StatusPill tone="ok" size="sm" label={copy.verified} />}
+            {badges.map((badge) => (
+              <StatusPill key={badge} size="sm" label={listingBadgeLabel(badge)} />
+            ))}
+            {listing.rating && (
+              <Box
+                component="span"
+                aria-label={copy.ratingLabel(formatAverage(listing.rating.average), listing.rating.count)}
+                sx={{
+                  px: 1.25,
+                  py: "2px",
+                  fontSize: "0.82rem",
+                  fontWeight: 700,
+                  lineHeight: 1.5,
+                  whiteSpace: "nowrap",
+                  bgcolor: "quintal.luz",
+                  border: "2px solid",
+                  borderColor: "text.primary",
+                  borderRadius: `${quintalRadii.pill}px`,
+                }}
+              >
+                {copy.rating(formatAverage(listing.rating.average), listing.rating.count)}
+              </Box>
+            )}
+          </Stack>
+          {compatibility}
         </Stack>
-        <Divider />
-        <Stack direction={{ xs: "column", md: "row" }} spacing={5}>
-          <Stack spacing={3} sx={{ flex: 1, minWidth: 0 }}>
-            <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-              <Avatar src={listing.host?.avatarUrl ?? undefined} alt="" />
-              <Box>
-                <Typography variant="overline">{copy.host}</Typography>
-                <Typography>{listing.host?.name ?? copy.noHost}</Typography>
+
+        <Box sx={{ gridArea: "aside", position: { md: "sticky" }, top: { md: 24 } }}>
+          <Surface component="aside" elevation="lg" sx={{ p: 3 }}>
+            {stay ? (
+              <StayBookingCard
+                listingId={listing.id}
+                account={accountRole}
+                nightlyRate={listing.nightlyRate}
+                hostName={hostName}
+                today={stay.today}
+                search={stay.search}
+                from={stay.from}
+                to={stay.to}
+                petIds={stay.petIds}
+                count={stay.count}
+                pets={stay.pets}
+              />
+            ) : (
+              <NightlyPrice nightlyRate={listing.nightlyRate} />
+            )}
+          </Surface>
+        </Box>
+
+        <Stack spacing={3} sx={{ gridArea: "body", minWidth: 0 }}>
+          <Section title={copy.sections.host}>
+            <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
+              <InitialsAvatar
+                name={hostName}
+                src={listing.host?.avatarUrl}
+                size={56}
+                sx={{ fontWeight: 800, border: "2px solid", borderColor: "text.primary" }}
+              />
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontWeight: 700 }}>{hostName}</Typography>
+                {listing.host?.isCompany && (
+                  <Typography variant="body2" color="text.secondary">
+                    {copy.company}
+                  </Typography>
+                )}
+                {listing.description && (
+                  <Typography sx={{ mt: 1, whiteSpace: "pre-line" }}>“{listing.description}”</Typography>
+                )}
               </Box>
             </Stack>
-            <section>
-              <Typography component="h2" variant="h5">
-                {copy.description}
-              </Typography>
-              <Typography sx={{ whiteSpace: "pre-line", mt: 1 }}>{listing.description}</Typography>
-            </section>
-            <section>
-              <Typography component="h2" variant="h5">
-                {copy.property}
-              </Typography>
-              <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1, mt: 1 }}>
-                {listing.hasYard && <Chip label="Quintal" />}
-                {listing.hasDogs && <Chip label="Cachorros em casa" />}
-                {listing.hasCats && <Chip label="Gatos em casa" />}
-                {listing.hasKids && <Chip label="Crianças em casa" />}
-              </Stack>
-            </section>
-            {listing.hostId && residents}
-            <section>
-              <Typography component="h2" variant="h5">
-                {copy.accepted}
-              </Typography>
-              <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1, mt: 1 }}>
-                {listing.acceptedSpecies.map((species) => (
-                  <Chip key={species} label={copy.speciesLabels[species] ?? species} />
-                ))}
-                {listing.acceptsSmall && <Chip label="Porte pequeno" />}
-                {listing.acceptsMedium && <Chip label="Porte médio" />}
-                {listing.acceptsLarge && <Chip label="Porte grande" />}
-                <Chip label={copy.capacity(listing.capacity)} />
-              </Stack>
-            </section>
-            {selectedPets.length > 0 && (
-              <section>
-                <Typography component="h2" variant="h5">
-                  Combina com
-                </Typography>
-                <Stack spacing={1} sx={{ mt: 1 }}>
-                  {selectedPets.map((pet) => {
-                    const fit = petFitsListing(pet, listing);
-                    const reason = fit.fits
-                      ? null
-                      : fit.reason === "species"
-                        ? copy.mismatchSpecies(pet.name, copy.speciesLabels[pet.species] ?? pet.species)
-                        : copy.mismatchSize(pet.name, copy.sizeLabels[pet.size ?? ""] ?? pet.size ?? "");
-                    return (
+          </Section>
+          {listing.hostId && residents && (
+            <Box sx={{ borderTop: "2px dashed", borderColor: "divider", pt: 3, "&:empty": { display: "none" } }}>
+              {residents}
+            </Box>
+          )}
+          <Section title={copy.sections.rules}>
+            <Box component="ul" sx={{ m: 0, pl: 2.5, display: "grid", gap: 0.75 }}>
+              {houseRuleItems(listing).map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </Box>
+          </Section>
+          {reviews.length > 0 && (
+            <Section title={copy.sections.reviews}>
+              <Box
+                component="ul"
+                sx={{
+                  listStyle: "none",
+                  m: 0,
+                  p: 0,
+                  display: "grid",
+                  gap: 2,
+                  gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))" },
+                }}
+              >
+                {reviews.map((review) => (
+                  <Box
+                    component="li"
+                    key={review.id}
+                    sx={{
+                      p: 2,
+                      bgcolor: "background.paper",
+                      border: "2px solid",
+                      borderColor: "text.primary",
+                      borderRadius: `${quintalRadii.media}px`,
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: 700 }}>{review.author?.name ?? copy.reviewer}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatMemberSince(review.stayEndedAt)} ·{" "}
+                      <Box component="span" role="img" aria-label={copy.reviewStars(review.rating)}>
+                        {"★".repeat(review.rating)}
+                      </Box>
+                    </Typography>
+                    {review.comment && <Typography sx={{ mt: 1 }}>“{review.comment}”</Typography>}
+                    {review.reply && (
                       <Typography
-                        key={pet.id}
-                        sx={{
-                          border: "1px dashed",
-                          borderColor: "text.secondary",
-                          borderRadius: `${quintalRadii.control}px`,
-                          p: 1.5,
-                        }}
+                        variant="body2"
+                        sx={{ mt: 1, pl: 1.5, borderLeft: "2px solid", borderColor: "divider" }}
                       >
-                        {reason ?? copy.fit(pet.name)}
+                        <strong>{hostName}:</strong> {review.reply.text}
                       </Typography>
-                    );
-                  })}
-                </Stack>
-              </section>
-            )}
-            <section>
-              <Typography component="h2" variant="h5">
-                {copy.weekdays}
-              </Typography>
-              <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1, mt: 1 }}>
-                {listing.availableWeekdays.map((day) => (
-                  <Chip key={day} label={copy.weekdayLabels[day] ?? day} />
+                    )}
+                  </Box>
                 ))}
-              </Stack>
-            </section>
-            {listing.houseRules && (
-              <section>
-                <Typography component="h2" variant="h5">
-                  {copy.rules}
-                </Typography>
-                <Typography sx={{ mt: 1, whiteSpace: "pre-line" }}>{listing.houseRules}</Typography>
-              </section>
-            )}
-          </Stack>
-          <Stack
-            spacing={1.5}
-            sx={{ width: { md: 320 }, flexShrink: 0, alignSelf: "flex-start", position: { md: "sticky" }, top: 24 }}
-          >
-            <Typography component="h2" variant="h5">
-              {copy.nightlyRate(formatBRL(listing.nightlyRate))}
-            </Typography>
-            {total && (
-              <Typography aria-live="polite">
-                Total para {petCount} pets: {total}
-              </Typography>
-            )}
-            <ListingPageActions
-              listingId={listing.id}
-              requestHref={requestHref}
-              isOwnerView={ownerNotice}
-              accountRole={accountRole}
-              hasTotal={Boolean(total)}
-              selectionControl={selectionControl}
-            />
-          </Stack>
+              </Box>
+            </Section>
+          )}
         </Stack>
-      </Stack>
-    </Container>
+      </Box>
+    </PageContainer>
   );
 }
 
-function ListingGallery({ title, photos }: { title: string; photos: ListingDetail["photos"] }) {
-  if (photos.length === 0)
-    return (
-      <Box
-        sx={{
-          minHeight: 220,
-          display: "grid",
-          placeItems: "center",
-          bgcolor: "action.hover",
-          borderRadius: `${quintalRadii.media}px`,
-        }}
-      >
-        {copy.noPhoto}
-      </Box>
-    );
+/** Seção da página: título display e divisória tracejada em cima, como na prancha. */
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <Box
-      aria-label={`Fotos de ${title}`}
-      sx={{
-        display: "grid",
-        gridTemplateColumns: { xs: "1fr", md: photos.length > 1 ? "2fr 1fr 1fr" : "1fr" },
-        gap: 1,
-        overflow: "hidden",
-        borderRadius: `${quintalRadii.card}px`,
-      }}
-    >
-      {photos.map((photo, index) => (
-        <Box
-          component="img"
-          key={photo.id}
-          src={photo.url}
-          alt={copy.photoAlt(index + 1, title)}
-          sx={{
-            width: "100%",
-            height: { xs: 250, md: index === 0 ? 440 : 216 },
-            objectFit: "cover",
-            gridRow: { md: index === 0 && photos.length > 1 ? "span 2" : undefined },
-          }}
-        />
-      ))}
+    <Box component="section" sx={{ borderTop: "2px dashed", borderColor: "divider", pt: 3 }}>
+      <Typography component="h2" variant="h4" sx={{ mb: 2 }}>
+        {title}
+      </Typography>
+      {children}
     </Box>
   );
 }

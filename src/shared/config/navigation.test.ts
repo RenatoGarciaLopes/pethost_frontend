@@ -3,11 +3,12 @@ import { NAV_ITEMS, navItemsFor } from "./navigation";
 
 describe("REQ-SHELL-002 tabela única de atalhos", () => {
   it("cada papel vê só os seus atalhos", () => {
-    expect(navItemsFor("owner").map((item) => item.href)).toEqual(["/pets", "/conversations"]);
+    expect(navItemsFor("owner").map((item) => item.href)).toEqual(["/", "/pets", "/owner/bookings", "/conversations"]);
     expect(navItemsFor("host").map((item) => item.href)).toEqual([
       "/host",
       "/host/application",
       "/pets",
+      "/host/bookings",
       "/conversations",
     ]);
     expect(navItemsFor("admin").map((item) => item.href)).toEqual([

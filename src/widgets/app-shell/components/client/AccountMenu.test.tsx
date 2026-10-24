@@ -18,7 +18,7 @@ function setup(role: AccountRole = "owner") {
   return renderWithProviders(<AccountMenu user={{ ...USER, role }} />, { theme: quintalTheme });
 }
 async function openMenu(user: ReturnType<typeof setup>["user"]) {
-  await user.click(screen.getByRole("button", { name: "CS Menu da conta de Camila Souza" }));
+  await user.click(screen.getByRole("button", { name: "CS Camila Menu da conta de Camila Souza" }));
   return screen.findByRole("menu");
 }
 function accounts(list: { role: "owner" | "host"; isActive: boolean; isCurrent: boolean }[]) {
@@ -33,10 +33,11 @@ function accounts(list: { role: "owner" | "host"; isActive: boolean; isCurrent: 
 }
 
 describe("menu da conta", () => {
-  it("REQ-SHELL-003 iniciais no botão; nome e conta no menu", async () => {
+  it("REQ-SHELL-003 pílula com iniciais e primeiro nome no botão; nome e conta no menu", async () => {
     accounts([{ role: "owner", isActive: true, isCurrent: true }]);
     const { user } = setup("owner");
-    expect(screen.getByRole("button", { name: "CS Menu da conta de Camila Souza" })).toHaveTextContent("CS");
+    // O nome acessível já confere a ordem: iniciais e primeiro nome visíveis, depois o texto escondido.
+    expect(screen.getByRole("button", { name: "CS Camila Menu da conta de Camila Souza" })).toHaveTextContent("Camila");
     await openMenu(user);
     expect(screen.getByText("Camila Souza")).toBeInTheDocument();
     expect(screen.getByText("Conta de tutor")).toBeInTheDocument();
@@ -112,4 +113,12 @@ describe("menu da conta", () => {
     expect(loggedOut).toBe(true);
     expect(queryClient.getQueryData(["account", USER.id, "profile"])).toBeUndefined();
   });
+});
+
+it("076 ignora a observa??o nas iniciais e preserva o nome acess?vel", () => {
+  renderWithProviders(<AccountMenu user={{ ...USER, role: "owner", fullName: "Ana Souza (teste)" }} />, {
+    theme: quintalTheme,
+  });
+  expect(screen.getByRole("button", { name: "AS Ana Menu da conta de Ana Souza (teste)" })).toBeVisible();
+  expect(screen.queryByText("A(")).not.toBeInTheDocument();
 });

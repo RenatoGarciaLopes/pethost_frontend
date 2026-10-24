@@ -16,15 +16,10 @@ import * as zod from 'zod';
  * @summary Recebe um evento do Stripe (conta da plataforma ou contas conectadas).
  */
 export const PostApiV1StripeWebhooksResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
 
-}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

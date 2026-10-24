@@ -5,7 +5,8 @@ import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
-import { homeOf, loginRedirectPath, registerPath } from "@/shared/config/appRoutes";
+import { homeOf, loginRedirectPath, registerPath, resolvePostLoginPath } from "@/shared/config/appRoutes";
+import { toSafeInternalPath } from "@/shared/lib/url/toSafeInternalPath";
 import { roleLabel } from "@/shared/config/roleLabels";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { useAnnounce } from "@/shared/ui/feedback/Announcer";
@@ -25,16 +26,21 @@ export interface AccountSwitchPanelProps {
   current: PersonalRole;
   /** Já resolvido pela página (`resolveSwitchTarget`): sempre a outra conta. */
   target: PersonalRole;
+  /**
+   * Para onde voltar (REQ-SWITCH-013): depois da troca, no "Agora não" e passando pelo cadastro ou pelo login da
+   * conta pausada. Só caminho interno seguro; sem ele, a casa de cada conta.
+   */
+  next?: string;
 }
 
 /**
  * `/users/switch` (spec 014): lê as contas da mesma pessoa (já hidratadas pela página) e mostra a troca,
  * o convite para criar a outra conta (REQ-SWITCH-003) ou o aviso de conta pausada. Depois da troca, a
- * casa da conta nova com `replace` + `refresh` e o anúncio na região viva do app (REQ-SWITCH-006).
+ * casa da conta nova (ou o `next`) com `replace` + `refresh` e o anúncio na região viva do app (REQ-SWITCH-006).
  *
  * @example <AccountSwitchPanel userId={user.id} current="owner" target="host" />
  */
-export function AccountSwitchPanel({ userId, current, target }: AccountSwitchPanelProps) {
+export function AccountSwitchPanel({ userId, current, target, next }: AccountSwitchPanelProps) {
   const router = useRouter();
   const announce = useAnnounce();
   // Depois da troca o cache foi limpo e a página está saindo: a lista não é buscada de novo.
@@ -44,7 +50,7 @@ export function AccountSwitchPanel({ userId, current, target }: AccountSwitchPan
 
   function handleSwitched() {
     setLeaving(true);
-    router.replace(homeOf(target));
+    router.replace(resolvePostLoginPath(target, next));
     router.refresh();
     announce(switchCopy.done(account));
   }
@@ -63,14 +69,18 @@ export function AccountSwitchPanel({ userId, current, target }: AccountSwitchPan
           available: (
             <>
               <AccountPair current={current} target={target} />
-              <SwitchPasswordForm current={current} target={target} onSwitched={handleSwitched} />
+              <SwitchPasswordForm
+                target={target}
+                cancelHref={toSafeInternalPath(next, homeOf(current))}
+                onSwitched={handleSwitched}
+              />
             </>
           ),
           missing: (
             <EmptyState
               title={switchCopy.missing(account)}
               action={
-                <Button component={NextLink} href={registerPath(target)} variant="contained">
+                <Button component={NextLink} href={registerPath(target, next)} variant="contained">
                   {switchCopy.create(account)}
                 </Button>
               }
@@ -80,7 +90,7 @@ export function AccountSwitchPanel({ userId, current, target }: AccountSwitchPan
             <Notice
               tone="atencao"
               action={
-                <Link component={NextLink} href={loginRedirectPath(null, target)}>
+                <Link component={NextLink} href={loginRedirectPath(next, target)}>
                   {switchCopy.reactivate}
                 </Link>
               }

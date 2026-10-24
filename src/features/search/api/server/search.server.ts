@@ -13,3 +13,18 @@ export async function prefetchSearch(client: QueryClient, accountId: string, que
     return toSearchError(error);
   }
 }
+
+/**
+ * Compatibilidade de um pet com o cantinho, pré-carregada para a `CompatibilityNotice` hidratar pronta (a caixa não
+ * aparece depois, empurrando a página). Falha fica silenciosa: no navegador a caixa simplesmente não aparece.
+ * @example await prefetchCompatibility(client, user.id, listing.id, pet.id, { checkIn, checkOut })
+ */
+export async function prefetchCompatibility(
+  client: QueryClient,
+  accountId: string,
+  listingId: string,
+  petId: string,
+  stay: { checkIn?: string; checkOut?: string },
+) {
+  await client.prefetchQuery(searchQueries.compatibility(accountId, listingId, petId, stay, await backendForRequest()));
+}

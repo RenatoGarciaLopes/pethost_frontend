@@ -13,7 +13,7 @@ import { quintalLink } from "./overrides/Link";
 import { quintalFormLabel } from "./overrides/FormLabel";
 import { createTheme, type Shadows } from "@mui/material/styles";
 import { quintalColors as c } from "./tokens/colors";
-import { accountTones, feedbackColors, sceneColors, surfaceColors } from "./tokens/semantic";
+import { accountTones, avatarTones, feedbackColors, sceneColors, surfaceColors } from "./tokens/semantic";
 import { quintalTypography } from "./tokens/typography";
 import { hardShadow } from "./tokens/shadows";
 import { quintalRadii } from "./tokens/radii";
@@ -40,6 +40,7 @@ export const quintalTheme = createTheme({
     warning: { main: feedbackColors.warning, contrastText: c.tinta },
     error: { main: feedbackColors.error, contrastText: "#FFFFFF" },
     account: accountTones,
+    avatar: avatarTones,
     scene: sceneColors,
     text: { primary: c.tinta, secondary: c.texto2 },
     background: { default: surfaceColors.page, paper: surfaceColors.paper },

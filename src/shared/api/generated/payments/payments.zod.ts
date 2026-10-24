@@ -20,8 +20,8 @@ export const GetApiV1PaymentsPayoutsMeQueryParams = zod.object({
 })
 
 export const GetApiV1PaymentsPayoutsMeResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "items": zod.array(zod.object({
   "bookingId": zod.string().uuid(),
   "paymentStatus": zod.string().describe('`pending`, `active`, `paid` ou `cancelled`.'),
@@ -46,14 +46,9 @@ export const GetApiV1PaymentsPayoutsMeResponse = zod.object({
   "pageSize": zod.number().int(),
   "totalCount": zod.number().int(),
   "totalPages": zod.number().int().optional()
-}).describe('Página de uma lista (§13): `page` começa em 1.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Página de uma lista (§13): `page` começa em 1.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Parcela em atraso (`installment_overdue`), contestação aberta ou perdida
@@ -63,7 +58,7 @@ export const GetApiV1PaymentsPayoutsMeResponse = zod.object({
  * @summary Pendências de pagamento para o admin resolver.
  */
 export const GetApiV1PaymentsIssuesResponse = zod.object({
-  "success": zod.boolean(),
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.array(zod.object({
   "paymentId": zod.string().uuid(),
   "bookingId": zod.string().uuid(),
@@ -74,11 +69,6 @@ export const GetApiV1PaymentsIssuesResponse = zod.object({
   "failureCode": zod.string().nullish().describe('Por que o repasse ou o estorno falhou (código do Stripe, `NO_CONNECTED_ACCOUNT` ou `HOST_PAYOUTS_DISABLED`).'),
   "stripeObjectId": zod.string().nullish().describe('O objeto a conferir no Dashboard do Stripe.')
 }).describe('Uma pendência numa parcela.')).nullish(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

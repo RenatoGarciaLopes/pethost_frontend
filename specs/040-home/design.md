@@ -45,13 +45,13 @@ Não se cria uma feature `home`: a home não possui domínio/API própria. O wid
 
 `src/widgets/home/lib/homeSearchPath.ts` fornece `buildHomeSearchPath` (função pura, testada) e monta apenas a URL de handoff:
 
-| Estado                  | Query de `/search`                                                           |
+| Estado                  | Query da URL de `/`                                                          |
 | ----------------------- | ---------------------------------------------------------------------------- |
 | Tutor com pet(s)        | `where`, `from`, `to`; `pets` repetido por id selecionado.                   |
 | Visitante/tutor sem pet | `where`, `from`, `to`; `species` com `dog` ou `cat`.                         |
 | Anfitrião               | `where`, `from`, `to`; `pets` como quantidade escolhida, conforme a 041/API. |
 
-Valores vazios são omitidos; nomes e fotos nunca entram na URL. `HomeScreen` escolhe `/search?...` para qualquer sessão pessoal e `loginRedirectPath(searchPath)` para visitante, reaproveitando a validação segura de `next` em `shared/config/appRoutes`. A 040 não replica o parser nem chama endpoint de listing; a 041 é responsável por consumir essa URL e adaptar parâmetros ao contrato real.
+Valores vazios são omitidos; nomes e fotos nunca entram na URL. (Revisão 079) `HomeScreen` escreve a busca na URL de `/` por `useSearchUrl`, para qualquer sessão, sem passar pelo login. A 040 não replica o parser nem chama endpoint de listing; a 041 é responsável por consumir essa URL e adaptar parâmetros ao contrato real.
 
 ## Reutilização
 

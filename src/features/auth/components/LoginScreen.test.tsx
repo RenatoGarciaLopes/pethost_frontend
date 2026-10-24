@@ -11,7 +11,7 @@ it("REQ-AUTH-016 compõe entrada pessoal com formulário, cena decorativa e gara
   });
   const main = screen.getByRole("main");
   expect(main).toHaveAttribute("id", "conteudo");
-  expect(within(main).getByRole("heading", { level: 1 })).toHaveTextContent("Entra que a porta tá aberta.");
+  expect(within(main).getByRole("heading", { level: 1 })).toHaveTextContent("Entra que a porta tá aberta");
   expect(screen.getByRole("radio", { name: "Sou anfitrião" })).toBeChecked();
   const guarantees = within(screen.getByRole("list", { name: "Garantias da PetHost" })).getAllByRole("listitem");
   expect(guarantees.map((item) => item.textContent)).toEqual([

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, userEvent } from "storybook/test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { PIPOCA_ID, THOR_ID } from "@/test/fixtures/bookings";
@@ -65,4 +66,27 @@ export const SemPets: Story = { name: "REQ-REQST-002 Sem pets na lista", args: {
 export const Celular: Story = {
   name: "REQ-REQST-002 Celular",
   globals: { viewport: { value: "celular", isRotated: false } },
+};
+
+export const SemAceiteDoCuidado: Story = {
+  name: "REQ-REQST-004 Sem marcar ração e remédios",
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole("button", { name: "Pedir estadia" }));
+    await expect(
+      await canvas.findByText("Marca os dois pra confirmar que a ração e os remédios vão junto."),
+    ).toBeVisible();
+  },
+};
+
+export const ChegadaCedoDemais: Story = {
+  name: "REQ-REQST-010 Chegada com menos de 72 h",
+  args: { initial: { checkIn: "2026-12-12", checkOut: "2026-12-15", petIds: [PIPOCA_ID] } },
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole("button", { name: "Pedir estadia" }));
+    await expect(
+      await canvas.findByText(
+        "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.",
+      ),
+    ).toBeVisible();
+  },
 };

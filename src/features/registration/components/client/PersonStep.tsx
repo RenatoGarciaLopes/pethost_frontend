@@ -1,6 +1,6 @@
 "use client";
 
-import { Stack, TextField, Typography } from "@mui/material";
+import { Box, Stack, TextField, Typography } from "@mui/material";
 import { Controller, useFormContext, type ControllerFieldState, type ControllerRenderProps } from "react-hook-form";
 import { BirthDateField } from "@/shared/ui/forms/BirthDateField";
 import { CpfField } from "@/shared/ui/forms/CpfField";
@@ -40,7 +40,7 @@ export interface PersonStepProps {
 }
 
 /**
- * Passo 1, "Primeiro, você" (REQ-OREG-002, REQ-HREG-001): nome, e-mail, senha com a régua viva, celular,
+ * Passo 1, "Bora se conhecer." (REQ-OREG-002, REQ-HREG-001): nome, e-mail, senha com a régua viva, celular,
  * nascimento e, só no tutor, CPF. Teclado e `autocomplete` certos em cada campo (REQ-OREG-016).
  * Ajuda do topo e da senha vêm da variante (REQ-HREG-001, 003).
  */
@@ -49,8 +49,12 @@ export function PersonStep({ variant }: PersonStepProps) {
   const withCpf = variant.steps[0].fields.includes("cpf");
 
   return (
-    <Stack spacing={3}>
-      {variant.intro.person && <Typography color="text.secondary">{variant.intro.person}</Typography>}
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, columnGap: 2, rowGap: 2.5 }}>
+      {variant.intro.person && (
+        <Typography sx={{ gridColumn: "1 / -1" }} color="text.secondary">
+          {variant.intro.person}
+        </Typography>
+      )}
       <Controller
         control={control}
         name="fullName"
@@ -59,6 +63,7 @@ export function PersonStep({ variant }: PersonStepProps) {
             {...bind(field, fieldState)}
             value={field.value}
             onChange={field.onChange}
+            sx={{ gridColumn: "1 / -1" }}
             label={fields.fullName}
             autoComplete="name"
           />
@@ -80,27 +85,10 @@ export function PersonStep({ variant }: PersonStepProps) {
       />
       <Controller
         control={control}
-        name="password"
-        render={({ field, fieldState }) => (
-          <Stack spacing={1.5}>
-            <PasswordField
-              {...bind(field, fieldState, variant.passwordHelp)}
-              value={field.value}
-              onChange={field.onChange}
-              label={fields.password}
-              autoComplete="new-password"
-            />
-            {/* A régua lê o valor do próprio campo: só este bloco re-renderiza a cada tecla (REQ-OREG-004). */}
-            <PasswordStrengthChecklist password={field.value} />
-          </Stack>
-        )}
-      />
-      <Controller
-        control={control}
         name="phone"
         render={({ field, fieldState }) => (
           <MaskedTextField
-            {...bind(field, fieldState)}
+            {...bind(field, fieldState, variant.role === "owner" ? fields.phoneHelp : undefined)}
             mask="phone"
             value={field.value}
             onValueChange={field.onChange}
@@ -135,6 +123,23 @@ export function PersonStep({ variant }: PersonStepProps) {
           )}
         />
       )}
-    </Stack>
+      <Controller
+        control={control}
+        name="password"
+        render={({ field, fieldState }) => (
+          <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>
+            <PasswordField
+              {...bind(field, fieldState, variant.passwordHelp)}
+              value={field.value}
+              onChange={field.onChange}
+              label={fields.password}
+              autoComplete="new-password"
+            />
+            {/* A régua lê o valor do próprio campo: só este bloco re-renderiza a cada tecla (REQ-OREG-004). */}
+            <PasswordStrengthChecklist password={field.value} />
+          </Stack>
+        )}
+      />
+    </Box>
   );
 }

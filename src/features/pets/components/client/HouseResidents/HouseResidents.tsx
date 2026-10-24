@@ -30,7 +30,7 @@ export function HouseResidents({ hostId }: HouseResidentsProps) {
   if (residents.isError || !residents.data?.length) return null;
   return (
     <Stack component="section" spacing={2} aria-labelledby={titleId}>
-      <Typography component="h2" variant="h5" id={titleId}>
+      <Typography component="h2" variant="h4" id={titleId}>
         {petsCopy.residents.title}
       </Typography>
       <Box
@@ -56,8 +56,8 @@ export function HouseResidents({ hostId }: HouseResidentsProps) {
                   height: 64,
                   bgcolor: "background.paper",
                   color: "text.secondary",
-                  border: 1,
-                  borderColor: "divider",
+                  border: "2px solid",
+                  borderColor: "text.primary",
                 }}
               >
                 <PawMark size={28} />

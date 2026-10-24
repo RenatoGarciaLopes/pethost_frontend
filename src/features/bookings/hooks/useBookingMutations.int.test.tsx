@@ -115,6 +115,7 @@ describe("useRequestBooking", () => {
       petIds: [bookingDto().pets[0]!.id],
       checkIn: "2026-12-20",
       checkOut: "2026-12-25",
+      careTermsAccepted: true as const,
     };
     await act(() => result.current.mutateAsync(body));
     expect(bodies).toEqual([body]);
@@ -138,7 +139,7 @@ describe("useRequestBooking", () => {
     });
     await act(async () => {
       await result.current
-        .mutateAsync({ listingId: "l", petIds: [], checkIn: "", checkOut: "" })
+        .mutateAsync({ listingId: "l", petIds: [], checkIn: "", checkOut: "", careTermsAccepted: true })
         .catch(() => undefined);
     });
     expect(calls).toBe(1);

@@ -6,6 +6,7 @@ import {
   refreshRedirectPath,
   registerPath,
   resolvePostLoginPath,
+  switchAccountPath,
   isLoginNotice,
   loginNoticePath,
 } from "./appRoutes";
@@ -28,6 +29,13 @@ describe("appRoutes", () => {
     expect(registerPath(undefined, "/hosts/42")).toBe("/register?next=%2Fhosts%2F42");
     expect(registerPath("owner", "/hosts/42")).toBe("/register/owner?next=%2Fhosts%2F42");
     expect(registerPath("host", "//evil.example")).toBe("/register/host");
+  });
+
+  it("REQ-SWITCH-013 troca de conta com o destino e o next seguro", () => {
+    expect(switchAccountPath("owner", "/listings/42?from=2026-12-20")).toBe(
+      "/users/switch?to=owner&next=%2Flistings%2F42%3Ffrom%3D2026-12-20",
+    );
+    expect(switchAccountPath("host", "//evil.example")).toBe("/users/switch?to=host");
   });
 });
 

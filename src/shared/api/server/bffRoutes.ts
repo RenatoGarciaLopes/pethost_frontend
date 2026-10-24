@@ -30,10 +30,69 @@ export const sessionOnlyRoutes: readonly BffRoute[] = [
  */
 export const apiOnlyRoutes: readonly BffRoute[] = [route("POST", "/stripe/webhooks")];
 
+export interface DeniedRoute extends BffRoute {
+  /** Por que a rota está fora do proxy (e o que a traz de volta). */
+  reason: string;
+}
+
+const denied = (method: HttpMethod, pattern: string, reason: string): DeniedRoute => ({ method, pattern, reason });
+
+const adminNoScreen = "Só admin e nenhuma tela de admin a usa; entra na lista junto com a tela.";
+const reviewsNoScreen = "Avaliações: a tela de avaliar (spec 056) ainda não existe; entra na lista junto com ela.";
+const publicReviewsNoScreen =
+  "Leitura pública de avaliações sem tela no navegador (a página do cantinho lê `GET /reviews` no servidor, sem o proxy).";
+
+/**
+ * Operações da API que existem e que o app **ainda não usa** pelo navegador. Ficam fora do proxy de propósito
+ * (404), cada uma com o motivo, e o teste de contrato confere que nada foi esquecido. Quando uma tela passar a
+ * chamar a rota, ela sai daqui e entra em `bffRoutes` na mesma entrega.
+ */
+export const deniedRoutes: readonly DeniedRoute[] = [
+  // Admin
+  denied("GET", "/bookings", adminNoScreen),
+  denied("POST", "/host-applications/identity-blocks/release", adminNoScreen),
+  denied("GET", "/reviews/reports", adminNoScreen),
+  denied("GET", "/reviews/reports/{reportId}", adminNoScreen),
+  denied("PUT", "/reviews/reports/{reportId}/resolution", adminNoScreen),
+  denied("PUT", "/reviews/{reviewId}/moderation-hide", adminNoScreen),
+  denied("DELETE", "/reviews/{reviewId}/moderation-hide", adminNoScreen),
+
+  // Anfitrião e tutor
+  denied("GET", "/hosts/me/dashboard", "O painel do anfitrião ainda lê pedidos e cantinhos pelas rotas que já usa."),
+  denied(
+    "POST",
+    "/hosts/me/deletion",
+    'Exclusão de conta (LGPD): a tela de conta só tem "pausar"; entra com a tela de excluir.',
+  ),
+  denied(
+    "POST",
+    "/owners/me/deletion",
+    'Exclusão de conta (LGPD): a tela de conta só tem "pausar"; entra com a tela de excluir.',
+  ),
+
+  // Avaliações
+  denied("POST", "/reviews", reviewsNoScreen),
+  denied("GET", "/reviews/me", reviewsNoScreen),
+  denied("GET", "/reviews/me/received", reviewsNoScreen),
+  denied("GET", "/reviews/{reviewId}", reviewsNoScreen),
+  denied("PATCH", "/reviews/{reviewId}", reviewsNoScreen),
+  denied("DELETE", "/reviews/{reviewId}", reviewsNoScreen),
+  denied("PUT", "/reviews/{reviewId}/reply", reviewsNoScreen),
+  denied("DELETE", "/reviews/{reviewId}/reply", reviewsNoScreen),
+  denied("POST", "/reviews/{reviewId}/report", reviewsNoScreen),
+  denied("GET", "/reviews", publicReviewsNoScreen),
+  denied("GET", "/reviews/summary", publicReviewsNoScreen),
+  denied("GET", "/owners/{ownerId}/reviews", publicReviewsNoScreen),
+  denied("GET", "/owners/{ownerId}/reviews/summary", publicReviewsNoScreen),
+  denied("GET", "/pets/{petId}/reviews", publicReviewsNoScreen),
+  denied("GET", "/pets/{petId}/reviews/summary", publicReviewsNoScreen),
+];
+
 /**
  * Lista permitida do proxy `app/api/[...path]` (REQ-HTTP-009). O que não está aqui responde 404.
  * Papéis não são conferidos no BFF: a API é a autoridade de autorização (evita duas regras divergentes).
- * O teste `bffRoutes.test.ts` confere a lista contra o OpenAPI versionado.
+ * O teste `bffRoutes.test.ts` confere a lista contra o OpenAPI versionado; toda operação da API está aqui, em
+ * `sessionOnlyRoutes`, em `apiOnlyRoutes` ou em `deniedRoutes` (com o motivo).
  */
 export const bffRoutes: readonly BffRoute[] = [
   // Conta e senha

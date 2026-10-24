@@ -99,9 +99,9 @@ describe("mock do pedido de estadia", () => {
   const LUNA = "0199d2a0-0000-7000-8000-0000000000e1";
   const THOR = "0199d2a0-0000-7000-8000-0000000000e2";
   const MEL = "0199d2a0-0000-7000-8000-0000000000e3";
-  /** A próxima segunda-feira com pelo menos 2 dias de folga, em Brasília. */
+  /** A próxima segunda-feira com pelo menos 4 dias de folga (72 h de antecedência do pedido), em Brasília. */
   const monday = (() => {
-    let day = new Date(Date.now() - 3 * 60 * 60 * 1000 + 2 * 86_400_000);
+    let day = new Date(Date.now() - 3 * 60 * 60 * 1000 + 4 * 86_400_000);
     while (day.getUTCDay() !== 1) day = new Date(day.getTime() + 86_400_000);
     return day.toISOString().slice(0, 10);
   })();
@@ -112,6 +112,7 @@ describe("mock do pedido de estadia", () => {
     petIds,
     checkIn,
     checkOut,
+    careTermsAccepted: true,
   });
 
   afterEach(resetPets);
@@ -131,6 +132,16 @@ describe("mock do pedido de estadia", () => {
     expect((await call("/bookings/me?status=requested")).body.data.items).toHaveLength(1);
   });
 
+  it("REQ-REQST-010 chegada com menos de 72 h e pedido sem aceite do cuidado voltam 400 por campo", async () => {
+    const call = caller(owner);
+    const soonDay = new Date(Date.now() - 3 * 60 * 60 * 1000 + 3 * 86_400_000).toISOString().slice(0, 10);
+    const soon = await call("/bookings", "POST", request([LUNA], soonDay, plus(soonDay, 2)));
+    expect(soon.status).toBe(400);
+    expect(soon.body.error.details).toMatchObject([{ field: "checkIn" }]);
+    const noTerms = await call("/bookings", "POST", { ...request([LUNA]), careTermsAccepted: false });
+    expect(noTerms.body.error.details).toMatchObject([{ field: "careTermsAccepted" }]);
+  });
+
   it("REQ-REQST-007 regras na ordem da API: campos, pet fora da lista, outro pedido nas mesmas noites, dia fechado", async () => {
     const call = caller(owner);
     const invalid = await call("/bookings", "POST", { listingId: LISTING_ID, petIds: [], checkIn: "", checkOut: "" });
@@ -139,6 +150,7 @@ describe("mock do pedido de estadia", () => {
       "petIds",
       "checkIn",
       "checkOut",
+      "careTermsAccepted",
     ]);
     expect((await call("/bookings", "POST", request([MEL]))).body.error.code).toBe("BOOKING_PET_INACTIVE");
     await call("/bookings", "POST", request([LUNA]));

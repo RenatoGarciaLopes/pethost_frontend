@@ -1,12 +1,12 @@
 "use client";
 
-import { Avatar, Box, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useId, useState } from "react";
 import { useLinkedAccounts } from "@/features/auth/index.client";
 import type { AccountRole } from "@/shared/auth/contracts/session";
 import { roleLabel } from "@/shared/config/roleLabels";
-import { initialsOf } from "@/shared/lib/text/initials";
+import { InitialsAvatar } from "@/shared/ui/media/InitialsAvatar";
 import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { useLogout } from "../../hooks/useLogout";
@@ -20,20 +20,18 @@ const SWITCH_PATH = "/users/switch";
 export interface AccountMenuProps {
   /** Só o que o menu mostra; o resto da conta não vai para o navegador. */
   user: { id: string; fullName: string; role: AccountRole; avatarUrl: string | null };
-  /** A home mostra avatar e primeiro nome na pílula; a casca conserva o avatar compacto. */
-  appearance?: "avatar" | "pill";
 }
 
 /**
- * Menu da conta (REQ-SHELL-003 a 005): foto ou iniciais, nome e a conta atual; "Minha conta" e, quando a outra
+ * Menu da conta (REQ-SHELL-003 a 005): pílula com foto ou iniciais e o primeiro nome (no celular, só o avatar,
+ * REQ-SHELL-006), nome completo e a conta atual no menu; "Minha conta" e, quando a outra
  * conta existe e está ativa, "Trocar pra conta de …" (spec 014). As contas vinculadas só são buscadas quando o
  * menu abre pela primeira vez; falha esconde o item e o resto do menu continua. "Sair" sai mesmo com a API
  * fora do ar. Admin não tem conta vinculada nem "Minha conta".
  *
  * @example <AccountMenu user={{ id, fullName: "Camila Souza", role: "owner", avatarUrl: null }} />
  */
-export function AccountMenu({ user, appearance = "avatar" }: AccountMenuProps) {
-  const pill = appearance === "pill";
+export function AccountMenu({ user }: AccountMenuProps) {
   const menuId = useId();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [opened, setOpened] = useState(false);
@@ -57,30 +55,20 @@ export function AccountMenu({ user, appearance = "avatar" }: AccountMenuProps) {
         aria-controls={anchor ? menuId : undefined}
         sx={{
           p: 0.5,
-          ...(pill && {
-            border: "2px solid",
-            borderColor: "text.primary",
-            borderRadius: `${quintalRadii.pill}px`,
-            gap: 1,
-            pr: 1.5,
-            minHeight: 48,
-            color: "text.primary",
-          }),
+          pr: { md: 1.5 },
+          gap: 1,
+          minHeight: 48,
+          color: "text.primary",
+          border: "2px solid",
+          borderColor: "text.primary",
+          borderRadius: `${quintalRadii.pill}px`,
         }}
       >
         {/* O nome do botão começa pelas iniciais visíveis e segue com o texto escondido (WCAG 2.5.3). */}
-        <Avatar
-          src={user.avatarUrl ?? undefined}
-          alt=""
-          sx={{ bgcolor: "primary.main", color: "primary.contrastText", width: pill ? 32 : 40, height: pill ? 32 : 40 }}
-        >
-          {initialsOf(user.fullName)}
-        </Avatar>{" "}
-        {pill && (
-          <Typography component="span" sx={{ fontWeight: 700 }}>
-            {user.fullName.split(" ")[0]}
-          </Typography>
-        )}
+        <InitialsAvatar name={user.fullName} src={user.avatarUrl} size={32} />{" "}
+        <Typography component="span" sx={{ fontWeight: 700, display: { xs: "none", md: "inline" } }}>
+          {user.fullName.split(" ")[0]}
+        </Typography>{" "}
         <Box component="span" sx={visuallyHidden}>
           {shellCopy.menu(user.fullName)}
         </Box>

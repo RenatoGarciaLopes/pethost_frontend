@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { pickDates } from "../../support/calendar";
 import { loginAccount, resetAccountMock } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { openSearch } from "../../support/search";
@@ -11,9 +12,9 @@ const LISTING_ID = "0199d2a0-0000-7000-8000-000000000042";
 const LUNA = "0199d2a0-0000-7000-8000-0000000000e1";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** A próxima segunda-feira com pelo menos 2 dias de folga, em Brasília (o cantinho do mock não recebe no domingo). */
+/** A próxima segunda-feira com pelo menos 4 dias de folga (a API pede 72 h de antecedência), em Brasília (o cantinho do mock não recebe no domingo). */
 function nextMonday(): string {
-  let day = new Date(Date.now() - 3 * 60 * 60 * 1000 + 2 * DAY_MS);
+  let day = new Date(Date.now() - 3 * 60 * 60 * 1000 + 4 * DAY_MS);
   while (day.getUTCDay() !== 1) day = new Date(day.getTime() + DAY_MS);
   return day.toISOString().slice(0, 10);
 }
@@ -41,7 +42,7 @@ test("REQ-REQST-002 a REQ-REQST-006 pede a estadia com o que veio da URL e acomp
   await page.goto(requestPath(monday, plus(monday, 2), [LUNA]));
 
   await expect(page.getByRole("heading", { name: "Pedir estadia", level: 1 })).toBeVisible();
-  await expect(page.getByLabel("Chegada")).toHaveValue(monday);
+  await expect(page.getByLabel("Chegada e saída")).toHaveValue(/ · 2 noites$/);
   const who = page.getByRole("group", { name: "Quem vai?" });
   await expect(who.getByRole("checkbox", { name: /Luna/ })).toBeChecked();
   await expect(who.getByRole("checkbox", { name: /Thor/ })).not.toBeChecked();
@@ -54,7 +55,16 @@ test("REQ-REQST-002 a REQ-REQST-006 pede a estadia com o que veio da URL e acomp
   await waitForHydration(thor);
   await thor.check();
   await expect(summary).toContainText(/× 2 noites × 2 pets = R\$\s240,00/);
+  // Troca o período pelo calendário: o resumo refaz a conta com uma noite a mais.
+  await pickDates(
+    page,
+    page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }),
+    monday,
+    plus(monday, 3),
+  );
+  await expect(summary).toContainText(/× 3 noites × 2 pets = R\$\s360,00/);
   await page.getByRole("checkbox", { name: "A ração de costume" }).check();
+  await page.getByRole("checkbox", { name: "Os remédios e como dar" }).check();
   await expect(page.getByText("O pedido não segura a vaga: Casa Cida tem até 24 horas pra responder.")).toBeVisible();
   await page.getByRole("button", { name: "Pedir estadia" }).click();
 
@@ -73,16 +83,19 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   await loginAccount(page, baseURL!, "both", "owner");
   const from = nextMonday();
   const to = plus(from, 2);
-  await page.goto("/search");
+  await page.goto("/");
   await openSearch(page);
-  await page.getByLabel("Chegada", { exact: true }).filter({ visible: true }).fill(from);
-  await page.getByLabel("Saída", { exact: true }).filter({ visible: true }).fill(to);
-  await page.getByLabel("Luna", { exact: true }).filter({ visible: true }).check();
-  await page.getByRole("button", { name: "Buscar", exact: true }).filter({ visible: true }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cantinhos que recebem Luna", NAVIGATION);
+  await pickDates(page, page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }), from, to);
+  // A home já parte com a primeira pet do tutor (Luna) escolhida.
+  await page.getByRole("button", { name: "Achar um cantinho", exact: true }).filter({ visible: true }).click();
+  await expect(page.getByRole("heading", { level: 1, name: /casas com vaga perto/ })).toBeVisible(NAVIGATION);
 
   const card = page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link").first();
+  // O título já existe antes da busca: espera o card levar as datas e o pet da URL nova, senão o clique abre o
+  // cantinho sem eles (corrida vista no E2E da 078).
+  await expect(card).toHaveAttribute("href", new RegExp(`pets=.+&from=${from}&to=${to}`), NAVIGATION);
   const title = (await card.getByRole("heading").first().textContent())?.trim() ?? "";
+  await expect(card).toHaveAttribute("href", /pets=.+&from=.+&to=.+/);
   await waitForHydration(card);
   await card.click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible(FIRST_COMPILE);
@@ -93,13 +106,16 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   await expect(page).toHaveURL(/\/listings\/[0-9a-f-]+\/request\?/, NAVIGATION);
   await expect(page.getByRole("heading", { name: "Pedir estadia", level: 1 })).toBeVisible(NAVIGATION);
   // No celular a busca anterior continua montada e oculta, com os mesmos rótulos.
-  await expect(page.getByLabel("Chegada", { exact: true }).filter({ visible: true })).toHaveValue(from);
-  await expect(page.getByLabel("Saída", { exact: true }).filter({ visible: true })).toHaveValue(to);
+  await expect(page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true })).toHaveValue(
+    / · 2 noites$/,
+  );
   await expect(page.getByRole("group", { name: "Quem vai?" }).getByRole("checkbox", { name: /Luna/ })).toBeChecked();
   const summary = page.getByRole("region", { name: "Resumo do pedido" });
   await expect(summary).toContainText(title);
   await expect(summary).toContainText(/R\$\s60,00 × 2 noites × 1 pet = R\$\s120,00/);
 
+  await page.getByRole("checkbox", { name: "A ração de costume" }).check();
+  await page.getByRole("checkbox", { name: "Os remédios e como dar" }).check();
   const send = page.getByRole("button", { name: "Pedir estadia" });
   await waitForHydration(send);
   await send.click();
@@ -112,12 +128,35 @@ test("REQ-REQST-007 dia em que o cantinho não recebe vira frase no topo, com o 
   await page.goto(requestPath(saturday, plus(saturday, 2), [LUNA]));
   const send = page.getByRole("button", { name: "Pedir estadia" });
   await waitForHydration(send);
+  await page.getByRole("checkbox", { name: "A ração de costume" }).check();
+  await page.getByRole("checkbox", { name: "Os remédios e como dar" }).check();
   await send.click();
   const sunday = plus(saturday, 1);
   await expect(
     page.getByText(`O cantinho não recebe em domingo (${sunday.slice(8)}/${sunday.slice(5, 7)}). Tenta outras datas.`),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Pedido enviado!" })).toHaveCount(0);
+});
+
+test("REQ-REQST-004 REQ-REQST-010 sem marcar ração e remédios a frase aparece e o calendário bloqueia chegada com menos de 72 h", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  await loginAccount(page, baseURL!, "both", "owner");
+  const today = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  await page.goto(requestPath(plus(today, 6), plus(today, 8), [LUNA]));
+  const send = page.getByRole("button", { name: "Pedir estadia" });
+  await waitForHydration(send);
+  await send.click();
+  await expect(page.getByText("Marca os dois pra confirmar que a ração e os remédios vão junto.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pedido enviado!" })).toHaveCount(0);
+  await page.screenshot({ path: `test-results/request-091-erro-${testInfo.project.name}.png`, fullPage: true });
+  await page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true }).click();
+  const dialog = page.getByRole("dialog", { name: /^Escolher/ });
+  await expect(dialog.locator(`[data-iso="${plus(today, 3)}"]`)).toHaveAttribute("aria-disabled", "true");
+  await expect(dialog.locator(`[data-iso="${plus(today, 4)}"]`)).not.toHaveAttribute("aria-disabled");
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `test-results/request-091-calendario-${testInfo.project.name}.png` });
 });
 
 test("REQ-REQST-001 anfitrião vê que pedir é com a conta de tutor e a troca de conta", async ({ page, baseURL }) => {
