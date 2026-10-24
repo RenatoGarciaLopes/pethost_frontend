@@ -97,6 +97,47 @@ src/test/fixtures/listingPage.ts          detalhe, fotos e avaliações sintéti
 e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
 ```
 
+## Conversas, interface (spec 055 em rascunho, 23/10/2026)
+
+Interface (também no Storybook, `Conversas/Prévia sem backend`) e rotas `/conversations` e `/conversations/[conversationId]` ligadas à API. Sem o hub de tempo real: a conversa aberta se atualiza a cada 5 s e a lista a cada 15 s. Requisitos e divergências do design: [spec 055](../specs/055-conversations/requirements.md).
+
+```text
+src/app/(account)/conversations/
+  page.tsx, [conversationId]/page.tsx     sessão, id e composição; testes de metadata
+src/features/conversations/
+  index.ts, index.client.ts, index.server.ts
+  types.ts                                 conversa, mensagem, página por cursor e envio
+  api/contracts.ts, mappers.ts             estreita o gerado (sentBy owner/host) e converte
+  api/queries.ts                           lista, contador, detalhe e mensagens por cursor, com consulta periódica
+  api/client/conversations.client.ts       texto, foto em multipart e marcar como lida
+  api/server/conversations.server.ts       detalhe (404 da casca) e prefetch
+  hooks/useConversationMutations.ts        envio entra no cache; lida zera o contador
+  lib/                                     copy, hora/dia de Brasília, linha do tempo, prévia, bloqueio, limite
+  components/client/
+    ConversationList/                      lista com prévia, hora e não lidas
+    ConversationHeader/                    foto, nome, apoio, selo e voltar no celular
+    MessageThread/                         dias, balões, foto com legenda, acontecimentos
+    MessageComposer/                       câmera, texto, Enter envia
+    MyConversations/                       lista vinda da API (carregando, erro, lista)
+src/widgets/conversation-panel/
+  index.ts, index.client.ts, index.server.ts
+  lib/stayContext.ts                       cantinho, dia da estadia, faixa, chegada; reserva da conversa
+  components/client/ConversationPanel/     conversa + contexto da estadia + campo ou bloqueio
+  components/client/ConversationRoom/      painel ligado à API (envio, anteriores, lidas)
+  components/server/ConversationsScreen/   prefetch da lista, conversa, mensagens e estadia
+  components/server/StayBanner/            faixa céu da estadia
+  components/server/ConversationsLayout/   duas colunas; no celular, uma por vez
+src/features/bookings/index.ts             passa a expor formatPeriod, statusLabel, Booking e BookingStatus
+src/shared/config/navigation.ts            atalho Conversas para tutor e anfitrião
+src/widgets/app-shell/components/AppHeader.tsx  Conversas também na home do tutor
+src/shared/api/errors/errorCopy.ts         códigos CONVERSATION_*
+src/test/fixtures/conversations.ts         DTOs sintéticos da prancha
+src/test/conversationsPreview.ts           dados mapeados e envio só na memória das stories
+src/app/ConversationsPreview.stories.tsx   tela inteira com a casca real
+```
+
+O widget compõe `conversations` e `bookings` pelos índices públicos; a feature não conhece a estadia (recebe acontecimentos prontos). `ConversationRoom` e `ConversationsScreen` não têm story: só buscam dados, e o visual está nas stories do painel, do layout e da prévia. E2E simulado pendente (o backend simulado ainda não tem handlers de conversa). Catálogo e notas do vault pendentes: o vault não estava acessível nesta máquina.
+
 ## Início público (spec 040, 15/10/2026)
 
 ```text
@@ -523,6 +564,18 @@ e2e/mocked/admin/accounts.spec.ts                              jornada conta →
 
 As rotas compõem `AuditTable` pelo índice público `features/admin-audit/index.client.ts` e passam o nó pelo `auditTrail`; `widgets/admin-accounts` não importa a feature. O mock mantém eventos sintéticos para ids de tutor e anfitrião e registra ambos os handlers e resets em `mock-backend.mjs`. A primeira coluna do diretório de contas já traz o texto visível do nome, então não fornece `rowLabel` redundante ao `AdminDataTable` atualizado.
 
+## Avatar humano compartilhado (076)
+
+```text
+src/shared/ui/media/InitialsAvatar/
+  InitialsAvatar.tsx           foto opcional, fallback Unicode e cores AA
+  InitialsAvatar.test.tsx      erro da imagem retorna ao fallback
+  InitialsAvatar.stories.tsx   estados, tamanhos e comparação coral/café
+  index.ts                    API pública do componente e props
+src/shared/lib/text/initials.ts regra pura de extração de iniciais
+```
+
+A pasta media contém apresentação; parsing continua em shared/lib/text e cores em shared/theme/tokens/semantic.ts. AccountMenu, PublicProfileCard, HostBookingList, AvatarUploader, ListingCard e ListingPageScreen compõem o recurso; ele não conhece conta, reserva ou API. Detalhes: [076](../specs/076-avatar-initials/design.md).
 ## Revisão 071 da busca
 
 SearchBar em features/search/components/client/SearchBar centraliza a faixa usada por home, /search e detalhe. searchDateLabel e seus testes migram de widgets/home/lib para features/search/lib; não há pasta vazia ou cópia residual. HomeScreen compõe o recurso pelo index.client público.

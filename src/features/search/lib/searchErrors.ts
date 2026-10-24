@@ -18,7 +18,7 @@ export function toSearchError(error: unknown): SearchError {
     pets: "count",
   };
   const fields = Object.fromEntries(
-    Object.keys(error.fieldErrors).map((key) => {
+    Object.keys(error.fieldIssues).map((key) => {
       const field = key.split(".").at(-1)!;
       const normalized = field[0]!.toLowerCase() + field.slice(1);
       return [aliases[normalized] ?? normalized, searchCopy.filterError];

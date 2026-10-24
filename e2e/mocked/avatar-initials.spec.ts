@@ -1,0 +1,33 @@
+﻿import { expect, test } from "@playwright/test";
+import { loginAccount } from "../support/account";
+import { hideDevIndicator } from "../support/devIndicator";
+import { waitForHydration } from "../support/hydration";
+
+test("076 avatares humanos usam iniciais brancas e coral AA", async ({ page, baseURL }, testInfo) => {
+  test.setTimeout(180_000);
+  const width = testInfo.project.name.includes("mobile") ? 390 : 1440;
+  await page.setViewportSize({ width, height: 900 });
+  await hideDevIndicator(page);
+  await loginAccount(page, baseURL!);
+  await page.goto("/?where=Maring%C3%A1");
+  const menu = page.getByRole("button", { name: /Menu da conta de Camila Souza/ });
+  await expect(menu).toBeVisible();
+  await waitForHydration(menu);
+  const initials = menu.getByText("CS", { exact: true });
+  await expect(initials).toHaveCSS("background-color", "rgb(182, 83, 58)");
+  await expect(initials).toHaveCSS("color", "rgb(255, 255, 255)");
+  await page.screenshot({ path: testInfo.outputPath(`header-${width}.png`) });
+  const card = page.getByRole("link").filter({ has: page.getByRole("heading", { name: "Quintal 1", exact: true }) });
+  await expect(card).toBeVisible();
+  const host = card.getByText("CC", { exact: true });
+  await expect(host).toHaveCSS("background-color", "rgb(182, 83, 58)");
+  await expect(host).toHaveCSS("color", "rgb(255, 255, 255)");
+  await card.screenshot({ path: testInfo.outputPath(`card-${width}.png`) });
+  await card.click();
+  const section = page.getByRole("heading", { name: "Quem cuida", exact: true }).locator("..");
+  await expect(section).toBeVisible({ timeout: 60_000 });
+  await expect(section.getByText("CC", { exact: true })).toHaveCSS("background-color", "rgb(182, 83, 58)");
+  await expect(section.getByText("CC", { exact: true })).toHaveCSS("color", "rgb(255, 255, 255)");
+  await section.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: testInfo.outputPath(`listing-${width}.png`) });
+});

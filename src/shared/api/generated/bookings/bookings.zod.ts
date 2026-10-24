@@ -28,7 +28,7 @@ import * as zod from 'zod';
 export const PostApiV1BookingsBody = zod.object({
   "listingId": zod.string().uuid(),
   "petIds": zod.array(zod.string().uuid()).nullish().describe('Pets do tutor, de 1 a 10, sem repetição.'),
-  "checkIn": zod.string().nullish().describe('Dia de chegada, `"2026-12-20"`. Lido como texto: data mal formada volta como erro do\ncampo, junto com os outros, em vez de um erro genérico do corpo.'),
+  "checkIn": zod.string().nullish().describe('Dia de chegada, `"2026-12-20"`. Lido como texto: data mal formada volta como erro do\r\ncampo, junto com os outros, em vez de um erro genérico do corpo.'),
   "checkOut": zod.string().nullish().describe('Dia de saída, `"2026-12-25"`.'),
   "careTermsAccepted": zod.boolean().nullish().describe('`true`: o tutor confirma que leva a ração e entrega os remédios ao anfitrião (escopo, regra 8).')
 }).describe('Corpo de `POST /api/v1/bookings`.')
@@ -37,7 +37,7 @@ export const PostApiV1BookingsResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -72,7 +72,7 @@ export const PostApiV1BookingsResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -94,15 +94,15 @@ export const PostApiV1BookingsResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.'),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -128,7 +128,7 @@ export const GetApiV1BookingsResponse = zod.object({
   "data": zod.object({
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -163,7 +163,7 @@ export const GetApiV1BookingsResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -185,15 +185,15 @@ export const GetApiV1BookingsResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.')),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.')),
   "page": zod.number().int(),
   "pageSize": zod.number().int(),
   "totalCount": zod.number().int(),
@@ -220,7 +220,7 @@ export const GetApiV1BookingsMeResponse = zod.object({
   "data": zod.object({
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -255,7 +255,7 @@ export const GetApiV1BookingsMeResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -277,15 +277,15 @@ export const GetApiV1BookingsMeResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.')),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.')),
   "page": zod.number().int(),
   "pageSize": zod.number().int(),
   "totalCount": zod.number().int(),
@@ -306,7 +306,7 @@ export const GetApiV1BookingsBookingIdResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -341,7 +341,7 @@ export const GetApiV1BookingsBookingIdResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -363,15 +363,15 @@ export const GetApiV1BookingsBookingIdResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.'),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -392,7 +392,7 @@ export const PostApiV1BookingsBookingIdAcceptanceResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -427,7 +427,7 @@ export const PostApiV1BookingsBookingIdAcceptanceResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -449,15 +449,15 @@ export const PostApiV1BookingsBookingIdAcceptanceResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.'),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -478,7 +478,7 @@ export const PostApiV1BookingsBookingIdRefusalResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -513,7 +513,7 @@ export const PostApiV1BookingsBookingIdRefusalResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -535,15 +535,15 @@ export const PostApiV1BookingsBookingIdRefusalResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.'),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -570,7 +570,7 @@ export const PostApiV1BookingsBookingIdCancellationResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -605,7 +605,7 @@ export const PostApiV1BookingsBookingIdCancellationResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -627,15 +627,15 @@ export const PostApiV1BookingsBookingIdCancellationResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.'),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -653,7 +653,7 @@ export const PostApiV1BookingsBookingIdCheckInResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -688,7 +688,7 @@ export const PostApiV1BookingsBookingIdCheckInResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -710,15 +710,15 @@ export const PostApiV1BookingsBookingIdCheckInResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.'),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -742,7 +742,7 @@ export const PostApiV1BookingsBookingIdCheckOutResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
   "id": zod.string().uuid(),
-  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\n        `declined`, `expired` ou `cancelled`.'),
+  "status": zod.string().describe('`requested`, `accepted`, `confirmed`, `in_progress`, `completed`,\r\n        `declined`, `expired` ou `cancelled`.'),
   "listingId": zod.string().uuid(),
   "listing": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -777,7 +777,7 @@ export const PostApiV1BookingsBookingIdCheckOutResponse = zod.object({
   "totalPrice": zod.number().describe('Diária × noites × pets: o que o tutor paga.'),
   "requestedAt": zod.string().datetime({"offset":true}),
   "responseDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o anfitrião pode responder. Só enquanto `requested`.'),
-  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
+  "paymentDeadline": zod.string().datetime({"offset":true}).nullish().describe('Até quando o tutor pode pagar a 1ª parcela (24h depois do aceite, sem passar do dia de\r\nchegada). Só enquanto `accepted`; sem pagar, a reserva expira.'),
   "respondedAt": zod.string().datetime({"offset":true}).nullish(),
   "confirmedAt": zod.string().datetime({"offset":true}).nullish(),
   "checkedInAt": zod.string().datetime({"offset":true}).nullish(),
@@ -799,15 +799,15 @@ export const PostApiV1BookingsBookingIdCheckOutResponse = zod.object({
   "city": zod.string(),
   "state": zod.string()
 }).describe('Endereço exato do cantinho — só para o tutor.')]).optional()
-}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
+}).describe('O contato do outro lado, liberado só depois da confirmação (escopo, regra 7): para o tutor, o\r\ntelefone do anfitrião e o endereço exato do cantinho; para o anfitrião, o telefone do tutor.\r\nOmitido antes disso, depois de cancelada e para o admin.')]).optional(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true}),
   "ownerRating": zod.union([zod.null(),zod.object({
   "average": zod.number(),
   "count": zod.number().int()
-}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
-  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\nreservas pedidas antes dessa confirmação existir.')
-}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\n(`"2026-12-20"`); valores em reais.'),
+}).describe('A nota do tutor (o que os anfitriões escreveram dele: média com 1 casa e contagem), para o\r\nanfitrião decidir sobre o pedido. Só para o anfitrião e o admin; omitida enquanto ninguém avaliou.')]).optional(),
+  "careTermsAcceptedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o tutor confirmou que leva a ração e entrega os remédios (escopo, regra 8). Omitido nas\r\nreservas pedidas antes dessa confirmação existir.')
+}).describe('A reserva, como o tutor e o anfitrião a veem. Datas de calendário em ISO 8601\r\n(`"2026-12-20"`); valores em reais.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

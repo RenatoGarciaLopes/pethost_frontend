@@ -14,6 +14,11 @@ export const surfaceColors = {
   panel: c.cartao,
 } as const;
 
+/** Iniciais humanas: branco AA mesmo em 14px. Coral recomendado; café para revisão visual (076). */
+export const avatarTones = {
+  coral: { background: "#B6533A", foreground: surfaceColors.paper },
+  earth: { background: c.texto2, foreground: surfaceColors.paper },
+} as const;
 /**
  * Tom do cabeçalho por conta (REQ-SHELL-001). Ajuda quem tem conta de tutor e de anfitrião
  * a saber onde está. Visitante usa o mesmo tom do tutor.

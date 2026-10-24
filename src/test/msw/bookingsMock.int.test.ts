@@ -157,12 +157,12 @@ describe("mock do pedido de estadia", () => {
     const conflict = await call("/bookings", "POST", request([LUNA]));
     expect(conflict.body.error).toMatchObject({
       code: "BOOKING_PET_PERIOD_CONFLICT",
-      message: expect.stringContaining(LUNA),
+      params: { petId: LUNA },
     });
     const sunday = await call("/bookings", "POST", request([THOR], plus(monday, 5), plus(monday, 7)));
     expect(sunday.body.error).toMatchObject({
       code: "BOOKING_WEEKDAY_NOT_AVAILABLE",
-      message: expect.stringContaining(plus(monday, 6)),
+      params: { date: plus(monday, 6) },
     });
   });
 

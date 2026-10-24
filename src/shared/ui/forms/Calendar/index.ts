@@ -1,5 +1,5 @@
 export { Calendar } from "./Calendar";
-export type { CalendarProps } from "./Calendar";
+export type { CalendarClosedDay, CalendarProps } from "./Calendar";
 export { calendarCopy } from "./calendarCopy";
 export { CalendarGlyph, CalendarInput } from "./CalendarInput";
 export type { CalendarInputProps } from "./CalendarInput";

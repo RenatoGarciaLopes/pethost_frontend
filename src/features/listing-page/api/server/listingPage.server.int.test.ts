@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import { expect, it, vi } from "vitest";
 import { apiFail, apiOk } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
-import { getListingPageDetail, getListingReviews } from "./listingPage.server";
+import { getListingClosedPeriods, getListingPageDetail, getListingReviews } from "./listingPage.server";
 
 vi.mock("next/headers", () => ({
   cookies: async () => ({ get: () => ({ value: "synthetic" }) }),
@@ -88,6 +88,38 @@ it("REQ-LPAGE-010 reads the newest public reviews of the listing", async () => {
   await expect(getListingReviews("0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c")).resolves.toMatchObject([
     { author: { name: "Marina" }, rating: 5 },
   ]);
+});
+
+it("REQ-LPAGE-013 reads the host's closed periods with the account, only the dates", async () => {
+  server.use(
+    http.get("http://api.test/api/v1/listings/:id/availability-blocks", ({ request }) => {
+      expect(request.headers.get("authorization")).toBe("Bearer synthetic");
+      return HttpResponse.json(
+        apiOk([
+          {
+            id: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b3a",
+            listingId: "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c",
+            startDate: "2026-12-26",
+            endDate: "2026-12-28",
+            days: 3,
+            createdAt: "2026-10-20T12:00:00Z",
+          },
+        ]),
+      );
+    }),
+  );
+  await expect(getListingClosedPeriods("0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c")).resolves.toEqual([
+    { startDate: "2026-12-26", endDate: "2026-12-28" },
+  ]);
+});
+
+it("REQ-LPAGE-013 a failing agenda leaves only the weekdays closed", async () => {
+  server.use(
+    http.get("http://api.test/api/v1/listings/:id/availability-blocks", () =>
+      HttpResponse.json(apiFail("UNEXPECTED_ERROR"), { status: 500 }),
+    ),
+  );
+  await expect(getListingClosedPeriods("0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1d")).resolves.toEqual([]);
 });
 
 it("REQ-LPAGE-010 a failing reviews call leaves the page without the section", async () => {

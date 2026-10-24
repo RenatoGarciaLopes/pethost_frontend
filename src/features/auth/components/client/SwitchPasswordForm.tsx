@@ -6,7 +6,7 @@ import NextLink from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import type { PersonalRole, SessionUser } from "@/shared/auth/contracts/session";
 import { forgotPasswordPath } from "@/shared/config/appRoutes";
 import { roleLabel } from "@/shared/config/roleLabels";
@@ -45,7 +45,7 @@ export function SwitchPasswordForm({ target, cancelHref, onSwitched }: SwitchPas
   function handleApiError(error: unknown) {
     if (isApiError(error) && error.code === "AUTH_LINKED_ACCOUNT_NOT_FOUND") {
       resetField("password");
-      setError("password", { type: "server", message: getErrorMessage(error) });
+      setError("password", { type: "server", message: translateError(error) });
       return setFocus("password");
     }
     if (isApiError(error) && error.code === "VALIDATION_ERROR") {

@@ -10,8 +10,8 @@ export interface NavItem {
 /**
  * Atalhos do cabeçalho (spec 004, REQ-SHELL-002): tabela única. Só entram telas que existem; cada spec que
  * cria uma tela de atalho acrescenta a linha dela (020: Meus pets; 030: Minha verificação; 052: Minhas estadias;
- * 053: Pedidos). "Buscar" leva à home, que vira a página de resultados (a rota /search sai). Conversas, Agenda e
- * Ganhos da prancha esperam as telas deles.
+ * 053: Pedidos; 055: Conversas). "Buscar" leva à home, que vira a página de resultados (a rota /search sai).
+ * Agenda e Ganhos da prancha esperam as telas deles.
  */
 export const NAV_ITEMS: readonly NavItem[] = [
   { id: "search", label: "Buscar", href: "/", roles: ["owner"] },
@@ -21,6 +21,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: "host-application", label: "Minha verificação", href: "/host/application", roles: ["host"] },
   { id: "host-pets", label: "Pets da casa", href: "/pets", roles: ["host"] },
   { id: "host-bookings", label: "Pedidos", href: "/host/bookings", roles: ["host"] },
+  { id: "conversations", label: "Conversas", href: "/conversations", roles: ["owner", "host"] },
   { id: "admin-queue", label: "Fila de verificação", href: "/admin/host-applications", roles: ["admin"] },
   { id: "admin-users", label: "Contas", href: "/admin/users", roles: ["admin"] },
   { id: "admin-audit", label: "Auditoria", href: "/admin/audit-entries", roles: ["admin"] },

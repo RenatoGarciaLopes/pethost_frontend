@@ -93,7 +93,13 @@ it("REQ-AQUEUE-010 erro de validação mantém nota e associa mensagem ao campo"
   server.use(
     http.post("*/api/host-applications/:id/rejection", () =>
       HttpResponse.json(
-        apiFail("VALIDATION_ERROR", "Invalid", [{ field: "reason", messages: ["Descreva o que foi conferido."] }]),
+        apiFail("VALIDATION_ERROR", "Invalid", [
+          {
+            field: "reason",
+            messages: ["Descreva o que foi conferido."],
+            errors: [{ code: "HOST_REASON_TOO_LONG", params: { max: 500 } }],
+          },
+        ]),
         { status: 400 },
       ),
     ),
@@ -103,7 +109,7 @@ it("REQ-AQUEUE-010 erro de validação mantém nota e associa mensagem ao campo"
   await user.paste("Nota de teste");
   await user.click(screen.getByRole("button", { name: copy.rejection.other }));
   await user.click(screen.getByRole("button", { name: "Recusar" }));
-  expect(await screen.findByText(/Descreva o que foi conferido/)).toBeVisible();
+  expect(await screen.findByText(/O motivo aceita até 500 caracteres/)).toBeVisible();
   expect(reason).toHaveAttribute("aria-invalid", "true");
   expect(reason).toHaveValue("Nota de teste");
   expect(screen.getByRole("button", { name: "Recusar" })).toBeEnabled();

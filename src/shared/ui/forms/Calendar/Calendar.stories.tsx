@@ -3,19 +3,31 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { expect } from "storybook/test";
 import { Surface } from "@/shared/ui/layout/Surface";
-import { Calendar } from "./Calendar";
+import { Calendar, type CalendarClosedDay } from "./Calendar";
 import type { RangeValue } from "./calendarDates";
 
 const TODAY = "2026-10-15";
+const sunday: CalendarClosedDay = {
+  reason: "o cantinho não recebe aos domingos",
+  legend: "Não recebe aos domingos",
+};
+const agenda: CalendarClosedDay = {
+  reason: "o anfitrião fechou a agenda nesse dia",
+  legend: "Dias que o anfitrião fechou na agenda",
+};
+/** Como o cantinho manda (pela feature listing-page): domingos fechados e a agenda fechada de 28 a 30 out. */
+const closedDay = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).getUTCDay() === 0 ? sunday : iso >= "2026-10-28" && iso <= "2026-10-30" ? agenda : null;
 
 interface DemoProps {
   initial?: RangeValue;
   months?: 1 | 2;
   mode?: "single" | "range";
   blockWeekends?: boolean;
+  closed?: boolean;
 }
 
-function Demo({ initial = { start: "", end: "" }, months = 2, mode = "range", blockWeekends }: DemoProps) {
+function Demo({ initial = { start: "", end: "" }, months = 2, mode = "range", blockWeekends, closed }: DemoProps) {
   const [range, setRange] = useState(initial);
   const shared = {
     today: TODAY,
@@ -23,6 +35,7 @@ function Demo({ initial = { start: "", end: "" }, months = 2, mode = "range", bl
     max: "2027-10-15",
     months,
     onClear: () => setRange({ start: "", end: "" }),
+    closedDay: closed ? closedDay : undefined,
     isDisabled: blockWeekends ? (iso: string) => [0, 6].includes(new Date(`${iso}T00:00:00Z`).getUTCDay()) : undefined,
   };
   return (
@@ -82,6 +95,29 @@ export const Intervalo: Story = {
 export const DiasBloqueados: Story = {
   name: "REQ-CAL-004 Dias bloqueados",
   args: { blockWeekends: true, mode: "single" },
+};
+
+/**
+ * Dias fechados do cantinho: domingos e a agenda do anfitrião riscados, com o motivo no nome acessível e a legenda no
+ * rodapé. Com a chegada na segunda, a saída para no sábado: a estadia não atravessa o domingo.
+ */
+export const DiasFechados: Story = {
+  name: "REQ-CAL-010 Dias fechados",
+  args: { closed: true, initial: { start: "2026-10-19", end: "" } },
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole("button", { name: "domingo, 25 de outubro de 2026: o cantinho não recebe aos domingos" }),
+    ).toHaveAttribute("aria-disabled", "true");
+    await expect(canvas.getByText("Não recebe aos domingos")).toBeVisible();
+    await expect(canvas.getByText(/dá pra ficar até 24 out, porque o dia seguinte está fechado/)).toBeVisible();
+  },
+};
+
+/** Dias fechados no celular: um mês, a mesma legenda. */
+export const DiasFechadosCelular: Story = {
+  name: "REQ-CAL-010 Dias fechados no celular",
+  args: { closed: true, months: 1 },
+  globals: { viewport: { value: "celular", isRotated: false } },
 };
 
 /** Um mês só, como na folha de baixo do celular. */

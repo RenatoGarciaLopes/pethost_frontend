@@ -25,10 +25,10 @@ export interface NoticeProps {
 
 /**
  * Aviso em bloco com ícone desenhado e cor do tom (REQ-DS-013). Nunca só a cor: sempre ícone e texto.
- * Primitivo sem domínio: o texto chega pronto (ex.: `getErrorMessage(error)`).
+ * Primitivo sem domínio: o texto chega pronto (ex.: `translateError(error)`).
  *
  * @example
- * <Notice tone="erro" ref={noticeRef} title={getErrorMessage(error)} />
+ * <Notice tone="erro" ref={noticeRef} title={translateError(error)} />
  * <Notice tone="atencao" title="Essa conta está pausada." action={<Button>Reativar</Button>} />
  */
 export function Notice({ tone, title, children, action, ref, id }: NoticeProps) {

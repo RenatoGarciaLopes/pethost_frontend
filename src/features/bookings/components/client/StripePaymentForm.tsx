@@ -4,7 +4,7 @@ import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-
 import { loadStripe } from "@stripe/stripe-js";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { formatBRL } from "@/shared/lib/money";
 import { quintalColors } from "@/shared/theme/tokens/colors";
 import type { PaymentSession } from "../../api/paymentContracts";
@@ -68,12 +68,12 @@ function PaymentForm({ session, returnPath, onSubmitted }: StripePaymentFormProp
             redirect: "if_required",
           });
           if (result.error) {
-            setError(getErrorMessage(result.error));
+            setError(translateError(result.error));
             return;
           }
           await onSubmitted();
         } catch (cause) {
-          setError(getErrorMessage(cause));
+          setError(translateError(cause));
         } finally {
           submitted.current = false;
           setSending(false);

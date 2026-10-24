@@ -9,3 +9,6 @@ export { ownerBookingPaymentPath } from "./lib/bookingPaths";
 export { paymentCopy } from "./lib/paymentCopy";
 export { paymentSchema, paymentSessionSchema } from "./api/paymentContracts";
 export type { BookingPaymentData, PaymentSession } from "./api/paymentContracts";
+export { statusLabel } from "./lib/bookingStatus";
+export { formatPeriod } from "./lib/formatStay";
+export type { Booking, BookingStatus } from "./types";

@@ -5,6 +5,19 @@ import { fail, ok, sessionUserOf } from "./session.mjs";
 const API = "http://localhost:5099/api/v1";
 export const LISTING_ID = "0199d2a0-0000-7000-8000-000000000042";
 const HOST_ID = "0199d2a0-0000-7000-8000-0000000000b1";
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * O período que o anfitrião fechou na agenda do cantinho da página: segunda a quarta de daqui a umas três semanas
+ * (em Brasília), longe das datas dos outros testes do pedido.
+ * @example const { startDate, endDate } = hostClosedBlock();
+ */
+export function hostClosedBlock(now = Date.now()) {
+  let day = new Date(now - 3 * 60 * 60 * 1000 + 18 * DAY_MS);
+  while (day.getUTCDay() !== 1) day = new Date(day.getTime() + DAY_MS);
+  const iso = (date) => date.toISOString().slice(0, 10);
+  return { startDate: iso(day), endDate: iso(new Date(day.getTime() + 2 * DAY_MS)) };
+}
 
 const detail = {
   id: LISTING_ID,
@@ -89,6 +102,22 @@ export const listingPageHandlers = [
       stripeStatus: "enabled",
       createdAt: "2026-01-10T12:00:00Z",
     });
+  }),
+  // Exige conta, como a API real; só datas para quem não é o dono.
+  http.get(`${API}/listings/:listingId/availability-blocks`, ({ request, params }) => {
+    if (!sessionUserOf(request)) return fail(401, "UNAUTHORIZED");
+    if (params.listingId !== LISTING_ID) return ok([]);
+    const { startDate, endDate } = hostClosedBlock();
+    return ok([
+      {
+        id: "0199d2a0-0000-7000-8000-000000000045",
+        listingId: LISTING_ID,
+        startDate,
+        endDate,
+        days: 3,
+        createdAt: "2026-10-20T12:00:00Z",
+      },
+    ]);
   }),
   // Aberto, como a API real: o visitante vê o cantinho (sem a rua).
   http.get(`${API}/listings/:listingId`, ({ params }) => {

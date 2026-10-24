@@ -58,7 +58,7 @@ test("REQ-STAYS-001 a REQ-STAYS-005 da lista à estadia confirmada, com a trilha
   await seedStay(page, { status: "confirmed", responseDeadline: null, contact: HOST_CONTACT });
   await page.goto("/owner/bookings");
   await expect(page.getByRole("heading", { name: "Suas viagens e as deles.", level: 1 })).toBeVisible();
-  await expect(page.getByText("Minhas estadias", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("main").getByText("Minhas estadias", { exact: true })).toBeVisible();
 
   const stay = page
     .getByRole("list", { name: "Estadias" })
@@ -88,7 +88,7 @@ test("REQ-STAYS-004 pedido esperando: prazo do anfitrião e nenhum contato", asy
   await expect(page.getByRole("region", { name: "Contato do anfitrião" })).toHaveCount(0);
 });
 
-test("REQ-STAYS-006 REQ-STAYS-007 cancela a estadia confirmada com motivo e vê o reembolso; ela vai para Anteriores", async ({
+test("REQ-STAYS-006 REQ-STAYS-007 cancela a estadia confirmada com motivo e vê o reembolso; ela aparece como cancelada na lista", async ({
   page,
 }) => {
   const stay = await seedStay(page, {
@@ -136,7 +136,7 @@ test("REQ-STAYS-010 a lista única põe o que falta pagar primeiro, com 'Pagar' 
   await expect(cards).toHaveCount(3);
   await expect(cards.nth(0)).toContainText("Aceita · falta pagar");
   await expect(cards.nth(0)).toContainText(/Pague até .* pra garantir a vaga./);
-  await expect(cards.nth(0).getByRole("link", { name: /^Pagar R$s300,00$/ })).toHaveAttribute(
+  await expect(cards.nth(0).getByRole("link", { name: /^Pagar R\$\s300,00$/ })).toHaveAttribute(
     "href",
     `/owner/bookings/${toPay.id}/payment`,
   );

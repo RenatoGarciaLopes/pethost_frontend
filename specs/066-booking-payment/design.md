@@ -10,7 +10,7 @@ updated: 2026-10-23
 
 Estender `src/features/bookings/`, sem feature paralela para a mesma reserva. A rota owner valida UUID, aguarda `connection()` e usa `requireRole`, conforme as rotas existentes e a documentação Next local antes da implementação. A composição de servidor prepara reserva/pagamento; fronteira client administra checkout. Entradas públicas ficam nos índices existentes, somente quando consumidas.
 
-Recursos descobertos no catálogo e conferidos no código: `bookingQueries`, `bookingDtoSchema`, `bookingPaths`, `StayDetail`, `OWNER_TABS` (já inclui accepted), `StatusTimeline`, `formatPeriod`, `formatDeadline`, `formatBRL`, `toCents`/`fromCents`, `Notice`, `ErrorState`, `Announcer`, `bffClient`, `HttpTransport`, `unwrapData`, `accountQueryKey`, `getErrorMessage` e `applyFieldErrors`. Não duplicar tradução, cliente HTTP, providers ou formatadores.
+Recursos descobertos no catálogo e conferidos no código: `bookingQueries`, `bookingDtoSchema`, `bookingPaths`, `StayDetail`/NowPanel, `StayList` (lista única da 094), `StatusTimeline`, `formatPeriod`, `formatDeadline`, `formatBRL`, `toCents`/`fromCents`, `Notice`, `ErrorState`, `Announcer`, `bffClient`, `HttpTransport`, `unwrapData`, `accountQueryKey`, `translateError` e `applyFieldErrors`. Não duplicar tradução, cliente HTTP, providers ou formatadores. A integração de 24/10 substituiu o helper antigo pela tradução da 090.
 
 Recursos da implementação em validação (conferir execução e estado final em `validation.md`):
 

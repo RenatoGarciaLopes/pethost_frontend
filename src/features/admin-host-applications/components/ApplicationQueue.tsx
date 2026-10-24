@@ -8,7 +8,7 @@ import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { useSearchParamsState } from "@/shared/hooks/useSearchParamsState";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { queueSearchSchema } from "../schemas/reviewSchemas";
 import { adminApplicationQueries } from "../api/queries";
 import { applicationStatusSchema, type AdminApplication, type ApplicationStatus } from "../api/contracts";
@@ -90,6 +90,6 @@ export function ApplicationQueue({ accountId }: { accountId: string }) {
   const [filters, setFilters] = useSearchParamsState(queueSearchSchema);
   const query = useQuery(adminApplicationQueries.queue(accountId, filters.status));
   if (query.isPending) return <SniffLoader />;
-  if (query.isError) return <ErrorState title={getErrorMessage(query.error)} onRetry={() => void query.refetch()} />;
+  if (query.isError) return <ErrorState title={translateError(query.error)} onRetry={() => void query.refetch()} />;
   return <ApplicationQueueView rows={query.data} status={filters.status} page={filters.page} onChange={setFilters} />;
 }

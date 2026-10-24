@@ -11,6 +11,7 @@ import {
   addMonths,
   buildMonth,
   dayLabel,
+  firstDayWhere,
   monthOf,
   monthsBetween,
   monthTitle,
@@ -21,6 +22,14 @@ import {
   type CalendarMonth,
   type RangeValue,
 } from "./calendarDates";
+
+/** Dia fechado com o motivo: `reason` completa o nome do dia para o leitor de tela, `legend` vai no rodapé. */
+export interface CalendarClosedDay {
+  /** @example "o cantinho não recebe aos domingos" */
+  reason: string;
+  /** @example "Não recebe aos domingos" */
+  legend: string;
+}
 
 interface CalendarBase {
   /** Primeiro dia escolhível (como chegada, num intervalo). */
@@ -33,6 +42,11 @@ interface CalendarBase {
   months?: 1 | 2;
   /** Dias que não podem ser escolhidos, além dos limites. */
   isDisabled?: (iso: string) => boolean;
+  /**
+   * Dias fechados, com motivo: riscados, sem toque, com o motivo no nome acessível e a legenda no rodapé quando há
+   * algum no mês. Num intervalo nenhum dia fechado fica dentro: a saída para antes do primeiro depois da chegada.
+   */
+  closedDay?: (iso: string) => CalendarClosedDay | null;
   /** Mostra o link "Limpar" quando há data escolhida. */
   onClear?: () => void;
   /** Leva o foco ao dia ativo ao montar (calendário aberto num popover). */
@@ -128,12 +142,13 @@ function NavButton({ label, disabled, onClick, children }: NavButtonProps) {
  * Calendário de datas do PetHost: um mês (ou dois) com escolha de dia ou de intervalo, no padrão de grade de datas do
  * WAI-ARIA (setas, Home/End, PageUp/PageDown, Enter/Espaço). Datas são ISO `yyyy-MM-dd`, sem fuso. Dias fora dos
  * limites ficam apagados e não respondem ao toque; o limite de noites é explicado no rodapé. Num intervalo, `min` e
- * `max` valem para a chegada e a saída só obedece a `maxNights`.
+ * `max` valem para a chegada e a saída só obedece a `maxNights` e aos dias fechados (`closedDay`), que ficam
+ * riscados com o motivo e a legenda no rodapé.
  *
  * @example <Calendar mode="range" value={{ start, end }} onChange={setRange} months={2} maxNights={30} min={today} />
  */
 export function Calendar(props: CalendarProps) {
-  const { min, max, months = 1, isDisabled, onClear, autoFocus = false } = props;
+  const { min, max, months = 1, isDisabled, closedDay, onClear, autoFocus = false } = props;
   const today = props.today ?? brasiliaToday();
   const range: RangeValue = props.mode === "range" ? props.value : { start: props.value, end: "" };
   const maxNights = props.mode === "range" ? props.maxNights : undefined;
@@ -142,6 +157,11 @@ export function Calendar(props: CalendarProps) {
   const farthestEnd = awaitingEnd && maxNights !== undefined ? addDays(range.start, maxNights) : undefined;
   const upper = max !== undefined && farthestEnd !== undefined && farthestEnd > max ? farthestEnd : max;
   const clampDay = (iso: string) => (min && iso < min ? min : upper && iso > upper ? upper : iso);
+  // Primeiro dia fechado depois da chegada: a saída não passa dele (todo dia da estadia precisa estar aberto).
+  const closedAfterStart =
+    awaitingEnd && closedDay
+      ? firstDayWhere(addDays(range.start, 1), upper ?? addDays(range.start, 366), (iso) => Boolean(closedDay(iso)))
+      : undefined;
 
   const base = clampDay(range.start || today);
   const [focusIso, setFocusIso] = useState(base);
@@ -160,8 +180,11 @@ export function Calendar(props: CalendarProps) {
   }, [focusIso, view]);
 
   function isBlocked(iso: string): boolean {
-    if (isDisabled?.(iso)) return true;
-    if (awaitingEnd && iso > range.start) return maxNights !== undefined && nightsBetween(range.start, iso) > maxNights;
+    if (isDisabled?.(iso) || closedDay?.(iso)) return true;
+    if (awaitingEnd && iso > range.start) {
+      if (closedAfterStart !== undefined && iso > closedAfterStart) return true;
+      return maxNights !== undefined && nightsBetween(range.start, iso) > maxNights;
+    }
     return (min !== undefined && iso < min) || (max !== undefined && iso > max);
   }
 
@@ -235,8 +258,25 @@ export function Calendar(props: CalendarProps) {
   let hint: string = calendarCopy.pickStart;
   if (props.mode === "single") hint = range.start ? dayLabel(range.start) : calendarCopy.pickDay;
   else if (summary) hint = rangeSummary(shown.start, shown.end);
+  else if (awaitingEnd && closedAfterStart !== undefined && (!farthestEnd || closedAfterStart <= farthestEnd))
+    hint =
+      closedAfterStart === addDays(range.start, 1)
+        ? calendarCopy.noEndAfter(range.start)
+        : calendarCopy.pickEndBeforeClosed(addDays(closedAfterStart, -1));
   else if (awaitingEnd)
     hint = farthestEnd === undefined ? calendarCopy.pickEnd : calendarCopy.pickEndLimited(maxNights!, farthestEnd);
+  // Legendas dos dias fechados nos meses à vista, sem repetir.
+  const legends = closedDay
+    ? [
+        ...new Set(
+          visible.flatMap((month) =>
+            buildMonth(month)
+              .flat()
+              .flatMap((iso) => (iso && closedDay(iso)?.legend) || []),
+          ),
+        ),
+      ]
+    : [];
 
   return (
     <Stack ref={root} spacing={1.5} onKeyDown={onKeyDown} sx={{ p: { xs: 1.5, sm: 2 }, color: "text.primary" }}>
@@ -363,6 +403,7 @@ export function Calendar(props: CalendarProps) {
                           rangeMode={props.mode === "range"}
                           today={today}
                           blocked={isBlocked(iso)}
+                          closed={closedDay?.(iso)?.reason}
                           tabbable={iso === tabIso}
                           onChoose={choose}
                           onPoint={setPointed}
@@ -376,6 +417,24 @@ export function Calendar(props: CalendarProps) {
                 ))}
               </Box>
             </Box>
+          ))}
+        </Stack>
+      )}
+      {legends.length > 0 && !choosingYear && (
+        <Stack component="ul" spacing={0.5} sx={{ m: 0, p: 0, listStyle: "none" }}>
+          {legends.map((legend) => (
+            <Stack
+              key={legend}
+              component="li"
+              direction="row"
+              spacing={1}
+              sx={{ alignItems: "center", fontSize: "0.85rem", color: "text.secondary" }}
+            >
+              <Box component="span" aria-hidden sx={{ ...closedLook, minWidth: 24, textAlign: "center" }}>
+                {calendarCopy.closedSample}
+              </Box>
+              <span>{legend}</span>
+            </Stack>
           ))}
         </Stack>
       )}
@@ -423,6 +482,8 @@ interface DayCellProps {
   rangeMode: boolean;
   today: string;
   blocked: boolean;
+  /** Motivo do dia fechado (`closedDay`): risca o dia e completa o nome acessível. */
+  closed?: string;
   tabbable: boolean;
   onChoose: (iso: string) => void;
   onPoint: (iso: string) => void;
@@ -437,6 +498,7 @@ function DayCell({
   rangeMode,
   today,
   blocked,
+  closed,
   tabbable,
   onChoose,
   onPoint,
@@ -448,7 +510,8 @@ function DayCell({
   const inside = complete && iso > range.start && iso < range.end;
   const selected = isStart || isEnd;
   const role = rangeMode && isStart ? calendarCopy.start : isEnd && !previewing ? calendarCopy.end : null;
-  const label = [dayLabel(iso), role, iso === today ? calendarCopy.today : null].filter(Boolean).join(", ");
+  const name = [dayLabel(iso), role, iso === today ? calendarCopy.today : null].filter(Boolean).join(", ");
+  const label = closed ? `${name}: ${closed}` : name;
   // Prévia: a faixa fica mais clara e tracejada até virar cheia no toque.
   const strip = previewing ? `${quintalColors.grama}80` : quintalColors.grama;
   const previewEdge = previewing ? { borderBlock: "2px dashed", borderColor: "text.primary" } : undefined;
@@ -503,6 +566,7 @@ function DayCell({
           ...(previewing && isEnd && { borderStyle: "dashed" }),
           bgcolor: selected ? (previewing && isEnd ? `${quintalColors.coral}80` : quintalColors.coral) : "transparent",
           ...(iso === today && !selected && { borderStyle: "dashed", borderColor: "text.primary" }),
+          ...(closed && closedLook),
           "&:hover": !blocked && !selected ? { bgcolor: quintalColors.luz } : undefined,
           [keyboardFocus()]: focusRing,
         }}
@@ -512,6 +576,9 @@ function DayCell({
     </Box>
   );
 }
+
+/** Dia fechado: riscado e apagado, igual na grade e na amostra da legenda. */
+const closedLook = { textDecoration: "line-through", textDecorationThickness: "2px", opacity: 0.45 } as const;
 
 interface YearGridProps {
   current: number;

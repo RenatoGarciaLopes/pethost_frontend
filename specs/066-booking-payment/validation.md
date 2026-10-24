@@ -1,5 +1,11 @@
 # 066 · Validação em andamento
 
+## Integração de dev solicitada em 24/10/2026
+
+Merge posterior inclui tradução global de erros, chat, calendário e estadias 094/097. Único conflito textual: `src/features/bookings/index.ts`, resolvido mantendo os contratos/copy do pagamento e as exportações de status, período e tipos usadas pelo chat. `StayDetail` preserva `viewPayment` no NowPanel; `StayList`, AppHeader, GrassFooter e mock bookings mantêm as mudanças de dev. Checkout e formulário Stripe migraram de `getErrorMessage` removido para `translateError`, sem tradução paralela.
+
+Resultados desta integração: `npx tsc --noEmit` aprovado; `npx vitest run … --maxWorkers=1` aprovou 63 testes em 11 arquivos (paymentState, stayDetailView, StayDetail, StayList, BookingPayment, StripePaymentForm, bookingPaymentMock, bffRoutes, AppHeader, GrassFooter e rota payment). Nenhum E2E ou servidor iniciado. As duas falhas E2E da rodada anterior continuam pendentes para cloud, sem alegação de correção por este merge.
+
 ## Encerramento solicitado pelo coordenador (24/10/2026)
 
 Nenhum teste ou servidor novo foi iniciado após a ordem de encerramento. O runner anterior não está mais disponível na ferramenta de processos; não há listener na 3177. A 5099 está com PID 30680, diferente do mock iniciado nesta tarefa; não foi encerrado por não ser possível atribuí-lo à 066 com segurança. Validação final foi transferida para agente cloud.

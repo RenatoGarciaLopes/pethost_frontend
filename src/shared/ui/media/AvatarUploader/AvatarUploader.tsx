@@ -4,7 +4,6 @@ import { keyboardFocus } from "@/shared/theme/focus";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { useId, useRef, useState, type ChangeEvent } from "react";
 import {
-  Avatar,
   Box,
   Button,
   CircularProgress,
@@ -16,7 +15,7 @@ import {
 } from "@mui/material";
 import { useObjectUrl } from "../../../hooks/useObjectUrl";
 import { validateImageFile } from "../../../lib/files/validateImageFile";
-import { initialsOf } from "../../../lib/text/initials";
+import { InitialsAvatar } from "../InitialsAvatar";
 import { avatarUploaderCopy as copy } from "./avatarUploaderCopy";
 
 export interface AvatarUploaderProps {
@@ -54,7 +53,6 @@ function AvatarPicker({ name, avatarUrl, busy, error, onUpload, onRemove, disabl
   const previewUrl = useObjectUrl(file);
   const blocked = busy || disabled;
   const message = validationError || error;
-  const initials = initialsOf(name);
   const source = previewUrl || avatarUrl;
 
   function choose(event: ChangeEvent<HTMLInputElement>) {
@@ -80,30 +78,25 @@ function AvatarPicker({ name, avatarUrl, busy, error, onUpload, onRemove, disabl
   }
   return (
     <Stack role="group" aria-label={copy.group} aria-busy={busy} spacing={2} sx={{ alignItems: "flex-start" }}>
-      <Avatar
-        src={source ?? undefined}
+      <InitialsAvatar
+        name={name}
+        src={source}
+        size={96}
         alt={previewUrl ? copy.previewAlt : copy.photoAlt}
         role={!source ? "img" : undefined}
         aria-label={!source ? `${copy.placeholder} ${name}`.trim() : undefined}
-        sx={{
-          width: 96,
-          height: 96,
-          bgcolor: "background.paper",
-          color: "text.primary",
-          border: 1,
-          borderColor: "divider",
-          fontSize: 28,
-          fontWeight: 700,
-        }}
-      >
-        {initials}
-      </Avatar>
+        sx={{ border: 1, borderColor: "divider", fontSize: 28 }}
+      />
       <Box
         sx={{
           position: "relative",
           display: "inline-flex",
           borderRadius: `${quintalRadii.control}px`,
-          [keyboardFocus("&:has(input:focus-visible)")]: { outline: "2px solid", outlineColor: "text.primary", outlineOffset: 3 },
+          [keyboardFocus("&:has(input:focus-visible)")]: {
+            outline: "2px solid",
+            outlineColor: "text.primary",
+            outlineOffset: 3,
+          },
         }}
       >
         <Button component="label" role={undefined} tabIndex={-1} htmlFor={id} disabled={blocked} variant="outlined">

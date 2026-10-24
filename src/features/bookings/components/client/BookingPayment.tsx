@@ -5,7 +5,7 @@ import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { formatBRL, fromCents } from "@/shared/lib/money";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
@@ -61,7 +61,7 @@ export function BookingPaymentView({
     return (
       <ErrorState
         title={copy.unavailable}
-        description={getErrorMessage(failure)}
+        description={translateError(failure)}
         onRetry={() => {
           void state.booking.refetch();
           void state.payment.refetch();
@@ -115,7 +115,7 @@ export function BookingPaymentView({
               {payment.paymentDeadline && payment.status !== "active" && payment.status !== "paid" && (
                 <Typography>{copy.deadline(formatDeadline(payment.paymentDeadline, new Date(state.now)))}</Typography>
               )}
-              {failure ? <Notice tone="atencao" title={getErrorMessage(failure)} /> : null}
+              {failure ? <Notice tone="atencao" title={translateError(failure)} /> : null}
               {closed || expired ? (
                 <Notice tone="atencao" title={expired ? copy.expired : copy.closed} />
               ) : payment.status === "paid" ? (

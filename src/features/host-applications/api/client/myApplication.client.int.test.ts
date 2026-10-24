@@ -90,7 +90,10 @@ describe("myApplication.client", () => {
     );
     const error = await uploadDocuments({ back: photo("verso.jpg") }, transport).catch((caught: unknown) => caught);
     expect(error).toMatchObject({ status, code });
-    if (code === "VALIDATION_ERROR") expect(error).toMatchObject({ fieldErrors: { back: ["Arquivo inválido"] } });
+    if (code === "VALIDATION_ERROR")
+      expect(error).toMatchObject({
+        fieldIssues: { back: [expect.objectContaining({ message: "Arquivo inválido" })] },
+      });
   });
 
   it("REQ-HVER-010 envia para análise", async () => {

@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { pickDates } from "../../support/calendar";
+import { calendarDayName, pickDates } from "../../support/calendar";
 import { loginAccount, resetAccountMock } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { openSearch } from "../../support/search";
+import { hostClosedBlock } from "../../support/handlers/listingPage.mjs";
 
 // Navegação no cliente: no `next dev` a primeira visita compila a rota (como em `new-pet.spec.ts`).
 const NAVIGATION = { timeout: 15_000 };
@@ -141,6 +142,44 @@ test("REQ-REQST-007 dia em que o cantinho não recebe vira frase no topo, com o 
   await expect(page.getByRole("heading", { name: "Pedido enviado!" })).toHaveCount(0);
 });
 
+test("REQ-LPAGE-013 o calendário do pedido risca o domingo e a agenda do anfitrião; a escolha evita os dois", async ({
+  page,
+  baseURL,
+}) => {
+  await loginAccount(page, baseURL!, "both", "owner");
+  // Datas da URL dentro da agenda fechada (segunda a quarta; a véspera é domingo, que viria antes): o campo já diz o
+  // motivo, antes de enviar.
+  const block = hostClosedBlock();
+  await page.goto(requestPath(block.startDate, block.endDate, [LUNA]));
+  const field = page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true });
+  await expect(
+    page.getByText(/^Essas datas passam por .+, e o anfitrião fechou a agenda nesse dia\. Escolhe outras\.$/),
+  ).toBeVisible(FIRST_COMPILE);
+
+  // No calendário o domingo fica riscado, sem toque, com o motivo e a legenda.
+  await waitForHydration(field);
+  await field.click();
+  const dialog = page.getByRole("dialog", { name: /^Escolher/ });
+  const sunday = plus(block.startDate, -8);
+  const closedSunday = dialog.getByRole("button", {
+    name: `${calendarDayName(sunday)}: o cantinho não recebe aos domingos`,
+  });
+  for (let guard = 0; guard < 3 && !(await closedSunday.isVisible()); guard += 1)
+    await dialog.getByRole("button", { name: "Mês anterior" }).click();
+  await expect(closedSunday).toHaveAttribute("aria-disabled", "true");
+  await expect(dialog.getByText("Não recebe aos domingos")).toBeVisible();
+  const done = dialog.getByRole("button", { name: "Pronto" });
+  if (await done.isVisible()) await done.click();
+  else await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+
+  // Segunda a sexta da semana antes da agenda fechada: sem domingo e sem bloqueio, o erro some.
+  const monday = plus(block.startDate, -7);
+  await pickDates(page, field, monday, plus(monday, 4));
+  await expect(field).toHaveValue(/ · 4 noites$/);
+  await expect(page.getByText(/^Essas datas passam por/)).toHaveCount(0);
+});
+
 test("REQ-REQST-004 REQ-REQST-010 sem marcar ração e remédios a frase aparece e o calendário bloqueia chegada com menos de 72 h", async ({
   page,
   baseURL,
@@ -174,4 +213,54 @@ test("REQ-REQST-001 id que não é de cantinho apresenta o 404 da casca", async 
   await loginAccount(page, baseURL!, "both", "owner");
   await page.goto("/listings/nao-e-um-id/request");
   await expect(page.getByRole("heading", { name: "Esse cantinho não existe", exact: true })).toBeVisible();
+});
+
+test("REQ-REQST-007 REQ-HTTP-005 a API recusa a antecedência e os termos: as duas frases chegam em português", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  await loginAccount(page, baseURL!, "both", "owner");
+  const monday = nextMonday();
+  // A tela já impede esses dois erros; a recusa da API (regra mudou, tela antiga aberta) é forçada na rota.
+  await page.route("**/api/bookings", async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    await route.fulfill({
+      status: 400,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "One or more fields are invalid.",
+          details: [
+            {
+              field: "checkIn",
+              messages: ["Check-in must be at least 72 hours ahead."],
+              errors: [
+                { code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72, responseHours: 24, acceptHours: 48 } },
+              ],
+            },
+            {
+              field: "careTermsAccepted",
+              messages: ["Confirm that you will bring the pet's food and hand over its medicines to the host."],
+              errors: [{ code: "BOOKING_CARE_TERMS_NOT_ACCEPTED" }],
+            },
+          ],
+        },
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  });
+  await page.goto(requestPath(monday, plus(monday, 2), [LUNA]));
+  const checklist = page.getByRole("group", { name: "Combinou de levar?" });
+  await waitForHydration(checklist.getByRole("checkbox").first());
+  for (const box of await checklist.getByRole("checkbox").all()) await box.check();
+  await page.getByRole("button", { name: "Pedir estadia" }).click();
+
+  await expect(
+    page.getByText("A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder."),
+  ).toBeVisible();
+  await expect(page.getByText("Marca os dois pra confirmar que a ração e os remédios vão junto.")).toBeVisible();
+  await expect(page.getByText(/Check-in must|Confirm that/)).toHaveCount(0);
+  await page.screenshot({ path: `test-results/request-090-erros-${testInfo.project.name}.png`, fullPage: true });
 });

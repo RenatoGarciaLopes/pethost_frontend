@@ -1,9 +1,9 @@
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
 import { isListingBadge, listingBadgeLabel } from "@/shared/config/listingBadges";
 import { formatMemberSince } from "@/shared/lib/date/formatMemberSince";
-import { initialsOf } from "@/shared/lib/text/initials";
+import { InitialsAvatar } from "@/shared/ui/media/InitialsAvatar";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { PageContainer } from "@/shared/ui/layout/PageContainer";
@@ -13,6 +13,7 @@ import { houseLine, houseRuleItems } from "../lib/listingFacts";
 import { listingPageCopy as copy } from "../lib/listingPageCopy";
 import { searchOriginHref } from "../lib/searchOrigin";
 import { ListingPageActions } from "./client/ListingPageActions";
+import type { ListingClosedPeriod } from "../lib/listingClosedDays";
 import { StayBookingCard, type StayBookingPet } from "./client/StayBookingCard";
 import { ListingGallery } from "./ListingGallery";
 import { NightlyPrice } from "./NightlyPrice";
@@ -31,6 +32,8 @@ export interface ListingPageStay {
   count?: number;
   /** Pets ativos do tutor; vazio para o visitante e o anfitrião, que pedem passando pelo login ou pela troca. */
   pets: StayBookingPet[];
+  /** Períodos que o anfitrião fechou na agenda (exige conta: vazio para o visitante). */
+  closedPeriods: ListingClosedPeriod[];
 }
 
 export interface ListingPageScreenProps {
@@ -155,6 +158,8 @@ export function ListingPageScreen({
                 petIds={stay.petIds}
                 count={stay.count}
                 pets={stay.pets}
+                availableWeekdays={listing.availableWeekdays}
+                closedPeriods={stay.closedPeriods}
               />
             ) : (
               <NightlyPrice nightlyRate={listing.nightlyRate} />
@@ -165,21 +170,12 @@ export function ListingPageScreen({
         <Stack spacing={3} sx={{ gridArea: "body", minWidth: 0 }}>
           <Section title={copy.sections.host}>
             <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
-              <Avatar
-                src={listing.host?.avatarUrl ?? undefined}
-                alt=""
-                sx={{
-                  width: 56,
-                  height: 56,
-                  fontWeight: 800,
-                  color: "text.primary",
-                  bgcolor: "grama.main",
-                  border: "2px solid",
-                  borderColor: "text.primary",
-                }}
-              >
-                {initialsOf(hostName)}
-              </Avatar>
+              <InitialsAvatar
+                name={hostName}
+                src={listing.host?.avatarUrl}
+                size={56}
+                sx={{ fontWeight: 800, border: "2px solid", borderColor: "text.primary" }}
+              />
               <Box sx={{ minWidth: 0 }}>
                 <Typography sx={{ fontWeight: 700 }}>{hostName}</Typography>
                 {listing.host?.isCompany && (

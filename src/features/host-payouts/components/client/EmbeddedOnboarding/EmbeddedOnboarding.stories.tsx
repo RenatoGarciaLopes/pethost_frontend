@@ -3,7 +3,7 @@ import { useState } from "react";
 import { fn } from "storybook/test";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { ApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import type { OnboardingSessionDto } from "../../../api/contracts";
 import { EmbeddedOnboarding } from "./EmbeddedOnboarding";
 const pendingSession = () =>
@@ -16,7 +16,7 @@ const refusedSession = async (): Promise<OnboardingSessionDto> => {
 function Frame({ failure = false }: { failure?: boolean }) {
   const [error, setError] = useState<unknown>(null);
   return error ? (
-    <Notice tone="atencao" title={getErrorMessage(error)} />
+    <Notice tone="atencao" title={translateError(error)} />
   ) : (
     <EmbeddedOnboarding
       createSession={failure ? refusedSession : pendingSession}

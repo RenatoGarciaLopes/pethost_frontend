@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/shared/api/errors/ApiError";
-import { GENERIC_ERROR_MESSAGE } from "@/shared/api/errors/errorCopy";
+import { GENERIC_ERROR_MESSAGE } from "@/shared/api/errors/translateError";
 import { useErrorNotice } from "./useErrorNotice";
 
 afterEach(() => {
