@@ -5,3 +5,4 @@
  */
 export { bookingCopy } from "./lib/bookingCopy";
 export { isBookingId } from "./lib/bookingId";
+export { ownerBookingPaymentPath } from "./lib/bookingPaths";

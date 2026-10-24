@@ -7,154 +7,181 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
 import { formatBRL, fromCents } from "@/shared/lib/money";
+import { DoorMark } from "@/shared/ui/brand/DoorMark";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { Surface } from "@/shared/ui/layout/Surface";
+import { BOOKING_STATUSES } from "../../api/contracts";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
-import { ownerBookingPath, ownerBookingsPath, SEARCH_PATH } from "../../lib/bookingPaths";
-import { OWNER_TABS, statusLabel, type BookingTab } from "../../lib/bookingStatus";
-import { formatPeriod } from "../../lib/formatStay";
+import { ownerBookingPaymentPath, ownerBookingPath, SEARCH_PATH } from "../../lib/bookingPaths";
+import { ownerStayView, sortOwnerStays } from "../../lib/ownerStayCard";
 import type { Booking } from "../../types";
 
 const copy = bookingCopy.owner;
 
-/** Uma estadia na lista: o item inteiro é o link para o detalhe (REQ-STAYS-002); o nome é o próprio texto visível. */
-function StayListItem({ booking }: { booking: Booking }) {
-  const period = formatPeriod(booking.checkIn, booking.checkOut);
-  const title = booking.listing?.title ?? copy.listingGone;
+/** Moldura da foto do cantinho: a API ainda não manda foto na reserva, então a porta da casa ocupa o lugar. */
+function StayPhotoFrame() {
   return (
-    <Box component="li" sx={{ listStyle: "none" }}>
-      <Link
-        component={NextLink}
-        href={ownerBookingPath(booking.id)}
-        sx={{
-          color: "text.primary",
-          textDecoration: "none",
-          [keyboardFocus("&:focus-visible [data-surface]")]: { outline: "3px solid", outlineOffset: 3 },
-        }}
-      >
-        <Surface component="span" interactive elevation="sm" sx={{ display: "grid", gap: 0.5, p: 2 }}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
-            <Typography component="span" sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
-              {title}
-            </Typography>
-            <StatusPill label={statusLabel[booking.status]} size="sm" />
-          </Stack>
-          {booking.listing && (
-            <Typography component="span" color="text.secondary">
-              {`${booking.listing.neighborhood}, ${booking.listing.city}`}
-            </Typography>
-          )}
-          <Typography component="span">
-            {`${period} · ${booking.pets.map((pet) => pet.name ?? bookingCopy.unknownPet).join(", ")}`}
-          </Typography>
-          <Typography component="span" sx={{ fontWeight: 700 }}>
-            {bookingCopy.host.total(formatBRL(fromCents(booking.totalCents)))}
-          </Typography>
-        </Surface>
-      </Link>
+    <Box
+      aria-hidden
+      sx={(theme) => ({
+        display: "grid",
+        placeItems: "center",
+        flexShrink: 0,
+        width: { xs: 88, md: 120 },
+        height: { xs: 72, md: 96 },
+        bgcolor: theme.palette.quintal.luz,
+        border: "2px solid",
+        borderColor: "text.primary",
+        borderRadius: `${quintalRadii.card}px`,
+      })}
+    >
+      <DoorMark width={36} interactive={false} />
     </Box>
   );
 }
 
-function Tabs({ current }: { current: BookingTab }) {
+/**
+ * Uma estadia na lista: o título é o link para o detalhe e se estende pelo card inteiro (REQ-STAYS-002); a ação
+ * ("Pagar", "Buscar outro cantinho") é um link à parte, acima dele.
+ */
+function StayListItem({ booking }: { booking: Booking }) {
+  const view = ownerStayView(booking);
   return (
-    <Box component="nav" aria-label={copy.tabsLabel}>
-      <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, display: "flex", gap: 1, flexWrap: "wrap" }}>
-        {OWNER_TABS.map((tab) => {
-          const active = tab.id === current.id;
-          return (
-            <li key={tab.id}>
-              <Link
-                component={NextLink}
-                href={ownerBookingsPath(tab.id)}
-                aria-current={active ? "page" : undefined}
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  minHeight: 48,
-                  px: 2,
+    <Box component="li" sx={{ listStyle: "none" }}>
+      <Surface
+        elevation="sm"
+        interactive
+        sx={{
+          position: "relative",
+          display: "grid",
+          gridTemplateColumns: { xs: "auto minmax(0, 1fr)", md: "auto minmax(0, 1fr) auto" },
+          alignItems: "center",
+          gap: { xs: 1.5, md: 2.5 },
+          p: 2,
+        }}
+      >
+        <StayPhotoFrame />
+        <Stack spacing={0.75} sx={{ minWidth: 0 }}>
+          <StatusPill label={view.statusLabel} tone={view.tone} size="sm" />
+          <Typography component="h2" variant="h4" sx={{ fontSize: { xs: "1.1rem", md: "1.3rem" }, lineHeight: 1.2 }}>
+            <Link
+              component={NextLink}
+              href={ownerBookingPath(booking.id)}
+              color="text.primary"
+              underline="none"
+              sx={{
+                "&::after": { content: '""', position: "absolute", inset: 0, borderRadius: `${quintalRadii.card}px` },
+                [keyboardFocus("&:focus-visible::after")]: { outline: "3px solid", outlineOffset: 3 },
+              }}
+            >
+              {view.title}
+            </Link>
+          </Typography>
+          <Typography variant="body2">{view.summary}</Typography>
+          {view.context && (
+            <Typography
+              variant="body2"
+              sx={(theme) => ({
+                width: "fit-content",
+                color: view.context?.kind === "note" ? "text.secondary" : "text.primary",
+                fontWeight: view.context?.kind === "deadline" ? 700 : 400,
+                ...(view.context?.kind === "deadline" && {
+                  bgcolor: theme.palette.quintal.luz,
+                  px: 1,
                   borderRadius: `${quintalRadii.pill}px`,
-                  border: "2px solid",
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  bgcolor: active ? "text.primary" : "transparent",
-                  color: active ? "background.paper" : "text.primary",
-                }}
-              >
-                {tab.label}
-              </Link>
-            </li>
-          );
-        })}
-      </Box>
+                }),
+              })}
+            >
+              {view.context.text}
+            </Typography>
+          )}
+        </Stack>
+        {view.action === "pay" && (
+          <Button
+            component={NextLink}
+            href={ownerBookingPaymentPath(booking.id)}
+            variant="contained"
+            sx={{ position: "relative", zIndex: 1, gridColumn: { xs: "1 / -1", md: "auto" } }}
+          >
+            {copy.card.pay(formatBRL(fromCents(booking.totalCents)))}
+          </Button>
+        )}
+        {view.action === "search" && (
+          <Link
+            component={NextLink}
+            href={SEARCH_PATH}
+            color="text.primary"
+            sx={{ position: "relative", zIndex: 1, fontWeight: 700, gridColumn: { xs: "1 / -1", md: "auto" } }}
+          >
+            {copy.card.searchAgain}
+          </Link>
+        )}
+      </Surface>
     </Box>
   );
 }
 
 export interface StayListProps {
   accountId: string;
-  /** Aba atual (da URL). */
-  tab: BookingTab;
   /** Estadias por página (padrão da API de listas: 20). */
   pageSize?: number;
 }
 
 /**
- * "Minhas estadias" do tutor (spec 052, REQ-STAYS-001 a 003): abas na URL (Próximas, Acontecendo, Anteriores), cada
- * estadia como link com o cantinho, o período, os pets, o total e a situação em texto, e "Mostrar mais" por aba. Aba
- * vazia tem frase própria; em "Próximas", o caminho da busca.
+ * "Minhas estadias" do tutor (specs 052 e 094): lista única em ordem de relevância (pagar, acontecendo, confirmadas,
+ * esperando, concluídas, as que não aconteceram), cada estadia como card com selo, resumo, linha de contexto e a ação
+ * da situação; "Mostrar mais" traz a próxima página. Lista vazia leva à busca.
  *
- * @example <StayList accountId={user.id} tab={ownerTabOf(aba)} />
+ * @example <StayList accountId={user.id} />
  */
-export function StayList({ accountId, tab, pageSize }: StayListProps) {
-  const query = useInfiniteQuery(bookingQueries.infinite(accountId, tab.statuses, pageSize));
-  const stays = query.data?.pages.flatMap((page) => page.items) ?? [];
+export function StayList({ accountId, pageSize }: StayListProps) {
+  const query = useInfiniteQuery(bookingQueries.infinite(accountId, BOOKING_STATUSES, pageSize));
+  const stays = sortOwnerStays(query.data?.pages.flatMap((page) => page.items) ?? []);
 
+  if (query.isPending)
+    return (
+      <Box sx={{ display: "grid", placeItems: "center", py: 6 }}>
+        <SniffLoader label={bookingCopy.loading} />
+      </Box>
+    );
+  if (query.isError)
+    return (
+      <ErrorState
+        title={bookingCopy.loadError}
+        description={getErrorMessage(query.error)}
+        onRetry={() => void query.refetch()}
+      />
+    );
+  if (stays.length === 0)
+    return (
+      <Stack spacing={1.5} sx={{ alignItems: "flex-start" }}>
+        <Typography>{copy.empty}</Typography>
+        <Button component={NextLink} href={SEARCH_PATH} variant="contained">
+          {copy.search}
+        </Button>
+      </Stack>
+    );
   return (
-    <Stack spacing={3}>
-      <Tabs current={tab} />
-      {query.isPending ? (
-        <Box sx={{ display: "grid", placeItems: "center", py: 6 }}>
-          <SniffLoader label={bookingCopy.loading} />
+    <Stack spacing={2}>
+      <Box component="ul" aria-label={copy.listLabel} sx={{ m: 0, p: 0, display: "grid", gap: 2 }}>
+        {stays.map((booking) => (
+          <StayListItem key={booking.id} booking={booking} />
+        ))}
+      </Box>
+      {query.hasNextPage && (
+        <Box>
+          <Button
+            variant="outlined"
+            disabled={query.isFetchingNextPage}
+            aria-busy={query.isFetchingNextPage || undefined}
+            onClick={() => void query.fetchNextPage()}
+          >
+            {copy.more}
+          </Button>
         </Box>
-      ) : query.isError ? (
-        <ErrorState
-          title={bookingCopy.loadError}
-          description={getErrorMessage(query.error)}
-          onRetry={() => void query.refetch()}
-        />
-      ) : stays.length === 0 ? (
-        <Stack spacing={1.5} sx={{ alignItems: "flex-start" }}>
-          <Typography>{copy.empty[tab.id]}</Typography>
-          {tab.id === OWNER_TABS[0]!.id && (
-            <Button component={NextLink} href={SEARCH_PATH} variant="contained">
-              {copy.search}
-            </Button>
-          )}
-        </Stack>
-      ) : (
-        <Stack spacing={2}>
-          <Box component="ul" aria-label={copy.listLabel} sx={{ m: 0, p: 0, display: "grid", gap: 2 }}>
-            {stays.map((booking) => (
-              <StayListItem key={booking.id} booking={booking} />
-            ))}
-          </Box>
-          {query.hasNextPage && (
-            <Box>
-              <Button
-                variant="outlined"
-                disabled={query.isFetchingNextPage}
-                aria-busy={query.isFetchingNextPage || undefined}
-                onClick={() => void query.fetchNextPage()}
-              >
-                {copy.more}
-              </Button>
-            </Box>
-          )}
-        </Stack>
       )}
     </Stack>
   );

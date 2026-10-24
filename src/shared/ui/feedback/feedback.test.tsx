@@ -47,13 +47,13 @@ it("REQ-DS-013 Notice aceita somente detalhe ou somente título sem ação", () 
   expect(screen.getByRole("status")).toHaveTextContent("Título");
   expect(screen.queryByText("Detalhe")).not.toBeInTheDocument();
 });
-it.each(["neutro", "info", "ok", "erro", "atencao"] as const)(
+it.each(["neutro", "gema", "info", "ok", "erro", "atencao"] as const)(
   "REQ-DS-014 StatusPill comunica %s sem virar controle",
   (tone) => {
     const { rerender } = renderWithProviders(<StatusPill label="Em análise" tone={tone} />, { theme: quintalTheme });
     const pill = screen.getByText("Em análise");
     expect(pill).toHaveAttribute("data-tone", tone);
-    expect(Boolean(pill.querySelector("svg"))).toBe(tone !== "neutro");
+    expect(Boolean(pill.querySelector("svg"))).toBe(tone !== "neutro" && tone !== "gema");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(pill).toHaveStyle({ padding: "4px 12px" });
     rerender(<StatusPill label="Em análise" tone={tone} size="sm" />);

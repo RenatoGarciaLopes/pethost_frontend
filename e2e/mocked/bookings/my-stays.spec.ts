@@ -57,13 +57,13 @@ test("REQ-STAYS-001 a REQ-STAYS-005 da lista à estadia confirmada, com a trilha
 }) => {
   await seedStay(page, { status: "confirmed", responseDeadline: null, contact: HOST_CONTACT });
   await page.goto("/owner/bookings");
-  await expect(page.getByRole("heading", { name: "Minhas estadias", level: 1 })).toBeVisible();
-  const tabs = page.getByRole("navigation", { name: "Situação das estadias" });
-  await expect(tabs.getByRole("link", { name: "Próximas" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { name: "Suas viagens e as deles.", level: 1 })).toBeVisible();
+  await expect(page.getByText("Minhas estadias", { exact: true }).first()).toBeVisible();
 
-  const stay = page.getByRole("list", { name: "Estadias" }).getByRole("link", { name: /^Casa da Cida/ });
-  await expect(stay).toContainText("Confirmada");
-  await expect(stay).toContainText("Zona 01, Maringá");
+  const stay = page
+    .getByRole("list", { name: "Estadias" })
+    .getByRole("link", { name: "Pipoca na casa de Aparecida Souza" });
+  await expect(stay.locator("xpath=ancestor::li")).toContainText("Confirmada");
   await waitForHydration(stay);
   await stay.click();
   await expect(page).toHaveURL(/\/owner\/bookings\/[0-9a-f-]+$/, NAVIGATION);
@@ -106,10 +106,38 @@ test("REQ-STAYS-006 REQ-STAYS-007 cancela a estadia confirmada com motivo e vê 
   await expect(page.getByText("Reembolso de 100%")).toBeVisible();
   await expect(page.getByRole("region", { name: "Contato do anfitrião" })).toHaveCount(0);
 
-  await page.goto("/owner/bookings?aba=anteriores");
-  await expect(page.getByRole("link", { name: /^Casa da Cida/ })).toContainText("Cancelada");
   await page.goto("/owner/bookings");
-  await expect(page.getByText("Nenhuma estadia por vir. Bora procurar um cantinho?")).toBeVisible();
+  const card = page.getByRole("list", { name: "Estadias" }).getByRole("listitem");
+  await expect(card).toContainText("Cancelada");
+  await expect(card).toContainText("Estadia cancelada. Reembolso de 100%.");
+  await expect(card.getByRole("link", { name: "Buscar outro cantinho" })).toHaveAttribute("href", "/");
+});
+
+test("REQ-STAYS-010 a lista única põe o que falta pagar primeiro, com 'Pagar' e o total, e leva à busca nas expiradas", async ({
+  page,
+}) => {
+  const MINUTE_MS = 60 * 1000;
+  await seedStay(page, { status: "expired", responseDeadline: null, checkIn: inDays(30), checkOut: inDays(33) });
+  await seedStay(page, { status: "completed", responseDeadline: null, checkIn: inDays(-10), checkOut: inDays(-7) });
+  const toPay = await seedStay(page, {
+    status: "accepted",
+    responseDeadline: null,
+    paymentDeadline: new Date(Date.now() + 90 * MINUTE_MS).toISOString(),
+  });
+  await page.goto("/owner/bookings");
+
+  const cards = page.getByRole("list", { name: "Estadias" }).getByRole("listitem");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.nth(0)).toContainText("Aceita · falta pagar");
+  await expect(cards.nth(0)).toContainText(/Pague até .* pra garantir a vaga./);
+  await expect(cards.nth(0).getByRole("link", { name: /^Pagar R$s300,00$/ })).toHaveAttribute(
+    "href",
+    `/owner/bookings/${toPay.id}/payment`,
+  );
+  await expect(cards.nth(1)).toContainText("Concluída");
+  await expect(cards.nth(2)).toContainText("Expirada");
+  await expect(cards.nth(2)).toContainText("Aparecida Souza não respondeu em 24 horas. Nada foi cobrado.");
+  await expect(cards.nth(2).getByRole("link", { name: "Buscar outro cantinho" })).toHaveAttribute("href", "/");
 });
 
 test("REQ-STAYS-008 não aceita: o motivo do anfitrião e o caminho da busca", async ({ page }) => {

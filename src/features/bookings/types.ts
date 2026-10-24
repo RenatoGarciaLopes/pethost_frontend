@@ -49,6 +49,10 @@ export interface Booking {
   totalCents: number;
   /** Só enquanto `requested`: até quando o anfitrião responde (ISO). */
   responseDeadline: string | null;
+  /** Só enquanto `accepted`: até quando o tutor paga a 1ª parcela (ISO); sem pagar, a reserva expira. */
+  paymentDeadline: string | null;
+  /** Quando o anfitrião respondeu (ISO); distingue o pedido que expirou sem resposta da aceita que expirou sem pagamento. */
+  respondedAt: string | null;
   checkedInAt: string | null;
   checkedOutAt: string | null;
   cancelledBy: "owner" | "host" | null;

@@ -14,7 +14,7 @@ import { Notice } from "@/shared/ui/feedback/Notice";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
-import { ownerBookingsPath, SEARCH_PATH } from "../../lib/bookingPaths";
+import { OWNER_BOOKINGS_PATH, SEARCH_PATH } from "../../lib/bookingPaths";
 import { statusLabel, trailSteps } from "../../lib/bookingStatus";
 import { formatDeadline, formatPeriod } from "../../lib/formatStay";
 import type { Booking, BookingStatus } from "../../types";
@@ -99,7 +99,7 @@ export function StayDetail({ accountId, bookingId, now }: StayDetailProps) {
 
   return (
     <Stack spacing={3}>
-      <Link component={NextLink} href={ownerBookingsPath("proximas")} sx={{ alignSelf: "flex-start" }}>
+      <Link component={NextLink} href={OWNER_BOOKINGS_PATH} sx={{ alignSelf: "flex-start" }}>
         {copy.back}
       </Link>
       <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>

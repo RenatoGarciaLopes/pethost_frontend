@@ -32,6 +32,8 @@ export function toBooking(dto: BookingDto): Booking {
     nightlyRateCents: toCents(dto.nightlyRate),
     totalCents: toCents(dto.totalPrice),
     responseDeadline: dto.responseDeadline ?? null,
+    paymentDeadline: dto.paymentDeadline ?? null,
+    respondedAt: dto.respondedAt ?? null,
     checkedInAt: dto.checkedInAt ?? null,
     checkedOutAt: dto.checkedOutAt ?? null,
     cancelledBy: dto.cancelledBy === "owner" || dto.cancelledBy === "host" ? dto.cancelledBy : null,
