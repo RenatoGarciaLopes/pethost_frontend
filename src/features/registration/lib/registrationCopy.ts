@@ -58,7 +58,6 @@ export const registrationCopy = {
     cpf: "CPF",
     cpfHelp: "Um CPF por pessoa. Fica protegido.",
     phoneHelp: "Só aparece pro anfitrião depois do pagamento.",
-    hostPhoneHelp: "Pro tutor entrar em contato sobre a estadia.",
   },
   fieldErrors: {
     fullNameMissing: "Falta seu nome.",
