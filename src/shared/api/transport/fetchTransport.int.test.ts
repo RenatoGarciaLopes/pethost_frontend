@@ -41,7 +41,10 @@ describe("fetchTransport com rede simulada (MSW)", () => {
 
     await expect(
       transport.request({ method: "POST", path: "/users/register", body: {} }, userSchema),
-    ).rejects.toMatchObject({ status: 400, fieldErrors: { "address.zipCode": ["Zip code is invalid."] } });
+    ).rejects.toMatchObject({
+      status: 400,
+      fieldIssues: { "address.zipCode": [expect.objectContaining({ message: "Zip code is invalid." })] },
+    });
   });
 
   it("REQ-HTTP-002 429 com Retry-After", async () => {

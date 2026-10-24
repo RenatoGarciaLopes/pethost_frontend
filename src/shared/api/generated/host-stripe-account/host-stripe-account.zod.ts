@@ -16,7 +16,7 @@ import * as zod from 'zod';
 export const GetApiV1HostsMeStripeAccountResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
-  "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\n        DisabledReason) ou `enabled` (pode receber).'),
+  "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\r\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\r\n        DisabledReason) ou `enabled` (pode receber).'),
   "detailsSubmitted": zod.boolean(),
   "chargesEnabled": zod.boolean(),
   "payoutsEnabled": zod.boolean(),
@@ -44,7 +44,7 @@ export const PostApiV1HostsMeStripeAccountOnboardingSessionResponse = zod.object
   "publishableKey": zod.string().describe('Chave publicável da plataforma (`pk_test_...`).'),
   "expiresAt": zod.number().int().describe('Quando a sessão vence, em Unix time (segundos, UTC). Vencida: peça outra.'),
   "account": zod.object({
-  "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\n        DisabledReason) ou `enabled` (pode receber).'),
+  "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\r\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\r\n        DisabledReason) ou `enabled` (pode receber).'),
   "detailsSubmitted": zod.boolean(),
   "chargesEnabled": zod.boolean(),
   "payoutsEnabled": zod.boolean(),
@@ -70,7 +70,7 @@ export const PostApiV1HostsMeStripeAccountOnboardingLinkResponse = zod.object({
   "url": zod.string().describe('Uso único. Não guardar: peça outro a cada vez.'),
   "expiresAt": zod.number().int().describe('Quando o link vence, em Unix time (segundos, UTC).'),
   "account": zod.object({
-  "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\n        DisabledReason) ou `enabled` (pode receber).'),
+  "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\r\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\r\n        DisabledReason) ou `enabled` (pode receber).'),
   "detailsSubmitted": zod.boolean(),
   "chargesEnabled": zod.boolean(),
   "payoutsEnabled": zod.boolean(),
@@ -92,7 +92,7 @@ export const PostApiV1HostsMeStripeAccountOnboardingLinkResponse = zod.object({
 export const PostApiV1HostsMeStripeAccountSynchronizationResponse = zod.object({
   "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.object({
-  "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\n        DisabledReason) ou `enabled` (pode receber).'),
+  "status": zod.string().describe('`not_started` (sem conta conectada), `in_progress` (falta terminar o cadastro),\r\n        `under_review` (o Stripe está conferindo), `restricted` (o Stripe pede algo — ver\r\n        DisabledReason) ou `enabled` (pode receber).'),
   "detailsSubmitted": zod.boolean(),
   "chargesEnabled": zod.boolean(),
   "payoutsEnabled": zod.boolean(),

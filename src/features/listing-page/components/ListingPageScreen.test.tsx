@@ -15,6 +15,7 @@ const stay: ListingPageStay = {
   to: "2026-12-25",
   petIds: ["pet-1"],
   pets: [{ id: "pet-1", name: "Pipoca", coverUrl: null }],
+  closedPeriods: [],
 };
 const render = (ui: React.ReactElement) => renderWithProviders(ui, { theme: quintalTheme });
 

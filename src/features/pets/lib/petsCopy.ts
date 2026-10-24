@@ -1,4 +1,4 @@
-/** Textos por papel da lista, abertura e vitrine (020/023). Erros vêm de getErrorMessage. @example petsCopy.host.title */
+/** Textos por papel da lista, abertura e vitrine (020/023). Erros vêm de translateError. @example petsCopy.host.title */
 export const petsCopy = {
   owner: {
     title: "Meus pets",

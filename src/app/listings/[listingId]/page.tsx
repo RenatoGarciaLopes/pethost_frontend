@@ -6,6 +6,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { compatibilityReasons } from "@/features/listing-page";
 import {
   ListingPageScreen,
+  getListingClosedPeriods,
   getListingPageContext,
   getListingPageDetail,
   getListingReviews,
@@ -67,13 +68,15 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
   const hostName = listing.host?.name ?? "a casa";
   const stay = { checkIn: query.from, checkOut: query.to };
   const queryClient = getQueryClient();
-  // Residentes e compatibilidade chegam hidratados: nada aparece depois empurrando a página. Os dois exigem conta,
-  // então o visitante não os vê.
-  if (user)
-    await Promise.all([
-      prefetchHouseResidents(queryClient, listing.hostId),
-      ...selectedPets.map((pet) => prefetchCompatibility(queryClient, user.id, listing.id, pet.id, stay)),
-    ]);
+  // Residentes, compatibilidade e a agenda do anfitrião chegam prontos: nada aparece depois empurrando a página. Os
+  // três exigem conta, então o visitante não os vê (o calendário dele risca só os dias da semana).
+  const [closedPeriods] = user
+    ? await Promise.all([
+        isOwner ? [] : getListingClosedPeriods(listing.id),
+        prefetchHouseResidents(queryClient, listing.hostId),
+        ...selectedPets.map((pet) => prefetchCompatibility(queryClient, user.id, listing.id, pet.id, stay)),
+      ])
+    : [[]];
   return (
     <AppShell user={user} returnTo={path}>
       <HydrationBoundary state={dehydrate(queryClient)}>
@@ -93,6 +96,7 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
                   petIds: selectedPets.map((pet) => pet.id),
                   count: query.count,
                   pets: activePets.map(({ id, name, coverUrl }) => ({ id, name, coverUrl })),
+                  closedPeriods,
                 }
               : undefined
           }

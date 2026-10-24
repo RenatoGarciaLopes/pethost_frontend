@@ -5,9 +5,9 @@ import { Box, FormHelperText, Stack, TextField, Typography } from "@mui/material
 import { useState } from "react";
 import { Controller, FormProvider, useForm, type FieldPath } from "react-hook-form";
 import type { z } from "zod";
-import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
+import { isApiError } from "@/shared/api/errors/ApiError";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { AddressFields } from "@/shared/ui/forms/AddressFields";
 import { ChoiceCardGroup } from "@/shared/ui/forms/ChoiceCardGroup";
@@ -78,15 +78,12 @@ export function DataStep({ accountId, personType, draft, onBack, onNext }: DataS
   function reportError(error: unknown) {
     const conflict = isApiError(error) ? CONFLICT_FIELD[error.code] : undefined;
     if (conflict)
-      return form.setError(conflict, { type: "server", message: getErrorMessage(error) }, { shouldFocus: true });
-    if (isApiError(error) && Object.keys(error.fieldErrors).length > 0) {
-      const fieldErrors = Object.fromEntries(
-        Object.entries(error.fieldErrors).map(([field, messages]) => [toFormField(field), messages]),
-      );
-      applyFieldErrors(form.setError, new ApiError({ ...error.toJSON(), fieldErrors }));
+      return form.setError(conflict, { type: "server", message: translateError(error) }, { shouldFocus: true });
+    if (isApiError(error) && Object.keys(error.fieldIssues).length > 0) {
+      applyFieldErrors(form.setError, error, { rename: toFormField });
       return;
     }
-    setNotice(getErrorMessage(error));
+    setNotice(translateError(error));
   }
 
   const submit = form.handleSubmit(async (values) => {

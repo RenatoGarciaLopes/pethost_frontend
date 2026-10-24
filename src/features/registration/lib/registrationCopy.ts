@@ -1,7 +1,7 @@
 /**
  * Textos do cadastro (specs 011 e 012, seção Microcopy). Os textos só do anfitrião começam com `host`.
- * Erros vindos da API não ficam aqui: a frase de cada código vem de `getErrorMessage`
- * (`shared/api/errors/errorCopy.ts`).
+ * Erros vindos da API não ficam aqui: a frase de cada código vem de `translateError`
+ * (`shared/api/errors/translateError.ts`).
  * Nenhum texto supõe gênero (não há campo de tratamento).
  */
 export const registrationCopy = {

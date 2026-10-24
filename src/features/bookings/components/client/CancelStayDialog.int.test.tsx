@@ -74,6 +74,6 @@ describe("CancelStayDialog", { timeout: 15000 }, () => {
     const dialog = await screen.findByRole("dialog", { name: copy.title });
     await user.click(within(dialog).getByRole("button", { name: copy.confirm }));
     expect(await screen.findByText("A estadia mudou enquanto você olhava. Confere de novo.")).toBeInTheDocument();
-    expect(await screen.findByText("Acontecendo")).toBeInTheDocument();
+    expect(await screen.findByText("Em andamento")).toBeInTheDocument();
   });
 });

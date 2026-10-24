@@ -63,11 +63,11 @@ export const GetApiV1ReviewsReportsResponse = zod.object({
   "hiddenAt": zod.string().datetime({"offset":true}),
   "reason": zod.string().nullish()
 }).describe('Se o admin ocultou, quando e por quê. Só o autor e o admin veem.')]).optional(),
-  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\noutro lado também avalia. Só o autor e o admin veem.'),
+  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\r\noutro lado também avalia. Só o autor e o admin veem.'),
   "subject": zod.union([zod.null(),zod.object({
   "name": zod.string(),
   "avatarUrl": zod.string().nullish()
-}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
+}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\r\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
 }).describe('A avaliação, na visão do admin. Nula se o autor a apagou.')]).optional()
 }).describe('Uma denúncia na fila do admin, com a avaliação denunciada.')),
   "page": zod.number().int(),
@@ -129,11 +129,11 @@ export const GetApiV1ReviewsReportsReportIdResponse = zod.object({
   "hiddenAt": zod.string().datetime({"offset":true}),
   "reason": zod.string().nullish()
 }).describe('Se o admin ocultou, quando e por quê. Só o autor e o admin veem.')]).optional(),
-  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\noutro lado também avalia. Só o autor e o admin veem.'),
+  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\r\noutro lado também avalia. Só o autor e o admin veem.'),
   "subject": zod.union([zod.null(),zod.object({
   "name": zod.string(),
   "avatarUrl": zod.string().nullish()
-}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
+}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\r\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
 }).describe('A avaliação, na visão do admin. Nula se o autor a apagou.')]).optional()
 }).describe('Uma denúncia na fila do admin, com a avaliação denunciada.'),
   "timestamp": zod.string().datetime({"offset":true})
@@ -198,11 +198,11 @@ export const PutApiV1ReviewsReportsReportIdResolutionResponse = zod.object({
   "hiddenAt": zod.string().datetime({"offset":true}),
   "reason": zod.string().nullish()
 }).describe('Se o admin ocultou, quando e por quê. Só o autor e o admin veem.')]).optional(),
-  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\noutro lado também avalia. Só o autor e o admin veem.'),
+  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\r\noutro lado também avalia. Só o autor e o admin veem.'),
   "subject": zod.union([zod.null(),zod.object({
   "name": zod.string(),
   "avatarUrl": zod.string().nullish()
-}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
+}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\r\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
 }).describe('A avaliação, na visão do admin. Nula se o autor a apagou.')]).optional()
 }).describe('Uma denúncia na fila do admin, com a avaliação denunciada.'),
   "timestamp": zod.string().datetime({"offset":true})
@@ -255,12 +255,12 @@ export const PutApiV1ReviewsReviewIdModerationHideResponse = zod.object({
   "hiddenAt": zod.string().datetime({"offset":true}),
   "reason": zod.string().nullish()
 }).describe('Se o admin ocultou, quando e por quê. Só o autor e o admin veem.')]).optional(),
-  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\noutro lado também avalia. Só o autor e o admin veem.'),
+  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\r\noutro lado também avalia. Só o autor e o admin veem.'),
   "subject": zod.union([zod.null(),zod.object({
   "name": zod.string(),
   "avatarUrl": zod.string().nullish()
-}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
-}).describe('Uma avaliação. O que é só do autor (ou do admin) — Guid? ReviewResponse.BookingId,\nDateTimeOffset? ReviewResponse.EditableUntil, ReviewModerationResponse? ReviewResponse.Moderation, DateTimeOffset? ReviewResponse.PublishedAt e\nReviewPartySummary? ReviewResponse.Subject — fica nulo e some do JSON na leitura de outras pessoas.'),
+}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\r\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
+}).describe('Uma avaliação. O que é só do autor (ou do admin) — Guid? ReviewResponse.BookingId,\r\nDateTimeOffset? ReviewResponse.EditableUntil, ReviewModerationResponse? ReviewResponse.Moderation, DateTimeOffset? ReviewResponse.PublishedAt e\r\nReviewPartySummary? ReviewResponse.Subject — fica nulo e some do JSON na leitura de outras pessoas.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 
@@ -305,12 +305,12 @@ export const DeleteApiV1ReviewsReviewIdModerationHideResponse = zod.object({
   "hiddenAt": zod.string().datetime({"offset":true}),
   "reason": zod.string().nullish()
 }).describe('Se o admin ocultou, quando e por quê. Só o autor e o admin veem.')]).optional(),
-  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\noutro lado também avalia. Só o autor e o admin veem.'),
+  "publishedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando os outros passam (ou passaram) a ler a avaliação: às cegas, no fim do prazo ou quando o\r\noutro lado também avalia. Só o autor e o admin veem.'),
   "subject": zod.union([zod.null(),zod.object({
   "name": zod.string(),
   "avatarUrl": zod.string().nullish()
-}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
-}).describe('Uma avaliação. O que é só do autor (ou do admin) — Guid? ReviewResponse.BookingId,\nDateTimeOffset? ReviewResponse.EditableUntil, ReviewModerationResponse? ReviewResponse.Moderation, DateTimeOffset? ReviewResponse.PublishedAt e\nReviewPartySummary? ReviewResponse.Subject — fica nulo e some do JSON na leitura de outras pessoas.'),
+}).describe('Quem foi avaliado, como aparece (o anfitrião ou o tutor). Só o autor e o admin veem: nas outras\r\nleituras o avaliado já é a página (o cantinho, o tutor, o pet ou a própria conta).')]).optional()
+}).describe('Uma avaliação. O que é só do autor (ou do admin) — Guid? ReviewResponse.BookingId,\r\nDateTimeOffset? ReviewResponse.EditableUntil, ReviewModerationResponse? ReviewResponse.Moderation, DateTimeOffset? ReviewResponse.PublishedAt e\r\nReviewPartySummary? ReviewResponse.Subject — fica nulo e some do JSON na leitura de outras pessoas.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

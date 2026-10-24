@@ -11,6 +11,8 @@ import {
 } from "@/test/fixtures/listingPage";
 import { ListingPageScreen } from "./ListingPageScreen";
 
+/** Recebe todo dia: as datas da prancha (20 a 25 dez) passam por um domingo, que a fixture não recebe. */
+const everyDay = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 const stay = {
   today: "2026-12-01",
   search: "where=Zona+7&pets=pet-1&from=2026-12-20&to=2026-12-25",
@@ -22,6 +24,7 @@ const stay = {
     { id: "pet-1", name: "Pipoca", coverUrl: listingPhotoFixture("#FFE9B0", "#C58B4F") },
     { id: "pet-2", name: "Mel", coverUrl: null },
   ],
+  closedPeriods: [],
 };
 const reviews = [
   listingReviewFixture(),
@@ -56,7 +59,11 @@ const meta = {
     useRouter.mockReturnValue({ ...getRouter(), replace: fn(), refresh: fn(), bfcacheId: "listing-page" });
   },
   args: {
-    listing: listingDetailFixture({ photos: listingPhotosFixture, rating: { average: 4.9, count: 18 } }),
+    listing: listingDetailFixture({
+      photos: listingPhotosFixture,
+      rating: { average: 4.9, count: 18 },
+      availableWeekdays: everyDay,
+    }),
     isOwner: false,
     accountRole: "owner",
     reviews,
@@ -69,9 +76,11 @@ type Story = StoryObj<typeof meta>;
 /** Como na prancha: tutor com a Pipoca escolhida, datas, compatibilidade e avaliações. */
 export const TutorCompativel: Story = { args: { compatibility: compatible } };
 export const ComAviso: Story = { args: { compatibility: warning } };
-export const SemFotos: Story = { args: { listing: listingDetailFixture({ rating: { average: 4.9, count: 18 } }) } };
+export const SemFotos: Story = {
+  args: { listing: listingDetailFixture({ rating: { average: 4.9, count: 18 }, availableWeekdays: everyDay }) },
+};
 export const SemAvaliacao: Story = {
-  args: { listing: listingDetailFixture({ photos: listingPhotosFixture }), reviews: [] },
+  args: { listing: listingDetailFixture({ photos: listingPhotosFixture, availableWeekdays: everyDay }), reviews: [] },
 };
 export const TutorSemEscolha: Story = {
   args: { stay: { ...stay, search: "", from: undefined, to: undefined, petIds: [], where: undefined } },

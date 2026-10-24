@@ -3,7 +3,7 @@
 import { Box, Button, Container, Skeleton, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { useFlashMessageOnce } from "@/shared/hooks/useFlashMessage";
 import { PawMark } from "@/shared/ui/brand/PawMark";
 import { EmptyState } from "@/shared/ui/feedback/EmptyState";
@@ -40,7 +40,7 @@ export function PetList({ accountId, role = "owner" }: { accountId: string; role
     return (
       <ErrorState
         title={petsCopy.loadError}
-        description={getErrorMessage(pets.error)}
+        description={translateError(pets.error)}
         onRetry={() => void pets.refetch()}
       />
     );

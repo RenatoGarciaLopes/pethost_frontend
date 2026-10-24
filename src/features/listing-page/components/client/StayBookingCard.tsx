@@ -3,13 +3,14 @@
 import { Avatar, Box, Button, ButtonBase, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { loginRedirectPath, switchAccountPath } from "@/shared/config/appRoutes";
 import { earliestRequestCheckIn, nightsBetween, validateRequestStay } from "@/shared/lib/date/stayRules";
 import { formatBRL } from "@/shared/lib/money";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { PawMark } from "@/shared/ui/brand/PawMark";
 import { DateRangeField } from "@/shared/ui/forms/DateRangeField";
+import { listingClosedDays, type ListingClosedPeriod } from "../../lib/listingClosedDays";
 import { stayTotal } from "../../lib/stayTotal";
 import { listingPageCopy as copy } from "../../lib/listingPageCopy";
 import { NightlyPrice } from "../NightlyPrice";
@@ -42,6 +43,10 @@ export interface StayBookingCardProps {
   count?: number;
   /** Pets ativos do tutor, para "Quem vai"; vazio fora da conta de tutor. */
   pets: StayBookingPet[];
+  /** Dias da semana em que o cantinho recebe: os outros ficam riscados no calendário. */
+  availableWeekdays: readonly string[];
+  /** Períodos fechados pelo anfitrião (só com conta; vazio para o visitante), riscados também. */
+  closedPeriods: readonly ListingClosedPeriod[];
 }
 
 /**
@@ -64,8 +69,14 @@ export function StayBookingCard({
   petIds,
   count,
   pets,
+  availableWeekdays,
+  closedPeriods,
 }: StayBookingCardProps) {
   const router = useRouter();
+  const closedDay = useMemo(
+    () => listingClosedDays(availableWeekdays, closedPeriods),
+    [availableWeekdays, closedPeriods],
+  );
   const [dates, setDates] = useState({ checkIn: from, checkOut: to });
   const [chosen, setChosen] = useState(petIds);
   const params = stayParams(search, dates, chosen);
@@ -109,6 +120,7 @@ export function StayBookingCard({
           checkOut={dates.checkOut}
           today={today}
           min={earliestRequestCheckIn(today)}
+          closedDay={closedDay}
           onChange={changeDates}
         />
         {account === "owner" && (

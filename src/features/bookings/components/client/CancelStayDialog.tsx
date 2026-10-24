@@ -3,7 +3,7 @@
 import { Box, Button, TextField } from "@mui/material";
 import { useState } from "react";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
 import { useCancelBooking } from "../../hooks/useBookingMutations";
 import { bookingCopy } from "../../lib/bookingCopy";
@@ -32,7 +32,7 @@ export function CancelStayDialog({ accountId, booking, onConflict }: CancelStayD
   const [reason, setReason] = useState("");
   return (
     <Box>
-      <Button variant="quiet" onClick={() => setOpen(true)}>
+      <Button variant="outlined" color="error" onClick={() => setOpen(true)}>
         {copy.open}
       </Button>
       <ConfirmDialog
@@ -42,7 +42,7 @@ export function CancelStayDialog({ accountId, booking, onConflict }: CancelStayD
         confirmLabel={copy.confirm}
         cancelLabel={copy.keep}
         busy={cancel.isPending}
-        error={cancel.isError ? getErrorMessage(cancel.error) : null}
+        error={cancel.isError ? translateError(cancel.error) : null}
         onConfirm={async () => {
           // mutateAsync: a estadia cancelada ou mudada deixa de ser cancelável e o diálogo some; a promessa resolve mesmo assim.
           try {
@@ -51,7 +51,7 @@ export function CancelStayDialog({ accountId, booking, onConflict }: CancelStayD
           } catch (error) {
             if (!hasErrorCode(error, "BOOKING_CONFLICT")) return;
             setOpen(false);
-            onConflict(getErrorMessage(error));
+            onConflict(translateError(error));
           }
         }}
         onCancel={() => {

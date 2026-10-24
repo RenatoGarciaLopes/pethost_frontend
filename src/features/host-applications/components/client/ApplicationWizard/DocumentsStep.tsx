@@ -3,7 +3,7 @@
 import { Box, LinearProgress, Stack, Typography } from "@mui/material";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { ImagePreparationError, prepareImageForUpload } from "@/shared/lib/image/prepareImageForUpload";
 import { Hint } from "@/shared/ui/feedback/Hint";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -37,12 +37,12 @@ const isDocumentKind = (field: string): field is DocumentKind => (DOCUMENT_KINDS
 
 /** Erro do envio → erro de cada vaga (`field` da API) e/ou aviso do passo. */
 function readUploadError(error: unknown): { slots: SlotErrors; notice: string | null } {
-  if (!isApiError(error)) return { slots: {}, notice: getErrorMessage(error) };
+  if (!isApiError(error)) return { slots: {}, notice: translateError(error) };
   if (error.status === 413) return { slots: {}, notice: copy.errors.tooLarge };
-  const fields = Object.keys(error.fieldErrors);
+  const fields = Object.keys(error.fieldIssues);
   const slots = Object.fromEntries(fields.filter(isDocumentKind).map((kind) => [kind, copy.errors.rejected]));
   const unplaced = error.code !== "VALIDATION_ERROR" || fields.some((field) => !isDocumentKind(field));
-  return { slots, notice: unplaced ? getErrorMessage(error) : null };
+  return { slots, notice: unplaced ? translateError(error) : null };
 }
 
 /**

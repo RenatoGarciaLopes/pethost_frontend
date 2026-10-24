@@ -25,6 +25,26 @@ it("REQ-CAL-009 um campo só mostra vazio, só a chegada e o período com as noi
   expect(field).toHaveValue("20 a 25 out · 5 noites");
 });
 
+it("REQ-CAL-010 período que já chega passando por um dia fechado mostra o motivo, sem esperar o calendário", () => {
+  renderWithProviders(
+    <DateRangeField
+      checkIn="2026-11-07"
+      checkOut="2026-11-10"
+      today="2026-10-15"
+      closedDay={(iso) =>
+        iso === "2026-11-08"
+          ? { reason: "o cantinho não recebe aos domingos", legend: "Não recebe aos domingos" }
+          : null
+      }
+      onChange={vi.fn()}
+    />,
+  );
+  expect(
+    screen.getByText("Essas datas passam por 8 nov, e o cantinho não recebe aos domingos. Escolhe outras."),
+  ).toBeVisible();
+  expect(screen.getByLabelText(FIELD)).toHaveAttribute("aria-invalid", "true");
+});
+
 it("REQ-SRCH-003 anuncia o erro ao fechar o calendário e devolve o foco ao campo", async () => {
   const { user } = renderWithProviders(
     <DateRangeField checkIn="2026-10-14" checkOut="2026-10-17" today="2026-10-15" onChange={vi.fn()} />,

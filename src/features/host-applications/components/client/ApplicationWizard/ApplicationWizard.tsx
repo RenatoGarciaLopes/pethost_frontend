@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { useUnsavedChangesGuard } from "@/shared/hooks/useUnsavedChangesGuard";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
@@ -54,7 +54,7 @@ export function ApplicationWizard({ accountId, entry }: ApplicationWizardProps) 
     return (
       <ErrorState
         title={copy.loadError}
-        description={getErrorMessage(query.error)}
+        description={translateError(query.error)}
         onRetry={() => void query.refetch()}
       />
     );

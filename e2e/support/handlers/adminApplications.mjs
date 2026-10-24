@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http, HttpResponse } from "msw";
 import { ok, fail, sessionUserOf } from "./session.mjs";
 import { z } from "zod";
@@ -99,7 +100,9 @@ async function decide(request, id, approval) {
       ? approveSchema.safeParse(body)
       : rejectSchema.safeParse(body);
   if (!parsed.success)
-    return fail(400, "VALIDATION_ERROR", [{ field: "reason", messages: ["Escreva um motivo de até 500 caracteres."] }]);
+    return fail(400, "VALIDATION_ERROR", [
+      fieldIssue("reason", "Escreva um motivo de até 500 caracteres.", "HOST_REASON_TOO_LONG", { max: 500 }),
+    ]);
   Object.assign(result.application, {
     status: approval ? "approved" : body.rejectionReason === "suspected_fraud" ? "rejected_final" : "rejected",
     rejectionReason: approval ? null : body.rejectionReason,
@@ -118,7 +121,9 @@ export const adminApplicationsHandlers = [
     if (error) return error;
     const status = new URL(request.url).searchParams.get("status") ?? "submitted";
     if (!["draft", "submitted", "approved", "rejected", "rejected_final", "cancelled", "expired"].includes(status))
-      return fail(400, "VALIDATION_ERROR", [{ field: "status", messages: ["Escolha um status conhecido."] }]);
+      return fail(400, "VALIDATION_ERROR", [
+        fieldIssue("status", "Escolha um status conhecido.", "HOST_STATUS_FILTER_INVALID"),
+      ]);
     return ok(
       applications.filter((item) => item.status === status).sort((a, b) => a.submittedAt.localeCompare(b.submittedAt)),
     );

@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { uploadPetPhoto, replacePetPhoto, removePetPhoto } from "../api/client/petMutations.client";
 import { petQueries } from "../api/queries";
 import { toPetDetail } from "../api/toPetDetail";
@@ -30,7 +30,7 @@ export function usePetPhotoMutations(accountId: string, petId: string) {
     } catch (error) {
       if (hasErrorCode(error, "PET_PHOTO_NOT_FOUND")) {
         await client.invalidateQueries({ queryKey: petQueries.detail(accountId, petId).queryKey });
-      } else setError(slot, getErrorMessage(error));
+      } else setError(slot, translateError(error));
     } finally {
       lock.current = false;
       setBusySlot(null);

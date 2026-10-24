@@ -24,6 +24,7 @@ export const Tons: Story = {
       <Stack direction="row" spacing={1}>
         <StatusPill tone="ok" label="Aprovada" />
         <StatusPill tone="info" label="Esperando resposta" />
+        <StatusPill tone="gema" label="Aceita · falta pagar" />
         <StatusPill tone="atencao" label="Falta um documento" />
         <StatusPill tone="erro" label="Recusada" />
         <StatusPill label="Pausada" />

@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http } from "msw";
 import { fail, ok, sessionUserOf } from "./session.mjs";
 import { switchAccounts } from "./switchAccounts.mjs";
@@ -87,7 +88,7 @@ function validateBody(input) {
       .map(([key, entry]) => [key, typeof entry === "string" ? entry.trim() : entry]),
   );
   const errors = [];
-  const reject = (field, message) => errors.push({ field, messages: [message] });
+  const reject = (field, message, code, params) => errors.push(fieldIssue(field, message, code, params));
   const species = [
     "dog",
     "cat",
@@ -102,15 +103,19 @@ function validateBody(input) {
     "turtle",
     "exotic",
   ];
-  if (!species.includes(value.species)) reject("species", "Escolhe que bicho é o seu.");
-  if (!value.name || value.name.length > 60) reject("name", "Use um nome de até 60 caracteres.");
-  if (value.species === "dog" && !value.size) reject("size", "Escolhe o porte do cachorro.");
+  if (!species.includes(value.species)) reject("species", "Escolhe que bicho é o seu.", "PET_SPECIES_INVALID");
+  if (!value.name || value.name.length > 60)
+    reject("name", "Use um nome de até 60 caracteres.", "PET_NAME_TOO_LONG", { max: 60 });
+  if (value.species === "dog" && !value.size) reject("size", "Escolhe o porte do cachorro.", "PET_SIZE_REQUIRED");
   if (value.size && (!["dog", "cat"].includes(value.species) || !["small", "medium", "large"].includes(value.size)))
-    reject("size", "Confere o porte.");
-  if (value.species === "exotic" && !value.speciesDescription) reject("speciesDescription", "Conta que bicho é o seu.");
-  if (!["male", "female", "unknown"].includes(value.sex)) reject("sex", "Escolhe o sexo ou marca Não sei.");
+    reject("size", "Confere o porte.", "PET_SIZE_INVALID");
+  if (value.species === "exotic" && !value.speciesDescription)
+    reject("speciesDescription", "Conta que bicho é o seu.", "PET_SPECIES_DESCRIPTION_REQUIRED");
+  if (!["male", "female", "unknown"].includes(value.sex))
+    reject("sex", "Escolhe o sexo ou marca Não sei.", "PET_SEX_INVALID");
   for (const field of ["isVaccinated", "isNeutered", "goodWithDogs", "goodWithCats", "goodWithKids"])
-    if (typeof value[field] !== "boolean") reject(field, "Marca Sim ou Não.");
+    if (typeof value[field] !== "boolean")
+      reject(field, "Marca Sim ou Não.", `PET_${field.replace(/[A-Z]/g, (c) => `_${c}`).toUpperCase()}_REQUIRED`);
   for (const [field, limit] of [
     ["speciesDescription", 60],
     ["breed", 60],
@@ -120,7 +125,13 @@ function validateBody(input) {
     ["vetContact", 160],
     ["notes", 2000],
   ])
-    if (value[field]?.length > limit) reject(field, `Use até ${limit} caracteres.`);
+    if (value[field]?.length > limit)
+      reject(
+        field,
+        `Use até ${limit} caracteres.`,
+        `PET_${field.replace(/[A-Z]/g, (c) => `_${c}`).toUpperCase()}_TOO_LONG`,
+        { max: limit },
+      );
   if (value.birthDate) {
     const date = new Date(`${value.birthDate}T00:00:00Z`);
     if (
@@ -129,17 +140,18 @@ function validateBody(input) {
       date.toISOString().slice(0, 10) !== value.birthDate ||
       value.birthDate > new Date().toISOString().slice(0, 10)
     )
-      reject("birthDate", "Confere a data de nascimento.");
+      reject("birthDate", "Confere a data de nascimento.", "PET_BIRTH_DATE_INVALID_FORMAT");
   }
   if (
     value.weightKg !== undefined &&
     (!(value.weightKg > 0 && value.weightKg <= 150) ||
       Math.abs(value.weightKg * 1000 - Math.round(value.weightKg * 1000)) > 1e-8)
   )
-    reject("weightKg", "Confere o peso.");
+    reject("weightKg", "Confere o peso.", "PET_WEIGHT_OUT_OF_RANGE", { max: 200 });
   if (value.microchip) {
     value.microchip = value.microchip.replace(/[\s-]/g, "");
-    if (!/^\d{15}$/.test(value.microchip)) reject("microchip", "O microchip tem 15 números.");
+    if (!/^\d{15}$/.test(value.microchip))
+      reject("microchip", "O microchip tem 15 números.", "PET_MICROCHIP_INVALID", { digits: 15 });
   }
   if (value.species !== "exotic") delete value.speciesDescription;
   return { value, errors };
@@ -184,7 +196,7 @@ export const petsHandlers = [
     if (!["dog", "cat"].includes(candidate.species)) candidate.size = null;
     if (candidate.species !== "exotic") candidate.speciesDescription = null;
     if (result.current.species !== "dog" && candidate.species === "dog" && !patch.size)
-      return fail(400, "VALIDATION_ERROR", [{ field: "size", messages: ["Escolhe o porte do cachorro."] }]);
+      return fail(400, "VALIDATION_ERROR", [fieldIssue("size", "Escolhe o porte do cachorro.", "PET_SIZE_REQUIRED")]);
     const { value, errors } = validateBody(candidate);
     if (errors.length) return fail(400, "VALIDATION_ERROR", errors);
     if (candidate.isActive && microchipConflict(candidate.id, value.microchip))
@@ -230,7 +242,7 @@ export const petsHandlers = [
     const form = await request.formData().catch(() => null);
     const file = form?.get("file");
     if (!file || typeof file === "string")
-      return fail(400, "VALIDATION_ERROR", [{ field: "file", messages: ["Falta a foto."] }]);
+      return fail(400, "VALIDATION_ERROR", [fieldIssue("file", "Falta a foto.", "IMAGE_FILE_REQUIRED")]);
     const valid = validateImageFile(file);
     if (!valid.ok)
       return fail(
@@ -309,7 +321,7 @@ export const petsHandlers = [
     const form = await request.formData().catch(() => null);
     const file = form?.get("file");
     if (!file || typeof file === "string")
-      return fail(400, "VALIDATION_ERROR", [{ field: "file", messages: ["Falta a foto."] }]);
+      return fail(400, "VALIDATION_ERROR", [fieldIssue("file", "Falta a foto.", "IMAGE_FILE_REQUIRED")]);
     const valid = validateImageFile(file);
     if (!valid.ok)
       return fail(
@@ -319,7 +331,7 @@ export const petsHandlers = [
           : valid.reason === "type"
             ? "UNSUPPORTED_MEDIA_TYPE"
             : "VALIDATION_ERROR",
-        valid.reason === "empty" ? [{ field: "file", messages: ["Falta a foto."] }] : undefined,
+        valid.reason === "empty" ? [fieldIssue("file", "Falta a foto.", "IMAGE_FILE_REQUIRED")] : undefined,
       );
     if (file.name === "falha.jpg") return fail(500, "UNEXPECTED_ERROR");
     if (current.photos.length >= 3) return fail(422, "PET_PHOTO_LIMIT_REACHED");
