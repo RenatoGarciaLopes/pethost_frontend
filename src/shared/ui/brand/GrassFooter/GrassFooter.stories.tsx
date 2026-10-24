@@ -24,8 +24,12 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   name: "REQ-UIC-011 Rodapé de gramado",
   play: async ({ canvasElement }) => {
-    const footer = within(canvasElement).getByTestId("grass-footer");
-    await expect(footer).toHaveAttribute("aria-hidden", "true");
+    const footer = within(canvasElement).getByRole("contentinfo");
+    await expect(within(footer).getByRole("navigation", { name: "Navegue" })).toBeVisible();
+    await expect(within(footer).getByRole("link", { name: "Como funciona" })).toHaveAttribute(
+      "href",
+      "/#como-funciona",
+    );
   },
 };
 
@@ -33,6 +37,12 @@ export const Default: Story = {
 export const Celular: Story = {
   name: "REQ-UIC-011 Celular (390 px)",
   globals: { viewport: { value: "celular", isRotated: false } },
+};
+
+/** Reserva para barra fixa da página, sem cobrir os direitos ou os atalhos no fim da rolagem. */
+export const CelularComBarraFixa: Story = {
+  globals: { viewport: { value: "celular", isRotated: false } },
+  args: { mobileBottomSpace: 12 },
 };
 
 /** Com `prefers-reduced-motion`, o rodapé não ouve a rolagem: fica o degradê estático (sem `--descida`). */

@@ -13,24 +13,26 @@ export interface AppShellProps {
   children: ReactNode;
   /** Página aberta (o cantinho): o Entrar do visitante volta para ela depois do login. */
   returnTo?: string;
+  /** Espaço extra no rodapé mobile, em unidades do tema, para a barra fixa composta pela página. */
+  mobileBottomSpace?: number;
 }
 
 /**
  * Casca das áreas logadas (spec 004) e da página aberta do cantinho, Server Component: "Pular para o conteúdo", cabeçalho no tom da conta
  * (REQ-SHELL-001: tutor papel, anfitrião gramado claro, admin areia), logo levando à casa do papel, menu da
  * conta, os atalhos do papel (`NAV_ITEMS`; gaveta no celular), o `<main id="conteudo">` e o `GrassFooter`
- * (rodapé de gramado que desce para a terra, só desenho; fora do admin: orçamento de personalidade zero).
+ * (navegação, contato e direitos sobre a terra; fora do admin: orçamento de personalidade zero).
  *
  * @example <RoleGate roles="host">{(user) => <AppShell user={user}>{children}</AppShell>}</RoleGate>
  */
-export function AppShell({ user, children, returnTo }: AppShellProps) {
+export function AppShell({ user, children, returnTo, mobileBottomSpace }: AppShellProps) {
   return (
     <Box sx={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
       <AppHeader user={user} returnTo={returnTo} />
       <Box component="main" id="conteudo" tabIndex={-1} sx={{ outline: "none", flexGrow: 1 }}>
         {children}
       </Box>
-      {user?.role !== "admin" && <GrassFooter />}
+      {user?.role !== "admin" && <GrassFooter mobileBottomSpace={mobileBottomSpace} />}
     </Box>
   );
 }

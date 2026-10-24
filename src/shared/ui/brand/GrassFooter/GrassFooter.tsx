@@ -1,8 +1,23 @@
 "use client";
-import { Box } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
+import NextLink from "next/link";
 import { useEffect, useRef } from "react";
+import { CONTACT_CHANNELS } from "@/shared/config/contact";
 import { usePrefersReducedMotion } from "@/shared/lib/motion/usePrefersReducedMotion";
+import { keyboardFocus } from "@/shared/theme/focus";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { GroundLine } from "../GroundLine";
+import { DoorMark } from "../DoorMark";
+import { grassFooterCopy as copy } from "./grassFooterCopy";
+
+const footerLink = {
+  color: "inherit",
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: 44,
+  overflowWrap: "anywhere",
+  [keyboardFocus()]: { outlineColor: "quintal.papel" },
+} as const;
 
 /** Quanto a terra escurece (brilho), no máximo, quando o rodapé aparece inteiro (fim da rolagem). */
 const MAX_DARKEN = 0.3;
@@ -22,15 +37,18 @@ function descentProgress(rect: DOMRect, viewportHeight: number) {
 }
 
 /**
- * Rodapé decorativo da casca: o gramado do hero (`GroundLine`) em cima e, descendo, terra clara, terra média
+ * Rodapé público da casca: o gramado do hero (`GroundLine`) em cima e, descendo, terra clara, terra média
  * e terra funda, com pedrinhas e raízes no traço de tinta. Quem rola até o fim "entra debaixo da terra": a terra
  * escurece conforme o rodapé sobe na tela. Com `prefers-reduced-motion`, fica só o degradê estático.
- * Sem conteúdo e sem landmark (`aria-hidden`); só desenho.
+ * Landmark `contentinfo` com navegação e contatos aprovados de `shared/config/contact`.
+ * Texto em papel sobre base de terra estável, fora do filtro de escurecimento.
+ * Sem canais aprovados, a coluna de contato fica oculta e o desktop usa duas colunas.
  *
- * @example <GrassFooter />
+ * @param mobileBottomSpace Reserva em unidades de espaçamento do tema para uma barra fixa no celular.
+ * @example <GrassFooter mobileBottomSpace={12} />
  */
-export function GrassFooter() {
-  const ref = useRef<HTMLDivElement>(null);
+export function GrassFooter({ mobileBottomSpace = 0 }: { mobileBottomSpace?: number }) {
+  const ref = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
@@ -58,7 +76,7 @@ export function GrassFooter() {
   return (
     <Box
       ref={ref}
-      aria-hidden="true"
+      component="footer"
       data-testid="grass-footer"
       sx={(theme) => ({
         position: "relative",
@@ -69,6 +87,7 @@ export function GrassFooter() {
     >
       <GroundLine variant="wave" height={44} />
       <Box
+        aria-hidden="true"
         sx={(theme) => ({
           position: "relative",
           height: { xs: 220, md: 300 },
@@ -126,6 +145,58 @@ export function GrassFooter() {
             <ellipse cx="96" cy="214" rx="20" ry="12" />
           </g>
         </Box>
+      </Box>
+      <Box sx={{ bgcolor: "scene.soilContent", color: "quintal.papel" }}>
+        <PageContainer sx={{ pt: { xs: 4, md: 5 }, pb: { xs: 3 + mobileBottomSpace, md: 3 } }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: CONTACT_CHANNELS.length ? "1.2fr 1fr 1fr" : "1.2fr 1fr" },
+              gap: { xs: 4, md: 8 },
+            }}
+          >
+            <Box>
+              <Typography variant="h3" component="p" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <DoorMark width={32} interactive={false} />
+                {copy.brand}
+              </Typography>
+              <Typography sx={{ mt: 2, maxWidth: 300 }}>{copy.tagline}</Typography>
+            </Box>
+            <Box component="nav" aria-label={copy.navigation}>
+              <Typography component="h2" variant="h4" sx={{ mb: 1 }}>
+                {copy.navigation}
+              </Typography>
+              <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
+                {copy.links.map(({ label, href }) => (
+                  <li key={href}>
+                    <Link component={NextLink} href={href} sx={footerLink}>
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </Box>
+            </Box>
+            {CONTACT_CHANNELS.length > 0 && (
+              <Box>
+                <Typography component="h2" variant="h4" sx={{ mb: 1 }}>
+                  {copy.contact}
+                </Typography>
+                <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
+                  {CONTACT_CHANNELS.map(({ label, href }) => (
+                    <li key={href}>
+                      <Link href={href} sx={footerLink}>
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </Box>
+              </Box>
+            )}
+          </Box>
+          <Typography variant="body2" sx={{ mt: 4, pt: 3, borderTop: "1px solid", borderColor: "quintal.papel" }}>
+            © {new Date().getFullYear()} {copy.rights}
+          </Typography>
+        </PageContainer>
       </Box>
     </Box>
   );

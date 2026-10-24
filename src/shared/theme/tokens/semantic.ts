@@ -39,6 +39,8 @@ export const sceneColors = {
   soilLight: "#E2C99E",
   soilMid: "#C09566",
   soilDeep: "#8A6240",
+  /** Base estável do conteúdo do rodapé: papel e indicadores coral passam AA. */
+  soilContent: "#493323",
   /** Pedrinhas do rodapé, mais claras que a terra para aparecerem no traço de tinta. */
   stone: "#F1E3C6",
 } as const;

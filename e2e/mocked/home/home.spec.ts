@@ -95,7 +95,10 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
   await expect(brandLink).toHaveCSS("text-decoration-line", "none");
   await expect(brandLink).toHaveCSS("color", "rgb(31, 26, 23)");
   const header = await page.getByRole("banner").boundingBox();
-  for (const content of [brandLink.locator("svg"), page.getByRole("link", { name: "Entrar", exact: true })]) {
+  for (const content of [
+    brandLink.locator("svg"),
+    page.getByRole("banner").getByRole("link", { name: "Entrar", exact: true }),
+  ]) {
     const bounds = await content.boundingBox();
     expect(bounds!.y - header!.y).toBeGreaterThanOrEqual(8);
     expect(header!.y + header!.height - (bounds!.y + bounds!.height)).toBeGreaterThanOrEqual(10);

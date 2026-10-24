@@ -75,7 +75,7 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
       ...selectedPets.map((pet) => prefetchCompatibility(queryClient, user.id, listing.id, pet.id, stay)),
     ]);
   return (
-    <AppShell user={user} returnTo={path}>
+    <AppShell user={user} returnTo={path} mobileBottomSpace={isOwner ? 0 : 12}>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ListingPageScreen
           listing={listing}

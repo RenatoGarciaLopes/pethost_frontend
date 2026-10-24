@@ -1,5 +1,5 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { afterEach, expect, it, vi } from "vitest";
 import { apiFail, apiOk, fakeJwt, nowSeconds, sessionUserFixture } from "@/test/fixtures/session";
@@ -99,7 +99,7 @@ it("renova sessão na raiz sem parâmetros", async () => {
 it("access vencido sem refresh continua visitante", async () => {
   requestState.accessToken = fakeJwt(nowSeconds() - 60);
   renderWithProviders(await resolveHomeContent(), { theme: quintalTheme });
-  expect(screen.getByRole("link", { name: "Entrar" })).toBeVisible();
+  expect(within(screen.getByRole("banner")).getByRole("link", { name: "Entrar" })).toBeVisible();
 });
 
 it("REQ-HOME-001 home pública tem metadata e não consulta sessão sem cookie", async () => {

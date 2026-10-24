@@ -123,6 +123,6 @@ it.each([
   setup(role);
   const footer = screen.queryByTestId("grass-footer");
   if (!shown) return expect(footer).not.toBeInTheDocument();
-  expect(footer).toHaveAttribute("aria-hidden", "true");
+  expect(footer).toBe(screen.getByRole("contentinfo"));
   expect(screen.getByRole("main").compareDocumentPosition(footer!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 });
