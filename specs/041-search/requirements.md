@@ -86,3 +86,7 @@ Decisão do Renato: a home é a página de resultados e a rota `/search` sai ([[
 - **Chips na home:** os mesmos do `FilterChips` (Combina com {pet}, Casa com quintal, Sem criança/cachorro/gato, Casa, Apartamento, Aceita gatos, Aceita porte grande). "Vizinho" e "Responde rápido" continuam fora: a API não filtra (lacuna registrada).
 - **Removidos:** a rota `/search` (sem redirect: nenhum link externo a usa), `SearchScreen`, `SearchExperience` (virou `SearchResultsSection`, sem a barra), `buildHomeSearchPath` e o botão "Ver todos os cantinhos" da vitrine.
 - **Mapa nos resultados (079 + 080):** com região na busca (`where` ou `state`) e resultados, `SearchResultsSection` monta o `SearchMap`: lista à esquerda e mapa à direita a partir de `lg`; no celular, botão "Ver mapa" abre o mapa em tela cheia (REQ-SRCH-013).
+
+## Revisão 096 (23/10/2026): fim da lista
+
+REQ-SRCH-010: a ampliação de raio continua disponível no fim de lista, inclusive preenchida. A frase "Tenta outras datas ou tira um filtro." é ajuda de recuperação de **lista vazia**, sem raio maior, erro ou carregamento; não aparece sob resultados válidos. Detalhes e validação: [sticky-header-096.md](../004-app-shell-and-guards/sticky-header-096.md).

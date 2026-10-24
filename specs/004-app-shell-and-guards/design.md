@@ -109,3 +109,7 @@ Ajuste na spec 010: ela usa `toSafeInternalPath` (spec 003) e `resolvePostLoginP
 - **Item ativo (`HeaderNav`):** contorno de tinta e fundo papel, raio `control`, como na prancha; todos os itens em negrito. Continua com `aria-current="page"` (REQ-SHELL-008: destaque não só por cor).
 - **Conta (`AccountMenu`):** sempre a pílula contornada com avatar e primeiro nome (na casca e na home); abaixo de 900 px só o avatar (REQ-SHELL-006). A prop `appearance` saiu: não havia mais quem usasse o avatar isolado.
 - **Testes:** `navigation.test.ts` (atalhos por papel), `HeaderNav.test.tsx` (`/host/bookings/123` marca "Pedidos"; `/host/payments` cai em "Painel"), `AppHeader.test.tsx` (atalhos e pílula do tutor na casca).
+
+## Revisão 096: cabeçalho fixo
+
+Sticky compartilhado pela home, resultados, contas e cantinho; altura medida em variável CSS para âncoras e painéis. Interface, limites e validação: [sticky-header-096.md](sticky-header-096.md).

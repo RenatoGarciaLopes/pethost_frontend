@@ -595,3 +595,9 @@ GlobalError, fronteira alternativa que substitui o layout sem MUI/providers, ins
 ## Revisão 074 do cadastro
 
 RegisterChoiceScreen foi removido; /register compõe RegistrationScreen owner diretamente. RegisterChoice permanece interno ao wizard como cartões de troca de papel. Stories de RegistrationScreen cobrem composição do wizard/PersonStep; stories de RegisterChoice cobrem as opções. Nenhuma store/provider/pasta nova. WizardProgress e PasswordStrengthChecklist foram estendidos nas pastas existentes. Fonte técnica: [cadastro fiel](../specs/005-ui-conformance/register-fidelity-implementation.md).
+
+## Conteúdo do rodapé (093)
+
+`src/shared/config/contact.ts` mantém os canais públicos aprovados, tipados e sem transporte HTTP. `shared/ui/brand/GrassFooter/grassFooterCopy.ts` mantém textos e destinos do rodapé; sem diretórios técnicos novos. Interface, consumo, limites e testes: `specs/005-ui-conformance/footer-content-implementation.md`.
+
+Revisão da 093: sem diretórios novos. GrassFooter recebe accountRole da sessão na home/AppShell e usa NAV_ITEMS para atalhos pessoais. DoorMark aceita wordmarkColor, com uso real na assinatura em papel do footer. soilContent removido; soilDeep atende onda e textos, sem painel separado. Fonte: `specs/005-ui-conformance/footer-content-implementation.md`.

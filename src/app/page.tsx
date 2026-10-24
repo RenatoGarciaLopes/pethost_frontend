@@ -85,7 +85,7 @@ async function HomeContent({ searchParams }: HomePageProps) {
           initialError={initialError}
         />
       </HydrationBoundary>
-      <GrassFooter />
+      <GrassFooter accountRole={user?.role} />
     </>
   );
 }

@@ -9,7 +9,15 @@ import { accountQueryKey } from "@/shared/api/query/queryClient";
 import { AppShell } from "./AppShell";
 
 /** Cache isolado, como nas stories de AddressFields, sem chamadas ao backend. `visitor`: sem conta (página aberta). */
-function Frame({ role }: { role: "owner" | "host" | "admin" | "visitor" }) {
+function Frame({
+  role,
+  scrolling = false,
+  mobileBottomSpace,
+}: {
+  role: "owner" | "host" | "admin" | "visitor";
+  scrolling?: boolean;
+  mobileBottomSpace?: number;
+}) {
   const [client] = useState(() => {
     const cache = new QueryClient();
     cache.setQueryData(accountQueryKey("story-account", "linked-accounts"), [
@@ -21,13 +29,14 @@ function Frame({ role }: { role: "owner" | "host" | "admin" | "visitor" }) {
   return (
     <QueryClientProvider client={client}>
       <AppShell
+        mobileBottomSpace={mobileBottomSpace}
         user={
           role === "visitor"
             ? null
             : { id: "story-account", fullName: "Camila Souza", email: "camila@exemplo.test", role, isActive: true }
         }
       >
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 3, minHeight: scrolling ? "180vh" : undefined }}>
           <Typography component="h1" variant="h4">
             Seu cantinho
           </Typography>
@@ -103,9 +112,18 @@ export const Visitante: Story = {
   args: { role: "visitor" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+    await expect(within(canvas.getByRole("banner")).getByRole("link", { name: "Entrar" })).toHaveAttribute(
+      "href",
+      "/login",
+    );
     await expect(canvas.queryByRole("navigation", { name: "Navegação principal" })).not.toBeInTheDocument();
   },
+};
+
+/** O cantinho com barra fixa reserva o fim do rodapé no celular. */
+export const VisitanteComBarraFixa: Story = {
+  args: { role: "visitor", mobileBottomSpace: 12 },
+  globals: { viewport: { value: "celular", isRotated: false } },
 };
 
 export const Celular: Story = {
@@ -119,5 +137,18 @@ export const Celular: Story = {
     // O mock de router do Storybook segura a navegação por âncora; o foco no main é provado no E2E (shell.spec.ts).
     await expect(skip).toHaveAttribute("href", "#conteudo");
     await expect(canvas.getByRole("main")).toHaveAttribute("id", "conteudo");
+  },
+};
+
+/** Página longa para inspecionar o cabeçalho fixo e o skip link após a rolagem. */
+export const Rolagem: Story = {
+  args: { scrolling: true },
+  play: async ({ canvasElement }) => {
+    const banner = within(canvasElement).getByRole("banner");
+    const viewport = canvasElement.ownerDocument.defaultView!;
+    viewport.scrollTo(0, 400);
+    await waitFor(() => expect(banner.getBoundingClientRect().top).toBe(0));
+    await expect(getComputedStyle(banner).position).toBe("sticky");
+    viewport.scrollTo(0, 0);
   },
 };

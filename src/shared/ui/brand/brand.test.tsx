@@ -18,10 +18,13 @@ it("REQ-DS-015 DoorMark nomeia marca quando informativo e respeita escala", () =
   rerender(<DoorMark title="PetHost" size="large" withWordmark interactive={false} />);
   expect(screen.getByRole("img", { name: "PetHost" })).toHaveAttribute("width", "170");
   expect(screen.getByText("pethost")).toBeVisible();
+  expect(screen.getByText("pethost")).toHaveStyle({ color: "var(--mui-palette-text-primary)" });
   expect(container.querySelector("path")).toHaveAttribute("stroke-width", "6");
   rerender(<DoorMark title="Marca" width={100} />);
   expect(screen.getByRole("img", { name: "Marca" })).toHaveAttribute("height", "110");
   expect(screen.queryByText("pethost")).not.toBeInTheDocument();
+  rerender(<DoorMark withWordmark wordmarkColor="quintal.papel" />);
+  expect(screen.getByText("pethost")).toHaveStyle({ color: "var(--mui-palette-quintal-papel)" });
 });
 it("GroundLine mantém traço ao esticar e permite faixa sem tufos", () => {
   const { container, rerender } = renderWithProviders(<GroundLine />, { theme: quintalTheme });

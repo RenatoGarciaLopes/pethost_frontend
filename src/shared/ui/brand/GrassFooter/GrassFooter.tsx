@@ -1,19 +1,35 @@
 "use client";
-import { Box } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
+import NextLink from "next/link";
 import { useEffect, useRef } from "react";
+import type { AccountRole } from "@/shared/auth/contracts/session";
+import { CONTACT_CHANNELS } from "@/shared/config/contact";
+import { NAV_ITEMS } from "@/shared/config/navigation";
 import { usePrefersReducedMotion } from "@/shared/lib/motion/usePrefersReducedMotion";
+import { keyboardFocus } from "@/shared/theme/focus";
+import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { GroundLine } from "../GroundLine";
+import { DoorMark } from "../DoorMark";
+import { grassFooterCopy as copy } from "./grassFooterCopy";
 
-/** Quanto a terra escurece (brilho), no máximo, quando o rodapé aparece inteiro (fim da rolagem). */
+const footerLink = {
+  color: "inherit",
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: 44,
+  overflowWrap: "anywhere",
+  [keyboardFocus()]: { outlineColor: "quintal.papel" },
+} as const;
+
+/** Mistura máxima de tinta nas cores da terra quando o rodapé aparece inteiro. */
 const MAX_DARKEN = 0.3;
 
-/** Só a terra escurece (a grama não): o filtro vai nos dois svgs de terra, lido de `--descida`. */
+/** Geometria da terra; cores dinâmicas compartilhadas pela ilustração e pelo conteúdo. */
 const soilLayer = {
   position: "absolute",
   inset: 0,
   width: "100%",
   height: "100%",
-  filter: `brightness(calc(1 - var(--descida) * ${MAX_DARKEN}))`,
 } as const;
 
 /** Quanto do rodapé já subiu na tela: 0 antes de aparecer, 1 com ele inteiro à vista. */
@@ -22,16 +38,34 @@ function descentProgress(rect: DOMRect, viewportHeight: number) {
 }
 
 /**
- * Rodapé decorativo da casca: o gramado do hero (`GroundLine`) em cima e, descendo, terra clara, terra média
+ * Rodapé público da casca: o gramado do hero (`GroundLine`) em cima e, descendo, terra clara, terra média
  * e terra funda, com pedrinhas e raízes no traço de tinta. Quem rola até o fim "entra debaixo da terra": a terra
  * escurece conforme o rodapé sobe na tela. Com `prefers-reduced-motion`, fica só o degradê estático.
- * Sem conteúdo e sem landmark (`aria-hidden`); só desenho.
+ * Landmark `contentinfo` com navegação e contatos aprovados de `shared/config/contact`.
+ * Texto em papel dentro da última camada; o mesmo tom acompanha a onda e o conteúdo, sem emenda.
+ * Sem canais aprovados, a coluna de contato fica oculta e a navegação se distribui em duas colunas.
  *
- * @example <GrassFooter />
+ * @param mobileBottomSpace Reserva em unidades de espaçamento do tema para uma barra fixa no celular.
+ * @param accountRole Papel confirmado pela sessão; ausente indica visitante. Somente visitante vê entrar/cadastro.
+ * @example <GrassFooter mobileBottomSpace={12} />
  */
-export function GrassFooter() {
-  const ref = useRef<HTMLDivElement>(null);
+export function GrassFooter({
+  mobileBottomSpace = 0,
+  accountRole,
+}: {
+  mobileBottomSpace?: number;
+  accountRole?: AccountRole;
+}) {
+  const ref = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const links = [
+    ...copy.links,
+    ...(accountRole
+      ? NAV_ITEMS.filter(
+          (item) => item.roles.includes(accountRole) && (item.id === "owner-stays" || item.id === "host-home"),
+        )
+      : copy.visitorLinks),
+  ];
 
   useEffect(() => {
     const footer = ref.current;
@@ -58,28 +92,29 @@ export function GrassFooter() {
   return (
     <Box
       ref={ref}
-      aria-hidden="true"
+      component="footer"
       data-testid="grass-footer"
       sx={(theme) => ({
         position: "relative",
         mt: { xs: 6, md: 8 },
         "--descida": 0,
         "--ink": theme.palette.quintal.tinta,
+        "--soil-light": `color-mix(in srgb, ${theme.palette.scene.soilLight}, ${theme.palette.quintal.tinta} calc(var(--descida) * ${MAX_DARKEN * 100}%))`,
+        "--soil-mid": `color-mix(in srgb, ${theme.palette.scene.soilMid}, ${theme.palette.quintal.tinta} calc(var(--descida) * ${MAX_DARKEN * 100}%))`,
+        "--soil-deep": `color-mix(in srgb, ${theme.palette.scene.soilDeep}, ${theme.palette.quintal.tinta} calc(var(--descida) * ${MAX_DARKEN * 100}%))`,
+        "--stone": `color-mix(in srgb, ${theme.palette.scene.stone}, ${theme.palette.quintal.tinta} calc(var(--descida) * ${MAX_DARKEN * 100}%))`,
       })}
     >
       <GroundLine variant="wave" height={44} />
       <Box
-        sx={(theme) => ({
+        data-testid="grass-footer-layers"
+        aria-hidden="true"
+        sx={{
           position: "relative",
           height: { xs: 220, md: 300 },
           overflow: "hidden",
           bgcolor: "scene.ground",
-          borderBottom: "2px solid var(--ink)",
-          "--soil-light": theme.palette.scene.soilLight,
-          "--soil-mid": theme.palette.scene.soilMid,
-          "--soil-deep": theme.palette.scene.soilDeep,
-          "--stone": theme.palette.scene.stone,
-        })}
+        }}
       >
         <Box component="svg" viewBox="0 0 1440 300" preserveAspectRatio="none" focusable="false" sx={soilLayer}>
           <path
@@ -96,9 +131,10 @@ export function GrassFooter() {
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
           />
+          <path d="M0 242C240 226 420 256 680 240S1020 224 1240 246 1390 238 1440 242V300H0Z" fill="var(--soil-deep)" />
           <path
-            d="M0 242C240 226 420 256 680 240S1020 224 1240 246 1390 238 1440 242V300H0Z"
-            fill="var(--soil-deep)"
+            d="M0 242C240 226 420 256 680 240S1020 224 1240 246 1390 238 1440 242"
+            fill="none"
             stroke="var(--ink)"
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
@@ -126,6 +162,68 @@ export function GrassFooter() {
             <ellipse cx="96" cy="214" rx="20" ry="12" />
           </g>
         </Box>
+      </Box>
+      <Box data-testid="grass-footer-earth" sx={{ bgcolor: "var(--soil-deep)", color: "quintal.papel" }}>
+        <PageContainer sx={{ pt: { xs: 4, md: 5 }, pb: { xs: 3 + mobileBottomSpace, md: 3 } }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: CONTACT_CHANNELS.length ? "1fr 1fr 1fr" : "minmax(0, 1fr) minmax(0, 2fr)",
+              },
+              gap: { xs: 4, md: 8 },
+            }}
+          >
+            <Box>
+              <DoorMark withWordmark wordmarkColor="quintal.papel" interactive={false} />
+              <Typography sx={{ mt: 2, maxWidth: 300 }}>{copy.tagline}</Typography>
+            </Box>
+            <Box component="nav" aria-label={copy.navigation}>
+              <Typography component="h2" variant="h4" sx={{ mb: 1 }}>
+                {copy.navigation}
+              </Typography>
+              <Box
+                component="ul"
+                sx={{
+                  listStyle: "none",
+                  m: 0,
+                  p: 0,
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: CONTACT_CHANNELS.length ? "1fr" : "repeat(2, minmax(0, 1fr))" },
+                  columnGap: 3,
+                }}
+              >
+                {links.map(({ label, href }) => (
+                  <li key={href}>
+                    <Link component={NextLink} href={href} sx={footerLink}>
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </Box>
+            </Box>
+            {CONTACT_CHANNELS.length > 0 && (
+              <Box>
+                <Typography component="h2" variant="h4" sx={{ mb: 1 }}>
+                  {copy.contact}
+                </Typography>
+                <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0 }}>
+                  {CONTACT_CHANNELS.map(({ label, href }) => (
+                    <li key={href}>
+                      <Link href={href} sx={footerLink}>
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </Box>
+              </Box>
+            )}
+          </Box>
+          <Typography variant="body2" sx={{ mt: 4, pt: 3, borderTop: "1px solid", borderColor: "quintal.papel" }}>
+            © {new Date().getFullYear()} {copy.rights}
+          </Typography>
+        </PageContainer>
       </Box>
     </Box>
   );
