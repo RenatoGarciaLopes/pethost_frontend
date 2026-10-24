@@ -2,13 +2,30 @@ import { screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
-import { Calendar, type CalendarProps } from "./Calendar";
+import { Calendar, type CalendarClosedDay, type CalendarProps } from "./Calendar";
 import type { RangeValue } from "./calendarDates";
 
 const day = (label: string) => screen.getByRole("button", { name: new RegExp(`, ${label}( |,|$)`) });
 const iso = (value: string) => document.querySelector<HTMLElement>(`[data-iso="${value}"]`)!;
 
-function Range({ initial = { start: "", end: "" } }: { initial?: RangeValue }) {
+const sunday: CalendarClosedDay = { reason: "o cantinho não recebe aos domingos", legend: "Não recebe aos domingos" };
+const holiday: CalendarClosedDay = { reason: "o anfitrião fechou a agenda nesse dia", legend: "Dias fechados" };
+/** Domingos fechados e a agenda fechada de 28 a 30 out. */
+const closedDay = (value: string) =>
+  new Date(`${value}T00:00:00Z`).getUTCDay() === 0
+    ? sunday
+    : value >= "2026-10-28" && value <= "2026-10-30"
+      ? holiday
+      : null;
+const closed = (label: string, reason: string) => screen.getByRole("button", { name: `${label}: ${reason}` });
+
+function Range({
+  initial = { start: "", end: "" },
+  closedDay,
+}: {
+  initial?: RangeValue;
+  closedDay?: CalendarProps["closedDay"];
+}) {
   const [value, setValue] = useState(initial);
   return (
     <Calendar
@@ -20,6 +37,7 @@ function Range({ initial = { start: "", end: "" } }: { initial?: RangeValue }) {
       min="2026-10-15"
       max="2027-10-15"
       maxNights={30}
+      closedDay={closedDay}
     />
   );
 }
@@ -143,6 +161,32 @@ describe("Calendar (REQ-CAL-009 prévia do intervalo)", () => {
     const { user } = renderWithProviders(<Range />);
     await user.hover(day("25 de outubro de 2026"));
     expect(screen.getByText("Escolhe o dia da chegada.")).toBeInTheDocument();
+  });
+});
+
+describe("Calendar (REQ-CAL-010 dias fechados com motivo)", () => {
+  it("dia fechado fica desabilitado com o motivo no nome, não escolhe, e o rodapé tem a legenda do mês", async () => {
+    const { user } = renderWithProviders(<Range closedDay={closedDay} />);
+    const sundayCell = closed("domingo, 18 de outubro de 2026", sunday.reason);
+    expect(sundayCell).toHaveAttribute("aria-disabled", "true");
+    expect(closed("quarta-feira, 28 de outubro de 2026", holiday.reason)).toHaveAttribute("aria-disabled", "true");
+    await user.click(sundayCell);
+    expect(screen.getByText("Escolhe o dia da chegada.")).toBeInTheDocument();
+    expect(screen.getByText("Não recebe aos domingos")).toBeInTheDocument();
+    expect(screen.getByText("Dias fechados")).toBeInTheDocument();
+  });
+
+  it("com a chegada escolhida, a saída para antes do primeiro dia fechado e o rodapé explica", () => {
+    renderWithProviders(<Range closedDay={closedDay} initial={{ start: "2026-10-19", end: "" }} />);
+    expect(screen.getByText(/dá pra ficar até 24 out, porque o dia seguinte está fechado/)).toBeInTheDocument();
+    expect(day("24 de outubro de 2026")).not.toHaveAttribute("aria-disabled");
+    // Segunda depois do domingo: a estadia atravessaria o dia fechado.
+    expect(day("26 de outubro de 2026")).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("chegada na véspera de um dia fechado não tem saída: o rodapé pede outra chegada", () => {
+    renderWithProviders(<Range closedDay={closedDay} initial={{ start: "2026-10-24", end: "" }} />);
+    expect(screen.getByText(/Não dá pra sair depois de 24 out: o dia seguinte está fechado/)).toBeInTheDocument();
   });
 });
 

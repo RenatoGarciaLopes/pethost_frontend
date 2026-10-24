@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { contrastRatio } from "@/test/a11y/contrastRatio";
 import { quintalColors as c } from "./colors";
-import { sceneColors } from "./semantic";
+import { avatarTones, sceneColors } from "./semantic";
 
 it("REQ-DS-002 tinta sobre coral passa AA; branco sobre coral falha", () => {
   expect(contrastRatio(c.tinta, c.coral)).toBeGreaterThanOrEqual(4.5);
@@ -31,4 +31,8 @@ it("093 papel passa AA e coral/foco passam 3:1 na camada funda inteira", () => {
   }
   expect(contrastRatio(c.papel, sceneColors.soilLight)).toBeLessThan(contrastRatio(c.papel, sceneColors.soilMid));
   expect(contrastRatio(c.papel, sceneColors.soilMid)).toBeLessThan(contrastRatio(c.papel, sceneColors.soilDeep));
+});
+
+it.each(Object.entries(avatarTones))("076 iniciais brancas sobre %s passam AA para texto pequeno", (_name, tone) => {
+  expect(contrastRatio(tone.foreground, tone.background)).toBeGreaterThanOrEqual(4.5);
 });

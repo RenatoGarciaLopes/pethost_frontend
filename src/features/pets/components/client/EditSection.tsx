@@ -2,8 +2,8 @@
 
 import { Box, Link } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { hasErrorCode, isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { hasErrorCode } from "@/shared/api/errors/ApiError";
+import { translateError, translateFieldErrors } from "@/shared/api/errors/translateError";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { toUpdatePetRequest } from "../../api/toUpdatePetRequest";
 import { useUpdatePet } from "../../hooks/usePetMutations";
@@ -108,16 +108,11 @@ export function EditSection({ accountId, pet, section, sectionOfField, onDirtyCh
         setVersion((current) => current + 1);
         setStatus({ kind: "saved" });
       } catch (error) {
-        if (isApiError(error) && Object.keys(error.fieldErrors).length > 0)
-          return showFieldErrors(
-            Object.fromEntries(
-              Object.entries(error.fieldErrors).map(([field, messages]) => [field, messages.join(" ")]),
-            ),
-            tried,
-          );
+        const fieldErrors = translateFieldErrors(error);
+        if (Object.keys(fieldErrors).length > 0) return showFieldErrors(fieldErrors, tried);
         if (hasErrorCode(error, "PET_MICROCHIP_ALREADY_REGISTERED"))
-          return showFieldErrors({ microchip: getErrorMessage(error) }, tried);
-        setStatus({ kind: "error", message: getErrorMessage(error) });
+          return showFieldErrors({ microchip: translateError(error) }, tried);
+        setStatus({ kind: "error", message: translateError(error) });
       }
     },
     [pet.values, savePatch, showFieldErrors],

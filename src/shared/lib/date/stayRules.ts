@@ -62,6 +62,17 @@ export function validateStay(
   return errors;
 }
 
+/**
+ * A frase da antecedência mínima do pedido: a mesma na validação local e na recusa da API (`BOOKING_CHECK_IN_TOO_SOON`,
+ * com `minimumHours` e `responseHours` dos params).
+ *
+ * @example requestLeadMessage() // "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder."
+ */
+export function requestLeadMessage(minimumHours = 72, responseHours = 24): string {
+  const days = Math.ceil(minimumHours / 24);
+  return `A chegada precisa ser daqui a pelo menos ${days} ${days === 1 ? "dia" : "dias"}: o anfitrião tem ${responseHours} horas pra responder.`;
+}
+
 /** Primeira chegada que a API aceita num pedido feito hoje (Brasília). @example earliestRequestCheckIn("2026-10-23") // "2026-10-27" */
 export function earliestRequestCheckIn(today: string): string {
   return addDays(today, MIN_REQUEST_LEAD_DAYS);
@@ -77,7 +88,6 @@ export function validateRequestStay(
   today: string,
 ): Partial<Record<"checkIn" | "checkOut", string>> {
   const errors = validateStay(checkIn || " ", checkOut || " ", today);
-  if (!errors.checkIn && checkIn < earliestRequestCheckIn(today))
-    errors.checkIn = "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.";
+  if (!errors.checkIn && checkIn < earliestRequestCheckIn(today)) errors.checkIn = requestLeadMessage();
   return errors;
 }

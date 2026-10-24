@@ -23,6 +23,8 @@ const base: StayBookingCardProps = {
     { id: "pet-1", name: "Pipoca", coverUrl: null },
     { id: "pet-2", name: "Mel", coverUrl: null },
   ],
+  availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+  closedPeriods: [],
 };
 const render = (props: Partial<StayBookingCardProps> = {}) =>
   renderWithProviders(<StayBookingCard {...base} {...props} />, { theme: quintalTheme });
@@ -65,6 +67,13 @@ it("REQ-LPAGE-004 sem datas não há total; as datas só vão para a URL quando 
   expect(lastUrl().searchParams.get("to")).toBe("2026-12-22");
   // Sem pet escolhido e sem "quantos pets" da busca, ainda não dá pra fazer a conta.
   expect(screen.queryByText("Total")).not.toBeInTheDocument();
+});
+
+it("REQ-LPAGE-013 os dias que o cantinho não recebe valem no card: datas que passam por um domingo mostram o motivo", () => {
+  render({ availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] });
+  expect(
+    screen.getByText("Essas datas passam por 20 dez, e o cantinho não recebe aos domingos. Escolhe outras."),
+  ).toBeVisible();
 });
 
 it("tutor sem pet é convidado a cadastrar um", () => {

@@ -82,7 +82,9 @@ it("REQ-PNEW-017 400 retorna ao passo do campo, foca e permite reenviar", async 
       creates++;
       return creates === 1
         ? HttpResponse.json(
-            apiFail("VALIDATION_ERROR", "invalid", [{ field: "name", messages: ["Confere esse nome."] }]),
+            apiFail("VALIDATION_ERROR", "invalid", [
+              { field: "name", messages: ["Confere esse nome."], errors: [{ code: "PET_NAME_REQUIRED" }] },
+            ]),
             { status: 400 },
           )
         : HttpResponse.json(apiOk(petDto()));
@@ -91,7 +93,7 @@ it("REQ-PNEW-017 400 retorna ao passo do campo, foca e permite reenviar", async 
   const { user } = setup();
   await screen.findByRole("heading", { name: "Confere a ficha" });
   await user.click(save());
-  expect(await screen.findByText("Confere esse nome.")).toBeVisible();
+  expect(await screen.findByText("Falta o nome.")).toBeVisible();
   expect(screen.getByLabelText(/^Nome/)).toHaveFocus();
   await user.click(screen.getByRole("button", { name: "Continuar" }));
   await user.click(save());

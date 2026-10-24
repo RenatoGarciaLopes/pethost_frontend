@@ -6,7 +6,7 @@ import { useId, useState, type ReactNode } from "react";
 import { FormProvider, useForm, useWatch, type Control, type FieldPath } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorCopy, getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateCode, translateError } from "@/shared/api/errors/translateError";
 import { useErrorNotice } from "@/shared/hooks/useErrorNotice";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -91,14 +91,14 @@ export function ProfileForm({ profile, editability, save, saving, onSaved }: Pro
       return;
     }
     if (error.code === "OWNER_CPF_ALREADY_REGISTERED") {
-      return form.setError("cpf", { type: "server", message: getErrorMessage(error) }, { shouldFocus: true });
+      return form.setError("cpf", { type: "server", message: translateError(error) }, { shouldFocus: true });
     }
     if (error.code === "HOST_IDENTITY_LOCKED") {
       restore(HOST_IDENTITY);
       return notice.report(error);
     }
     if (error.code === "VALIDATION_ERROR") {
-      if (error.fieldErrors.currentPassword) form.resetField("currentPassword");
+      if (error.fieldIssues.currentPassword) form.resetField("currentPassword");
       return applyFieldErrors(form.setError, error, { fields: API_FIELDS });
     }
     notice.report(error);
@@ -175,7 +175,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 /** Soma as travas descobertas ao salvar às do papel, com o motivo da API (REQ-ACC-007). */
 function withLocks(editability: FieldEditability, locks: readonly ("cpf" | "birthDate")[]): FieldEditability {
   if (locks.length === 0) return editability;
-  const reason = getErrorCopy("OWNER_CPF_LOCKED");
+  const reason = translateCode("OWNER_CPF_LOCKED");
   const locked = { mode: "locked", reason } as const;
   return { ...editability, ...Object.fromEntries(locks.map((field) => [field, locked])) };
 }

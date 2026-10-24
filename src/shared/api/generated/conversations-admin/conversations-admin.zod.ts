@@ -24,7 +24,7 @@ export const DeleteApiV1ConversationsConversationIdModerationBlockResponse = zod
   "data": zod.object({
   "conversationId": zod.string().uuid(),
   "blocked": zod.boolean()
-}).describe('A conversa foi bloqueada ou desbloqueada (evento do hub). Não diz quem bloqueou: o app recarrega a\nconversa pelo REST (`blockedByMe`) se precisar.'),
+}).describe('A conversa foi bloqueada ou desbloqueada (evento do hub). Não diz quem bloqueou: o app recarrega a\r\nconversa pelo REST (`blockedByMe`) se precisar.'),
   "timestamp": zod.string().datetime({"offset":true})
 }).describe('Resposta de sucesso.')
 

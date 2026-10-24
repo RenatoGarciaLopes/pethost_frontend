@@ -52,6 +52,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Pedido: Story = { name: "REQ-STAYS-004 Esperando resposta" };
+export const Aceita: Story = {
+  name: "REQ-STAYS-010 Aceita, falta pagar",
+  args: { overrides: { status: "accepted", responseDeadline: null, paymentDeadline: "2026-12-10T21:30:00Z" } },
+};
 export const Confirmada: Story = {
   name: "REQ-STAYS-005 Confirmada com contato",
   args: { overrides: { status: "confirmed", responseDeadline: null, contact: hostContact } },
@@ -59,6 +63,19 @@ export const Confirmada: Story = {
 export const Acontecendo: Story = {
   name: "REQ-STAYS-004 Acontecendo",
   args: { overrides: { status: "in_progress", responseDeadline: null, contact: hostContact } },
+};
+export const Concluida: Story = {
+  name: "REQ-STAYS-011 Concluída",
+  args: {
+    overrides: {
+      status: "completed",
+      responseDeadline: null,
+      confirmedAt: "2026-12-10T17:30:00Z",
+      checkedInAt: "2026-12-20T15:00:00Z",
+      checkedOutAt: "2026-12-25T15:00:00Z",
+      contact: hostContact,
+    },
+  },
 };
 export const Recusada: Story = {
   name: "REQ-STAYS-008 Não aceita",

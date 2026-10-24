@@ -69,7 +69,9 @@ it("REQ-PNEW-017 criação preserva conflito de microchip e mensagens de campos"
       }),
     ),
   );
-  await expect(createPet(body, transport)).rejects.toMatchObject({ fieldErrors: { name: ["Confere o nome."] } });
+  await expect(createPet(body, transport)).rejects.toMatchObject({
+    fieldIssues: { name: [expect.objectContaining({ message: "Confere o nome." })] },
+  });
 });
 it("REQ-PNEW-019 primeiro 401 renova e reenvia o mesmo arquivo sem recriar pet", async () => {
   let sends = 0;

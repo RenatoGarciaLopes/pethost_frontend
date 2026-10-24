@@ -7,7 +7,8 @@ import { backendForRequest } from "@/shared/api/server/backendForRequest";
 import { GetApiV1HostsMeResponse } from "@/shared/api/generated/hosts/hosts.zod";
 import { unwrapData } from "@/shared/api/contracts/unwrapData";
 import { listingPageQueries } from "../queries";
-import { listingReviewsSchema, type ListingReview } from "../contracts";
+import { listingBlocksSchema, listingReviewsSchema, type ListingReview } from "../contracts";
+import type { ListingClosedPeriod } from "../../lib/listingClosedDays";
 
 /** Quantas avaliações a página mostra (as mais novas). */
 const REVIEWS_SHOWN = 4;
@@ -36,6 +37,29 @@ export const getListingPageContext = cache(
     return { listing, isOwner: role === "host" && hostProfile?.id === listing.hostId };
   },
 );
+
+/**
+ * Os períodos que o anfitrião fechou na agenda (`GET /listings/{id}/availability-blocks`, exige conta: só com sessão).
+ * Falha não derruba a página nem o pedido: o calendário fica só com os dias da semana, e a API segue barrando no envio.
+ * @example const blocks = user ? await getListingClosedPeriods(listing.id) : []
+ */
+export const getListingClosedPeriods = cache(async (listingId: string): Promise<ListingClosedPeriod[]> => {
+  try {
+    const transport = await backendForRequest();
+    const blocks = await transport.request(
+      { method: "GET", path: `/listings/${listingId}/availability-blocks` },
+      listingBlocksSchema,
+    );
+    return blocks.map(({ startDate, endDate }) => ({ startDate, endDate }));
+  } catch (error) {
+    if (process.env.NODE_ENV === "development")
+      console.error(
+        "ListingClosedPeriods",
+        isApiError(error) ? { status: error.status, code: error.code } : { code: "UNKNOWN_ERROR" },
+      );
+    return [];
+  }
+});
 
 /**
  * As avaliações mais novas dos tutores sobre o cantinho (`GET /reviews?listingId=`, pública). Falha não derruba a

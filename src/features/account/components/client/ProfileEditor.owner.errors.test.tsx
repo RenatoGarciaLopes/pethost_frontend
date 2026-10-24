@@ -50,17 +50,22 @@ it.each([
 ])("REQ-ACC-008 VALIDATION_ERROR em %s aparece no campo e permite corrigir", async (name, label) => {
   server.use(
     http.patch("*/api/owners/me", () =>
-      HttpResponse.json(apiFail("VALIDATION_ERROR", "Inválido", [{ field: name, messages: ["Confira esse dado."] }]), {
-        status: 400,
-      }),
+      HttpResponse.json(
+        apiFail("VALIDATION_ERROR", "Inválido", [
+          { field: name, messages: ["Confira esse dado."], errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }] },
+        ]),
+        {
+          status: 400,
+        },
+      ),
     ),
   );
   const { user } = await setupProfile();
   await user.clear(field(label));
   await user.type(field(label), "Outro valor");
   await user.click(saveButton());
-  await screen.findByText("Confira esse dado.");
-  expect(field(label)).toHaveAccessibleDescription("Confira esse dado.");
+  await screen.findByText("Confere o e-mail: o formato não é válido.");
+  expect(field(label)).toHaveAccessibleDescription("Confere o e-mail: o formato não é válido.");
   expect(field(label)).toHaveFocus();
   expect(field(label)).toHaveValue("Outro valor");
 });
@@ -68,7 +73,13 @@ it("REQ-ACC-008 senha atual inválida é apagada e mantém o novo CPF", async ()
   server.use(
     http.patch("*/api/owners/me", () =>
       HttpResponse.json(
-        apiFail("VALIDATION_ERROR", "Inválido", [{ field: "currentPassword", messages: ["Confere sua senha atual."] }]),
+        apiFail("VALIDATION_ERROR", "Inválido", [
+          {
+            field: "currentPassword",
+            messages: ["Confere sua senha atual."],
+            errors: [{ code: "AUTH_EMAIL_INVALID_FORMAT" }],
+          },
+        ]),
         { status: 400 },
       ),
     ),
@@ -79,7 +90,7 @@ it("REQ-ACC-008 senha atual inválida é apagada e mantém o novo CPF", async ()
   await user.type(field("CPF"), "16899535009");
   await user.type(field("Sua senha atual"), "errada");
   await user.click(saveButton());
-  await screen.findByText("Confere sua senha atual.");
+  await screen.findByText("Confere o e-mail: o formato não é válido.");
   expect(field("Sua senha atual")).toHaveValue("");
   expect(field("Sua senha atual")).toHaveFocus();
   expect(field("CPF")).toHaveValue("168.995.350-09");

@@ -1,3 +1,4 @@
+import { fieldIssue } from "./fieldIssue.mjs";
 import { http } from "msw";
 import { z } from "zod";
 import { unwrapData } from "../../../src/shared/api/contracts/unwrapData.ts";
@@ -164,7 +165,9 @@ export const adminAccountsHandlers = [
     const body = await validateReason(request);
     if (!body.success)
       return fail(400, "VALIDATION_ERROR", [
-        { field: "reason", messages: ["Escreva um motivo de até 500 caracteres."] },
+        fieldIssue("reason", "Escreva um motivo de até 500 caracteres.", "AUTH_SUSPENSION_REASON_TOO_LONG", {
+          max: 500,
+        }),
       ]);
     if (result.record.cpf == null) return fail(422, "OWNER_CPF_RELEASED");
     if (result.record.suspendedAt) return fail(422, "OWNER_SUSPENSION_REQUIRED");
@@ -197,7 +200,9 @@ export const adminAccountsHandlers = [
     const body = await validateReason(request);
     if (!body.success)
       return fail(400, "VALIDATION_ERROR", [
-        { field: "reason", messages: ["Escreva um motivo de até 500 caracteres."] },
+        fieldIssue("reason", "Escreva um motivo de até 500 caracteres.", "AUTH_SUSPENSION_REASON_TOO_LONG", {
+          max: 500,
+        }),
       ]);
     if (result.record.cpf == null) return fail(422, "OWNER_CPF_RELEASED");
     if (!result.record.suspendedAt) return fail(422, "OWNER_SUSPENSION_REQUIRED");
@@ -210,7 +215,7 @@ export const adminAccountsHandlers = [
     const status = new URL(request.url).searchParams.get("stripeStatus");
     if (status && !stripeStatuses.includes(status))
       return fail(400, "VALIDATION_ERROR", [
-        { field: "stripeStatus", messages: ["Escolha um status de recebimento conhecido."] },
+        fieldIssue("stripeStatus", "Escolha um status de recebimento conhecido.", "HOST_STRIPE_STATUS_FILTER_INVALID"),
       ]);
     const listed = status ? hosts.filter((item) => item.stripeStatus === status) : hosts;
     return ok(hostListSchema.parse(listed));
@@ -225,7 +230,9 @@ export const adminAccountsHandlers = [
     const body = await validateReason(request);
     if (!body.success)
       return fail(400, "VALIDATION_ERROR", [
-        { field: "reason", messages: ["Escreva um motivo de até 500 caracteres."] },
+        fieldIssue("reason", "Escreva um motivo de até 500 caracteres.", "AUTH_SUSPENSION_REASON_TOO_LONG", {
+          max: 500,
+        }),
       ]);
     if (result.record.identityReleasedAt) return fail(422, "HOST_IDENTITY_RELEASED");
     if (result.record.suspendedAt) return fail(422, "HOST_SUSPENSION_REQUIRED");
@@ -258,7 +265,9 @@ export const adminAccountsHandlers = [
     const body = await validateReason(request);
     if (!body.success)
       return fail(400, "VALIDATION_ERROR", [
-        { field: "reason", messages: ["Escreva um motivo de até 500 caracteres."] },
+        fieldIssue("reason", "Escreva um motivo de até 500 caracteres.", "AUTH_SUSPENSION_REASON_TOO_LONG", {
+          max: 500,
+        }),
       ]);
     if (result.record.identityReleasedAt) return fail(422, "HOST_IDENTITY_RELEASED");
     if (!result.record.suspendedAt) return fail(422, "HOST_SUSPENSION_REQUIRED");
@@ -271,7 +280,9 @@ export const adminAccountsHandlers = [
     const body = await validateReason(request);
     if (!body.success)
       return fail(400, "VALIDATION_ERROR", [
-        { field: "reason", messages: ["Escreva um motivo de até 500 caracteres."] },
+        fieldIssue("reason", "Escreva um motivo de até 500 caracteres.", "AUTH_SUSPENSION_REASON_TOO_LONG", {
+          max: 500,
+        }),
       ]);
     if (result.record.identityReleasedAt) return fail(422, "HOST_IDENTITY_RELEASED");
     if (result.record.stripeStatus !== "rejected") return fail(422, "HOST_STRIPE_ACCOUNT_NOT_REJECTED");

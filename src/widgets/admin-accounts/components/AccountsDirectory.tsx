@@ -9,7 +9,7 @@ import { EmptyState } from "@/shared/ui/feedback/EmptyState";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { useSearchParamsState } from "@/shared/hooks/useSearchParamsState";
 import { accountsSearchSchema } from "../schemas/accountsSearchSchema";
 import { filterAccounts, toAccountRow, type AccountRow } from "../lib/accountRows";
@@ -192,7 +192,7 @@ export function AccountsDirectory({ accountId }: { accountId: string }) {
   if (query.isPending) return <SniffLoader />;
   if (query.isError)
     return (
-      <ErrorState title={getErrorMessage(query.error, { adminAccounts: true })} onRetry={() => void query.refetch()} />
+      <ErrorState title={translateError(query.error, { adminAccounts: true })} onRetry={() => void query.refetch()} />
     );
   const rows =
     filters.type === "owners"

@@ -35,6 +35,8 @@ const meta = {
       { id: "pet-1", name: "Pipoca", coverUrl: listingPhotoFixture("#FFE9B0", "#C58B4F") },
       { id: "pet-2", name: "Mel", coverUrl: null },
     ],
+    availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+    closedPeriods: [],
   },
 } satisfies Meta<typeof StayBookingCard>;
 export default meta;
@@ -46,6 +48,16 @@ export const SemDatas: Story = { args: { search: "", from: undefined, to: undefi
 export const SemPets: Story = { args: { pets: [], petIds: [] } };
 /** No celular o botão vai para a barra fixa no rodapé. */
 export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };
+/**
+ * Cantinho que não recebe aos domingos e com a agenda fechada de 26 a 28 dez: o calendário risca esses dias, com o
+ * motivo e a legenda. Datas que já chegam passando por um domingo (da busca) mostram o motivo no campo.
+ */
+export const DiasFechados: Story = {
+  args: {
+    availableWeekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+    closedPeriods: [{ startDate: "2026-12-26", endDate: "2026-12-28" }],
+  },
+};
 /** Visitante (sem conta): as datas valem, sem "Quem vai"; "Pedir estadia" leva ao login de tutor e volta aqui. */
 export const Visitante: Story = {
   args: { account: "visitor", pets: [], petIds: [], count: 1, search: "from=2026-12-20&to=2026-12-25" },

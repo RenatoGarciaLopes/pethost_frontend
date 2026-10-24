@@ -123,8 +123,16 @@ it("REQ-PEDIT-015 erro da API no campo da seção volta ao campo; de outra seç�
     http.patch("*/api/pets/:id", () =>
       HttpResponse.json(
         apiFail("VALIDATION_ERROR", "invalid", [
-          { field: "vetContact", messages: ["Confere esse contato."] },
-          { field: "name", messages: ["Confere esse nome."] },
+          {
+            field: "vetContact",
+            messages: ["Confere esse contato."],
+            errors: [{ code: "PET_VET_CONTACT_TOO_LONG", params: { max: 160 } }],
+          },
+          {
+            field: "name",
+            messages: ["Confere esse nome."],
+            errors: [{ code: "PET_NAME_TOO_LONG", params: { max: 60 } }],
+          },
         ]),
         { status: 400 },
       ),
@@ -135,7 +143,9 @@ it("REQ-PEDIT-015 erro da API no campo da seção volta ao campo; de outra seç�
   await user.type(within(health).getByLabelText("Veterinário (nome e telefone)"), "x");
   await user.click(within(health).getByRole("button", { name: "Salvar Saúde" }));
 
-  expect(await within(section("Saúde")).findByText("Confere esse contato.")).toBeInTheDocument();
+  expect(
+    await within(section("Saúde")).findByText("O contato do veterinário aceita até 160 caracteres."),
+  ).toBeInTheDocument();
   // O que a pessoa digitou continua no campo depois da recusa.
   expect(within(section("Saúde")).getByLabelText("Veterinário (nome e telefone)")).toHaveValue("x");
   expect(within(section("Saúde")).getByRole("link", { name: "Nome e sexo" })).toHaveAttribute("href", "#nome");
@@ -189,7 +199,13 @@ it("REQ-PEDIT-015 erro de um campo que nenhuma seção edita aparece no aviso da
   server.use(
     http.patch("*/api/pets/:id", () =>
       HttpResponse.json(
-        apiFail("VALIDATION_ERROR", "invalid", [{ field: "ownerId", messages: ["Essa ficha não pode mudar agora."] }]),
+        apiFail("VALIDATION_ERROR", "invalid", [
+          {
+            field: "ownerId",
+            messages: ["Essa ficha não pode mudar agora."],
+            errors: [{ code: "PET_KEEPER_ID_REQUIRED" }],
+          },
+        ]),
         { status: 400 },
       ),
     ),
@@ -197,7 +213,7 @@ it("REQ-PEDIT-015 erro de um campo que nenhuma seção edita aparece no aviso da
   const { user } = setup();
   await user.type(within(section("Saúde")).getByLabelText("Veterinário (nome e telefone)"), "x");
   await user.click(within(section("Saúde")).getByRole("button", { name: "Salvar Saúde" }));
-  expect(await within(section("Saúde")).findByText("Essa ficha não pode mudar agora.")).toBeInTheDocument();
+  expect(await within(section("Saúde")).findByText("Falta o responsável.")).toBeInTheDocument();
 });
 
 it("REQ-PEDIT-004 salvar a espécie não apaga o que está sendo digitado em outra seção", async () => {

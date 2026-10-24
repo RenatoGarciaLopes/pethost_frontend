@@ -49,7 +49,7 @@ export function ResetPasswordForm({ token, onDone, onTokenRejected }: ResetPassw
     if (!isApiError(error)) return notice.report(error);
     if (error.code === "AUTH_PASSWORD_RESET_TOKEN_INVALID") return onTokenRejected("expired");
     if (error.code === "VALIDATION_ERROR") {
-      if (error.fieldErrors.token) return onTokenRejected("missing");
+      if (error.fieldIssues.token) return onTokenRejected("missing");
       return applyFieldErrors(setError, error, { fields: ["newPassword"] });
     }
     notice.report(error);

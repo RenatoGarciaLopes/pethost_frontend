@@ -47,6 +47,33 @@ describe("apiErrorEnvelopeSchema", () => {
     expect(parsed.error.details).toEqual([{ field: "address.zipCode", messages: ["Zip code is invalid."] }]);
   });
 
+  it("REQ-HTTP-002 lê os códigos e params de cada motivo; a API antiga, sem errors, continua válida", () => {
+    const parsed = apiErrorEnvelopeSchema.parse({
+      success: false,
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "x",
+        details: [
+          {
+            field: "checkIn",
+            messages: ["a"],
+            errors: [{ code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72 } }],
+          },
+          { field: "name", messages: ["b"] },
+        ],
+      },
+    });
+
+    expect(parsed.error.details).toEqual([
+      {
+        field: "checkIn",
+        messages: ["a"],
+        errors: [{ code: "BOOKING_CHECK_IN_TOO_SOON", params: { minimumHours: 72 } }],
+      },
+      { field: "name", messages: ["b"] },
+    ]);
+  });
+
   it("REQ-HTTP-002 lê o traceId do erro 500", () => {
     const parsed = apiErrorEnvelopeSchema.parse({
       success: false,

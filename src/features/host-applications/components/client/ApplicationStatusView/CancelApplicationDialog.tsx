@@ -2,7 +2,7 @@
 
 import { Box, Button } from "@mui/material";
 import { useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
 import { useCancelApplication } from "../../../hooks/useApplicationMutations";
 import { verificationCopy } from "../../../lib/verificationCopy";
@@ -31,7 +31,7 @@ export function CancelApplicationDialog({ accountId }: { accountId: string }) {
         confirmLabel={copy.confirm}
         cancelLabel={copy.keep}
         busy={cancel.isPending}
-        error={cancel.isError ? getErrorMessage(cancel.error) : null}
+        error={cancel.isError ? translateError(cancel.error) : null}
         onConfirm={() => cancel.mutate(undefined, { onSuccess: () => setOpen(false) })}
         onCancel={() => {
           cancel.reset();

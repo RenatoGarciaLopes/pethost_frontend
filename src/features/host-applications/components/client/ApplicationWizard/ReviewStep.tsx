@@ -4,7 +4,7 @@ import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError } from "@/shared/api/errors/translateError";
 import { useFlashMessage } from "@/shared/hooks/useFlashMessage";
 import { useObjectUrl } from "@/shared/hooks/useObjectUrl";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
@@ -76,7 +76,7 @@ export function ReviewStep({ accountId, application, photos, onBack }: ReviewSte
     try {
       await submit.mutateAsync();
     } catch (caught) {
-      return setError(getErrorMessage(caught));
+      return setError(translateError(caught));
     }
     flash.show(copy.sent);
     router.push(APPLICATION_PATH);

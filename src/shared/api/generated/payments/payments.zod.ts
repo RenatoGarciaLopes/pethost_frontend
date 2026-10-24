@@ -63,7 +63,7 @@ export const GetApiV1PaymentsIssuesResponse = zod.object({
   "paymentId": zod.string().uuid(),
   "bookingId": zod.string().uuid(),
   "installmentNumber": zod.number().int(),
-  "issue": zod.string().describe('`installment_overdue`, `dispute_open`, `dispute_lost`, `refund_failed`,\n        `payout_failed`, `payout_blocked` (o Stripe bloqueou os repasses do anfitrião) ou\n        `payout_reversal_failed`.'),
+  "issue": zod.string().describe('`installment_overdue`, `dispute_open`, `dispute_lost`, `refund_failed`,\r\n        `payout_failed`, `payout_blocked` (o Stripe bloqueou os repasses do anfitrião) ou\r\n        `payout_reversal_failed`.'),
   "amount": zod.number(),
   "since": zod.string().datetime({"offset":true}).nullish().describe('Desde quando (atraso, contestação, reembolso) — quando se sabe.'),
   "failureCode": zod.string().nullish().describe('Por que o repasse ou o estorno falhou (código do Stripe, `NO_CONNECTED_ACCOUNT` ou `HOST_PAYOUTS_DISABLED`).'),

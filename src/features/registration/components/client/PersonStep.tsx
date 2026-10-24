@@ -88,7 +88,7 @@ export function PersonStep({ variant }: PersonStepProps) {
         name="phone"
         render={({ field, fieldState }) => (
           <MaskedTextField
-            {...bind(field, fieldState, variant.role === "owner" ? fields.phoneHelp : fields.hostPhoneHelp)}
+            {...bind(field, fieldState, variant.role === "owner" ? fields.phoneHelp : undefined)}
             mask="phone"
             value={field.value}
             onValueChange={field.onChange}

@@ -7,8 +7,7 @@ import { adminOwnerQueries, type AdminOwner } from "@/features/owners";
 import { adminHostQueries, type AdminHost } from "@/features/hosts";
 import { getOwner } from "@/features/owners/index.client";
 import { getHost } from "@/features/hosts/index.client";
-import { isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
+import { translateError, translateFieldErrors } from "@/shared/api/errors/translateError";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
 import { useAccountAction } from "../hooks/useAccountAction";
@@ -43,7 +42,7 @@ export function AccountDetail({ accountId, resourceId, kind, auditTrail }: Detai
   if (query.isPending) return <SniffLoader />;
   if (query.isError)
     return (
-      <ErrorState title={getErrorMessage(query.error, { adminAccounts: true })} onRetry={() => void query.refetch()} />
+      <ErrorState title={translateError(query.error, { adminAccounts: true })} onRetry={() => void query.refetch()} />
     );
   const source: AccountSource =
     "personType" in query.data ? { kind: "hosts", value: query.data } : { kind: "owners", value: query.data };
@@ -59,7 +58,7 @@ export function AccountDetail({ accountId, resourceId, kind, auditTrail }: Detai
         busy={mutation.isPending}
         onAction={mutation.mutateAsync}
         onBegin={mutation.reset}
-        reasonError={isApiError(mutation.error) ? mutation.error.fieldErrors.reason?.join(" ") : undefined}
+        reasonError={translateFieldErrors(mutation.error).reason}
       />
       <section aria-label={copy.audit}>
         <Typography component="h2" variant="h5">
