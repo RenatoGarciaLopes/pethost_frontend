@@ -97,7 +97,7 @@ export function SearchResults({
         (bigger ? (
           <Button onClick={() => onExpand(bigger)}>{copy.expand(bigger)}</Button>
         ) : (
-          <Typography>{copy.end}</Typography>
+          !items.length && <Typography>{copy.end}</Typography>
         ))
       )}
     </Stack>

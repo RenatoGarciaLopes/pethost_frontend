@@ -58,3 +58,37 @@ it("REQ-LPAGE-012 o Entrar do visitante volta para a página aberta que ele esta
     "/login?next=%2Flistings%2Fabc%3Ffrom%3D2026-11-10",
   );
 });
+
+it("096 mede busca e chips, atualiza o offset ao redimensionar e limpa ao desmontar", () => {
+  let resize: () => void = () => {};
+  const disconnect = vi.fn();
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      constructor(callback: () => void) {
+        resize = callback;
+      }
+      observe = vi.fn();
+      disconnect = disconnect;
+    },
+  );
+  const rect = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect");
+  rect.mockReturnValue({ height: 148 } as DOMRect);
+  const { unmount } = renderWithProviders(<AppHeader search={<div>Busca</div>} filters={<div>Filtros</div>} />, {
+    theme: quintalTheme,
+  });
+  expect(screen.getByRole("banner")).toHaveStyle({
+    position: "sticky",
+    top: "0px",
+    zIndex: String(quintalTheme.zIndex.appBar),
+  });
+  expect(document.documentElement.style.getPropertyValue("--app-header-height")).toBe("148px");
+  rect.mockReturnValue({ height: 212 } as DOMRect);
+  resize();
+  expect(document.documentElement.style.getPropertyValue("--app-header-height")).toBe("212px");
+  unmount();
+  expect(disconnect).toHaveBeenCalledOnce();
+  expect(document.documentElement.style.getPropertyValue("--app-header-height")).toBe("");
+  rect.mockRestore();
+  vi.unstubAllGlobals();
+});
