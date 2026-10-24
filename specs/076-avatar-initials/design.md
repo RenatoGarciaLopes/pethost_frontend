@@ -13,3 +13,5 @@ Validação 23/10: tsc sem erros; eslint dos tocados sem avisos; 76 testes aprov
 Documentação canônica no vault: `development/resources/initials-avatar.md`.
 
 Pontuação interna não divide nomes: A.C.M.E. gera A, Patas S.A. gera PS e João-Silva isolado gera J. Espaços separam as palavras úteis.
+
+Validação visual final: dois testes Playwright aprovados (mocked-desktop/mobile, um worker, CI=1), seis PNGs conferidos em test-results/mocked-avatar-initials-076-9ba45-iniciais-brancas-e-coral-AA-mocked-{desktop,mobile}/. Cabeçalho/card/Quem cuida com coral e branco em 1440/390. Sem antes histórico e sem runner Storybook nesta rodada. Turbopack incompatível com junction; configuração temporária --webpack removida após uso. Após as aprovações, runner interrompido durante teardown para encerrar servidores e liberar 3100/5099 ao Loam. Detalhes e limitações no vault.
