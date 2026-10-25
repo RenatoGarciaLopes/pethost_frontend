@@ -14,12 +14,21 @@ export const verificationCopy = {
   loadError: "Não deu pra abrir sua verificação.",
 
   wizard: {
+    progressTitle: "Verificação",
     progressLabel: "Etapas da verificação",
     stepLabels: ["Antes de começar", "Seus dados", "Fotos", "Confere"],
+    stepDescriptions: [
+      "Como as fotos são usadas",
+      "CPF e documento",
+      "Frente, verso e selfie",
+      "Último olhar antes de enviar",
+    ],
+    position: (current: number, total: number) => `Passo ${current} de ${total}`,
   },
 
   notice: {
     heading: "Antes de começar",
+    intro: "Antes de pedir seus dados, a gente conta como as fotos são usadas.",
     /** Aviso de uso das fotos por versão; versão sem texto aqui usa o mais recente (`latestNoticeVersion`). */
     versions: {
       "2026-10-10": [
@@ -31,15 +40,20 @@ export const verificationCopy = {
     } as Readonly<Record<string, readonly string[]>>,
     latestNoticeVersion: "2026-10-10",
     personType: "Quem vai receber os pets?",
-    personTypes: { pf: "Pessoa física", pj: "Empresa" },
+    personTypes: {
+      pf: { label: "Pessoa física", description: "Você mesmo recebe os pets." },
+      pj: { label: "Empresa", description: "Hospedagem ou negócio com CNPJ." },
+    },
     personTypeLocked: "O tipo fica como foi escolhido quando a verificação começou.",
-    accept: "Li e concordo",
+    accept: "Li e concordo com o uso das fotos só para a verificação",
     acceptMissing: "Pra seguir, marca o “Li e concordo”.",
+    back: "Voltar",
     next: "Continuar: seus dados",
   },
 
   data: {
     heading: "Seus dados",
+    intro: "Agora o CPF e o documento que você vai fotografar.",
     cpf: "CPF",
     cpfHelp: { pf: "O seu CPF.", pj: "O CPF de quem representa a empresa: você." },
     cpfMissing: "Falta o CPF.",
@@ -110,7 +124,7 @@ export const verificationCopy = {
     documentType: "Documento",
     company: "Empresa",
     missing: "Pra enviar, faltam fotos. Volta e completa as três vagas.",
-    back: "Voltar: fotos",
+    back: "Voltar",
     submit: "Enviar pra análise",
     submitting: "Enviando…",
     sent: "Pronto, enviada! Agora é com a gente.",

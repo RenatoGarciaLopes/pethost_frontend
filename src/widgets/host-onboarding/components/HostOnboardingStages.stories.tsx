@@ -26,9 +26,9 @@ export const MontarCantinho: Story = {
   args: { progress: { verified: true, payouts: { enabled: true, status: "enabled" }, hasListing: false } },
 };
 
-/** Tudo pronto. */
+/** Tudo pronto: o painel inteiro fica ausente, inclusive o título. */
 export const CantinhoAberto: Story = {
-  name: "REQ-LIST-001 Cantinho aberto",
+  name: "099 Caminho concluído (sem painel)",
   args: { progress: { verified: true, payouts: { enabled: true, status: "enabled" }, hasListing: true } },
 };
 

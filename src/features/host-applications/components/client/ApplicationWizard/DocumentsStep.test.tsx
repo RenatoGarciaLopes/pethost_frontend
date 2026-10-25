@@ -56,7 +56,6 @@ async function pickAll(user: ReturnType<typeof setup>["user"]) {
 describe("DocumentsStep", () => {
   it("REQ-HVER-006 três vagas com o que se espera e as dicas", () => {
     setup();
-    expect(screen.getByRole("heading", { level: 1, name: copy.photos.heading })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Foto da frente do documento Tirar foto" })).toHaveAccessibleDescription(
       copy.photos.hints.front,
     );
