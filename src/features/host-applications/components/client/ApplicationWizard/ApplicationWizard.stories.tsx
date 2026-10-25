@@ -63,10 +63,9 @@ type Story = StoryObj<typeof meta>;
 export const AntesDeComecar: Story = {
   name: "REQ-HVER-003 Antes de começar",
   play: async ({ canvasElement }) => {
-    await expect(
-      await within(canvasElement).findByRole("heading", { level: 1, name: copy.notice.heading }),
-    ).toBeVisible();
+    const heading = await within(canvasElement).findByRole("heading", { level: 1, name: copy.notice.heading });
     await waitForEntrance({ canvasElement });
+    await expect(heading).toBeVisible();
   },
 };
 
