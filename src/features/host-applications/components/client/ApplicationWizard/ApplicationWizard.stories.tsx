@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
 import { expect, fn, userEvent, within } from "storybook/test";
+import { waitForEntrance } from "@/test/waitForEntrance";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { FlashMessageProvider } from "@/shared/hooks/useFlashMessage";
@@ -48,6 +49,7 @@ const meta = {
   component: Frame,
   tags: ["autodocs"],
   parameters: { layout: "padded", design: { board: "Fluxo-Verificacao" } },
+  play: waitForEntrance,
   args: { entry: "start", application: null },
   beforeEach: () => {
     // Mock/decorator do framework: appDirectory ainda usa contexto anterior ao Next 16.4.
@@ -61,9 +63,9 @@ type Story = StoryObj<typeof meta>;
 export const AntesDeComecar: Story = {
   name: "REQ-HVER-003 Antes de começar",
   play: async ({ canvasElement }) => {
-    await expect(
-      await within(canvasElement).findByRole("heading", { level: 1, name: copy.notice.heading }),
-    ).toBeVisible();
+    const heading = await within(canvasElement).findByRole("heading", { level: 1, name: copy.notice.heading });
+    await waitForEntrance({ canvasElement });
+    await expect(heading).toBeVisible();
   },
 };
 
@@ -75,6 +77,7 @@ export const SeusDados: Story = {
     await userEvent.click(await canvas.findByRole("checkbox", { name: copy.notice.accept }));
     await userEvent.click(canvas.getByRole("button", { name: copy.notice.next }));
     await expect(await canvas.findByRole("heading", { level: 1, name: copy.data.heading })).toBeVisible();
+    await waitForEntrance({ canvasElement });
   },
 };
 

@@ -7,25 +7,34 @@ import { NoticeStep, type NoticeStepProps } from "./NoticeStep";
 
 function renderStep(props: Partial<NoticeStepProps> = {}) {
   const onNext = vi.fn();
+  const onBack = vi.fn();
   const view = renderWithProviders(
     <NoticeStep
       noticeVersion="2026-10-10"
       personType="pf"
       accepted={false}
       locked={false}
+      onBack={onBack}
       onNext={onNext}
       {...props}
     />,
     { theme: quintalTheme },
   );
-  return { ...view, onNext };
+  return { ...view, onNext, onBack };
 }
 
 describe("NoticeStep", () => {
-  it("REQ-HVER-003 mostra o aviso das fotos da versão vigente antes de pedir qualquer coisa", () => {
+  it("REQ-HVER-003 mostra o aviso das fotos da versão vigente, uma linha por cartão, antes de pedir qualquer coisa", () => {
     renderStep();
-    expect(screen.getByRole("heading", { level: 1, name: "Antes de começar" })).toBeInTheDocument();
-    for (const line of copy.notice.versions["2026-10-10"]!) expect(screen.getByText(line)).toBeInTheDocument();
+    const items = screen.getAllByRole("listitem");
+    expect(items.map((item) => item.textContent)).toEqual([...copy.notice.versions["2026-10-10"]!]);
+  });
+
+  it("REQ-HVER-003 Voltar sai do assistente sem pedir nada", async () => {
+    const { user, onBack, onNext } = renderStep();
+    await user.click(screen.getByRole("button", { name: copy.notice.back }));
+    expect(onBack).toHaveBeenCalled();
+    expect(onNext).not.toHaveBeenCalled();
   });
 
   it("REQ-HVER-003 versão sem texto no front mostra o aviso mais recente", () => {
@@ -33,12 +42,12 @@ describe("NoticeStep", () => {
     expect(screen.getByText("Só a equipe da PetHost vê.")).toBeInTheDocument();
   });
 
-  it("REQ-HVER-003 REQ-HVER-018 sem o 'Li e concordo' não avança; o erro diz o que falta e recebe o foco", async () => {
+  it("REQ-HVER-003 REQ-HVER-018 sem o aceite não avança; o erro diz o que falta e recebe o foco", async () => {
     const { user, onNext } = renderStep();
     await user.click(screen.getByRole("button", { name: copy.notice.next }));
 
     expect(onNext).not.toHaveBeenCalled();
-    const checkbox = screen.getByRole("checkbox", { name: "Li e concordo" });
+    const checkbox = screen.getByRole("checkbox", { name: copy.notice.accept });
     expect(checkbox).toHaveFocus();
     expect(checkbox).toHaveAccessibleDescription(copy.notice.acceptMissing);
     expect(checkbox).toHaveAttribute("aria-invalid", "true");
@@ -46,8 +55,8 @@ describe("NoticeStep", () => {
 
   it("REQ-HVER-003 escolhe Pessoa física ou Empresa e segue com o aceite", async () => {
     const { user, onNext } = renderStep();
-    await user.click(screen.getByRole("radio", { name: "Empresa" }));
-    await user.click(screen.getByRole("checkbox", { name: "Li e concordo" }));
+    await user.click(screen.getByRole("radio", { name: /^Empresa/ }));
+    await user.click(screen.getByRole("checkbox", { name: copy.notice.accept }));
     await user.click(screen.getByRole("button", { name: copy.notice.next }));
 
     expect(onNext).toHaveBeenCalledWith({ acceptNotice: true, personType: "pj" });
@@ -55,9 +64,9 @@ describe("NoticeStep", () => {
 
   it("REQ-HVER-003 com a verificação já aberta, o tipo fica travado e o aceite marcado", async () => {
     const { user, onNext } = renderStep({ personType: "pj", accepted: true, locked: true });
-    expect(screen.getByRole("radio", { name: "Pessoa física" })).toBeDisabled();
+    expect(screen.getByRole("radio", { name: /^Pessoa física/ })).toBeDisabled();
     expect(screen.getByText(copy.notice.personTypeLocked)).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "Li e concordo" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: copy.notice.accept })).toBeChecked();
     await user.click(screen.getByRole("button", { name: copy.notice.next }));
     expect(onNext).toHaveBeenCalledWith({ acceptNotice: true, personType: "pj" });
   });

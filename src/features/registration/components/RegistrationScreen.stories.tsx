@@ -1,19 +1,11 @@
-﻿import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
-import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { fn, userEvent, within } from "storybook/test";
+import { waitForEntrance } from "@/test/waitForEntrance";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { RegistrationScreen } from "./RegistrationScreen";
-
-/** Axe mede as cores finais, depois do fade de entrada da composição. */
-async function waitForEntrance({ canvasElement }: { canvasElement: HTMLElement }) {
-  await waitFor(() => {
-    for (const element of canvasElement.querySelectorAll<HTMLElement>('[style*="opacity"]')) {
-      expect(getComputedStyle(element).opacity).toBe("1");
-    }
-  });
-}
 
 const meta = {
   title: "Registration/RegistrationScreen",

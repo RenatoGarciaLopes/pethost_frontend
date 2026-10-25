@@ -85,11 +85,13 @@ describe("ApplicationWizard", { timeout: 20000 }, () => {
 
     await screen.findByRole("heading", { level: 1, name: copy.notice.heading });
     expect(screen.getByRole("navigation", { name: copy.wizard.progressLabel })).toBeInTheDocument();
+    expect(screen.getByText(copy.wizard.position(1, 4))).toBeInTheDocument();
     await user.click(screen.getByRole("checkbox", { name: copy.notice.accept }));
     await user.click(screen.getByRole("button", { name: copy.notice.next }));
 
     const heading = await screen.findByRole("heading", { level: 1, name: copy.data.heading });
     await waitFor(() => expect(heading).toHaveFocus());
+    expect(screen.getByText(copy.wizard.position(2, 4))).toBeInTheDocument();
     await user.type(screen.getByRole("textbox", { name: copy.data.cpf }), SYNTHETIC_CPF);
     await user.click(screen.getByRole("radio", { name: /CNH/ }));
     await user.click(screen.getByRole("button", { name: copy.data.next }));
@@ -113,6 +115,15 @@ describe("ApplicationWizard", { timeout: 20000 }, () => {
     ]);
   });
 
+  it("REQ-HVER-002 'Voltar' do primeiro passo volta para Minha verificação", async () => {
+    fakeApi({ application: null });
+    const { user } = renderWizard("start");
+
+    await user.click(await screen.findByRole("button", { name: copy.notice.back }));
+
+    expect(push).toHaveBeenCalledWith("/host/application");
+  });
+
   it("REQ-HVER-004 empresa pede CNPJ, razão social, nome fantasia e endereço", async () => {
     const requests = fakeApi({ application: null });
     server.use(
@@ -127,7 +138,7 @@ describe("ApplicationWizard", { timeout: 20000 }, () => {
       ),
     );
     const { user } = renderWizard("start");
-    await user.click(await screen.findByRole("radio", { name: "Empresa" }));
+    await user.click(await screen.findByRole("radio", { name: /^Empresa/ }));
     await user.click(screen.getByRole("checkbox", { name: copy.notice.accept }));
     await user.click(screen.getByRole("button", { name: copy.notice.next }));
 

@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { Box } from "@mui/material";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { getQueryClient } from "@/shared/api/query/queryClient";
@@ -25,10 +25,10 @@ export async function ApplicationWizardScreen({ accountId, entry }: ApplicationW
   const target = mine && wizardRedirect(entry, mine);
   if (target) redirect(target);
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 } }}>
+    <Box sx={{ maxWidth: 1168, mx: "auto", px: { xs: 2, md: 4 }, py: { xs: 3, md: 5 } }}>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ApplicationWizard accountId={accountId} entry={entry} />
       </HydrationBoundary>
-    </Container>
+    </Box>
   );
 }

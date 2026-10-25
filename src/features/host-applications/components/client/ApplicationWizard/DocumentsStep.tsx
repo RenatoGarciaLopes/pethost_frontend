@@ -7,9 +7,8 @@ import { translateError } from "@/shared/api/errors/translateError";
 import { ImagePreparationError, prepareImageForUpload } from "@/shared/lib/image/prepareImageForUpload";
 import { Hint } from "@/shared/ui/feedback/Hint";
 import { Notice } from "@/shared/ui/feedback/Notice";
-import { FormActions } from "@/shared/ui/forms/FormActions";
 import { DocumentSlot } from "@/shared/ui/media/DocumentSlot";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { StepWizardActions } from "@/shared/ui/navigation/StepWizard";
 import { DOCUMENT_KINDS } from "../../../api/contracts";
 import type { DocumentFiles } from "../../../api/client/myApplication.client";
 import { useUploadDocuments } from "../../../hooks/useApplicationMutations";
@@ -47,7 +46,7 @@ function readUploadError(error: unknown): { slots: SlotErrors; notice: string | 
 }
 
 /**
- * Passo "Fotos" (REQ-HVER-006 a 009): três vagas (frente, verso, selfie) com o desenho do que se espera e as dicas.
+ * Conteúdo de "Fotos" (REQ-HVER-006 a 009; título e frase de apoio são da casca): três vagas (frente, verso, selfie) com o desenho do que se espera e as dicas.
  * Cada foto é preparada no navegador antes de qualquer envio (tipo, tamanho até 5 MB, sem metadados); falha fica na
  * vaga. "Continuar" manda só as fotos novas num pedido só; recusa da API aparece na vaga certa e nenhuma conta como
  * enviada. Fotos só em memória, nas mãos do assistente.
@@ -97,8 +96,6 @@ export function DocumentsStep({ accountId, application, photos, onPhotosChange, 
 
   return (
     <Stack spacing={3}>
-      <StepHeading>{copy.heading}</StepHeading>
-      <Typography>{copy.intro}</Typography>
       <Hint title={copy.tipsTitle}>{copy.tips}</Hint>
       <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" } }}>
         {DOCUMENT_KINDS.map((kind) => (
@@ -124,7 +121,7 @@ export function DocumentsStep({ accountId, application, photos, onPhotosChange, 
         </Stack>
       )}
       {notice && <Notice tone="erro" title={notice} />}
-      <FormActions
+      <StepWizardActions
         backLabel={copy.back}
         nextLabel={copy.next}
         onBack={onBack}
