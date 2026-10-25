@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { delay, http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Activity, StrictMode, type ActivityProps } from "react";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { BOOKING_ID, bookingDto } from "@/test/fixtures/bookings";
 import { paymentFixture, paymentSessionFixture } from "@/test/fixtures/bookingPayment";
@@ -19,7 +20,12 @@ const path = `*/api/bookings/${BOOKING_ID}`;
 beforeEach(() => vi.stubEnv("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", "pk_test_synthetic"));
 afterEach(() => vi.unstubAllEnvs());
 
-function setup(payment: BookingPaymentData = paymentFixture(), bookingStatus = "accepted", coverUrl?: string) {
+function setup(
+  payment: BookingPaymentData = paymentFixture(),
+  bookingStatus = "accepted",
+  coverUrl?: string,
+  strict = false,
+) {
   let current = payment;
   let status = bookingStatus;
   const sessions = vi.fn();
@@ -39,22 +45,33 @@ function setup(payment: BookingPaymentData = paymentFixture(), bookingStatus = "
     }),
     http.post(`${path}/payment/synchronization`, () => HttpResponse.json(apiOk(current))),
   );
-  const view = renderWithProviders(
-    <BookingPayment accountId="account-1" bookingId={BOOKING_ID} coverUrl={coverUrl} />,
-    {
-      theme: quintalTheme,
-    },
+  const checkout = (mode: ActivityProps["mode"]) => (
+    <Activity mode={mode}>
+      {strict ? (
+        <StrictMode>
+          <BookingPayment accountId="account-1" bookingId={BOOKING_ID} coverUrl={coverUrl} />
+        </StrictMode>
+      ) : (
+        <BookingPayment accountId="account-1" bookingId={BOOKING_ID} coverUrl={coverUrl} />
+      )}
+    </Activity>
   );
+  const view = renderWithProviders(checkout("visible"), {
+    theme: quintalTheme,
+  });
   return {
     ...view,
     sessions,
     choose,
-    confirm: () => {
-      current = paymentFixture({
+    setVisibility: (mode: ActivityProps["mode"]) => view.rerender(checkout(mode)),
+    confirm: (
+      next = paymentFixture({
         status: "paid",
         paidAmount: 300,
         installments: [{ ...paymentFixture().installments[0]!, status: "paid" }],
-      });
+      }),
+    ) => {
+      current = next;
       status = "confirmed";
     },
   };
@@ -141,6 +158,48 @@ describe("checkout da estadia", { timeout: 15000 }, () => {
     expect(sessions).toHaveBeenCalledWith("2");
     expect(screen.queryByRole("heading", { name: "Fechado!" })).not.toBeInTheDocument();
   });
+  it.each([false, true])(
+    "REQ-PAY-011 oculta e restaura o checkout preservado pelo router sem repetir a celebração (StrictMode=%s)",
+    async (strict) => {
+      const first = { ...paymentFixture().installments[0]!, amount: 100, amountDue: 100 };
+      const installments = [first, { ...first, number: 2 }, { ...first, number: 3 }];
+      const payment = paymentFixture({ options: null, installmentCount: 3, installments });
+      const { user, confirm, sessions, setVisibility } = setup(payment, "accepted", undefined, strict);
+      await user.click(await screen.findByRole("button", { name: "Continuar para o pagamento" }));
+      await user.click(await screen.findByRole("button", { name: "Confirmar no Stripe simulado" }));
+      await screen.findByRole("heading", { name: "Esperando o banco confirmar" });
+      const firstPaid = { ...first, status: "paid" as const };
+      confirm({
+        ...payment,
+        status: "active",
+        paidAmount: 100,
+        installments: [firstPaid, installments[1]!, installments[2]!],
+      });
+      await user.click(screen.getByRole("button", { name: "Conferir pagamento" }));
+      await screen.findByRole("heading", { name: "Fechado!" });
+
+      setVisibility("hidden");
+      setVisibility("visible");
+      expect(await screen.findByRole("heading", { name: "Confirme e pague" })).toBeVisible();
+      expect(screen.queryByRole("heading", { name: "Fechado!" })).not.toBeInTheDocument();
+      expect(screen.getByText(/Já pago:.*100,00/)).toBeVisible();
+      expect(screen.queryByRole("combobox", { name: "Como você prefere pagar?" })).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Continuar para o pagamento" }));
+      await screen.findByRole("button", { name: "Confirmar no Stripe simulado" });
+      expect(sessions).toHaveBeenLastCalledWith("2");
+      confirm({
+        ...payment,
+        status: "active",
+        paidAmount: 200,
+        installments: [firstPaid, { ...firstPaid, number: 2 }, installments[2]!],
+      });
+      await user.click(screen.getByRole("button", { name: "Confirmar no Stripe simulado" }));
+      expect(await screen.findByText(/Já pago:.*200,00/)).toBeVisible();
+      expect(screen.getByRole("heading", { name: "Confirme e pague" })).toBeVisible();
+      expect(screen.queryByRole("heading", { name: "Fechado!" })).not.toBeInTheDocument();
+    },
+  );
   it("REQ-PAY-009 conflito relê pagamento e reserva antes de permitir nova tentativa", async () => {
     const { user } = setup();
     const readPayment = vi.fn(() => HttpResponse.json(apiOk(paymentFixture())));
@@ -157,14 +216,17 @@ describe("checkout da estadia", { timeout: 15000 }, () => {
     await waitFor(() => expect(readBooking).toHaveBeenCalledTimes(2));
     expect(screen.queryByRole("heading", { name: "Fechado!" })).not.toBeInTheDocument();
   });
-  it("REQ-PAY-008 retorno do Stripe apaga query sensível e sincroniza sem confiar nela", async () => {
-    window.history.replaceState(null, "", "/?payment_return=1&installment=1&payment_intent_client_secret=synthetic");
-    const { confirm, user } = setup();
-    expect(await screen.findByRole("heading", { name: "Esperando o banco confirmar" })).toBeVisible();
-    expect(window.location.search).toBe("");
-    expect(screen.queryByRole("heading", { name: "Fechado!" })).not.toBeInTheDocument();
-    confirm();
-    await user.click(screen.getByRole("button", { name: "Conferir pagamento" }));
-    expect(await screen.findByRole("heading", { name: "Fechado!" })).toBeVisible();
-  });
+  it.each([false, true])(
+    "REQ-PAY-008 retorno do Stripe apaga query sensível e sincroniza sem confiar nela (StrictMode=%s)",
+    async (strict) => {
+      window.history.replaceState(null, "", "/?payment_return=1&installment=1&payment_intent_client_secret=synthetic");
+      const { confirm, user } = setup(paymentFixture(), "accepted", undefined, strict);
+      expect(await screen.findByRole("heading", { name: "Esperando o banco confirmar" })).toBeVisible();
+      expect(window.location.search).toBe("");
+      expect(screen.queryByRole("heading", { name: "Fechado!" })).not.toBeInTheDocument();
+      confirm();
+      await user.click(screen.getByRole("button", { name: "Conferir pagamento" }));
+      expect(await screen.findByRole("heading", { name: "Fechado!" })).toBeVisible();
+    },
+  );
 });

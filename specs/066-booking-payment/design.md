@@ -1,7 +1,7 @@
 ---
 spec: 066-booking-payment
 status: approved
-updated: 2026-10-23
+updated: 2026-10-25
 ---
 
 # 066 · Design técnico
@@ -45,6 +45,8 @@ Dinheiro da API em reais; usar conversão existente quando compor com Booking em
 
 Carregando → seleção de plano → abertura da sessão → checkout → enviando → aguardando confirmação → sincronizando → sucesso confirmado pela API. Erro recuperável retorna à operação apropriada. Reserva fechada ou prazo vencido bloqueia sessão. Sem chave, checkout não inicia. Reentrada e retorno do Stripe leem estado atual antes de criar sessão. Espera pode atualizar GET com intervalo limitado enquanto a página está visível; POST de sincronização em retorno/ação explícita, sem loop agressivo.
 
+A celebração é feedback transitório da primeira confirmação autoritativa. O hook registra quando ela foi exibida e consome a flag no cleanup de useLayoutEffect ao ocultar Activity, pois o router preserva useState. Uma nova visita mantém o cache financeiro e apresenta a próxima parcela. O guard da confirmação exibida evita consumir prematuramente um retorno Stripe pendente no replay de efeitos de StrictMode.
+
 Status `active` permite pagar parcelas restantes; não significa quitação integral. `processing` impede tentativa duplicada. Não habilitar uma parcela posterior enquanto a anterior estiver em aberto. O servidor continua sendo autoridade para corrida/limite de prazo.
 
 ## Matriz de testes planejados
@@ -66,6 +68,6 @@ Funções triviais internas podem ser cobertas pela composição identificada. N
 
 Na mesma entrega: TSDoc/interfaces, stories, nota do recurso, catálogo dos reutilizáveis, decisão sobre confirmação e parcelamento, linha do tempo e árvore/responsabilidades se a estrutura mudar. O coordenador autorizou edição direta no vault compartilhado em 2026-10-23. Não há pacote intermediário.
 
-Executar suítes focadas pertinentes, `npx tsc --noEmit`, ESLint dos arquivos tocados e conferência visual. Dev próprio na 3177 (`next dev --webpack`); combinar 3100/5099 antes de usar os runners existentes. Sem npm install/ci, push ou PR. Registrar resultados reais e pendências; commits convencionais em português sem rodapé de atribuição.
+Executar suítes focadas pertinentes, `npx tsc --noEmit`, ESLint dos arquivos tocados e conferência visual. Dev próprio na 3177 (`next dev --webpack`); combinar 3100/5099 antes de usar os runners existentes. Sem npm install/ci nem novo PR. Push de feat/066-booking-payment autorizado pelo pedido de 25/10/2026 para atualizar o PR #28 existente. Registrar resultados reais e pendências; commits convencionais em português sem rodapé de atribuição.
 
-Aprovada pelo coordenador em 2026-10-23: lembrete curto sem checkbox; edição direta do vault compartilhado autorizada, sem pacote intermediário. Erros usam helpers atuais, com futura tradução 090 por baixo.
+Aprovada pelo coordenador em 2026-10-23: lembrete curto sem checkbox; edição direta do vault compartilhado autorizada, sem pacote intermediário. Erros usam translateError da 090, sem tradução paralela.

@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isApiError } from "@/shared/api/errors/ApiError";
 import { paymentMutations } from "../api/client/paymentMutations.client";
 import type { PaymentSession } from "../api/paymentContracts";
 import { paymentQuery } from "../api/paymentQueries";
 import { bookingQueries } from "../api/queries";
-import { nextPayableInstallment, paymentWindowClosed } from "../lib/paymentState";
+import { isPaymentConfirmed, nextPayableInstallment, paymentWindowClosed } from "../lib/paymentState";
 
-/** Coordena sessões efêmeras e atualização autoritativa. Não confirma localmente nem persiste segredos. */
+/** Coordena sessões efêmeras e atualização autoritativa. Não confirma localmente nem persiste segredos.
+ * A celebração exibida é consumida ao ocultar a página (Activity do router); cache financeiro é preservado.
+ */
 export function useBookingPayment(accountId: string, bookingId: string) {
   const client = useQueryClient();
   const booking = useQuery(bookingQueries.detail(accountId, bookingId));
@@ -23,6 +25,22 @@ export function useBookingPayment(accountId: string, bookingId: string) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [celebrate, setCelebrate] = useState(false);
+  const displayedCelebration = useRef(false);
+  useLayoutEffect(() => {
+    if (celebrate && payment.data && booking.data && isPaymentConfirmed(payment.data, booking.data.status))
+      displayedCelebration.current = true;
+  }, [celebrate, payment.data, booking.data]);
+  useLayoutEffect(
+    () => () => {
+      // Next preserves useState across navigation with Activity, but runs layout cleanups when hiding.
+      // Only consume an actually displayed confirmation: StrictMode setup/cleanup must not lose Stripe returns.
+      if (displayedCelebration.current) {
+        displayedCelebration.current = false;
+        setCelebrate(false);
+      }
+    },
+    [],
+  );
   const locked = useRef(false);
   const [now, setNow] = useState(() => Date.now());
   const refreshedDeadline = useRef<string | null>(null);
