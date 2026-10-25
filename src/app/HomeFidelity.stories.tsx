@@ -1,5 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { usePathname, useRouter } from "@storybook/nextjs-vite/navigation.mock";
+import {
+  ReadonlyURLSearchParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "@storybook/nextjs-vite/navigation.mock";
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
@@ -49,6 +54,7 @@ const meta = {
   beforeEach: () => {
     useRouter.mockReturnValue({ ...getRouter(), refresh: fn(), bfcacheId: "story" });
     usePathname.mockReturnValue("/");
+    useSearchParams.mockReturnValue(new ReadonlyURLSearchParams());
   },
 } satisfies Meta<typeof HomePreview>;
 export default meta;
