@@ -20,7 +20,7 @@ function matchesPath(pathname: string, href: string) {
  *
  * @example <HeaderNav items={navItemsFor(user.role)} />
  */
-export function HeaderNav({ items }: { items: readonly NavItem[] }) {
+export function HeaderNav({ items, stayUpdates = false }: { items: readonly NavItem[]; stayUpdates?: boolean }) {
   // Fora do App Router (ex.: Storybook) o caminho pode vir nulo: nenhum atalho fica marcado.
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
@@ -31,6 +31,7 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
   const links = (onNavigate?: () => void) =>
     items.map((item) => {
       const current = item.href === activeHref;
+      const updated = item.id === "owner-stays" && stayUpdates;
       return (
         <ListItem key={item.id} disablePadding sx={{ width: "auto" }}>
           <Link
@@ -38,6 +39,7 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
             href={item.href}
             onClick={onNavigate}
             aria-current={current ? "page" : undefined}
+            aria-label={updated ? `${item.label} (${shellCopy.updates})` : undefined}
             underline="none"
             sx={{
               display: "inline-flex",
@@ -53,7 +55,10 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
               bgcolor: current ? "background.paper" : "transparent",
             }}
           >
-            {item.label}
+            <Box component="span" sx={{ position: "relative" }}>
+              {item.label}
+              {updated && <UpdateDot top={-3} right={-10} />}
+            </Box>
           </Link>
         </ListItem>
       );
@@ -69,20 +74,46 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
       <Box sx={{ display: { xs: "block", md: "none" } }}>
         <IconButton
           onClick={() => setOpen(true)}
-          aria-label={shellCopy.openNav}
+          aria-label={stayUpdates ? `${shellCopy.openNav} (${shellCopy.updates})` : shellCopy.openNav}
           aria-expanded={open}
           sx={{ width: 48, height: 48 }}
         >
-          <Box component="span" aria-hidden sx={{ fontSize: 22, lineHeight: 1 }}>
-            ☰
+          <Box component="span" aria-hidden sx={{ position: "relative", fontSize: 22, lineHeight: 1 }}>
+            ☰{stayUpdates && <UpdateDot top={-2} right={-6} />}
           </Box>
         </IconButton>
-        <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
+        <Drawer
+          anchor="left"
+          open={open}
+          onClose={() => setOpen(false)}
+          slotProps={{ paper: { "aria-label": shellCopy.nav } }}
+        >
           <Box component="nav" aria-label={shellCopy.nav} sx={{ width: 260, p: 2 }}>
             <List>{links(() => setOpen(false))}</List>
           </Box>
         </Drawer>
       </Box>
     </>
+  );
+}
+
+/** Novidade nas estadias: coral contornado em tinta (o contorno garante contraste sobre o papel); o nome vem no link. */
+function UpdateDot({ top, right }: { top: number; right: number }) {
+  return (
+    <Box
+      component="span"
+      aria-hidden
+      sx={{
+        position: "absolute",
+        top,
+        right,
+        width: 10,
+        height: 10,
+        borderRadius: "50%",
+        bgcolor: "quintal.coral",
+        border: 1.5,
+        borderColor: "text.primary",
+      }}
+    />
   );
 }

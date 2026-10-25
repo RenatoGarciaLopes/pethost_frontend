@@ -7,3 +7,5 @@
 export { RequestStayForm } from "./components/client/RequestStayForm";
 export type { RequestStayFormProps, RequestStayListing } from "./components/client/RequestStayForm";
 export type { PickablePet } from "./components/client/PetPickCards";
+export { useStayUpdates } from "./hooks/useStayUpdates";
+export { bookingQueries } from "./api/queries";
