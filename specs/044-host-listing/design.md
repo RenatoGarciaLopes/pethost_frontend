@@ -82,4 +82,5 @@ As seções seguem o padrão da 022: recebem `values` e `accept` de um anfitriã
 - **Pets da casa:** a 023 ainda não chegou ao `dev`, então "Apresentar quem mora aqui" leva a `/pets`. O rascunho fica na sessão do navegador.
 
 ### Revisão 099 (25/10/2026)
+
 O painel de etapas não renderiza seção ou título quando todas estão prontas. `hasListing` exige ao menos um cantinho `isActive`; somente pausados mantêm a pendência. O painel retorna quando qualquer etapa volta a pendente. Contratos HTTP preservados. Cobertura e validação: nota `development/resources/host-verification`, seção Tarefa 099 no vault.
