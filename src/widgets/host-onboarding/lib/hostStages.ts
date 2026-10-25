@@ -5,6 +5,7 @@ export interface HostProgress {
   verified: boolean;
   /** Recebimento: `null` antes da verificação (ainda não há perfil de anfitrião). */
   payouts: { enabled: boolean; status: string } | null;
+  /** Há ao menos um cantinho aberto (isActive), não apenas cadastrado. */
   hasListing: boolean;
 }
 
