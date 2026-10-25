@@ -55,7 +55,7 @@ export const KeyboardFocus: Story = {
     const label = toggle.closest("label")!;
     const hasVisibleRing = Array.from(label.querySelectorAll("*")).some((element) => {
       const styles = getComputedStyle(element);
-      return styles.outlineWidth === "3px" && styles.outlineColor === "rgb(47, 90, 134)" && styles.opacity !== "0";
+      return styles.outlineWidth === "3px" && styles.outlineColor === "rgb(31, 26, 23)" && styles.opacity !== "0";
     });
     await expect(hasVisibleRing).toBe(true);
   },
