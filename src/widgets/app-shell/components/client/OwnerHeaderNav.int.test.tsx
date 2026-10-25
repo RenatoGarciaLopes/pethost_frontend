@@ -101,10 +101,31 @@ describe("owner stays navigation", () => {
   it("does not resurrect an acknowledged detail from stale list data on leaving the page", async () => {
     saved.set(key, current());
     const accepted = bookingDto({ status: "accepted" });
-    server.use(http.get(`*/api/bookings/${bookingDto().id}`, () => HttpResponse.json(apiOk(accepted))));
+    // This scenario needs the requested list committed BEFORE the accepted detail.
+    // Response arrival time determines dataUpdatedAt; racing both responses tests a different scenario.
+    let releaseDetail: () => void = () => {};
+    const listCommitted = new Promise<void>((resolve) => {
+      releaseDetail = resolve;
+    });
+    server.use(
+      http.get(`*/api/bookings/${bookingDto().id}`, async () => {
+        await listCommitted;
+        return HttpResponse.json(apiOk(accepted));
+      }),
+    );
     navigation.pathname = `/owner/bookings/${bookingDto().id}`;
     const view = renderNav();
+    const listKey = bookingQueries.infinite("a", BOOKING_STATUSES).queryKey;
+    try {
+      await waitFor(() => {
+        expect(view.queryClient.getQueryState(listKey)?.fetchStatus).toBe("idle");
+        expect(view.queryClient.getQueryData(listKey)?.pages[0]?.items[0]?.status).toBe("requested");
+      });
+    } finally {
+      releaseDetail();
+    }
     await waitFor(() => expect(saved.get(key)?.[bookingDto().id]).toContain("accepted"));
+    expect(view.queryClient.getQueryData(listKey)?.pages[0]?.items[0]?.status).toBe("accepted");
     navigation.pathname = "/pets";
     view.rerender(<OwnerHeaderNav accountId="a" items={navItemsFor("owner")} />);
     await waitFor(() => expect(screen.queryByRole("link", { name: /há novidades/ })).not.toBeInTheDocument());

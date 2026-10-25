@@ -28,3 +28,15 @@ Catálogo consultado: bookings, NAV_ITEMS/HeaderNav e AppHeader. Código consult
 Rodada completa selecionada: 6 arquivos e 44 testes aprovados. Após acrescentar as duas regressões de cache: OwnerHeaderNav 12/12, AppHeader 6/6 e HeaderNav 7/7 aprovados em execuções selecionadas. Uma rodada intermediária terminou com timeout ao iniciar o worker de HeaderNav, corrigido pela reexecução isolada, sem alteração do produto. São 46 casos distintos aprovados combinando as execuções, não uma rodada única de 46. TypeScript, lint dos arquivos alterados e diff check passaram.
 
 Storybook dev limitado a HeaderNav.stories.tsx falhou por EPERM em settings global e acesso negado/cache do esbuild. Nenhuma captura foi produzida, nenhum play/a11y de story executado. E2E e comparação Figma continuam pendentes para CI/revisão. Configuração temporária de reprodução em `test-results/storybook-100/` (ignorada pelo Git). Nenhum pacote instalado e nenhum push.
+
+### Revisão: ordenação determinística da regressão de cache
+
+A instabilidade de `does not resurrect an acknowledged detail from stale list data on leaving the page` era causada pelo arranjo do teste: lista requested e detalhe accepted respondiam concorrentemente. O hook usa dataUpdatedAt do TanStack Query para preservar o resultado mais recente. Quando a lista terminava depois, o cenário já não representava uma lista antiga e um detalhe novo, e a assinatura accepted corretamente não substituía a lista mais recente.
+
+O handler MSW do detalhe agora aguarda uma Promise local, liberada somente após observar a lista requested no cache com fetchStatus idle. Só então responde accepted. O teste também verifica o item accepted no cache antes de navegar para /pets. O finally libera o handler caso a assertion inicial falhe, evitando requisição pendurada. Sem sleeps, relógio simulado ou aumento de timeout. Nenhuma alteração no hook, contratos, query keys, HeaderNav/UpdateDot ou helpers compartilhados.
+
+Esta alteração afeta somente o teste de integração/funcional. Unitário isolado não se aplica à ordenação entre HTTP, cache e navegação simulada; o próprio teste cobre a composição. E2E e stories não se aplicam à mudança do arranjo de teste, sem alteração de interface ou comportamento de produção.
+
+Comando de prova: `npx vitest run --maxWorkers=1 src/widgets/app-shell/components/client/OwnerHeaderNav.int.test.tsx`, cinco processos consecutivos sobre o mesmo código, todos com 12/12 aprovados (60 execuções de casos). Durações registradas pelo Vitest: 11,86 s; 13,01 s; 29,23 s; 18,13 s; 10,46 s. Não houve falha entre essas cinco rodadas.
+
+Checks desta revisão: `npx tsc --noEmit`, ESLint do teste alterado, Prettier e `git diff --check` aprovados.
