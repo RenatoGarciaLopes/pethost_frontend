@@ -1,4 +1,4 @@
-﻿import { hostOnboardingCopy as copy } from "./hostOnboardingCopy";
+import { hostOnboardingCopy as copy } from "./hostOnboardingCopy";
 
 /** Onde o anfitrião está no caminho: verificação, recebimento (`GET /hosts/me`) e cantinho. */
 export interface HostProgress {

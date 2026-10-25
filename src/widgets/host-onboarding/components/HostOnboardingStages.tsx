@@ -1,4 +1,4 @@
-﻿import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { useId } from "react";
 import { StatusPill, type StatusPillTone } from "@/shared/ui/feedback/StatusPill";
 import { Surface } from "@/shared/ui/layout/Surface";
@@ -15,7 +15,8 @@ export interface HostOnboardingStagesProps {
 /**
  * As três etapas para virar anfitrião, em ordem (REQ-HVER-001, REQ-LIST-001): 1. Mostrar quem eu sou → 2. Como eu
  * recebo → 3. Montar meu cantinho. Cada etapa só abre quando a anterior termina; a da vez traz o caminho
- * (`aria-current="step"`) e a travada diz o que falta. O estado vem em texto; o selo só reforça. Apresentação pura. Não renderiza seção, título ou espaço quando todas estão prontas.
+ * (`aria-current="step"`) e a travada diz o que falta. O estado vem em texto; o selo só reforça. Apresentação pura.
+ * Com as três prontas não renderiza nada (099): nem seção, nem título.
  *
  * @example <HostOnboardingStages progress={{ verified: true, payouts: { enabled: false, status: "in_progress" }, hasListing: false }} />
  */

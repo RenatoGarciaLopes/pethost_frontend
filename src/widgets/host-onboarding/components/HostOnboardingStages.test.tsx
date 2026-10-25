@@ -1,4 +1,4 @@
-﻿import { screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { renderWithProviders } from "@/test/render";
