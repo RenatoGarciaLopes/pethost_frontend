@@ -82,7 +82,12 @@ export function HeaderNav({ items, stayUpdates = false }: { items: readonly NavI
             ☰{stayUpdates && <UpdateDot top={-2} right={-6} />}
           </Box>
         </IconButton>
-        <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
+        <Drawer
+          anchor="left"
+          open={open}
+          onClose={() => setOpen(false)}
+          slotProps={{ paper: { "aria-label": shellCopy.nav } }}
+        >
           <Box component="nav" aria-label={shellCopy.nav} sx={{ width: 260, p: 2 }}>
             <List>{links(() => setOpen(false))}</List>
           </Box>
