@@ -95,7 +95,12 @@ export function NearbyListings({ scope, pets = [], from, to, count }: NearbyList
           >
             {shown.items.map((listing) => (
               <Box component="li" key={listing.id}>
-                <ListingCard listing={listing} query={cardQuery} petCount={pets.length || count || 0} compatibility={compatibility} />
+                <ListingCard
+                  listing={listing}
+                  query={cardQuery}
+                  petCount={pets.length || count || 0}
+                  compatibility={compatibility}
+                />
               </Box>
             ))}
           </Box>
