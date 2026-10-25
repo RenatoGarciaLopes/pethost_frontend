@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
-import { Box, Dialog } from "@mui/material";
+import { Box, Dialog, DialogTitle } from "@mui/material";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { focusRing, keyboardFocus } from "@/shared/theme/focus";
+import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
 import { stayLabel } from "@/shared/ui/forms/Calendar";
 import type { SearchPet } from "../../../types";
 import { useSearchUrl } from "../../../hooks/useSearchUrl";
@@ -128,10 +129,11 @@ export function SearchSummaryBar({ pets, quantityMode = false }: SearchSummaryBa
         onClose={() => setEditing(null)}
         fullWidth
         maxWidth="md"
-        aria-label={copy.editSearch}
         sx={{ "& .MuiDialog-container": { alignItems: { xs: "flex-end", md: "flex-start" } } }}
         slotProps={{ paper: { sx: { m: { xs: 0, md: 3 }, p: 1.5, width: { xs: "100%", md: undefined } } } }}
       >
+        {/* O Dialog aponta aria-labelledby para o próprio título: oculto, ele dá nome ao diálogo sem mudar a prancha. */}
+        <DialogTitle sx={visuallyHidden}>{copy.editSearch}</DialogTitle>
         {editing && (
           <SearchBar
             key={editing}
