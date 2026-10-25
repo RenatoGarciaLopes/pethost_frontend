@@ -9,6 +9,8 @@ export interface ChoiceCardGroupProps {
   /** Ordered unique options; checked state comes from value. */ options: readonly Omit<ChoiceCardProps, "checked">[];
   /** Selected option. */ value: string;
   /** Next selected option from click or arrows. */ onChange: (value: string) => void;
+  /** Equal columns from md; stacked on mobile. */ layout?: "stacked" | "responsive";
+  /** Section heading for the visible group label; body preserves existing forms. */ labelVariant?: "body" | "section";
   /** Disable all choices. */ disabled?: boolean;
 }
 /**
@@ -16,12 +18,42 @@ export interface ChoiceCardGroupProps {
  * Use for a small visual choice; use SegmentedControl for short text-only choices.
  * @example <ChoiceCardGroup label="Casa" options={options} value={value} onChange={setValue} />
  */
-export function ChoiceCardGroup({ label, options, value, onChange, disabled = false }: ChoiceCardGroupProps) {
+export function ChoiceCardGroup({
+  label,
+  options,
+  value,
+  onChange,
+  disabled = false,
+  layout = "stacked",
+  labelVariant = "body",
+}: ChoiceCardGroupProps) {
   const id = useId();
   return (
     <FormControl fullWidth>
-      <FormLabel id={id}>{label}</FormLabel>
-      <RadioGroup aria-labelledby={id} value={value} onChange={(_, next) => onChange(next)} sx={{ gap: 2, mt: 1 }}>
+      <FormLabel
+        id={id}
+        component={labelVariant === "section" ? "h2" : "label"}
+        sx={
+          labelVariant === "section"
+            ? { typography: "h2", fontSize: 20, fontWeight: 700, color: "text.primary" }
+            : undefined
+        }
+      >
+        {label}
+      </FormLabel>
+      <RadioGroup
+        aria-labelledby={id}
+        value={value}
+        onChange={(_, next) => onChange(next)}
+        sx={{
+          gap: 2,
+          mt: 1,
+          ...(layout === "responsive" && {
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: `repeat(${options.length}, minmax(0, 1fr))` },
+          }),
+        }}
+      >
         {options.map((option) => (
           <ChoiceCard
             key={option.value}

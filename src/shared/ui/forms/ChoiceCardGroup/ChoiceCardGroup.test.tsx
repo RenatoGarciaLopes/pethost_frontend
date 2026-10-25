@@ -34,3 +34,11 @@ it("REQ-DS-009 cards preservam avisos e seleção por teclado e clique", async (
   await user.click(screen.getByRole("radio", { name: /Cachorro/ }));
   expect(change).toHaveBeenLastCalledWith("dog");
 });
+
+it("section label remains the accessible group name", () => {
+  renderWithProviders(
+    <ChoiceCardGroup label="Plano" labelVariant="section" options={options} value="dog" onChange={() => {}} />,
+  );
+  expect(screen.getByRole("heading", { name: "Plano", level: 2 })).toBeVisible();
+  expect(screen.getByRole("radiogroup", { name: "Plano" })).toBeVisible();
+});
