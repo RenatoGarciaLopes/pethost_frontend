@@ -1,10 +1,11 @@
-import { hostOnboardingCopy as copy } from "./hostOnboardingCopy";
+﻿import { hostOnboardingCopy as copy } from "./hostOnboardingCopy";
 
 /** Onde o anfitrião está no caminho: verificação, recebimento (`GET /hosts/me`) e cantinho. */
 export interface HostProgress {
   verified: boolean;
   /** Recebimento: `null` antes da verificação (ainda não há perfil de anfitrião). */
   payouts: { enabled: boolean; status: string } | null;
+  /** Há ao menos um cantinho aberto (isActive), não apenas cadastrado. */
   hasListing: boolean;
 }
 
