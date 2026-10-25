@@ -51,3 +51,7 @@ E2E com backend e Stripe simulados não valida API .NET, Stripe ou banco reais. 
 ## Bloqueio da entrega Git local
 
 A tentativa de git add/commit foi recusada ao criar `pethost_frontend/.git/worktrees/pethost_frontend-066/index.lock` (Permission denied). Não há index.lock existente; nenhum commit/push desta revisão foi realizado por esse comando. O código e os documentos estão prontos na worktree, e somente os cinco arquivos da revisão devem entrar no commit, preservando yarn.lock já alterado antes. O coordenador foi avisado via Maestri para concluir a entrega em ambiente com acesso ao gitdir.
+
+### Entrega Git concluída pelo coordenador
+
+O coordenador contornou o bloqueio do gitdir executando a entrega no próprio ambiente: commit `ba5a709` da correção, merge de dev `d1e4d0b` e push confirmado para `origin/feat/066-booking-payment` (PR #28). Segundo o retorno do coordenador, os 149 testes da área de bookings, typecheck, lint e formatação passaram após integrar dev. São checks adicionais dele; os resultados locais do agente permanecem discriminados acima. T6 está concluída. CI do PR foi reiniciado; REQ-PAY-011 no navegador ainda aguarda esse resultado. Nenhum dado Stripe real foi acessado ou usado nesta revisão.
