@@ -11,6 +11,7 @@ import { DoorMark } from "@/shared/ui/brand/DoorMark";
 import { PageContainer } from "@/shared/ui/layout/PageContainer";
 import { AccountMenu } from "./client/AccountMenu";
 import { HeaderNav } from "./client/HeaderNav";
+import { OwnerHeaderNav } from "./client/OwnerHeaderNav";
 import { SkipLink } from "./SkipLink";
 
 interface AppHeaderProps {
@@ -100,7 +101,12 @@ export function AppHeader({ user, variant = "shell", search, filters, returnTo }
           <Box sx={{ flexGrow: 1 }} />
           {search}
           {search && <Box sx={{ flexGrow: 1, display: { xs: "none", md: "block" } }} />}
-          {items.length > 0 && <HeaderNav items={items} />}
+          {items.length > 0 &&
+            (user?.role === "owner" ? (
+              <OwnerHeaderNav key={user.id} accountId={user.id} items={items} />
+            ) : (
+              <HeaderNav items={items} />
+            ))}
           {user ? (
             <AccountMenu user={{ ...user, avatarUrl: user.avatarUrl ?? null }} />
           ) : (

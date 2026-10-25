@@ -9,3 +9,4 @@ export { ownerBookingPaymentPath } from "./lib/bookingPaths";
 export { statusLabel } from "./lib/bookingStatus";
 export { formatPeriod } from "./lib/formatStay";
 export type { Booking, BookingStatus } from "./types";
+export { BOOKING_STATUSES } from "./api/contracts";

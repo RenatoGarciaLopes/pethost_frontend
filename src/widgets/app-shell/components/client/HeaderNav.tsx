@@ -20,7 +20,7 @@ function matchesPath(pathname: string, href: string) {
  *
  * @example <HeaderNav items={navItemsFor(user.role)} />
  */
-export function HeaderNav({ items }: { items: readonly NavItem[] }) {
+export function HeaderNav({ items, stayUpdates = false }: { items: readonly NavItem[]; stayUpdates?: boolean }) {
   // Fora do App Router (ex.: Storybook) o caminho pode vir nulo: nenhum atalho fica marcado.
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
@@ -31,6 +31,7 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
   const links = (onNavigate?: () => void) =>
     items.map((item) => {
       const current = item.href === activeHref;
+      const updated = item.id === "owner-stays" && stayUpdates;
       return (
         <ListItem key={item.id} disablePadding sx={{ width: "auto" }}>
           <Link
@@ -38,6 +39,7 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
             href={item.href}
             onClick={onNavigate}
             aria-current={current ? "page" : undefined}
+            aria-label={updated ? `${item.label} (${shellCopy.updates})` : undefined}
             underline="none"
             sx={{
               display: "inline-flex",
@@ -53,7 +55,24 @@ export function HeaderNav({ items }: { items: readonly NavItem[] }) {
               bgcolor: current ? "background.paper" : "transparent",
             }}
           >
-            {item.label}
+            <Box component="span" sx={{ position: "relative" }}>
+              {item.label}
+              {updated && (
+                <Box
+                  component="span"
+                  aria-hidden
+                  sx={{
+                    position: "absolute",
+                    top: -2,
+                    right: -8,
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    bgcolor: "quintal.coral",
+                  }}
+                />
+              )}
+            </Box>
           </Link>
         </ListItem>
       );
