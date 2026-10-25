@@ -57,21 +57,7 @@ export function HeaderNav({ items, stayUpdates = false }: { items: readonly NavI
           >
             <Box component="span" sx={{ position: "relative" }}>
               {item.label}
-              {updated && (
-                <Box
-                  component="span"
-                  aria-hidden
-                  sx={{
-                    position: "absolute",
-                    top: -2,
-                    right: -8,
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    bgcolor: "quintal.coral",
-                  }}
-                />
-              )}
+              {updated && <UpdateDot top={-3} right={-10} />}
             </Box>
           </Link>
         </ListItem>
@@ -88,12 +74,12 @@ export function HeaderNav({ items, stayUpdates = false }: { items: readonly NavI
       <Box sx={{ display: { xs: "block", md: "none" } }}>
         <IconButton
           onClick={() => setOpen(true)}
-          aria-label={shellCopy.openNav}
+          aria-label={stayUpdates ? `${shellCopy.openNav} (${shellCopy.updates})` : shellCopy.openNav}
           aria-expanded={open}
           sx={{ width: 48, height: 48 }}
         >
-          <Box component="span" aria-hidden sx={{ fontSize: 22, lineHeight: 1 }}>
-            ☰
+          <Box component="span" aria-hidden sx={{ position: "relative", fontSize: 22, lineHeight: 1 }}>
+            ☰{stayUpdates && <UpdateDot top={-2} right={-6} />}
           </Box>
         </IconButton>
         <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
@@ -103,5 +89,26 @@ export function HeaderNav({ items, stayUpdates = false }: { items: readonly NavI
         </Drawer>
       </Box>
     </>
+  );
+}
+
+/** Novidade nas estadias: coral contornado em tinta (o contorno garante contraste sobre o papel); o nome vem no link. */
+function UpdateDot({ top, right }: { top: number; right: number }) {
+  return (
+    <Box
+      component="span"
+      aria-hidden
+      sx={{
+        position: "absolute",
+        top,
+        right,
+        width: 10,
+        height: 10,
+        borderRadius: "50%",
+        bgcolor: "quintal.coral",
+        border: 1.5,
+        borderColor: "text.primary",
+      }}
+    />
   );
 }

@@ -52,7 +52,7 @@ describe("owner stays navigation", () => {
     saved.set(key, {});
     const view = renderNav();
     expect(await screen.findByRole("link", { name: "Minhas estadias (há novidades)" })).toBeInTheDocument();
-    await view.user.click(screen.getByRole("button", { name: "Abrir a navegação" }));
+    await view.user.click(screen.getByRole("button", { name: "Abrir a navegação (há novidades)" }));
     expect(
       within(await screen.findByRole("presentation")).getByRole("link", { name: /há novidades/ }),
     ).toBeInTheDocument();
