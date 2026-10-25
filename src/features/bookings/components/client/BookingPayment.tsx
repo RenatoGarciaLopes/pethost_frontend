@@ -183,9 +183,12 @@ export function BookingPaymentView({
                             plan.count === 1
                               ? copy.atSight(formatBRL(plan.firstAmount))
                               : copy.planLabel(plan.count, formatBRL(plan.firstAmount)),
-                          description: plan.installments.every((i) => i.amount === plan.firstAmount)
-                            ? copy.planTotal(formatBRL(payment.totalAmount))
-                            : plan.installments.map((i) => formatBRL(i.amount)).join(" + "),
+                          description:
+                            plan.count === 1
+                              ? copy.atSightDetail
+                              : plan.installments.every((i) => i.amount === plan.firstAmount)
+                                ? copy.planTotal(formatBRL(payment.totalAmount))
+                                : plan.installments.map((i) => formatBRL(i.amount)).join(" + "),
                         }))}
                       />
                       <Typography variant="body2" color="text.secondary">

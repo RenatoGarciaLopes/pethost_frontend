@@ -33,6 +33,7 @@ export const paymentCopy = {
   deadline: (date: string) => `Pague até ${date}`,
   atSight: (amount: string) => `À vista · ${amount}`,
   planLabel: (count: number, amount: string) => `${count}× de ${amount}`,
+  atSightDetail: "Uma cobrança só, com Pix ou cartão",
   planTotal: (amount: string) => `Total ${amount}`,
   installmentPaid: (date?: string | null) =>
     date
