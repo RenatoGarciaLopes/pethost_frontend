@@ -541,6 +541,7 @@ src/shared/lib/text/initials.ts regra pura de extração de iniciais
 ```
 
 A pasta media contém apresentação; parsing continua em shared/lib/text e cores em shared/theme/tokens/semantic.ts. AccountMenu, PublicProfileCard, HostBookingList, AvatarUploader, ListingCard e ListingPageScreen compõem o recurso; ele não conhece conta, reserva ou API. Detalhes: [076](../specs/076-avatar-initials/design.md).
+
 ## Revisão 071 da busca
 
 SearchBar em features/search/components/client/SearchBar centraliza a faixa usada por home, /search e detalhe. searchDateLabel e seus testes migram de widgets/home/lib para features/search/lib; não há pasta vazia ou cópia residual. HomeScreen compõe o recurso pelo index.client público.

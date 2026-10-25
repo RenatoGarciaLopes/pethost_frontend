@@ -168,7 +168,11 @@ function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRe
           display: "grid",
           placeItems: "center",
           bgcolor: "background.paper",
-          [keyboardFocus("&:has(input:focus-visible)")]: { outline: "2px solid", outlineColor: "text.primary", outlineOffset: 3 },
+          [keyboardFocus("&:has(input:focus-visible)")]: {
+            outline: "2px solid",
+            outlineColor: "text.primary",
+            outlineOffset: 3,
+          },
         }}
         aria-busy={uploading || undefined}
       >
@@ -248,7 +252,11 @@ function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRe
             textAlign: "center",
             color: disabled ? "text.disabled" : "text.primary",
             cursor: disabled ? "not-allowed" : "pointer",
-            [keyboardFocus("&:has(input:focus-visible)")]: { outline: "2px solid", outlineColor: "text.primary", outlineOffset: 2 },
+            [keyboardFocus("&:has(input:focus-visible)")]: {
+              outline: "2px solid",
+              outlineColor: "text.primary",
+              outlineOffset: 2,
+            },
           }}
         >
           {copy.replace(number)}
