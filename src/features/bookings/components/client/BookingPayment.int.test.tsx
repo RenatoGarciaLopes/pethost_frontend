@@ -102,6 +102,51 @@ describe("checkout da estadia", { timeout: 15000 }, () => {
     expect(choose).toHaveBeenCalledWith({ installmentCount: 1 });
     expect(sessions).toHaveBeenCalledTimes(1);
   });
+  it("101 seleciona plano por teclado e envia installmentCount da API", async () => {
+    const { user, choose } = setup(paymentFixture({ status: "not_started", installmentCount: null, installments: [] }));
+    const first = await screen.findByRole("radio", { name: /À vista/ });
+    first.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("radio", { name: /3×/ })).toBeChecked();
+    expect(screen.getByRole("list", { name: "Vencimentos das parcelas" })).toHaveTextContent("3ª parcela");
+    await user.click(screen.getByRole("button", { name: "Continuar para o pagamento" }));
+    await screen.findByRole("button", { name: "Confirmar no Stripe simulado" });
+    expect(choose).toHaveBeenCalledWith({ installmentCount: 3 });
+  });
+  it("101 preserva ordem e valores desiguais da API e permite escolher por clique", async () => {
+    const plans = paymentFixture().options!;
+    const { user, choose } = setup(
+      paymentFixture({
+        status: "not_started",
+        installmentCount: null,
+        installments: [],
+        totalAmount: 345,
+        options: [
+          {
+            ...plans[1]!,
+            count: 2,
+            firstAmount: 145,
+            otherAmount: 200,
+            installments: [
+              { number: 1, amount: 145, dueAt: "2099-11-11T12:00:00Z" },
+              { number: 2, amount: 200, dueAt: "2099-12-11T12:00:00Z" },
+            ],
+          },
+          plans[0]!,
+        ],
+      }),
+    );
+    const radios = await screen.findAllByRole("radio");
+    expect(radios[0]).toHaveAccessibleName(/2×.*145,00.*200,00/);
+    expect(radios[0]).toBeChecked();
+    await user.click(radios[1]!);
+    await user.click(radios[0]!);
+    expect(screen.getByRole("complementary", { name: "Resumo da estadia" })).toHaveTextContent("345,00");
+    expect(screen.getByRole("list", { name: "Vencimentos das parcelas" })).toHaveTextContent("200,00");
+    await user.click(screen.getByRole("button", { name: "Continuar para o pagamento" }));
+    await screen.findByRole("button", { name: "Confirmar no Stripe simulado" });
+    expect(choose).toHaveBeenCalledWith({ installmentCount: 2 });
+  });
   it("REQ-PAY-007/008 mantém pendência e só celebra após confirmação da API", async () => {
     const { user, confirm } = setup();
     await user.click(await screen.findByRole("button", { name: "Continuar para o pagamento" }));
@@ -183,7 +228,7 @@ describe("checkout da estadia", { timeout: 15000 }, () => {
       expect(await screen.findByRole("heading", { name: "Confirme e pague" })).toBeVisible();
       expect(screen.queryByRole("heading", { name: "Fechado!" })).not.toBeInTheDocument();
       expect(screen.getByText(/Já pago:.*100,00/)).toBeVisible();
-      expect(screen.queryByRole("combobox", { name: "Como você prefere pagar?" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("radiogroup", { name: "Como você prefere pagar?" })).not.toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Continuar para o pagamento" }));
       await screen.findByRole("button", { name: "Confirmar no Stripe simulado" });

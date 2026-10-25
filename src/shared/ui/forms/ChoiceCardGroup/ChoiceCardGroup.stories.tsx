@@ -48,3 +48,6 @@ export const Mobile: Story = {
   name: "REQ-DS-018 Mobile",
   globals: { viewport: { value: "celular", isRotated: false } },
 };
+
+/** Equal desktop columns, stacked on mobile; same native radio keyboard behavior. */
+export const Responsive: Story = { args: { layout: "responsive" } };

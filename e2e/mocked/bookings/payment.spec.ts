@@ -167,14 +167,14 @@ test("REQ-PAY-011 parcela seguinte preserva plano e não repete celebração", a
   await mockStripePayment(page);
   const booking = await seed(page);
   await page.goto(`/owner/bookings/${booking.id}/payment`);
-  await page.getByRole("combobox", { name: "Como você prefere pagar?" }).selectOption("3");
+  await page.getByRole("radio", { name: /^3×/ }).check();
   await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
   await page.getByRole("button", { name: /Pagar R\$\s*100,00/ }).click();
   await expect(page.getByRole("heading", { name: "Fechado!" })).toBeVisible();
   await page.getByRole("link", { name: "Ver a estadia" }).click();
   await page.getByRole("link", { name: "Ver pagamento e parcelas" }).click();
   await expect(page.getByRole("heading", { name: "Confirme e pague" })).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Como você prefere pagar?" })).toHaveCount(0);
+  await expect(page.getByRole("radiogroup", { name: "Como você prefere pagar?" })).toHaveCount(0);
   await capture(page, "next-installment", isMobile);
   await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
   await page.getByRole("button", { name: /Pagar R\$\s*100,00/ }).click();

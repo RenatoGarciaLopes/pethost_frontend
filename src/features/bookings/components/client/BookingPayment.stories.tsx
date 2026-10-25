@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect } from "storybook/test";
 import { Container } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
@@ -12,7 +13,18 @@ import { bookingQueries } from "../../api/queries";
 import { useBookingPayment } from "../../hooks/useBookingPayment";
 import { BookingPaymentView } from "./BookingPayment";
 
-type Mode = "ready" | "loading" | "opening" | "sdk" | "waiting" | "error" | "expired" | "success" | "installments";
+type Mode =
+  | "ready"
+  | "loading"
+  | "opening"
+  | "sdk"
+  | "waiting"
+  | "error"
+  | "expired"
+  | "success"
+  | "installments"
+  | "closed"
+  | "paid";
 const ACCOUNT = "storybook-payment";
 
 function Content({ mode, coverUrl }: { mode: Mode; coverUrl?: string }) {
@@ -45,7 +57,7 @@ function Frame({ mode = "ready", coverUrl }: { mode?: Mode; coverUrl?: string })
       defaultOptions: { queries: { staleTime: Infinity, retry: false, enabled: false } },
     });
     if (mode === "loading") return queryClient;
-    const paid = mode === "success";
+    const paid = mode === "success" || mode === "paid";
     const payment = paymentFixture(
       paid
         ? { status: "paid", paidAmount: 300, installments: [{ ...paymentFixture().installments[0]!, status: "paid" }] }
@@ -68,7 +80,9 @@ function Frame({ mode = "ready", coverUrl }: { mode?: Mode; coverUrl?: string })
                   },
                 ],
               }
-            : {},
+            : mode === "closed"
+              ? { status: "cancelled" }
+              : { status: "not_started", installmentCount: null, installments: [] },
     );
     queryClient.setQueryData(paymentQuery(ACCOUNT, BOOKING_ID).queryKey, payment);
     queryClient.setQueryData(
@@ -98,6 +112,17 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const SemFoto: Story = {};
+export const Planos: Story = {
+  play: async ({ canvas, userEvent }) => {
+    const first = canvas.getByRole("radio", { name: /À vista/ });
+    first.focus();
+    await userEvent.keyboard("{ArrowRight}");
+    await expect(canvas.getByRole("radio", { name: /3×/ })).toBeChecked();
+    await expect(canvas.getByRole("list", { name: "Vencimentos das parcelas" })).toHaveTextContent("3ª parcela");
+  },
+};
+export const Encerrado: Story = { args: { mode: "closed" } };
+export const Pago: Story = { args: { mode: "paid" } };
 export const CapaIndisponivel: Story = { args: { coverUrl: "/capa-indisponivel.png" } };
 export const Carregando: Story = { args: { mode: "loading" } };
 export const AbrindoSessao: Story = { args: { mode: "opening" } };
