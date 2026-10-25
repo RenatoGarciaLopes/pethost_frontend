@@ -32,3 +32,9 @@ Diferenças deliberadas ou limitações reais:
 ## Níveis aplicáveis
 
 Unitário: paymentState existente, nenhuma regra financeira nova. Funcional/integração: BookingPayment.int.test.tsx (teclado, clique, ordem, valores desiguais, installmentCount, total autoritativo, capa, lock e estados), StripePaymentForm.test.tsx e StayDetail.test.tsx para consumidores preservados; infraestrutura HTTP simulada em bookingPaymentMock.int.test.ts. Shared ChoiceCardGroup coberto por teste existente e story Responsive, sem API nova. E2E aplicável à jornada, execução pendente no CI por instrução. Build completo não executado: alteração de composição, com typecheck e testes direcionados; não confundir checks estáticos com testes de comportamento.
+
+## Entrega local
+
+Implementação/spec: commit 6ab134e na feat/101-checkout-quintal. Typecheck final e rerun de 15 testes do checkout aprovados após ajuste de tipos nas assertions. ESLint, Prettier, git diff --check e verificação de ausência de BOM aprovados. Config/captura temporários removidos. Sem push/PR.
+
+Vault atualizado no próprio workspace: design/12-pagamento-e-fechado.md, development/resources/booking-payment.md, development/resources/choice-card-group.md e development/resource-catalog.md. O repositório compartilhado do vault está em main com várias mudanças anteriores e concorrentes; não foi commitado integralmente nem incluído na branch frontend. As fontes técnicas desta entrega estão versionadas nesta spec. Nenhuma mudança estrutural de src ocorreu, portanto árvore/responsabilidades não precisaram de alteração.

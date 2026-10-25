@@ -8,4 +8,4 @@
 - [x] Testes de teclado/clique, ordem e valores da API, unit/int e stories.
 - [x] Capturar desktop/celular e comparar com as duas pranchas.
 - [x] Atualizar documentação, nota de pagamento e catálogo no vault.
-- [ ] Commit na branch e ask back a Claude Code; registrar hashes no relatório final.
+- [x] Commit local na branch; ask back a Claude Code no encerramento, com hashes e validação.
