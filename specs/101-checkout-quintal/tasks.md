@@ -9,3 +9,11 @@
 - [x] Capturar desktop/celular e comparar com as duas pranchas.
 - [x] Atualizar documentação, nota de pagamento e catálogo no vault.
 - [x] Commit local na branch; ask back a Claude Code no encerramento, com hashes e validação.
+
+## Revisão r1
+
+- [x] Rótulos curtos, descrições financeiras e heading forte dos planos.
+- [x] Datas planas e status paga/vencida/próxima baseados na API.
+- [x] Ordem celular corrigida e resumo com miniatura única ao lado do nome.
+- [x] Testes funcionais e oito capturas ready/installments/sdk/no-photo em 1440/390.
+- [x] Documentação atualizada na mesma entrega; commit e ask back no encerramento.

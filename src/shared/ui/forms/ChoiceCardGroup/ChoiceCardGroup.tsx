@@ -10,6 +10,7 @@ export interface ChoiceCardGroupProps {
   /** Selected option. */ value: string;
   /** Next selected option from click or arrows. */ onChange: (value: string) => void;
   /** Equal columns from md; stacked on mobile. */ layout?: "stacked" | "responsive";
+  /** Section heading for the visible group label; body preserves existing forms. */ labelVariant?: "body" | "section";
   /** Disable all choices. */ disabled?: boolean;
 }
 /**
@@ -24,11 +25,22 @@ export function ChoiceCardGroup({
   onChange,
   disabled = false,
   layout = "stacked",
+  labelVariant = "body",
 }: ChoiceCardGroupProps) {
   const id = useId();
   return (
     <FormControl fullWidth>
-      <FormLabel id={id}>{label}</FormLabel>
+      <FormLabel
+        id={id}
+        component={labelVariant === "section" ? "h2" : "label"}
+        sx={
+          labelVariant === "section"
+            ? { typography: "h2", fontSize: 20, fontWeight: 700, color: "text.primary" }
+            : undefined
+        }
+      >
+        {label}
+      </FormLabel>
       <RadioGroup
         aria-labelledby={id}
         value={value}

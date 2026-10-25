@@ -1,6 +1,16 @@
 # Validação — 101 (25/10/2026)
 
-## Resultados
+## Revisão r1 — resultados atuais
+
+- 38/38 testes focados em cinco arquivos: BookingPayment.int.test.tsx (16), ChoiceCardGroup.test.tsx (2), StayDetail.test.tsx, StripePaymentForm.test.tsx e paymentState.test.ts. Inclui status pago/paidAt em Brasília, ausência de paidAt, overdue/próxima e pending com data antiga sem inferência local. Novo teste do labelVariant section preserva h2/nome acessível do grupo; seleção por teclado/clique e valores desiguais continuam cobertos.
+- Storybook-vitest: 26/26 testes aprovados em três arquivos (18 stories permanentes de pagamento/grupo e 8 capturas temporárias). Chromium confirmou rótulos de plano em linha única no desktop, nenhuma rolagem horizontal, título antes do resumo em 390 e pergunta dos planos antes de 720px de rolagem.
+- Prints substituídos: ready, installments, sdk e no-photo em 1440/390, mais comparison-* para esses quatro estados. Os outros estados/prints da pasta são históricos da entrega inicial.
+- SDK agora capturado com createStripeSdkFixture({autoReady:true}) no setup temporário do runner: métodos e CTA do wrapper visíveis, sem Stripe/API real ou cobrança. A primeira tentativa da captura falhou por readiness do mock; corrigido apenas no setup temporário, rerun 26/26 aprovado. Nenhuma mudança em StripePaymentForm/hook/contrato.
+- Resumo mobile tem miniatura única de 72px ao lado do nome, sem duplicar foto/alt. Ordem visual e DOM: voltar, título, prazo, resumo, planos. Datas em StatusPill neutro sem sombra; pago verde com valor secundário, overdue em atenção e próxima parcela via helper existente.
+- Typecheck, lint, formatação e diff/BOM conferidos na entrega. E2E pesado continua reservado ao CI por instrução, sem push.
+- Documentação de design/recurso/catálogo atualizada no vault compartilhado; fontes técnicas desta revisão nesta spec. Nenhuma pasta técnica permanente nova; configurações, setup e story de captura temporários removidos.
+
+## Entrega inicial (histórico) — Resultados
 
 - npx vitest run src/features/bookings/lib/paymentState.test.ts src/features/bookings/components/client/BookingPayment.int.test.tsx src/features/bookings/components/client/StripePaymentForm.test.tsx src/test/msw/bookingPaymentMock.int.test.ts src/shared/ui/forms/ChoiceCardGroup/ChoiceCardGroup.test.tsx src/features/bookings/components/client/StayDetail.test.tsx --maxWorkers=1: 37 testes em 6 arquivos aprovados. Após acrescentar o caso de valores desiguais, rerun de BookingPayment.int.test.tsx: 15/15 aprovados (substitui os 14 desse arquivo na rodada de 37; total de casos distintos cobertos: 38).
 - npx vitest run --config vitest.storybook.101.config.ts src/features/bookings/components/client/BookingPayment.stories.tsx src/shared/ui/forms/ChoiceCardGroup/ChoiceCardGroup.stories.tsx --maxWorkers=1: 18/18 aprovados, Chromium + a11y. Repetidos junto das capturas, novamente aprovados.

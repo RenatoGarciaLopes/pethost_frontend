@@ -50,4 +50,4 @@ export const Mobile: Story = {
 };
 
 /** Equal desktop columns, stacked on mobile; same native radio keyboard behavior. */
-export const Responsive: Story = { args: { layout: "responsive" } };
+export const Responsive: Story = { args: { layout: "responsive", labelVariant: "section" } };

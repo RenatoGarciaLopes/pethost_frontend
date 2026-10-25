@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { delay, http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Activity, StrictMode, type ActivityProps } from "react";
@@ -84,6 +84,7 @@ describe("checkout da estadia", { timeout: 15000 }, () => {
     expect(screen.getByRole("complementary", { name: "Resumo da estadia" })).toHaveTextContent("Casa da Cida");
     expect(screen.getByText(/Lembrete: leve a ração/)).toBeVisible();
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Como você prefere pagar?", level: 2 })).toBeVisible();
     expect(screen.queryByText(/Avenida Brasil/)).not.toBeInTheDocument();
   });
   it("REQ-PAY-002 capa da API que falha mostra fallback sem impedir pagamento", async () => {
@@ -146,6 +147,32 @@ describe("checkout da estadia", { timeout: 15000 }, () => {
     await user.click(screen.getByRole("button", { name: "Continuar para o pagamento" }));
     await screen.findByRole("button", { name: "Confirmar no Stripe simulado" });
     expect(choose).toHaveBeenCalledWith({ installmentCount: 2 });
+  });
+  it("101 r1 distingue paga, vencida e próxima sem inferir status pela data", async () => {
+    const first = paymentFixture().installments[0]!;
+    setup(
+      paymentFixture({
+        status: "active",
+        options: null,
+        installmentCount: 3,
+        installments: [
+          { ...first, number: 1, amount: 100, status: "paid", paidAt: "2026-10-25T01:00:00Z" },
+          { ...first, number: 2, amount: 100, status: "overdue", amountDue: 105, lateFee: 5 },
+          { ...first, number: 3, amount: 100, status: "pending", dueAt: "2020-01-01T12:00:00Z" },
+          { ...first, number: 4, amount: 100, status: "paid", paidAt: null },
+        ],
+      }),
+      "confirmed",
+    );
+    const list = await screen.findByRole("list", { name: "Vencimentos das parcelas" });
+    const rows = within(list).getAllByRole("listitem");
+    expect(within(rows[0]!).getByText("Paga em 24/10")).toBeVisible();
+    expect(within(rows[0]!).queryByText("Próxima")).not.toBeInTheDocument();
+    expect(within(rows[1]!).getByText("Vencida")).toBeVisible();
+    expect(within(rows[1]!).getByText("Próxima")).toBeVisible();
+    expect(within(rows[1]!).getByText(/acréscimo por atraso/)).toBeVisible();
+    expect(within(rows[2]!).queryByText("Vencida")).not.toBeInTheDocument();
+    expect(within(rows[3]!).getByText("Paga", { exact: true })).toBeVisible();
   });
   it("REQ-PAY-007/008 mantém pendência e só celebra após confirmação da API", async () => {
     const { user, confirm } = setup();

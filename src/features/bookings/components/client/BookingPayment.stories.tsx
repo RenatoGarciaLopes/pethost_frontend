@@ -69,7 +69,7 @@ function Frame({ mode = "ready", coverUrl }: { mode?: Mode; coverUrl?: string })
                 options: null,
                 installmentCount: 3,
                 installments: [
-                  { ...paymentFixture().installments[0]!, amount: 100, status: "paid" },
+                  { ...paymentFixture().installments[0]!, amount: 100, status: "paid", paidAt: "2026-10-25T12:00:00Z" },
                   {
                     ...paymentFixture().installments[0]!,
                     number: 2,

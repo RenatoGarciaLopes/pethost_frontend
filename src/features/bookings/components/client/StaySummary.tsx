@@ -31,9 +31,32 @@ export function StaySummary({
   const headingId = useId();
   const nightly = formatBRL(fromCents(booking.nightlyRateCents));
   return (
-    <Surface component="section" aria-labelledby={headingId} elevation="sm" sx={{ overflow: "hidden" }}>
-      {cover}
-      <Box sx={{ p: { xs: checkout ? 2 : 2.5, md: 2.5 } }}>
+    <Surface
+      component="section"
+      aria-labelledby={headingId}
+      elevation="sm"
+      sx={{
+        overflow: "hidden",
+        ...(checkout && {
+          display: { xs: "grid", md: "block" },
+          gridTemplateColumns: cover ? "72px minmax(0, 1fr)" : "1fr",
+          gap: 1.5,
+          p: { xs: 1.5, md: 0 },
+        }),
+      }}
+    >
+      {cover && (
+        <Box
+          sx={
+            checkout
+              ? { gridColumn: 1, gridRow: 1, borderRadius: { xs: "12px", md: 0 }, overflow: "hidden" }
+              : undefined
+          }
+        >
+          {cover}
+        </Box>
+      )}
+      <Box sx={{ display: { xs: checkout ? "contents" : "block", md: "block" }, p: { xs: 2.5, md: 2.5 } }}>
         <Typography
           id={headingId}
           component="h2"
@@ -43,25 +66,30 @@ export function StaySummary({
           {copy.summary}
         </Typography>
         {checkout ? (
-          <Stack spacing={1.5}>
-            <Box>
-              <Typography sx={{ fontWeight: 700 }}>{booking.listing?.title ?? paymentCopy.yourPlace}</Typography>
-              {booking.host && <Typography variant="body2">{booking.host.name}</Typography>}
-              {booking.listing && (
-                <Typography variant="body2" color="text.secondary">
-                  {booking.listing.neighborhood}
-                </Typography>
-              )}
+          <Stack spacing={{ xs: 0, md: 1.5 }} sx={{ display: { xs: "contents", md: "flex" } }}>
+            <Box
+              sx={{ gridColumn: cover ? 2 : 1, gridRow: 1, alignSelf: { xs: "center", md: "stretch" }, minWidth: 0 }}
+            >
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontWeight: 700 }}>{booking.listing?.title ?? paymentCopy.yourPlace}</Typography>
+                {booking.host && <Typography variant="body2">{booking.host.name}</Typography>}
+                {booking.listing && (
+                  <Typography variant="body2" color="text.secondary">
+                    {booking.listing.neighborhood}
+                  </Typography>
+                )}
+              </Box>
             </Box>
             <Box
               component="dl"
               sx={{
                 m: 0,
+                gridColumn: "1 / -1",
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
                 border: "2px solid",
                 borderRadius: "16px",
-                "& > div": { p: 1.5 },
+                "& > div": { p: { xs: 1, md: 1.5 } },
                 "& > div + div": { borderLeft: "2px dashed", borderColor: "divider" },
                 "& dt": { textTransform: "uppercase", fontSize: 12 },
                 "& dd": { m: 0, fontWeight: 700, fontSize: 14 },
@@ -76,7 +104,7 @@ export function StaySummary({
                 <dd>{formatStayDay(booking.checkOut)}</dd>
               </div>
             </Box>
-            <Box>
+            <Box sx={{ gridColumn: "1 / -1" }}>
               <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.75 }}>
                 {copy.pets}
               </Typography>
@@ -127,7 +155,15 @@ export function StaySummary({
             )}
           </Box>
         )}
-        <Box sx={{ mt: 2, pt: 2, borderTop: "2px dashed", borderColor: "divider" }}>
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            mt: { xs: checkout ? 1.5 : 2, md: 2 },
+            pt: { xs: checkout ? 1 : 2, md: 2 },
+            borderTop: "2px dashed",
+            borderColor: "divider",
+          }}
+        >
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Typography variant="body2" color="text.secondary">
               {bookingCopy.answer.line(nightly, booking.nights, booking.petCount)}
@@ -146,7 +182,7 @@ export function StaySummary({
           </Box>
         </Box>
         {!!checkout?.paidAmount && (
-          <Typography variant="body2" sx={{ mt: 1 }}>
+          <Typography variant="body2" sx={{ mt: 1, gridColumn: "1 / -1" }}>
             {paymentCopy.alreadyPaid(formatBRL(checkout.paidAmount))}
           </Typography>
         )}

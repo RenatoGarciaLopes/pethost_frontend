@@ -32,7 +32,14 @@ export const paymentCopy = {
   dueDates: "Vencimentos das parcelas",
   deadline: (date: string) => `Pague até ${date}`,
   atSight: (amount: string) => `À vista · ${amount}`,
-  planLabel: (count: number, amounts: string) => `${count}× · ${amounts}`,
+  planLabel: (count: number, amount: string) => `${count}× de ${amount}`,
+  planTotal: (amount: string) => `Total ${amount}`,
+  installmentPaid: (date?: string | null) =>
+    date
+      ? `Paga em ${new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date(date))}`
+      : "Paga",
+  installmentOverdue: "Vencida",
+  installmentNext: "Próxima",
   installment: (number: number) => `${number}ª parcela`,
   lateFee: (amount: string) => `Inclui ${amount} de acréscimo por atraso.`,
   pixDeadline: (date: string) => `No Pix, o código vale até ${date}.`,

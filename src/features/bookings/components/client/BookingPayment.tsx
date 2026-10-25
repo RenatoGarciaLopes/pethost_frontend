@@ -1,12 +1,13 @@
 "use client";
 
-import { Box, Button, Chip, Link, Stack, Typography } from "@mui/material";
+import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
 import { translateError } from "@/shared/api/errors/translateError";
 import { formatBRL } from "@/shared/lib/money";
+import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { ChoiceCardGroup } from "@/shared/ui/forms/ChoiceCardGroup";
 import { StaySummary } from "./StaySummary";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
@@ -96,11 +97,14 @@ export function BookingPaymentView({
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) 340px" },
-          gap: 4,
+          gridTemplateAreas: { xs: '"heading" "summary" "content"', md: '"heading summary" "content summary"' },
+          gridTemplateRows: "auto 1fr",
+          columnGap: 4,
+          rowGap: 3,
           alignItems: "start",
         }}
       >
-        <Stack spacing={3} sx={{ minWidth: 0 }}>
+        <Stack spacing={3} sx={{ minWidth: 0, gridArea: "heading" }}>
           <Typography
             variant="h1"
             ref={titleRef}
@@ -109,6 +113,45 @@ export function BookingPaymentView({
           >
             {success ? copy.success : copy.title}
           </Typography>
+          {!success && payment.paymentDeadline && payment.status !== "active" && payment.status !== "paid" && (
+            <Typography>{copy.deadline(formatDeadline(payment.paymentDeadline, new Date(state.now)))}</Typography>
+          )}
+        </Stack>
+
+        <Box component="aside" aria-label={copy.summary} sx={{ gridArea: "summary", minWidth: 0 }}>
+          <StaySummary
+            booking={booking}
+            checkout={{ totalAmount: payment.totalAmount, paidAmount: payment.paidAmount }}
+            cover={
+              coverUrl && !failedPhoto ? (
+                <Box
+                  component="img"
+                  src={coverUrl}
+                  alt={booking.listing?.title ?? copy.yourPlace}
+                  onError={() => setFailedPhoto(true)}
+                  sx={{ width: "100%", height: { xs: 72, md: 210 }, objectFit: "cover", display: "block" }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    minHeight: { xs: 70, md: 150 },
+                    bgcolor: "background.paper",
+                    display: "grid",
+                    placeItems: "center",
+                    gap: 1,
+                    p: { xs: 0.5, md: 3 },
+                  }}
+                >
+                  <DoorMark width={48} interactive={false} />
+                  <Typography color="text.secondary" sx={{ textAlign: "center", display: { xs: "none", md: "block" } }}>
+                    {copy.noPhoto}
+                  </Typography>
+                </Box>
+              )
+            }
+          />
+        </Box>
+        <Stack spacing={3} sx={{ minWidth: 0, gridArea: "content" }}>
           {success ? (
             <Stack spacing={2}>
               <Typography role="status">{copy.successBody}</Typography>
@@ -118,9 +161,6 @@ export function BookingPaymentView({
             </Stack>
           ) : (
             <>
-              {payment.paymentDeadline && payment.status !== "active" && payment.status !== "paid" && (
-                <Typography>{copy.deadline(formatDeadline(payment.paymentDeadline, new Date(state.now)))}</Typography>
-              )}
               {failure ? <Notice tone="atencao" title={translateError(failure)} /> : null}
               {closed || expired ? (
                 <Notice tone="atencao" title={expired ? copy.expired : copy.closed} />
@@ -133,6 +173,7 @@ export function BookingPaymentView({
                       <ChoiceCardGroup
                         label={copy.plan}
                         layout="responsive"
+                        labelVariant="section"
                         disabled={state.busy}
                         value={String(selected)}
                         onChange={(value) => setCount(Number(value))}
@@ -141,10 +182,10 @@ export function BookingPaymentView({
                           label:
                             plan.count === 1
                               ? copy.atSight(formatBRL(plan.firstAmount))
-                              : copy.planLabel(
-                                  plan.count,
-                                  plan.installments.map((i) => formatBRL(i.amount)).join(" + "),
-                                ),
+                              : copy.planLabel(plan.count, formatBRL(plan.firstAmount)),
+                          description: plan.installments.every((i) => i.amount === plan.firstAmount)
+                            ? copy.planTotal(formatBRL(payment.totalAmount))
+                            : plan.installments.map((i) => formatBRL(i.amount)).join(" + "),
                         }))}
                       />
                       <Typography variant="body2" color="text.secondary">
@@ -166,34 +207,52 @@ export function BookingPaymentView({
                         overflow: "hidden",
                       }}
                     >
-                      {(option?.installments ?? payment.installments).map((i) => (
-                        <Stack
-                          component="li"
-                          key={i.number}
-                          spacing={1}
-                          sx={{ p: 2, "& + li": { borderTop: "2px dashed", borderColor: "divider" } }}
-                        >
+                      {(option?.installments ?? payment.installments).map((i) => {
+                        const actual = option
+                          ? undefined
+                          : payment.installments.find((item) => item.number === i.number);
+                        const paid = actual?.status === "paid";
+                        const overdue = actual?.status === "overdue";
+                        const next = !!actual && actual.number === installment?.number;
+                        return (
                           <Stack
-                            direction="row"
-                            sx={{ justifyContent: "space-between", alignItems: "baseline", gap: 1 }}
-                          >
-                            <Typography sx={{ fontWeight: 700 }}>{copy.installment(i.number)}</Typography>
-                            <Typography sx={{ fontWeight: 800, fontSize: 20 }}>{formatBRL(i.amount)}</Typography>
-                          </Stack>
-                          <Chip
-                            label={formatDeadline(i.dueAt, new Date(state.now))}
+                            component="li"
+                            key={i.number}
+                            spacing={1}
                             sx={{
-                              alignSelf: "flex-start",
-                              maxWidth: "100%",
-                              height: "auto",
-                              "& .MuiChip-label": { whiteSpace: "normal", py: 0.5 },
+                              p: 2,
+                              bgcolor: overdue ? "quintal.luz" : undefined,
+                              "& + li": { borderTop: "2px dashed", borderColor: "divider" },
                             }}
-                          />
-                          {"lateFee" in i && !!i.lateFee && (
-                            <Typography variant="body2">{copy.lateFee(formatBRL(Number(i.lateFee)))}</Typography>
-                          )}
-                        </Stack>
-                      ))}
+                          >
+                            <Stack
+                              direction="row"
+                              sx={{ justifyContent: "space-between", alignItems: "baseline", gap: 1 }}
+                            >
+                              <Typography sx={{ fontWeight: 700 }}>{copy.installment(i.number)}</Typography>
+                              <Typography
+                                sx={{ fontWeight: 800, fontSize: 20, color: paid ? "text.secondary" : "text.primary" }}
+                              >
+                                {formatBRL(i.amount)}
+                              </Typography>
+                            </Stack>
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              useFlexGap
+                              sx={{ flexWrap: "wrap", alignItems: "center" }}
+                            >
+                              <StatusPill size="sm" label={formatDeadline(i.dueAt, new Date(state.now))} />
+                              {paid && <StatusPill size="sm" tone="ok" label={copy.installmentPaid(actual.paidAt)} />}
+                              {overdue && <StatusPill size="sm" tone="atencao" label={copy.installmentOverdue} />}
+                              {next && <StatusPill size="sm" tone="info" label={copy.installmentNext} />}
+                            </Stack>
+                            {!!actual?.lateFee && (
+                              <Typography variant="body2">{copy.lateFee(formatBRL(actual.lateFee))}</Typography>
+                            )}
+                          </Stack>
+                        );
+                      })}
                     </Box>
                   )}
                   <Notice tone="ok" title={copy.reminder} />
@@ -263,43 +322,6 @@ export function BookingPaymentView({
             </>
           )}
         </Stack>
-        <Box
-          component="aside"
-          aria-label={copy.summary}
-          sx={{ gridRow: { xs: 1, md: "auto" }, gridColumn: { md: 2 }, minWidth: 0 }}
-        >
-          <StaySummary
-            booking={booking}
-            checkout={{ totalAmount: payment.totalAmount, paidAmount: payment.paidAmount }}
-            cover={
-              coverUrl && !failedPhoto ? (
-                <Box
-                  component="img"
-                  src={coverUrl}
-                  alt={booking.listing?.title ?? copy.yourPlace}
-                  onError={() => setFailedPhoto(true)}
-                  sx={{ width: "100%", height: { xs: 72, md: 210 }, objectFit: "cover", display: "block" }}
-                />
-              ) : (
-                <Box
-                  sx={{
-                    minHeight: { xs: 70, md: 150 },
-                    bgcolor: "background.paper",
-                    display: "grid",
-                    placeItems: "center",
-                    gap: 1,
-                    p: 3,
-                  }}
-                >
-                  <DoorMark width={48} interactive={false} />
-                  <Typography color="text.secondary" sx={{ textAlign: "center" }}>
-                    {copy.noPhoto}
-                  </Typography>
-                </Box>
-              )
-            }
-          />
-        </Box>
       </Box>
     </Stack>
   );
