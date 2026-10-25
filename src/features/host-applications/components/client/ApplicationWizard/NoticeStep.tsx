@@ -1,16 +1,18 @@
 "use client";
 
-import { Box, Button, Checkbox, FormControlLabel, FormHelperText, Stack, Typography } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, FormHelperText, Stack } from "@mui/material";
 import { useId, useRef, useState, type FormEvent } from "react";
-import { SegmentedControl } from "@/shared/ui/forms/SegmentedControl";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { OkIcon } from "@/shared/ui/feedback/feedbackIcons";
+import { ChoiceCardGroup } from "@/shared/ui/forms/ChoiceCardGroup";
+import { StepWizardActions } from "@/shared/ui/navigation/StepWizard";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { PERSON_TYPES } from "../../../api/contracts";
 import { verificationCopy } from "../../../lib/verificationCopy";
 import { applicationNoticeSchema, type ApplicationNoticeValues } from "../../../schemas/applicationSchemas";
 import type { PersonType } from "../../../types";
 
 const copy = verificationCopy.notice;
-const PERSON_OPTIONS = PERSON_TYPES.map((value) => ({ value, label: copy.personTypes[value] }));
+const PERSON_OPTIONS = PERSON_TYPES.map((value) => ({ value, ...copy.personTypes[value] }));
 
 export interface NoticeStepProps {
   /** Versão do aviso que a API exige (`noticeVersion`); sem texto no front, mostra o mais recente. */
@@ -19,17 +21,18 @@ export interface NoticeStepProps {
   accepted: boolean;
   /** Verificação já aberta: o tipo de pessoa não muda mais (a API fixa na abertura). */
   locked: boolean;
+  onBack: () => void;
   onNext: (values: ApplicationNoticeValues) => void;
 }
 
 /**
- * "Antes de começar" (REQ-HVER-003): o aviso de como as fotos são usadas, em linhas curtas, antes de pedir qualquer
- * coisa; Pessoa física ou Empresa; e o "Li e concordo". Sem o aceite não segue: o erro diz o que falta e o foco vai
+ * Conteúdo de "Antes de começar" (REQ-HVER-003; o título é da casca): o aviso de como as fotos são usadas, em cartões curtos, antes de pedir qualquer
+ * coisa; Pessoa física ou Empresa em cartões; e o "Li e concordo". Sem o aceite não segue: o erro diz o que falta e o foco vai
  * para a caixa.
  *
- * @example <NoticeStep noticeVersion={mine.noticeVersion} personType="pf" accepted={false} locked={false} onNext={next} />
+ * @example <NoticeStep noticeVersion={mine.noticeVersion} personType="pf" accepted={false} locked={false} onBack={back} onNext={next} />
  */
-export function NoticeStep({ noticeVersion, personType, accepted, locked, onNext }: NoticeStepProps) {
+export function NoticeStep({ noticeVersion, personType, accepted, locked, onBack, onNext }: NoticeStepProps) {
   const id = useId();
   const checkboxRef = useRef<HTMLInputElement>(null);
   const [type, setType] = useState<PersonType>(personType);
@@ -48,29 +51,37 @@ export function NoticeStep({ noticeVersion, personType, accepted, locked, onNext
 
   return (
     <Stack component="form" noValidate spacing={3} onSubmit={handleSubmit}>
-      <StepHeading>{copy.heading}</StepHeading>
-      <Box
-        component="ul"
-        sx={{ m: 0, pl: 3, display: "grid", gap: 1, fontSize: "1.06rem", "& li::marker": { color: "text.secondary" } }}
-      >
+      <Box component="ul" sx={{ m: 0, p: 0, listStyle: "none", display: "grid", gap: 1.5 }}>
         {lines.map((line) => (
-          <li key={line}>{line}</li>
+          <Box
+            component="li"
+            key={line}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              p: 2,
+              border: "2px solid",
+              borderColor: "text.primary",
+              borderRadius: `${quintalRadii.field}px`,
+              bgcolor: "background.paper",
+              fontWeight: 600,
+              "& svg": { width: 22, height: 22, flexShrink: 0, color: "success.dark" },
+            }}
+          >
+            <OkIcon />
+            {line}
+          </Box>
         ))}
       </Box>
-      <Stack spacing={1}>
-        <SegmentedControl
-          label={copy.personType}
-          options={PERSON_OPTIONS}
-          value={type}
-          onChange={(value) => setType(value as PersonType)}
-          disabled={locked}
-        />
-        {locked && (
-          <Typography variant="body2" color="text.secondary">
-            {copy.personTypeLocked}
-          </Typography>
-        )}
-      </Stack>
+      <ChoiceCardGroup
+        label={copy.personType}
+        options={PERSON_OPTIONS}
+        value={type}
+        onChange={(value) => setType(value as PersonType)}
+        disabled={locked}
+      />
+      {locked && <FormHelperText sx={{ m: 0 }}>{copy.personTypeLocked}</FormHelperText>}
       <Box>
         <FormControlLabel
           control={
@@ -97,11 +108,7 @@ export function NoticeStep({ noticeVersion, personType, accepted, locked, onNext
           </FormHelperText>
         )}
       </Box>
-      <Box>
-        <Button type="submit" variant="contained">
-          {copy.next}
-        </Button>
-      </Box>
+      <StepWizardActions backLabel={copy.back} nextLabel={copy.next} nextType="submit" onBack={onBack} />
     </Stack>
   );
 }

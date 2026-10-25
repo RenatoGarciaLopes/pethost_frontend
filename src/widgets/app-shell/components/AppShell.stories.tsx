@@ -5,6 +5,8 @@ import { getRouter } from "@storybook/nextjs-vite/router.mock";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { BOOKING_STATUSES } from "@/features/bookings/index";
+import { bookingQueries } from "@/features/bookings/index.client";
 import { accountQueryKey } from "@/shared/api/query/queryClient";
 import { AppShell } from "./AppShell";
 
@@ -20,6 +22,12 @@ function Frame({
 }) {
   const [client] = useState(() => {
     const cache = new QueryClient();
+    const stays = bookingQueries.infinite("story-account", BOOKING_STATUSES);
+    cache.setQueryDefaults(stays.queryKey, { staleTime: Infinity });
+    cache.setQueryData(stays.queryKey, {
+      pages: [{ items: [], page: 1, totalPages: 0, totalCount: 0 }],
+      pageParams: [1],
+    });
     cache.setQueryData(accountQueryKey("story-account", "linked-accounts"), [
       { role: "owner", isActive: true, isCurrent: role === "owner" },
       { role: "host", isActive: true, isCurrent: role === "host" },

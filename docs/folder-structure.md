@@ -602,3 +602,7 @@ RegisterChoiceScreen foi removido; /register compõe RegistrationScreen owner di
 `src/shared/config/contact.ts` mantém os canais públicos aprovados, tipados e sem transporte HTTP. `shared/ui/brand/GrassFooter/grassFooterCopy.ts` mantém textos e destinos do rodapé; sem diretórios técnicos novos. Interface, consumo, limites e testes: `specs/005-ui-conformance/footer-content-implementation.md`.
 
 Revisão da 093: sem diretórios novos. GrassFooter recebe accountRole da sessão na home/AppShell e usa NAV_ITEMS para atalhos pessoais. DoorMark aceita wordmarkColor, com uso real na assinatura em papel do footer. soilContent removido; soilDeep atende onda e textos, sem painel separado. Fonte: `specs/005-ui-conformance/footer-content-implementation.md`.
+
+## Novidades de estadias (100)
+
+`shared/lib/seenSnapshots.ts` contém adapter IndexedDB nativo opaco; `features/bookings/lib/stayUpdates.ts` mantém assinatura/comparação de domínio e `hooks/useStayUpdates.ts` coordena cache e reconhecimento. `widgets/app-shell/components/client/OwnerHeaderNav.tsx` é a ilha do tutor composta por AppHeader; HeaderNav segue apresentacional. Testes adjacentes e HeaderNav.stories.tsx. Sem novas pastas técnicas, providers ou stores. Interfaces e limites em [spec 100](../specs/100-stays-update-dot/implementation.md).

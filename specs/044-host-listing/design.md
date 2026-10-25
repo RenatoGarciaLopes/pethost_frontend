@@ -80,3 +80,7 @@ As seções seguem o padrão da 022: recebem `values` e `accept` de um anfitriã
 - **Erros:** além dos da spec, `LISTING_ADDRESS_NOT_LOCATED` (422) volta à seção Endereço. As frases dos códigos `LISTING_*` estão no `errorCopy`.
 - **Layout:** as sete seções ficam empilhadas na mesma página, com o painel de seções ao lado (fixo no computador). Não é "uma seção por tela" no celular.
 - **Pets da casa:** a 023 ainda não chegou ao `dev`, então "Apresentar quem mora aqui" leva a `/pets`. O rascunho fica na sessão do navegador.
+
+### Revisão 099 (25/10/2026)
+
+O painel de etapas não renderiza seção ou título quando todas estão prontas. `hasListing` exige ao menos um cantinho `isActive`; somente pausados mantêm a pendência. O painel retorna quando qualquer etapa volta a pendente. Contratos HTTP preservados. Cobertura e validação: nota `development/resources/host-verification`, seção Tarefa 099 no vault.

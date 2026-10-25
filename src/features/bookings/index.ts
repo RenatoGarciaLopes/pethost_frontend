@@ -12,3 +12,4 @@ export type { BookingPaymentData, PaymentSession } from "./api/paymentContracts"
 export { statusLabel } from "./lib/bookingStatus";
 export { formatPeriod } from "./lib/formatStay";
 export type { Booking, BookingStatus } from "./types";
+export { BOOKING_STATUSES } from "./api/contracts";

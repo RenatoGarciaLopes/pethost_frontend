@@ -4,6 +4,7 @@ import { Box, ButtonBase, Radio, Typography } from "@mui/material";
 import { quintalColors as c } from "../../../theme/tokens/colors";
 import { quintalRadii } from "../../../theme/tokens/radii";
 import { hardShadow } from "../../../theme/tokens/shadows";
+import { SelectedBadge } from "./SelectedBadge";
 import { focusRing, keyboardFocus } from "../../../theme/focus";
 import { SPRING_ASSENTAR } from "../../../theme/tokens/springs";
 
@@ -65,11 +66,7 @@ export function ChoiceCard({ label, value, description, icon, checked = false, d
           </Typography>
         )}
       </Box>
-      {checked && (
-        <Box component="span" aria-hidden="true" sx={{ ml: "auto" }}>
-          ✓
-        </Box>
-      )}
+      {checked && <SelectedBadge />}
     </ButtonBase>
   );
 }
