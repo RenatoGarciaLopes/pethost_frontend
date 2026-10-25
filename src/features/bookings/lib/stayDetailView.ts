@@ -46,12 +46,12 @@ export interface StayNow {
   title: string;
   /** Linhas de apoio, uma por parágrafo. */
   details: string[];
-  action: "pay" | "search" | null;
+  action: "pay" | "viewPayment" | "search" | null;
 }
 
 /**
  * A frase da etapa em que a estadia está, com o prazo, o que aconteceu com o dinheiro e a ação que existe: "Pagar"
- * (aceita) e "Procurar outro cantinho" (recusada, expirada). Concluída e em andamento não têm ação (sem tela de avaliação).
+ * (aceita), "Ver pagamento e parcelas" (confirmada, em andamento e concluída) e busca (recusada, expirada).
  *
  * @example const now = stayNow(booking, new Date());
  */
@@ -79,11 +79,16 @@ export function stayNow(booking: Booking, moment: Date): StayNow {
         action: "pay",
       };
     case "confirmed":
-      return { ...base, tone: "ok", title: now.confirmed(formatStayDay(booking.checkIn)) };
+      return { ...base, tone: "ok", title: now.confirmed(formatStayDay(booking.checkIn)), action: "viewPayment" };
     case "in_progress":
-      return { ...base, tone: "info", title: now.inProgress(host, formatStayDay(booking.checkOut)) };
+      return {
+        ...base,
+        tone: "info",
+        title: now.inProgress(host, formatStayDay(booking.checkOut)),
+        action: "viewPayment",
+      };
     case "completed":
-      return { ...base, tone: "ok", title: now.completed(host) };
+      return { ...base, tone: "ok", title: now.completed(host), action: "viewPayment" };
     case "declined":
       return {
         ...base,

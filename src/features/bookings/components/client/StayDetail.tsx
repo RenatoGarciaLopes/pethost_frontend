@@ -13,6 +13,7 @@ import { Notice } from "@/shared/ui/feedback/Notice";
 import { StatusPill } from "@/shared/ui/feedback/StatusPill";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
+import { paymentCopy } from "../../lib/paymentCopy";
 import { OWNER_BOOKINGS_PATH, ownerBookingPaymentPath, SEARCH_PATH } from "../../lib/bookingPaths";
 import { ownerStayView } from "../../lib/ownerStayCard";
 import { stayNow, stayTrail, type StayNow } from "../../lib/stayDetailView";
@@ -73,6 +74,10 @@ function NowPanel({ now, booking }: { now: StayNow; booking: Booking }) {
     now.action === "pay" ? (
       <Button component={NextLink} href={ownerBookingPaymentPath(booking.id)} variant="contained">
         {copy.now.pay(formatBRL(fromCents(booking.totalCents)))}
+      </Button>
+    ) : now.action === "viewPayment" ? (
+      <Button component={NextLink} href={ownerBookingPaymentPath(booking.id)} variant="outlined">
+        {paymentCopy.viewPayment}
       </Button>
     ) : now.action === "search" ? (
       <Button component={NextLink} href={SEARCH_PATH} variant="contained">

@@ -60,7 +60,7 @@ describe("StayDetail", () => {
     );
   });
 
-  it("REQ-STAYS-011 concluída e em andamento: só a frase, nenhuma ação sem tela", () => {
+  it("REQ-PAY-011 concluída oferece pagamento e parcelas no painel atual", () => {
     setup({
       status: "completed",
       responseDeadline: null,
@@ -70,6 +70,10 @@ describe("StayDetail", () => {
     expect(screen.getByText("Estadia concluída. Obrigado por confiar em Aparecida Souza.")).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Pagar|Avaliar/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver pagamento e parcelas" })).toHaveAttribute(
+      "href",
+      `/owner/bookings/${BOOKING_ID}/payment`,
+    );
   });
 
   it('REQ-STAYS-006 "Cancelar estadia" só em pedido e confirmada', () => {
@@ -85,6 +89,10 @@ describe("StayDetail", () => {
       expect(within(contact).getByRole("link", { name: "(44) 98888-7777" })).toHaveAttribute("href", "tel:44988887777");
       expect(contact).toHaveTextContent("Avenida Brasil, 120, Casa 2");
       expect(contact).toHaveTextContent("Zona 01, Maringá - PR, 87020-000");
+      expect(screen.getByRole("link", { name: "Ver pagamento e parcelas" })).toHaveAttribute(
+        "href",
+        `/owner/bookings/${BOOKING_ID}/payment`,
+      );
     },
   );
 

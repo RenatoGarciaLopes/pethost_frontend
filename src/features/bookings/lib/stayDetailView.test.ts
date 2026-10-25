@@ -58,12 +58,13 @@ describe("stayNow", () => {
     expect(stayNow(stay({ status: "accepted" }), NOW).title).toBe("Falta pagar pra garantir a vaga.");
     expect(stayNow(stay({ status: "confirmed" }), NOW)).toMatchObject({
       title: "Tudo certo. A chegada é dom., 20 de dez.",
-      action: null,
+      action: "viewPayment",
     });
     expect(stayNow(stay({ status: "in_progress" }), NOW).title).toBe(
       "Seu pet está na casa de Aparecida Souza. A saída é sex., 25 de dez.",
     );
-    expect(stayNow(stay({ status: "completed" }), NOW).action).toBeNull();
+    expect(stayNow(stay({ status: "completed" }), NOW).action).toBe("viewPayment");
+    expect(stayNow(stay({ status: "in_progress" }), NOW).action).toBe("viewPayment");
   });
 
   it("REQ-STAYS-011 fora do trilho: o que houve, nada cobrado e o caminho da busca", () => {

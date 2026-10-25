@@ -8,6 +8,7 @@ import "server-only";
 export { HostBookingDetailScreen } from "./components/HostBookingDetailScreen";
 export { HostBookingsScreen } from "./components/HostBookingsScreen";
 export { OwnerStayDetailScreen } from "./components/OwnerStayDetailScreen";
+export { BookingPaymentScreen } from "./components/BookingPaymentScreen";
 export { OwnerStaysScreen } from "./components/OwnerStaysScreen";
 export { getBookingDetail } from "./api/server/bookings.server";
 export { RequestStayHostNotice } from "./components/RequestStayHostNotice";
