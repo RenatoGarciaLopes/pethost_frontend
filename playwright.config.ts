@@ -52,6 +52,8 @@ const config = defineConfig({
       env: {
         BACKEND_URL: isReal ? backendUrl! : "http://localhost:5099",
         BACKEND_API_PREFIX: process.env.E2E_BACKEND_API_PREFIX ?? "/api/v1",
+        // Chave sintética: no mocked o Stripe.js é trocado pelo fixture do navegador (e2e/support/stripePayment.ts).
+        ...(!isReal ? { NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_synthetic" } : {}),
       },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
