@@ -41,7 +41,7 @@ Testes/stories ao lado dos componentes; funções e regras ficam em lib, E/S na 
 
 ## Página do cantinho (spec 042)
 
-`src/app/listings/[listingId]/` contém a rota aberta ao visitante (087; só o pedido, em `(account)/listings/[listingId]/request`, exige conta), que compõe a casca (`AppShell`, com `user` nulo para o visitante) e as features: `HouseResidents` (pets) e `CompatibilityNotice` (busca) entram como slots da `ListingPageScreen`, sem import entre features. `features/listing-page/components/ListingPageScreen.tsx` é a composição server (revisão 078, fiel à prancha); a lateral do tutor é `components/client/StayBookingCard.tsx` e os recados de quem não pede ficam em `components/client/ListingPageActions.tsx`.
+`src/app/listings/[listingId]/` contém a rota aberta ao visitante (087; só o pedido, em `(account)/listings/[listingId]/request`, exige conta), que compõe a casca (`AppShell`, com `user` nulo para o visitante) e as features: `HouseResidents` (pets), `CompatibilityNotice` (busca) e `ListingMessageContact` (conversas) entram como slots da `ListingPageScreen`, sem import entre features. O contato aparece apenas ao tutor logado; inicia/recupera a conversa e envia a primeira mensagem antes de navegar. `features/listing-page/components/ListingPageScreen.tsx` é a composição server (revisão 078, fiel à prancha); a lateral do tutor é `components/client/StayBookingCard.tsx` e os recados de quem não pede ficam em `components/client/ListingPageActions.tsx`.
 
 ```text
 src/app/listings/[listingId]/
@@ -51,7 +51,7 @@ src/app/listings/[listingId]/
 src/features/listing-page/
   api/                                   contratos (detalhe, avaliações), query e carregamento server
   lib/                                   copy, total, fatos da casa, motivos, voltar (searchOrigin)
-  components/ListingPageScreen.tsx        detalhe RSC com slots de compatibilidade e residentes
+  components/ListingPageScreen.tsx        detalhe RSC com slots de compatibilidade, residentes e contato
   components/ListingGallery.tsx           galeria com moldura, carrossel no celular e vazio
   components/NightlyPrice.tsx             diária da lateral
   components/client/StayBookingCard.tsx   datas, pets, conta, pedido e barra do celular
@@ -60,6 +60,7 @@ src/features/search/components/client/CompatibilityNotice/  caixa de compatibili
 src/shared/config/listingBadges.ts        selos do cantinho (códigos e rótulos), fonte única do card e da página
 src/test/fixtures/listingPage.ts          detalhe, fotos e avaliações sintéticos
 e2e/mocked/search/listing-page.spec.ts   jornada simulada do detalhe
+src/app/ListingMessageContact.stories.tsx story da página composta com o compositor aberto
 ```
 
 ## Conversas, interface (spec 055 em rascunho, 23/10/2026)
@@ -74,7 +75,7 @@ src/features/conversations/
   types.ts                                 conversa, mensagem, página por cursor e envio
   api/contracts.ts, mappers.ts             estreita o gerado (sentBy owner/host) e converte
   api/queries.ts                           lista, contador, detalhe e mensagens por cursor, com consulta periódica
-  api/client/conversations.client.ts       texto, foto em multipart e marcar como lida
+  api/client/conversations.client.ts       iniciar/recuperar conversa, texto, foto em multipart e marcar como lida
   api/server/conversations.server.ts       detalhe (404 da casca) e prefetch
   hooks/useConversationMutations.ts        envio entra no cache; lida zera o contador
   lib/                                     copy, hora/dia de Brasília, linha do tempo, prévia, bloqueio, limite
@@ -83,6 +84,7 @@ src/features/conversations/
     ConversationHeader/                    foto, nome, apoio, selo e voltar no celular
     MessageThread/                         dias, balões, foto com legenda, acontecimentos
     MessageComposer/                       câmera, texto, Enter envia
+    ListingMessageContact/                 primeira mensagem no anúncio e navegação após confirmação
     MyConversations/                       lista vinda da API (carregando, erro, lista)
 src/widgets/conversation-panel/
   index.ts, index.client.ts, index.server.ts
@@ -101,7 +103,7 @@ src/test/conversationsPreview.ts           dados mapeados e envio só na memóri
 src/app/ConversationsPreview.stories.tsx   tela inteira com a casca real
 ```
 
-O widget compõe `conversations` e `bookings` pelos índices públicos; a feature não conhece a estadia (recebe acontecimentos prontos). `ConversationRoom` e `ConversationsScreen` não têm story: só buscam dados, e o visual está nas stories do painel, do layout e da prévia. E2E simulado pendente (o backend simulado ainda não tem handlers de conversa). Catálogo e notas do vault pendentes: o vault não estava acessível nesta máquina.
+O widget compõe `conversations` e `bookings` pelos índices públicos; a feature não conhece a estadia (recebe acontecimentos prontos). `ConversationRoom` e `ConversationsScreen` não têm story: só buscam dados, e o visual está nas stories do painel, do layout e da prévia. O mock de E2E usa `e2e/support/handlers/conversations.mjs`, registrado em `e2e/support/mock-backend.mjs`; a jornada testa que só há navegação após o envio confirmado, em desktop e celular. Os testes da feature verificam o contrato, validação, carregamento, falha e nova tentativa. A documentação do vault Obsidian continua pendente porque o vault não está disponível neste ambiente.
 
 ## Início público (spec 040, 15/10/2026)
 

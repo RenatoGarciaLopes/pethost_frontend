@@ -102,6 +102,34 @@ it("REQ-LPAGE-005 a caixa de compatibilidade da rota aparece logo abaixo dos sel
   expect(screen.getByText("Caixa de compatibilidade")).toBeVisible();
 });
 
+it("só mostra o contato composto pela rota na visão do tutor", () => {
+  const contact = <p>Enviar mensagem para Dona Cida</p>;
+  const listing = listingDetailFixture();
+  const { rerender } = render(
+    <ListingPageScreen
+      listing={listing}
+      isOwner={false}
+      accountRole="owner"
+      reviews={[]}
+      stay={stay}
+      contact={contact}
+    />,
+  );
+  expect(screen.getByText("Enviar mensagem para Dona Cida")).toBeVisible();
+
+  rerender(
+    <ListingPageScreen
+      listing={listing}
+      isOwner={false}
+      accountRole="host"
+      reviews={[]}
+      stay={stay}
+      contact={contact}
+    />,
+  );
+  expect(screen.queryByText("Enviar mensagem para Dona Cida")).not.toBeInTheDocument();
+});
+
 it("REQ-LPAGE-003/006 só mostra a rua na visão da pessoa anfitriã dona do cantinho, sem pedir estadia", () => {
   const listing = listingDetailFixture({
     address: { neighborhood: "Jd. Alvorada", city: "Maringá", state: "PR", street: "Rua da Casa", number: "10" },

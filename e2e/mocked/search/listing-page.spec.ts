@@ -118,3 +118,21 @@ test("REQ-LPAGE-007 anfitrião vê o card de compra e só ao pedir troca para a 
   await expect(page).toHaveURL(path, { timeout: 15_000 });
   await expect(page.getByText("Quem vai", { exact: true })).toBeVisible();
 });
+
+test("REQ-CHAT-013 tutor escreve no anúncio e só depois abre o histórico da conversa", async ({ page, baseURL }) => {
+  test.setTimeout(120_000);
+  await loginAccount(page, baseURL!);
+  const listing = `/listings/${LISTING_ID}`;
+  await page.goto(listing);
+
+  await page.getByRole("button", { name: "Enviar mensagem" }).click();
+  await expect(page).toHaveURL(new RegExp(`${LISTING_ID}$`));
+  const field = page.getByRole("textbox", { name: "Mensagem para Casa Cida" });
+  await field.fill("  Ainda tem vaga para a Pipoca?  ");
+  await page.getByRole("button", { name: "Enviar", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/conversations\/0199d2a0-0000-7000-8000-000000000046$/, { timeout: 45_000 });
+  await expect(
+    page.getByRole("log", { name: "Mensagens com Casa Cida" }).getByText("Ainda tem vaga para a Pipoca?", { exact: true }),
+  ).toHaveCount(1);
+});

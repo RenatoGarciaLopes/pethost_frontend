@@ -46,6 +46,8 @@ export interface ListingPageScreenProps {
   compatibility?: ReactNode;
   /** `HouseResidents` composto pela rota (pets da casa vêm da feature pets). */
   residents?: ReactNode;
+  /** Contato inicial com o anfitrião, composto pela rota para tutores logados. */
+  contact?: ReactNode;
 }
 
 function formatAverage(average: number) {
@@ -67,6 +69,7 @@ export function ListingPageScreen({
   stay,
   compatibility,
   residents,
+  contact,
 }: ListingPageScreenProps) {
   const address = listing.address;
   const ownerNotice = isOwner && accountRole === "host";
@@ -142,23 +145,26 @@ export function ListingPageScreen({
 
         <Box sx={{ gridArea: "aside", position: { md: "sticky" }, top: { md: 24 } }}>
           <Surface component="aside" elevation="lg" sx={{ p: 3 }}>
-            {stay ? (
-              <StayBookingCard
-                listingId={listing.id}
-                account={accountRole}
-                nightlyRate={listing.nightlyRate}
-                hostName={hostName}
-                today={stay.today}
-                search={stay.search}
-                from={stay.from}
-                to={stay.to}
-                petIds={stay.petIds}
-                count={stay.count}
-                pets={stay.pets}
-              />
-            ) : (
-              <NightlyPrice nightlyRate={listing.nightlyRate} />
-            )}
+            <Stack spacing={2}>
+              {accountRole === "owner" && contact}
+              {stay ? (
+                <StayBookingCard
+                  listingId={listing.id}
+                  account={accountRole}
+                  nightlyRate={listing.nightlyRate}
+                  hostName={hostName}
+                  today={stay.today}
+                  search={stay.search}
+                  from={stay.from}
+                  to={stay.to}
+                  petIds={stay.petIds}
+                  count={stay.count}
+                  pets={stay.pets}
+                />
+              ) : (
+                <NightlyPrice nightlyRate={listing.nightlyRate} />
+              )}
+            </Stack>
           </Surface>
         </Box>
 

@@ -1,7 +1,12 @@
 "use client";
 
 import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
-import { markConversationRead, sendMessage, sendPhotoMessage } from "../api/client/conversations.client";
+import {
+  markConversationRead,
+  sendMessage,
+  sendPhotoMessage,
+  startConversation,
+} from "../api/client/conversations.client";
 import { toMessage } from "../api/mappers";
 import { conversationQueries } from "../api/queries";
 import type { ComposedMessage, ConversationMessage, MessagePage } from "../types";
@@ -35,6 +40,26 @@ export function useSendMessage(accountId: string, conversationId: string) {
         withNewMessage(data, toMessage(dto)),
       );
       await client.invalidateQueries({ queryKey: conversationQueries.summaries(accountId) });
+    },
+  });
+}
+
+/**
+ * Inicia ou recupera a conversa do cantinho e envia a primeira mensagem. A criação é idempotente no backend; a
+ * mensagem não tem retry automático para evitar duplicá-la.
+ * @example useStartConversationMessage(accountId).mutateAsync({ listingId, body: "Oi!" })
+ */
+export function useStartConversationMessage(accountId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ listingId, body }: { listingId: string; body: string }) => {
+      const conversation = await startConversation(listingId);
+      await sendMessage(conversation.id, body);
+      return conversation;
+    },
+    retry: false,
+    onSettled: () => {
+      void client.invalidateQueries({ queryKey: conversationQueries.summaries(accountId) });
     },
   });
 }

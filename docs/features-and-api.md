@@ -21,7 +21,7 @@ Código define chamadas existentes; `escopo-mvp.md` define produto planejado; `d
 | `availability-blocks` | Agenda, bloqueios e capacidade por data                                        | Planejado                                                                        |
 | `bookings`            | Pedido, aceite/recusa, prazos, cancelamento e estadia                          | Planejado                                                                        |
 | `payments`            | Pix/cartão, conexão Stripe, situação e ganhos                                  | Planejado                                                                        |
-| `conversations`       | Texto/foto, lista e contador; chat como diário                                 | Planejado; transporte a decidir com a API                                        |
+| `conversations`       | Texto/foto, primeiro contato pelo anúncio, lista e histórico do chat            | `POST /conversations` cria/recupera a dupla tutor–anfitrião; `POST /{id}/messages` envia texto |
 | `reviews`             | Avaliação bilateral e reputação                                                | Planejado                                                                        |
 | `audit`               | Consulta de trilha e filtros administrativos                                   | Endpoint implementado; complemento operacional                                   |
 
@@ -81,8 +81,11 @@ Prefixo backend `/api/v1`; equivalentes BFF futuros sob `/api` no Next.
 | Revisão         | `GET /host-applications`, detalhe, documentos por kind, `POST .../approval`, `POST .../rejection`                                               |
 | Administração   | Owners/Hosts: listagem e detalhe, `POST/DELETE .../suspension`, `POST /owners/{ownerId}/cpf-release`, `POST /hosts/{hostId}/identity-release`   |
 | Auditoria       | `GET /audit-entries`                                                                                                                            |
+| Conversas       | `POST /conversations` com `{ listingId }` cria ou recupera a conversa; `POST /conversations/{conversationId}/messages` envia texto                 |
 
 Envelope `{ success, data | error, timestamp }`; erros de campo em `error.details: [{ field, messages[] }]`, inclusive `address.zipCode`. Normalizar erros e apresentar microcopy em português. Validar DTOs reais antes de implementar formulários.
+
+No anúncio, somente o tutor logado recebe o compositor de contato. Abrir o compositor não chama a API nem navega: o frontend inicia/recupera a conversa do anúncio, envia o texto não vazio (até 2.000 caracteres) e só abre `/conversations/{conversationId}` após confirmar o envio. Se qualquer pedido falhar, mantém o texto e permite tentar novamente. A página de conversa existente continua responsável pelo histórico e pelas mensagens seguintes.
 
 ## Regras que afetam a estrutura
 

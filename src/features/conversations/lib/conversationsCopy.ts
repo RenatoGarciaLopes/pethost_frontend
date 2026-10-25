@@ -1,3 +1,5 @@
+import { MAX_MESSAGE_LENGTH } from "./constants";
+
 /** Textos das conversas (spec 055, em rascunho), na voz da PetHost. Sem gênero presumido. */
 export const conversationsCopy = {
   heading: "Conversas",
@@ -37,6 +39,16 @@ export const conversationsCopy = {
     photoType: "Essa foto não deu. Manda em JPG, PNG ou WebP.",
     photoSize: "Essa foto passou de 5 MB. Tenta uma menor.",
     photoEmpty: "Esse arquivo está vazio.",
+  },
+  listingContact: {
+    open: "Enviar mensagem",
+    heading: (name: string) => `Enviar mensagem para ${name}`,
+    label: (name: string) => `Mensagem para ${name}`,
+    placeholder: (name: string) => `Escreva para ${name} sobre este cantinho…`,
+    send: "Enviar",
+    sending: "Enviando…",
+    tooLong: `A mensagem pode ter até ${MAX_MESSAGE_LENGTH.toLocaleString("pt-BR")} caracteres.`,
+    failed: "Não foi possível enviar a mensagem. Confira sua conexão e tente novamente.",
   },
   blocked: {
     byMe: "Você bloqueou essa conversa. Dá pra ler o que já foi dito, mas ninguém envia mensagem nova.",

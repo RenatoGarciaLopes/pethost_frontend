@@ -1,15 +1,36 @@
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { createBffClient } from "@/shared/api/client/bffClient";
-import { CIDA_CONVERSATION_ID, messageDto } from "@/test/fixtures/conversations";
+import { CIDA_CONVERSATION_ID, conversationDto, messageDto } from "@/test/fixtures/conversations";
 import { apiFail, apiOk } from "@/test/fixtures/session";
 import { server } from "@/test/msw/server";
-import { markConversationRead, sendMessage, sendPhotoMessage } from "./conversations.client";
+import { markConversationRead, sendMessage, sendPhotoMessage, startConversation } from "./conversations.client";
 
 const transport = createBffClient({ baseUrl: "http://localhost/api" });
 const path = `*/api/conversations/${CIDA_CONVERSATION_ID}`;
 
 describe("conversations.client", () => {
+  it("cria a conversa do anúncio usando o contrato do backend", async () => {
+    server.use(
+      http.post("*/api/conversations", async ({ request }) => {
+        expect(await request.json()).toEqual({ listingId: CIDA_CONVERSATION_ID });
+        return HttpResponse.json(apiOk(conversationDto()), { status: 201 });
+      }),
+    );
+    await expect(startConversation(CIDA_CONVERSATION_ID, transport)).resolves.toMatchObject({
+      id: CIDA_CONVERSATION_ID,
+    });
+  });
+
+  it("aceita a conversa existente devolvida pelo backend sem criar outra", async () => {
+    server.use(
+      http.post("*/api/conversations", () => HttpResponse.json(apiOk(conversationDto()), { status: 200 })),
+    );
+    await expect(startConversation(CIDA_CONVERSATION_ID, transport)).resolves.toMatchObject({
+      id: CIDA_CONVERSATION_ID,
+    });
+  });
+
   it("REQ-CHAT-008 texto vai em JSON com o cabeçalho anti-CSRF e volta a mensagem gravada", async () => {
     server.use(
       http.post(`${path}/messages`, async ({ request }) => {

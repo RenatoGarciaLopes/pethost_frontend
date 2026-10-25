@@ -17,6 +17,7 @@ import { seedRefreshToken, sessionHandlers } from "./handlers/session.mjs";
 import { adminApplicationsHandlers, resetAdminApplications } from "./handlers/adminApplications.mjs";
 import { adminAccountsHandlers, resetAdminAccounts } from "./handlers/adminAccounts.mjs";
 import { auditEntriesHandlers, resetAuditEntries } from "./handlers/auditEntries.mjs";
+import { conversationsHandlers, resetConversations } from "./handlers/conversations.mjs";
 
 /**
  * Backend HTTP mínimo para E2E simulado; não representa a API .NET.
@@ -33,6 +34,7 @@ const handlers = [
     resetAdminApplications();
     resetAdminAccounts();
     resetAuditEntries();
+    resetConversations();
     resetHostApplications();
     resetListings();
     resetBookings();
@@ -75,6 +77,7 @@ const handlers = [
   ...listingsHandlers,
   // Antes da busca: a compatibilidade do cantinho da página responde aqui; as outras passam para a busca.
   ...listingPageHandlers,
+  ...conversationsHandlers,
   ...searchHandlers,
   ...adminApplicationsHandlers,
   ...adminAccountsHandlers,

@@ -14,4 +14,6 @@ export { MyConversations } from "./components/client/MyConversations";
 export type { MyConversationsProps } from "./components/client/MyConversations";
 export { MessageThread } from "./components/client/MessageThread";
 export type { MessageThreadProps } from "./components/client/MessageThread";
-export { useMarkConversationRead, useSendMessage } from "./hooks/useConversationMutations";
+export { ListingMessageContact } from "./components/client/ListingMessageContact";
+export type { ListingMessageContactProps } from "./components/client/ListingMessageContact";
+export { useMarkConversationRead, useSendMessage, useStartConversationMessage } from "./hooks/useConversationMutations";

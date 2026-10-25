@@ -1,9 +1,22 @@
 import { bffClient } from "@/shared/api/client/bffClient";
 import { withSessionRetry } from "@/shared/api/client/withSessionRetry";
+import { PostApiV1ConversationsBody } from "@/shared/api/generated/conversations/conversations.zod";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
-import { readMarkerSchema, sentMessageSchema, sentPhotoMessageSchema } from "../contracts";
+import { conversationDtoSchema, readMarkerSchema, sentMessageSchema, sentPhotoMessageSchema } from "../contracts";
 
 const conversationPath = (conversationId: string) => `/conversations/${encodeURIComponent(conversationId)}`;
+
+/**
+ * Cria ou recupera a conversa única do tutor com o anfitrião do cantinho (POST /conversations).
+ * O backend garante a mesma conversa para a dupla tutor–anfitrião.
+ * @example await startConversation(listingId);
+ */
+export function startConversation(listingId: string, transport: HttpTransport = bffClient) {
+  return transport.request(
+    { method: "POST", path: "/conversations", body: PostApiV1ConversationsBody.parse({ listingId }) },
+    conversationDtoSchema,
+  );
+}
 
 /**
  * Envia texto (REQ-CHAT-008). O lado de quem envia sai do papel da sessão; sem nova tentativa automática, para a

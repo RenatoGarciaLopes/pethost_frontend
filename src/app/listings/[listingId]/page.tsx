@@ -16,6 +16,7 @@ import { prefetchCompatibility } from "@/features/search/index.server";
 import { isPetId, petQueries } from "@/features/pets";
 import { HouseResidents } from "@/features/pets/index.client";
 import { prefetchHouseResidents } from "@/features/pets/index.server";
+import { ListingMessageContact } from "@/features/conversations/index.client";
 import { getQueryClient } from "@/shared/api/query/queryClient";
 import { getSession } from "@/shared/auth/server/getSession";
 import { backendForRequest } from "@/shared/api/server/backendForRequest";
@@ -81,6 +82,15 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
           listing={listing}
           isOwner={isOwner}
           accountRole={user?.role ?? "visitor"}
+          contact={
+            user?.role === "owner" ? (
+              <ListingMessageContact
+                listingId={listing.id}
+                accountId={user.id}
+                recipientName={hostName}
+              />
+            ) : undefined
+          }
           reviews={reviews}
           stay={
             !isOwner
