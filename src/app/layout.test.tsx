@@ -7,7 +7,11 @@ vi.mock("next/font/local", () => ({
 }));
 
 import { quintalColors } from "@/shared/theme/tokens/colors";
-import { metadata } from "./layout";
+import RootLayout, { metadata } from "./layout";
+import { preload } from "react-dom";
+import { TURMA_MEMBERS, turmaSrc } from "@/shared/ui/brand/turma";
+
+vi.mock("react-dom", async (original) => ({ ...(await original<typeof import("react-dom")>()), preload: vi.fn() }));
 
 describe("RootLayout metadata & brand favicon", () => {
   it("exporta metadata com title, description e icons configurados para SVG e ICO", () => {
@@ -53,4 +57,12 @@ describe("RootLayout metadata & brand favicon", () => {
     // Não é o arquivo padrão de ~15KB do template Next.js
     expect(icoBuffer.length).toBeLessThan(10000);
   });
+});
+
+it("preloads every loader image before navigation needs the route fallback", () => {
+  vi.mocked(preload).mockClear();
+  RootLayout({ children: null });
+  expect(preload).toHaveBeenCalledTimes(TURMA_MEMBERS.length);
+  for (const member of TURMA_MEMBERS)
+    expect(preload).toHaveBeenCalledWith(turmaSrc(member), { as: "image", fetchPriority: "high" });
 });

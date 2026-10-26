@@ -32,7 +32,7 @@ async function resolveListingContent(search: Record<string, string> = {}) {
     params: Promise.resolve({ listingId: listing.id }),
     searchParams: Promise.resolve(search),
   });
-  const content = page.props.children as ReactElement;
+  const content = page as ReactElement;
   const renderContent = content.type as (props: typeof content.props) => Promise<ReactNode>;
   const resolved = await renderContent(content.props);
   if (!isValidElement(resolved)) throw new Error("ListingPageContent não retornou uma composição React.");

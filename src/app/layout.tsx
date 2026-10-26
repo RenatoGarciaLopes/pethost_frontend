@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { preload } from "react-dom";
+import { TURMA_MEMBERS, turmaSrc } from "@/shared/ui/brand/turma";
 import localFont from "next/font/local";
 import { AppProviders } from "@/bootstrap/providers/AppProviders";
 import "./globals.css";
@@ -32,6 +34,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  for (const member of TURMA_MEMBERS) preload(turmaSrc(member), { as: "image", fetchPriority: "high" });
   return (
     <html lang="pt-BR" className={`${caprasimo.variable} ${atkinsonHyperlegibleNext.variable}`}>
       <body>

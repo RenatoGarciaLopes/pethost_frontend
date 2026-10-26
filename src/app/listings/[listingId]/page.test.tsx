@@ -20,15 +20,11 @@ import ListingPage, { generateMetadata } from "./page";
 
 const LISTING = "0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c";
 
-it("places the session-reading listing content under Suspense for client navigation", () => {
-  const page = ListingPage({
-    params: Promise.resolve({ listingId: LISTING }),
-    searchParams: Promise.resolve({}),
-  });
-
-  expect(page.type).toBe(Suspense);
-  expect(page.props.fallback).toBeNull();
-  expect(page.props.children).toBeTruthy();
+it("lets the route loading boundary handle pending listing data without a blank fallback", () => {
+  const params = Promise.resolve({ listingId: LISTING });
+  const page = ListingPage({ params, searchParams: Promise.resolve({}) });
+  expect(page.type).not.toBe(Suspense);
+  expect(page.props.params).toBe(params);
   expect(getSession).not.toHaveBeenCalled();
 });
 

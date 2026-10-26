@@ -701,3 +701,7 @@ PhotoSlots permanece em `src/shared/ui/media/PhotoSlots/`, com componente, copy,
 ## Cadastro e edição do pet em passos (107)
 
 PetWizardScreen deixa de ter grade própria; steps/StepForm compõe StepWizard, StepWizardActions e LivePetCard. PetEditor compõe a mesma casca em modo navegável, com EditSection e PetStepHost hospedando um formulário por seção. Novos arquivos internos: `features/pets/lib/petEditSections.ts` (ids/resumos de URL) e `components/client/steps/usePetPreview.ts` (preview RHF). WizardProgress/navigation, ConfirmDialog/alternative e ChoiceCardGroup/grid são extensões nos diretórios existentes. Sem pasta técnica nova em produção, store ou provider novo. Contratos e validação em `specs/107-editar-pet-em-passos/`.
+
+## Listing route loading
+
+`src/app/listings/[listingId]/loading.tsx` reuses `src/app/loading.tsx`; the page no longer hides pending data behind a null fallback. `src/app/layout.tsx` preloads existing loader images, and `shared/ui/brand/TurmaWalker/TurmaDog.tsx` requests them eagerly. Tests live beside the route/layout; full responsibility and validation note: [listing-loading.md](listing-loading.md).

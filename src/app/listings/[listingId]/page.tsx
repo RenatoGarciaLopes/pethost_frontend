@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
@@ -45,11 +44,7 @@ export async function generateMetadata({ params, searchParams }: ListingPageProp
  * conta de tutor. Renderizada no servidor; a leitura da sessão fica sob Suspense.
  */
 export default function ListingPage(props: ListingPageProps) {
-  return (
-    <Suspense fallback={null}>
-      <ListingPageContent {...props} />
-    </Suspense>
-  );
+  return <ListingPageContent {...props} />;
 }
 
 async function ListingPageContent({ params, searchParams }: ListingPageProps) {

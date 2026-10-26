@@ -30,6 +30,8 @@ export function TurmaDog({ member, height, still }: TurmaDogProps) {
       width={width}
       height={height}
       unoptimized
+      loading="eager"
+      fetchPriority="high"
       draggable={false}
       style={{ display: "block" }}
     />
