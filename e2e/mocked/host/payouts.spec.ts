@@ -81,7 +81,7 @@ test("REQ-PAYOUT-003/004/007/009/011 abre o Connect fake e volta com a conta sin
   expect((await synchronization).ok()).toBe(true);
   await expect(page).toHaveURL(/\/host\/payments$/);
   await expect(page.getByText("Recebimento conectado ✓")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Montar meu cantinho" })).toHaveAttribute("href", "/host/listings");
+  await expect(page.getByRole("link", { name: "Montar meu cantinho" })).toHaveAttribute("href", "/host/listings/new");
 });
 
 test("REQ-PAYOUT-008 restricted explica o dado pendente e permite resolver", async ({ page, baseURL }) => {
@@ -100,5 +100,5 @@ test("REQ-PAYOUT-009 enabled confirma o recebimento e abre o próximo passo", as
   await page.goto("/host/payments");
 
   await expect(page.getByText("Recebimento conectado ✓")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Montar meu cantinho" })).toHaveAttribute("href", "/host/listings");
+  await expect(page.getByRole("link", { name: "Montar meu cantinho" })).toHaveAttribute("href", "/host/listings/new");
 });

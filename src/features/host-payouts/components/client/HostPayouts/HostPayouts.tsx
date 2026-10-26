@@ -251,7 +251,7 @@ export function HostPayouts({ accountId }: HostPayoutsProps) {
           {current.status === "enabled" && current.payoutsEnabled && (
             <Button
               component={NextLink}
-              href="/host/listings"
+              href="/host/listings/new"
               variant="contained"
               sx={{ alignSelf: "flex-start", minHeight: { xs: 56, sm: 48 } }}
             >
