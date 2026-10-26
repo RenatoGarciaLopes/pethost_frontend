@@ -16,13 +16,10 @@ async function enablePayouts(page: Page) {
   expect(response.ok()).toBe(true);
 }
 
-const section = (page: Page, name: string) => page.getByRole("region", { name, exact: true });
-
-async function saveSection(page: Page, name: string) {
-  const region = section(page, name);
-  await region.getByRole("button", { name: `Salvar ${name}` }).click();
-  // Na seção "Quem você recebe" o contador também é um status (output): o aviso é o que diz "Pronto.".
-  await expect(region.getByRole("status").filter({ hasText: "Pronto." })).toBeVisible();
+/** "Continuar" do passo (ou "Voltar pra revisão") e espera o título do próximo passo. */
+async function continueTo(page: Page, title: string) {
+  await page.getByRole("button", { name: /^Continuar: / }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 }
 
 /** Foto fictícia gerada no próprio navegador (canvas → PNG de verdade): nada de foto real. */
@@ -41,7 +38,7 @@ async function fakePhoto(page: Page, seed: number) {
 
 // Os projetos mocked-desktop e mocked-mobile executam a mesma jornada, com estado isolado.
 test.beforeEach(async ({ page, baseURL }) => {
-  // No celular, "Abrir meu cantinho" fica no fim da página, sob o selo do `next dev`.
+  // No celular, a barra fixa de "Continuar" fica embaixo, sob o selo do `next dev`.
   await hideDevIndicator(page);
   await resetAccountMock(page);
   await mockViaCep(page);
@@ -57,7 +54,7 @@ test("REQ-LIST-002 sem recebimento conectado, o cadastro do cantinho não abre",
   await expect(page.getByRole("link", { name: "Ver como eu recebo" })).toHaveAttribute("href", "/host/payments");
 });
 
-test("REQ-LIST-001 a REQ-LIST-015 monta o cantinho por seções, abre, põe foto, pausa e reabre", async ({ page }) => {
+test("REQ-LIST-001 a REQ-LIST-015 monta o cantinho em passos, abre, põe foto, pausa e reabre", async ({ page }) => {
   await enablePayouts(page);
   await page.goto("/host");
   const path = page.getByRole("region", { name: "Seu caminho pra receber pets" });
@@ -65,40 +62,39 @@ test("REQ-LIST-001 a REQ-LIST-015 monta o cantinho por seções, abre, põe foto
   await waitForHydration(build);
   await build.click();
   await expect(page).toHaveURL("/host/listings/new", NAVIGATION);
-  await expect(page.getByText("Faltam 7 coisas pro seu cantinho abrir")).toBeVisible();
+  await expect(page.getByText("Passo 1 de 9")).toBeVisible();
 
-  const home = section(page, "Sua casa");
-  await waitForHydration(home.getByRole("button", { name: "Salvar Sua casa" }));
-  await home.getByRole("radio", { name: "Casa", exact: true }).click();
-  await home.getByRole("radiogroup", { name: "Tem quintal?" }).getByRole("radio", { name: "Sim" }).click();
-  await home.getByRole("button", { name: /^Usar “Casa da/ }).click();
-  await home.getByRole("textbox", { name: "Conta como é a sua casa" }).fill("Casa térrea com quintal gramado.");
-  await saveSection(page, "Sua casa");
+  const yard = page.getByRole("radiogroup", { name: "Tem quintal?" });
+  await waitForHydration(yard.getByRole("radio", { name: "Sim" }));
+  await page.getByRole("radio", { name: /^Casa/ }).click();
+  await yard.getByRole("radio", { name: "Sim" }).click();
+  await continueTo(page, "Como o seu cantinho se chama?");
 
-  const household = section(page, "Quem mora com você");
+  await page.getByRole("button", { name: /Casa da/ }).click();
+  await page.getByRole("textbox", { name: "Conta como é a sua casa" }).fill("Casa térrea com quintal gramado.");
+  await continueTo(page, "Quem mora com você?");
+
   for (const question of ["Mora cachorro aí?", "Mora gato aí?", "Mora criança aí?"])
-    await household.getByRole("radiogroup", { name: question }).getByRole("radio", { name: "Não" }).click();
-  await saveSection(page, "Quem mora com você");
+    await page.getByRole("radiogroup", { name: question }).getByRole("radio", { name: "Não" }).click();
+  await continueTo(page, "Quem você recebe?");
 
-  const guests = section(page, "Quem você recebe");
-  await guests.getByRole("checkbox", { name: "Cachorro" }).check();
-  await guests.getByRole("checkbox", { name: "Pequeno" }).check();
-  await guests.getByRole("button", { name: "Aumentar Quantos pets ao mesmo tempo?" }).click();
-  await saveSection(page, "Quem você recebe");
+  await page.getByRole("checkbox", { name: "Cachorro", exact: true }).check();
+  await page.getByRole("checkbox", { name: /^Pequeno/ }).check();
+  await page.getByRole("button", { name: "Aumentar Quantos pets ao mesmo tempo?" }).click();
+  await continueTo(page, "Onde fica o cantinho?");
+  await continueTo(page, "Tem alguma regra da casa?");
+  await continueTo(page, "Em que dias você recebe?");
 
-  await saveSection(page, "Endereço");
-  await saveSection(page, "Regras da casa");
+  await page.getByRole("checkbox", { name: "Todos os dias" }).check();
+  await continueTo(page, "Quanto é a diária?");
 
-  const weekdays = section(page, "Dias que recebe");
-  await weekdays.getByRole("button", { name: "Todos os dias" }).click();
-  await saveSection(page, "Dias que recebe");
+  await page.getByRole("textbox", { name: "Diária por pet" }).fill("60,00");
+  await expect(page.getByText(/Com 2 pets por 10 noites no mês, você recebe R\$\s1\.080,00/)).toBeVisible();
+  await continueTo(page, "Confere e abre");
 
-  const rate = section(page, "Diária por pet");
-  await rate.getByRole("textbox", { name: "Diária por pet" }).fill("60,00");
-  await expect(rate.getByText(/Com 2 pets por 10 noites no mês, você recebe R\$\s1\.080,00/)).toBeVisible();
-  await saveSection(page, "Diária por pet");
-
-  await expect(page.getByText("Tudo pronto!")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Quem você recebe" })).toContainText(
+    "Cachorro · porte P · até 2 pets por vez",
+  );
   const created = page.waitForResponse(
     (response) => new URL(response.url()).pathname === "/api/listings" && response.request().method() === "POST",
   );

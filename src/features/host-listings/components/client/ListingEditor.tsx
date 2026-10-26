@@ -30,8 +30,8 @@ export interface ListingEditorProps {
 }
 
 /**
- * O cantinho do dono (spec 044, REQ-LIST-013, 015 e 017): as mesmas seções do cadastro, cada uma com "Salvar {seção}"
- * e só os campos alterados; "Nada mudou por aqui." sem chamar a API; sair com alteração pergunta antes. "Pausar meu
+ * O cantinho do dono (spec 044, REQ-LIST-013, 015 e 017): os mesmos campos do cadastro em passos, aqui em seções,
+ * cada uma com "Salvar {seção}" e só os campos alterados; "Nada mudou por aqui." sem chamar a API; sair com alteração pergunta antes. "Pausar meu
  * cantinho" pede confirmação neutra; pausado continua editável, com "Reabrir". Endereço completo só aqui, para o dono.
  *
  * @example <ListingEditor accountId={user.id} listingId={id} kind="person" firstName="Cida" />
@@ -119,11 +119,9 @@ function ListingEditorView({
     firstName,
     values: listing.values,
     schemas,
-    mode: "edit",
     save,
     saving,
     serverErrors,
-    focusSection: null,
     reportDirty,
   };
 

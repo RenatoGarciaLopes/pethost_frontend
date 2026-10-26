@@ -606,3 +606,24 @@ Revisão da 093: sem diretórios novos. GrassFooter recebe accountRole da sessã
 ## Novidades de estadias (100)
 
 `shared/lib/seenSnapshots.ts` contém adapter IndexedDB nativo opaco; `features/bookings/lib/stayUpdates.ts` mantém assinatura/comparação de domínio e `hooks/useStayUpdates.ts` coordena cache e reconhecimento. `widgets/app-shell/components/client/OwnerHeaderNav.tsx` é a ilha do tutor composta por AppHeader; HeaderNav segue apresentacional. Testes adjacentes e HeaderNav.stories.tsx. Sem novas pastas técnicas, providers ou stores. Interfaces e limites em [spec 100](../specs/100-stays-update-dot/implementation.md).
+
+## Cantinho em passos (104)
+
+O cadastro novo do cantinho é um assistente em passos na casca `StepWizard`; a edição continua em seções. Campos compartilhados em `fields/`; peças visuais reutilizáveis em shared. Detalhes: [104](../specs/104-cantinho-em-passos/design.md).
+
+```text
+src/features/host-listings/
+  components/client/
+    ListingDraft.tsx               assistente de 9 passos (rascunho com o passo)
+    ListingPreview.tsx             card do cantinho ao vivo
+    ListingReview.tsx              Confere e abre: blocos com Editar
+    ListingSections.tsx            seções da edição, com os mesmos campos
+    fields/                        HomeFields, HouseholdFields, GuestsFields, StayFields, ListingYesNo, HomeIllustration
+    sections/ListingSectionHost.tsx  seção com Salvar (só edição)
+  lib/listingSteps.ts, listingSummary.ts
+  schemas/listingResolver.ts
+src/shared/ui/forms/CheckCardGroup/        escolha múltipla em cartões
+src/shared/ui/data-display/ListingCardFace/ cara do card do cantinho (+ AttributeIcon, vindo da busca)
+```
+
+Saíram `ListingSectionsPanel.tsx` e `sections/{HomeSection,HouseholdSection,GuestsSection,SimpleSections}.tsx`.

@@ -1,34 +1,52 @@
 "use client";
 
-import { Divider, Stack } from "@mui/material";
-import { GuestsSection } from "./sections/GuestsSection";
-import { HomeSection } from "./sections/HomeSection";
-import { HouseholdSection } from "./sections/HouseholdSection";
-import { ListingSectionHost, type ListingSectionHostValue } from "./sections/ListingSectionHost";
-import { AddressSection, RateSection, RulesSection, WeekdaysSection } from "./sections/SimpleSections";
+import { Divider, Stack, Typography } from "@mui/material";
+import { AddressFields } from "@/shared/ui/forms/AddressFields";
+import { listingCopy } from "../../lib/listingCopy";
+import { CapacityField, SizesField, SpeciesField } from "./fields/GuestsFields";
+import { DescriptionField, HomeTypeField, TitleField } from "./fields/HomeFields";
+import { HouseholdFields } from "./fields/HouseholdFields";
+import { ListingYesNo } from "./fields/ListingYesNo";
+import { RateField, RateSimulation, RulesField, WeekdaysField } from "./fields/StayFields";
+import { ListingSection, ListingSectionHost, type ListingSectionHostValue } from "./sections/ListingSectionHost";
 
 /**
- * As sete seções do cantinho, na ordem do painel, ligadas a quem as guarda (rascunho ou edição, REQ-LIST-003 e 013).
- * @example <ListingSections host={host} addressSuggested />
+ * As sete seções do cantinho aberto, cada uma com o próprio "Salvar" (REQ-LIST-013). Os campos são os mesmos do
+ * cadastro em passos (`fields/`), então a edição tem os mesmos controles.
+ * @example <ListingSections host={host} />
  */
-export function ListingSections({
-  host,
-  addressSuggested = false,
-}: {
-  host: ListingSectionHostValue;
-  /** O endereço começou com o da conta (pessoa física, só no rascunho). */
-  addressSuggested?: boolean;
-}) {
+export function ListingSections({ host }: { host: ListingSectionHostValue }) {
   return (
     <ListingSectionHost value={host}>
       <Stack spacing={5} divider={<Divider />}>
-        <HomeSection />
-        <HouseholdSection />
-        <GuestsSection />
-        <AddressSection suggested={addressSuggested} />
-        <RulesSection />
-        <WeekdaysSection />
-        <RateSection />
+        <ListingSection id="home">
+          {host.kind === "person" && <HomeTypeField />}
+          <ListingYesNo name="hasYard" label={listingCopy.home.hasYard} />
+          <TitleField firstName={host.firstName} />
+          <DescriptionField />
+        </ListingSection>
+        <ListingSection id="household">
+          <HouseholdFields />
+        </ListingSection>
+        <ListingSection id="guests">
+          <SpeciesField />
+          <SizesField />
+          <CapacityField kind={host.kind} />
+        </ListingSection>
+        <ListingSection id="address">
+          <Typography color="text.secondary">{listingCopy.address.help}</Typography>
+          <AddressFields name="address" />
+        </ListingSection>
+        <ListingSection id="rules">
+          <RulesField />
+        </ListingSection>
+        <ListingSection id="weekdays">
+          <WeekdaysField />
+        </ListingSection>
+        <ListingSection id="rate">
+          <RateField />
+          <RateSimulation />
+        </ListingSection>
       </Stack>
     </ListingSectionHost>
   );

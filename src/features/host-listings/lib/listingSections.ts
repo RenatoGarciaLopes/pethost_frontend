@@ -1,7 +1,7 @@
 import type { ListingFormValues, ListingSectionId } from "../schemas/listingSchema";
 
-/** As seções do cantinho, na ordem do painel (REQ-LIST-003). */
-export const LISTING_SECTIONS: readonly ListingSectionId[] = [
+/** As seções do cantinho aberto, na ordem da página de edição (REQ-LIST-013). */
+const LISTING_SECTIONS: readonly ListingSectionId[] = [
   "home",
   "household",
   "guests",
@@ -12,7 +12,7 @@ export const LISTING_SECTIONS: readonly ListingSectionId[] = [
 ];
 
 /** Os campos que cada seção edita. */
-export const SECTION_FIELDS: Readonly<Record<ListingSectionId, readonly (keyof ListingFormValues)[]>> = {
+const SECTION_FIELDS: Readonly<Record<ListingSectionId, readonly (keyof ListingFormValues)[]>> = {
   home: ["homeType", "hasYard", "title", "description"],
   household: ["hasDogs", "hasCats", "hasKids"],
   guests: ["acceptedSpecies", "acceptsSmall", "acceptsMedium", "acceptsLarge", "capacity"],
