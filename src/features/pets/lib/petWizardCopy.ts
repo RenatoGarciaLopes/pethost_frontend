@@ -57,8 +57,16 @@ export const petWizardCopy = {
     help: "Coisas que só quem convive sabe",
     feeding: "Alimentação",
     notes: "Manias e jeito de ser",
-    shortcuts: "Atalhos",
-    chips: ["come 2× ao dia", "ração úmida", "medo de fogos", "medo de trovão", "puxa na guia", "sobe no sofá"],
+    shortcuts: {
+      feedingNotes: {
+        label: "Atalhos de alimentação",
+        chips: ["come 2× ao dia", "ração seca", "ração úmida", "porções medidas"],
+      },
+      notes: {
+        label: "Atalhos de manias",
+        chips: ["medo de fogos", "medo de trovão", "puxa na guia", "sobe no sofá"],
+      },
+    },
   },
   social: {
     title: (pet: string) => `Com quem ${pet} se dá bem?`,

@@ -121,7 +121,7 @@ test("REQ-STAYS-006 REQ-STAYS-007 cancela a estadia confirmada com motivo e vê 
   await expect(page.getByText("Estadia cancelada.")).toBeVisible();
   await expect(page.getByText("Reembolso de 100%")).toBeVisible();
   const stopped = page.getByRole("list", { name: "Andamento da estadia" });
-  await expect(stopped.getByText("parou", { exact: true })).toBeVisible();
+  await expect(stopped.getByRole("listitem").last()).toContainText(/Cancelada.*parou/);
   await expect(stopped.locator("[aria-current]")).toHaveCount(0);
   await expect(stopped.getByText("Chegou", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Contato do anfitrião" })).toHaveCount(0);

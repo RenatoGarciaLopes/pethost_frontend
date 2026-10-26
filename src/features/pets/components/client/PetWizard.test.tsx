@@ -124,12 +124,25 @@ it("REQ-PNEW-010 Sim/Não são obrigatórios e toggles revelam e apagam os texto
 it("REQ-PNEW-011/012 chips inserem sem repetir e convivência exige três respostas", async () => {
   const { user } = setup(5, petProfileValuesFixture);
   await screen.findByRole("heading", { name: "Rotina e manias" });
-  const chip = within(screen.getAllByRole("group", { name: "Atalhos" })[0]).getByRole("button", {
+  const feeding = screen.getByRole("group", { name: "Atalhos de alimentação" });
+  const habits = screen.getByRole("group", { name: "Atalhos de manias" });
+  expect(within(feeding).queryByRole("button", { name: "medo de fogos" })).not.toBeInTheDocument();
+  expect(within(habits).queryByRole("button", { name: "come 2× ao dia" })).not.toBeInTheDocument();
+  const food = screen.getByLabelText("Alimentação");
+  const notes = screen.getByLabelText("Manias e jeito de ser");
+  await user.clear(food);
+  await user.type(food, "Porção da manhã");
+  await user.clear(notes);
+  const chip = within(feeding).getByRole("button", {
     name: "come 2× ao dia",
   });
   await user.click(chip);
   await user.click(chip);
-  expect(screen.getByLabelText("Alimentação")).toHaveValue("come 2× ao dia");
+  expect(food).toHaveValue("Porção da manhã, come 2× ao dia");
+  expect(notes).toHaveValue("");
+  await user.click(within(habits).getByRole("button", { name: "medo de fogos" }));
+  expect(notes).toHaveValue("medo de fogos");
+  expect(food).toHaveValue("Porção da manhã, come 2× ao dia");
   await user.click(next());
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Com quem Mel se dá bem?");
   // Rascunho sem respostas de convivência em outro render é coberto no próximo caso.

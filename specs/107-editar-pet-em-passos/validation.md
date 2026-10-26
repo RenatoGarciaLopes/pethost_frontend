@@ -21,3 +21,15 @@ Depois dos ajustes descritos, `PetWizard.int.test.tsx` + `WizardProgress.test.ts
 ## Navegação e largura útil
 
 14 stories de PetEditor/WizardProgress/StepWizard aprovadas após incluir troca com rascunho e foco no destino. As capturas das sete seções revelaram overflow só em Convivência/390 por largura mínima automática da grade; StepWizard passou a usar minmax(0, 1fr) e Reveal minWidth:0. Story de regressão verifica scrollWidth/clientWidth com resumo longo. Resultado final registrado na integração. Typecheck e ESLint de pets/navigation/ConfirmDialog/ChoiceCardGroup aprovados antes desse ajuste de CSS.
+
+## E2E da integração (26/10/2026)
+
+Worktree isolada de validação a partir da dev integrada, Next webpack na porta 3180 e backend simulado na 5099, preservando o servidor do usuário na 3000. Comando: `node node_modules/@playwright/test/cli.js test --config playwright.recovery.tmp.config.ts e2e/mocked/bookings/my-stays.spec.ts e2e/mocked/search/listing-page.spec.ts e2e/mocked/pets/new-pet.spec.ts e2e/mocked/pets/pet-profile.spec.ts --grep "REQ-STAYS-001|REQ-STAYS-006|REQ-LPAGE-001|REQ-PNEW-016|REQ-PEDIT-004" --project=mocked-desktop --project=mocked-mobile --workers=1` (segunda rodada com `--last-failed`, que executou novamente os dez casos). **10/10 aprovados, 2,9 min na segunda rodada**.
+
+Primeira rodada: timeouts de navegação/compilação em rotas frias no desktop e seletor novo de cancelamento que buscava texto isolado apesar da vírgula acessível no marcador. Seletor corrigido para conferir o marco Cancelada/parou; a repetição passou sem aumentar os timeouts. Logs de desenvolvimento também registraram falha ao carregar Stripe.js externo; esses casos não validam o SDK real nem pagamento. Backend simulado não equivale à integração com API real. Configuração temporária removida na entrega; resultados locais em `.agent-tools/recovery-e2e-repeat.log`, fora do Git.
+
+## Atalhos de Alimentação e Manias
+
+`node node_modules/vitest/vitest.mjs run src/features/pets/components/client/PetWizard.test.tsx -t "chips inserem" --maxWorkers=1`: **1 teste pertinente aprovado** (12 outros casos filtrados). Cobre conjuntos diferentes por campo, preservação de texto manual, inserção sem duplicar e independência entre alimentação/manias. `node node_modules/vitest/vitest.mjs run --config vitest.storybook.config.ts src/features/pets/components/client/PetWizard.stories.tsx -t "Passo 5" --maxWorkers=1`: **1 story Rotina aprovada com axe** (11 outras filtradas). Sem mudança de API; E2E anterior cobriu a jornada de cadastro, sem nova rodada artificial por mudança de sugestões.
+
+Após integrar a 107, PetEditor.int e PetWizard.int passaram com **25 testes em 2 arquivos**. Typecheck/ESLint finais aprovados na composição; nenhum script temporário foi incluído no Git.

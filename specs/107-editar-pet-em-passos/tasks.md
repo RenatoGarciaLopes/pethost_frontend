@@ -7,4 +7,4 @@
 - [x] Atualizar consumidores, testes e seletores E2E.
 - [x] Stories e capturas de cadastro/edição em 1440, 996 e 390.
 - [x] Documentar recursos e contratos.
-- [ ] Registrar E2E e validação final após integração.
+- [x] Registrar E2E e validação final após integração.

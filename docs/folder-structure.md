@@ -651,9 +651,9 @@ Saíram `ListingSectionsPanel.tsx` e `sections/{HomeSection,HouseholdSection,Gue
 
 PhotoSlots permanece em `src/shared/ui/media/PhotoSlots/`, com componente, copy, index, testes e stories existentes. Novo teste da composição: `src/features/host-listings/components/client/ListingPhotosSection.int.test.tsx`. Spec real `specs/106-fotos-arrastar/{requirements,design,tasks,validation}.md`. Sem nova pasta técnica, store ou provider. Prints são relatórios em test-results/106, fora da árvore autoral.
 
-## Linha do tempo Única (108)
+## Linha do tempo única (108)
 
-`src/shared/ui/data-display/StatusTimeline/` mantém componente, tipos, teste e stories da trilha horizontal. `features/bookings/lib/stayDetailView.ts` monta os marcos consumidos por StayDetail e HostBookingDetail. `StayTimeline.tsx`, seu teste e `bookingStatus.trailSteps` foram removidos; não h? pasta nova de produção. Spec e validação: `specs/108-linha-do-tempo/`.
+`src/shared/ui/data-display/StatusTimeline/` mantém componente, tipos, teste e stories da trilha horizontal. `features/bookings/lib/stayDetailView.ts` monta os marcos consumidos por StayDetail e HostBookingDetail. `StayTimeline.tsx`, seu teste e `bookingStatus.trailSteps` foram removidos; não há pasta nova de produção. Spec e validação: `specs/108-linha-do-tempo/`.
 
 ## Fotos ampliadas (111)
 

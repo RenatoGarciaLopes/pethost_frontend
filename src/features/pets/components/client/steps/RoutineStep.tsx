@@ -64,9 +64,9 @@ export function RoutineStep() {
                   slotProps={{ htmlInput: { maxLength: name === "feedingNotes" ? 1000 : 2000 } }}
                 />
                 <ChipPicker
-                  label={copy.shortcuts}
-                  options={copy.chips}
-                  selected={copy.chips.filter((chip) => text.includes(chip))}
+                  label={copy.shortcuts[name].label}
+                  options={copy.shortcuts[name].chips}
+                  selected={copy.shortcuts[name].chips.filter((chip) => text.includes(chip))}
                   onPick={(chip) => field.onChange(withChip(text, chip))}
                 />
               </Stack>
