@@ -28,7 +28,7 @@ it.each(["owner", "host"] as const)(
         uploads++;
         expect(request.headers.get("content-type")).toContain("multipart/form-data; boundary=");
         const body = await request.text();
-        expect(body).toContain('name="file"; filename="foto.png"');
+        expect(body).toContain('name="file"; filename="upload.png"');
         expect(body).toContain("imagem sintética");
         return HttpResponse.json(
           apiOk({ ...dto, user: { ...dto.user, avatarUrl: "https://images.example.test/nova.png" } }),

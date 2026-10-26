@@ -116,6 +116,8 @@ it("REQ-PNEW-010/017 microchip repetido volta à saúde com mensagem no campo", 
 it("REQ-PNEW-018 foto 500 marca a vaga e retry envia apenas a que falhou sem recriar pet", async () => {
   let creates = 0;
   const uploads: string[] = [];
+  // uploadDirect retries the confirmation of a 5xx twice, so the second photo fails until the user asks again.
+  let failTwo = true;
   server.use(
     http.post("*/api/pets", () => {
       creates++;
@@ -128,7 +130,7 @@ it("REQ-PNEW-018 foto 500 marca a vaga e retry envia apenas a que falhou sem rec
       const name = /filename="([^"]+)"/.exec(raw)?.[1];
       expect(name).toBeDefined();
       uploads.push(raw.includes("one") ? "one" : raw.includes("two") ? "two" : "unknown");
-      return uploads.length === 2
+      return failTwo && uploads.at(-1) === "two"
         ? HttpResponse.json(apiFail("UNEXPECTED_ERROR"), { status: 500 })
         : HttpResponse.json(apiOk(petDto()));
     }),
@@ -141,12 +143,15 @@ it("REQ-PNEW-018 foto 500 marca a vaga e retry envia apenas a que falhou sem rec
   await screen.findByAltText("Prévia da foto 2");
   await review(user);
   await user.click(save());
-  expect(await screen.findByText("A foto não subiu. Tenta de novo ou segue sem, dá pra pôr depois.")).toBeVisible();
+  expect(
+    await screen.findByText("A foto não subiu. Tenta de novo ou segue sem, dá pra pôr depois.", {}, { timeout: 5000 }),
+  ).toBeVisible();
   expect(screen.getAllByRole("alert").some((node) => node.textContent?.includes("Deu um problema"))).toBe(true);
+  failTwo = false;
   await user.click(screen.getByRole("button", { name: "Tentar de novo" }));
   expect(await screen.findByRole("heading", { name: "Prazer, Mel!" })).toBeVisible();
   expect(creates).toBe(1);
-  expect(uploads).toEqual(["one", "two", "two"]);
+  expect(uploads).toEqual(["one", "two", "two", "two", "two"]);
 }, 15_000);
 it("REQ-PNEW-018 seguir sem foto conclui e mantém o pet criado", async () => {
   let creates = 0;
@@ -170,7 +175,8 @@ it("REQ-PNEW-018 seguir sem foto conclui e mantém o pet criado", async () => {
   await user.click(await screen.findByRole("button", { name: "Seguir sem a foto" }));
   expect(await screen.findByRole("heading", { name: "Prazer, Mel!" })).toBeVisible();
   expect(creates).toBe(1);
-  expect(uploads).toBe(1);
+  // One send plus the two confirmation retries made by uploadDirect; skipping does not send again.
+  expect(uploads).toBe(3);
 }, 15_000);
 it("REQ-PNEW-021 restaura rascunho e começar de novo limpa respostas", async () => {
   const { user } = setup(2);

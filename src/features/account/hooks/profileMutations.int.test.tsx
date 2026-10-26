@@ -55,7 +55,7 @@ it.each(["owner", "host"] as const)("REQ-ACC-015/016 upload e remoção %s atual
   server.use(
     http.put(`*/api/${role}s/me/avatar`, async ({ request }) => {
       const body = await request.text();
-      expect(body).toContain('name="file"; filename="foto.png"');
+      expect(body).toContain('name="file"; filename="upload.png"');
       expect(body).toContain("\r\nfoto\r\n");
       return HttpResponse.json(
         apiOk({ ...dto, user: { ...dto.user, avatarUrl: "https://images.example.test/photo.png" } }),

@@ -23,6 +23,13 @@ const files = sourceFiles(SRC).map((file) => ({
   code: readFileSync(file, "utf8"),
 }));
 
+/**
+ * Única URL com token permitida: o BFF (server-only) abre o hub SignalR do backend com `access_token`
+ * na query, contrato do hub para WebSocket. O token nunca chega ao navegador, que só recebe SSE.
+ */
+const SERVER_HUB_TOKEN =
+  'features/conversations/api/server/conversationStream.ts: searchParams.set("access_token", access.accessToken)';
+
 const SENSITIVE =
   /(token|refresh|authorization|bearer|signed.?url|document|selfie|photo|foto|cpf|cnpj|password|senha|url)/i;
 
@@ -74,7 +81,8 @@ describe("REQ-HTTP-019 dados sensíveis fora do navegador e dos logs", () => {
         ...code.matchAll(/router\.(?:push|replace)\(([^;]*)\)/g),
       ]
         .filter((match) => PERSONAL.test(match[1]!))
-        .map((match) => `${file}: ${match[0]}`),
+        .map((match) => `${file}: ${match[0]}`)
+        .filter((offender) => offender !== SERVER_HUB_TOKEN),
     );
 
     expect(offenders).toEqual([]);

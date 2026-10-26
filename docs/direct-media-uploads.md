@@ -42,3 +42,15 @@ Em produção, o navegador precisa alcançar o endpoint HTTPS do bucket e passar
 Unitários: contrato/copy/mapeamento/rotas BFF. Integração HTTP: transporte direto, erros, confirmação ambígua, clientes das seis finalidades e documentos em lote. Integração DOM: expiração, foco e falhas de fotos do chat, além dos componentes consumidores existentes. A API real é validada separadamente com PostgreSQL/RustFS nos testes backend. Jornadas Playwright usam mock local, sem afirmar integração completa com produção.
 
 Validação: 714 testes aprovados em 26 arquivos na suíte direcionada; repetição final de transporte, fotos privadas e chips com 15 testes aprovados, incluindo a assinatura rotativa. Typecheck aprovado. Quatro jornadas Playwright aprovadas (avatar e chips, desktop/mobile), com backend simulado. O build webpack compilou, mas falhou no prerender de `/_global-error`: o loader acessa `palette.quintal` fora do provider. Build de produção não aprovado; sem deploy nesta entrega. Nenhuma story artificial foi criada para o transporte HTTP.
+
+## Correção na integração da main com a dev (29/10/2026)
+
+A suíte completa na `dev` encontrou 6 arquivos quebrados pelo upload direto, nenhum em código de produção:
+
+- `e2e/support/handlers/directUploads.mjs` passou a guardar os bytes do PUT (`arrayBuffer`) e a montar o multipart da confirmação manualmente, com boundary próprio. Antes, ele dependia de `Blob`/`File`/`FormData` globais, que no jsdom e no Node são classes diferentes: um rejeitava o outro ("Expected value to be an instance of Blob") ou serializava `[object File]`. Os nomes de arquivo continuam `upload.<ext>`, porque o protocolo direto não envia o nome original.
+- `ProfileEditor.avatar.test.tsx`, `profileMutations.int.test.tsx` e `usePetPhotoMutations.int.test.tsx` passaram a esperar `filename="upload.png|jpg"` em vez de `foto.png|jpg`.
+- `PetWizard.int.test.tsx`: como `uploadDirect` repete duas vezes a confirmação após 5xx, a foto que deve falhar agora falha em todas as tentativas até o usuário pedir de novo. "Seguir sem a foto" conta 3 chamadas (envio + 2 retentativas) e nenhum reenvio depois.
+- `src/app/(account)/pets/new/page.int.test.tsx` espera a animação de entrada terminar antes de checar a visibilidade.
+- `src/test/architecture/no-token-storage.test.ts`: a chave pública `listing-photos` (prévia de fotos no hover) virou `listing-gallery`, porque "photo" é tratado como dado pessoal pela regra. O `access_token` que o BFF server-only coloca na URL do hub SignalR ficou como exceção nomeada e justificada: é o contrato do hub para WebSocket, e o token nunca chega ao navegador.
+
+Resultado: os 47 arquivos que tocam upload, fotos, avatar ou documentos, mais a arquitetura, passaram (341 testes).

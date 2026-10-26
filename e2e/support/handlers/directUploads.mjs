@@ -38,19 +38,30 @@ async function confirm(records, body, batch = false) {
   if (!batch && records[0].result) return ok(records[0].result);
   const first = records[0];
   const [method, path] = target(first);
-  const form = new FormData();
+  // Multipart assembled by hand: jsdom and Node expose different FormData/File/Blob classes that reject each other.
+  const boundary = `----pethost-mock-${crypto.randomUUID()}`;
+  const encoder = new TextEncoder();
+  const parts = [];
   for (const record of records) {
     const extension = record.target.contentType.split("/")[1].replace("jpeg", "jpg");
-    form.append(
-      record.target.purpose === "host-document" ? record.target.kind : "file",
-      record.file,
-      `upload.${extension}`,
+    const name = record.target.purpose === "host-document" ? record.target.kind : "file";
+    const disposition = `form-data; name="${name}"; filename="upload.${extension}"`;
+    parts.push(
+      encoder.encode(
+        `--${boundary}\r\nContent-Disposition: ${disposition}\r\nContent-Type: ${record.target.contentType}\r\n\r\n`,
+      ),
+      new Uint8Array(record.file),
+      encoder.encode("\r\n"),
     );
   }
-  if (body?.body) form.append("body", body.body);
+  if (body?.body)
+    parts.push(encoder.encode(`--${boundary}\r\nContent-Disposition: form-data; name="body"\r\n\r\n${body.body}\r\n`));
+  parts.push(encoder.encode(`--${boundary}--\r\n`));
+  const form = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
+  parts.reduce((offset, part) => (form.set(part, offset), offset + part.length), 0);
   // Reuse the existing synthetic resource handlers; only this test adapter speaks their multipart interface.
   const headers = new Headers(first.headers);
-  headers.delete("content-type");
+  headers.set("content-type", `multipart/form-data; boundary=${boundary}`);
   headers.delete("content-length");
   headers.delete("host");
   const response = await fetch(`${first.base}${path}`, { method, headers, body: form });
@@ -68,7 +79,8 @@ export const directUploadHandlers = [
   http.put("*/__mock/uploads/:id", async ({ request, params }) => {
     const session = sessions.get(String(params.id));
     if (!session) return missing();
-    session.file = await request.blob();
+    // Raw bytes for the hand-built multipart in confirm().
+    session.file = await request.arrayBuffer();
     return new HttpResponse(null, { status: 200, headers: { "Access-Control-Allow-Origin": "*" } });
   }),
   http.options(

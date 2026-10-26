@@ -78,7 +78,7 @@ it("REQ-PEDIT-009 substituição renova após 401 e reenvia mesmo arquivo uma ve
   server.use(
     http.patch("*/api/pets/:id/photos/:photoId", async ({ request }) => {
       const body = await request.text();
-      expect(body).toContain('name="file"; filename="foto.jpg"');
+      expect(body).toContain('name="file"; filename="upload.jpg"');
       expect(body).toContain("imagem");
       return ++sends === 1
         ? HttpResponse.json(apiFail("UNAUTHORIZED"), { status: 401 })

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { afterEach, expect, it, vi } from "vitest";
 import { getQueryClient } from "@/shared/api/query/queryClient";
@@ -59,7 +59,8 @@ it("REQ-HPETS-003/004 aprovado monta formulário com abertura de anfitrião", as
     ),
   );
   renderWithProviders(await content(), { theme: quintalTheme });
-  expect(screen.getByRole("heading", { name: "Quem mora com você?" })).toBeVisible();
+  // Step and page entrances start transparent; wait for the motion to settle.
+  await waitFor(() => expect(screen.getByRole("heading", { name: "Quem mora com você?" })).toBeVisible());
 });
 it("REQ-HPETS-003 outro erro de preflight relança e não libera formulário", async () => {
   server.use(

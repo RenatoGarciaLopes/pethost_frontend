@@ -16,7 +16,7 @@ export const searchQueries = {
   /** Fotos públicas, carregadas apenas pelo card em hover; independentes de conta e filtros. */
   photos: (listingId: string) =>
     queryOptions({
-      queryKey: ["listing-photos", listingId] as const,
+      queryKey: ["listing-gallery", listingId] as const,
       queryFn: async ({ signal }) =>
         (await bffClient.request({ method: "GET", path: `/listings/${listingId}`, signal }, listingPhotosSchema))
           .photos,
