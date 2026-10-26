@@ -18,6 +18,7 @@ import { usePetStep } from "./PetStepHost";
 import type { PetSpecies } from "../../../types";
 import { SizeField } from "./SizeField";
 import { StepForm } from "./StepForm";
+import { usePetPreview } from "./usePetPreview";
 import { useServerErrors } from "./useServerErrors";
 
 const copy = petWizardCopy.body;
@@ -65,6 +66,7 @@ export function BodyStep() {
       weightKg: values.weightKg,
     },
   });
+  usePetPreview(control);
   useServerErrors(setError, ["breed", "size", "birthDate", "weightKg"]);
 
   function chooseAge(mode: AgeMode) {

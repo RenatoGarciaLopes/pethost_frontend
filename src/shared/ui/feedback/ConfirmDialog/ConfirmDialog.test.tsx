@@ -36,6 +36,23 @@ function Opener() {
 }
 
 describe("ConfirmDialog", () => {
+  it("107 ação alternativa delega descarte e respeita ocupado", async () => {
+    const discard = vi.fn();
+    const { user, rerender } = renderDialog({ alternative: { label: "Descartar", onClick: discard } });
+    await user.click(screen.getByRole("button", { name: "Descartar" }));
+    expect(discard).toHaveBeenCalledOnce();
+    rerender(
+      <ConfirmDialog
+        open
+        {...texts}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+        busy
+        alternative={{ label: "Descartar", onClick: discard }}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Descartar" })).toBeDisabled();
+  });
   it("REQ-PEDIT-011 diálogo nomeado pelo título e descrito pelo corpo, com as duas ações", () => {
     renderDialog();
     const dialog = screen.getByRole("dialog", { name: texts.title });

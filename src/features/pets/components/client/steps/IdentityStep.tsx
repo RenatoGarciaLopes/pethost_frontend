@@ -12,6 +12,7 @@ import { petStepSchemas } from "../../../schemas/petProfileSchema";
 import { usePetWizard, usePetWizardStore } from "../../../stores/PetWizardProvider";
 import { usePetStep } from "./PetStepHost";
 import { StepForm } from "./StepForm";
+import { usePetPreview } from "./usePetPreview";
 import { useServerErrors } from "./useServerErrors";
 
 const copy = petWizardCopy.identity;
@@ -31,6 +32,7 @@ export function IdentityStep() {
     resolver: zodResolver(petStepSchemas.identity),
     defaultValues: { name: values.name ?? "", sex: values.sex },
   });
+  usePetPreview(control);
   useServerErrors(setError, ["name", "sex"]);
 
   return (

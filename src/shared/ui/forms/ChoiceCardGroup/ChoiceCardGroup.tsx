@@ -9,8 +9,13 @@ export interface ChoiceCardGroupProps {
   /** Ordered unique options; checked state comes from value. */ options: readonly Omit<ChoiceCardProps, "checked">[];
   /** Selected option. */ value: string;
   /** Next selected option from click or arrows. */ onChange: (value: string) => void;
-  /** `responsive`: equal columns from md, stacked on mobile. `row`: equal columns at every width (two short choices). */
-  layout?: "stacked" | "responsive" | "row";
+  /**
+   * `responsive`: equal columns from md, stacked on mobile. `row`: equal columns at every width (two short choices).
+   * `grid`: compact 56 px cards in `columns`, equal widths and equal row heights (long lists: the 12 species, 107).
+   */
+  layout?: "stacked" | "responsive" | "row" | "grid";
+  /** `grid` only: columns per breakpoint (default 2 on phones, 3 from `md`, like CheckCardGroup's species). */
+  columns?: { xs: number; sm?: number; md?: number };
   /** Section heading for the visible group label; body preserves existing forms. */ labelVariant?: "body" | "section";
   /** Disable all choices. */ disabled?: boolean;
 }
@@ -26,6 +31,7 @@ export function ChoiceCardGroup({
   onChange,
   disabled = false,
   layout = "stacked",
+  columns = { xs: 2, md: 3 },
   labelVariant = "body",
 }: ChoiceCardGroupProps) {
   const id = useId();
@@ -58,12 +64,22 @@ export function ChoiceCardGroup({
             display: "grid",
             gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
           }),
+          ...(layout === "grid" && {
+            display: "grid",
+            gap: 1.5,
+            // Linhas da mesma altura: a mais alta (rótulo de duas linhas) dita todas, como no CheckCardGroup.
+            gridAutoRows: "1fr",
+            gridTemplateColumns: Object.fromEntries(
+              Object.entries(columns).map(([breakpoint, count]) => [breakpoint, `repeat(${count}, minmax(0, 1fr))`]),
+            ),
+          }),
         }}
       >
         {options.map((option) => (
           <ChoiceCard
             key={option.value}
             {...option}
+            density={layout === "grid" ? "compact" : option.density}
             checked={value === option.value}
             disabled={disabled || option.disabled}
           />

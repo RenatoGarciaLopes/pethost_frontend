@@ -1,7 +1,6 @@
 "use client";
 
 import { Stack, Typography } from "@mui/material";
-import { useId } from "react";
 import { PhotoSlots } from "@/shared/ui/media/PhotoSlots";
 import { usePetPhotoMutations } from "../../hooks/usePetPhotoMutations";
 import { petEditCopy as copy } from "../../lib/petEditCopy";
@@ -17,16 +16,12 @@ const SLOTS = 3;
  * @example <PetPhotosSection accountId={user.id} pet={pet} />
  */
 export function PetPhotosSection({ accountId, pet }: { accountId: string; pet: PetDetail }) {
-  const headingId = useId();
   const photos = usePetPhotoMutations(accountId, pet.id);
   const files = Array.from({ length: SLOTS }, (_, slot) => pet.photos[slot]?.url ?? null);
   const photoId = (slot: number) => pet.photos[slot]?.id;
 
   return (
-    <Stack component="section" id="fotos" aria-labelledby={headingId} spacing={1.5}>
-      <Typography id={headingId} component="h2" variant="h3" sx={{ fontSize: 22 }}>
-        {copy.sections.photos}
-      </Typography>
+    <Stack component="section" id="fotos" aria-label={copy.sections.photos} spacing={1.5}>
       <Typography variant="body2" color="text.secondary">
         {copy.photosHelp}
       </Typography>

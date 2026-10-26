@@ -9,6 +9,7 @@ import { petWizardCopy } from "../../../lib/petWizardCopy";
 import { petStepSchemas } from "../../../schemas/petProfileSchema";
 import { usePetStep } from "./PetStepHost";
 import { StepForm } from "./StepForm";
+import { usePetPreview } from "./usePetPreview";
 import { useServerErrors } from "./useServerErrors";
 
 const copy = petWizardCopy.routine;
@@ -33,6 +34,7 @@ export function RoutineStep() {
     resolver: zodResolver(petStepSchemas.routine),
     defaultValues: { feedingNotes: values.feedingNotes ?? "", notes: values.notes ?? "" },
   });
+  usePetPreview(control);
   useServerErrors(setError, ["feedingNotes", "notes"]);
 
   return (

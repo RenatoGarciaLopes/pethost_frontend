@@ -2,6 +2,8 @@
 export const petWizardCopy = {
   pageTitle: "Apresentar o pet · PetHost",
   progressLabel: "Passos da ficha",
+  progressTitle: "Apresentar o pet",
+  position: (step: number, total: number) => `Passo ${step} de ${total}`,
   stepLabels: ["Bicho", "Nome e fotos", "Corpo", "Saúde", "Rotina", "Convivência", "Revisão"],
   fallbackName: "seu pet",
   next: "Continuar",

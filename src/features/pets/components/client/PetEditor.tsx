@@ -1,15 +1,19 @@
 "use client";
 
-import { Box, Divider, Link, Stack, Typography } from "@mui/material";
+import { Box, Button, Link, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { translateError } from "@/shared/api/errors/translateError";
 import { useUnsavedChangesGuard } from "@/shared/hooks/useUnsavedChangesGuard";
+import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
 import { ErrorState } from "@/shared/ui/feedback/ErrorState";
+import { StepWizard } from "@/shared/ui/navigation/StepWizard";
 import { petQueries } from "../../api/queries";
 import { petEditCopy as copy } from "../../lib/petEditCopy";
+import { PET_EDIT_SECTION_IDS, SECTION_PARAM, sectionIndexOf, petSectionSummary } from "../../lib/petEditSections";
 import { petPath } from "../../lib/petPaths";
+import type { PetWizardValues } from "../../stores/petWizardStore";
 import { PetProfileCard } from "../PetProfileCard";
 import { EditSection, type EditSectionDefinition } from "./EditSection";
 import { PetPhotosSection } from "./PetPhotosSection";
@@ -21,7 +25,6 @@ import { RoutineStep } from "./steps/RoutineStep";
 import { SocialStep } from "./steps/SocialStep";
 import { SpeciesStep } from "./steps/SpeciesStep";
 
-/** Os passos da 021 como seções (REQ-PEDIT-004), na ordem do cadastro, com os campos que cada uma edita. */
 const SECTIONS: readonly EditSectionDefinition[] = [
   {
     id: "bicho",
@@ -45,32 +48,72 @@ const SECTIONS: readonly EditSectionDefinition[] = [
     step: <SocialStep />,
   },
 ];
-
 const sectionOfField = (field: string) => SECTIONS.find((section) => section.fields.includes(field));
 
-/**
- * Edição da ficha (REQ-PEDIT-004 a 010, 017): fotos ligadas à API e seis seções, cada uma com "Salvar"
- * próprio, ao lado da carteirinha com o que está salvo (no celular, a carteirinha vem antes). Sair por um link
- * com seção alterada pergunta "Sair sem salvar?".
- *
- * @example <PetEditor accountId={user.id} petId={petId} />
- */
+const SECTION_EVENT = "pet-edit-section";
+function subscribeSection(onChange: () => void) {
+  window.addEventListener(SECTION_EVENT, onChange);
+  window.addEventListener("popstate", onChange);
+  window.addEventListener("hashchange", onChange);
+  return () => {
+    window.removeEventListener(SECTION_EVENT, onChange);
+    window.removeEventListener("popstate", onChange);
+    window.removeEventListener("hashchange", onChange);
+  };
+}
+function currentSection() {
+  const url = new URL(window.location.href);
+  return sectionIndexOf(url.searchParams.get(SECTION_PARAM) ?? url.hash.slice(1));
+}
+const serverSection = () => 0;
+
+/** Edição em sete seções navegáveis (107), com PATCH mínimo por seção e proteção de alterações. */
 export function PetEditor({ accountId, petId }: { accountId: string; petId: string }) {
   const query = useQuery(petQueries.detail(accountId, petId));
-  const [dirtySections, setDirtySections] = useState<ReadonlySet<string>>(() => new Set());
-  const { dialog } = useUnsavedChangesGuard(dirtySections.size > 0);
-  // A idade da carteirinha é calculada uma vez por visita.
+  const index = useSyncExternalStore(subscribeSection, currentSection, serverSection);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [preview, setPreview] = useState<PetWizardValues | null>(null);
+  const [pending, setPending] = useState<number | null>(null);
+  const saveDestination = useRef<number | null>(null);
+  const form = useRef<HTMLFormElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const { dialog } = useUnsavedChangesGuard(dirty);
   const [now] = useState(() => new Date());
-
-  const reportDirty = useCallback((sectionId: string, dirty: boolean) => {
-    setDirtySections((current) => {
-      if (current.has(sectionId) === dirty) return current;
-      const next = new Set(current);
-      if (dirty) next.add(sectionId);
-      else next.delete(sectionId);
-      return next;
-    });
+  const writeUrl = useCallback((next: number) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set(SECTION_PARAM, PET_EDIT_SECTION_IDS[next]);
+    url.hash = "";
+    window.history.replaceState(window.history.state, "", url);
+    window.dispatchEvent(new Event(SECTION_EVENT));
   }, []);
+  const go = useCallback(
+    (next: number) => {
+      setDirty(false);
+      setPreview(null);
+      setPending(null);
+      saveDestination.current = null;
+      writeUrl(next);
+    },
+    [writeUrl],
+  );
+  const request = useCallback(
+    (next: number) => {
+      if (saving || next === index) return;
+      if (dirty) setPending(next);
+      else go(next);
+    },
+    [dirty, index, go, saving],
+  );
+  useEffect(() => {
+    heading.current?.focus();
+  }, [index, query.isPending]);
+  const reportDirty = useCallback((_id: string, value: boolean) => setDirty(value), []);
+  const saved = useCallback(() => {
+    setDirty(false);
+    setPreview(null);
+    if (saveDestination.current !== null) go(saveDestination.current);
+  }, [go]);
 
   if (query.isPending) return <PetProfileSkeleton />;
   if (query.isError)
@@ -81,43 +124,97 @@ export function PetEditor({ accountId, petId }: { accountId: string; petId: stri
         onRetry={() => void query.refetch()}
       />
     );
-
   const pet = query.data;
-  const name = pet.values.name;
-
+  const sections = [{ id: "fotos", title: copy.sections.photos }, ...SECTIONS];
+  const current = sections[index];
+  const step = SECTIONS.find((section) => section.id === current.id);
+  const navigation = (
+    <>
+      {index > 0 && (
+        <Button
+          type="button"
+          disabled={saving}
+          onClick={() => request(index - 1)}
+          sx={{ display: { xs: "none", md: "inline-flex" } }}
+        >
+          {copy.wizard.previous(sections[index - 1].title)}
+        </Button>
+      )}
+      {index < sections.length - 1 && (
+        <Button type="button" disabled={saving} onClick={() => request(index + 1)}>
+          {copy.wizard.next(sections[index + 1].title)}
+        </Button>
+      )}
+    </>
+  );
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3} sx={{ minWidth: 0 }}>
       <Link component={NextLink} href={petPath(petId)} sx={{ alignSelf: "flex-start" }}>
-        {copy.backToProfile(name)}
+        {copy.backToProfile(pet.values.name)}
       </Link>
-      <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
-        {copy.editTitle(name)}
-      </Typography>
-      <Box
-        sx={{
-          display: "grid",
-          gap: { xs: 3, md: 5 },
-          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) 340px" },
-          alignItems: "start",
-        }}
+      <StepWizard
+        steps={sections.map((section, position) => ({
+          id: section.id,
+          label: section.title,
+          description: petSectionSummary(PET_EDIT_SECTION_IDS[position], pet, now),
+        }))}
+        currentIndex={index}
+        progressTitle={copy.editTitle(pet.values.name)}
+        progressLabel={copy.wizard.progressLabel}
+        position={copy.wizard.position(index + 1, sections.length)}
+        title={current.title}
+        titleRef={heading}
+        navigation={{ onSelect: request, menuLabel: copy.wizard.menu, disabled: saving }}
+        aside={
+          <PetProfileCard
+            values={{ ...pet.values, ...preview }}
+            coverUrl={pet.photos[0]?.url ?? null}
+            now={now}
+            showEmptyBlocks
+          />
+        }
       >
-        <Box sx={{ position: { md: "sticky" }, top: { md: 24 }, order: { md: 2 } }}>
-          <PetProfileCard values={pet.values} coverUrl={pet.photos[0]?.url ?? null} now={now} showEmptyBlocks />
-        </Box>
-        <Stack spacing={4} divider={<Divider />} sx={{ order: { md: 1 }, minWidth: 0 }}>
-          <PetPhotosSection accountId={accountId} pet={pet} />
-          {SECTIONS.map((section) => (
-            <EditSection
-              key={section.id}
-              accountId={accountId}
-              pet={pet}
-              section={section}
-              sectionOfField={sectionOfField}
-              onDirtyChange={reportDirty}
-            />
-          ))}
-        </Stack>
-      </Box>
+        {step ? (
+          <EditSection
+            key={current.id}
+            accountId={accountId}
+            pet={pet}
+            section={step}
+            sectionOfField={sectionOfField}
+            onDirtyChange={reportDirty}
+            onBusyChange={setSaving}
+            formRef={form}
+            actions={navigation}
+            onSaved={saved}
+            onPreview={setPreview}
+            onNavigate={(id) => request(sectionIndexOf(id))}
+          />
+        ) : (
+          <>
+            <PetPhotosSection accountId={accountId} pet={pet} />
+            <Box sx={{ mt: 3, pb: { xs: 10, md: 0 }, "& .MuiButton-root": { minHeight: 56 } }}>{navigation}</Box>
+          </>
+        )}
+      </StepWizard>
+      <ConfirmDialog
+        open={pending !== null}
+        title={copy.switchSection.title(current.title)}
+        message={copy.switchSection.message(current.title)}
+        confirmLabel={copy.switchSection.save}
+        cancelLabel={copy.switchSection.stay}
+        onCancel={() => setPending(null)}
+        onConfirm={() => {
+          saveDestination.current = pending;
+          setPending(null);
+          form.current?.requestSubmit();
+        }}
+        alternative={{
+          label: copy.switchSection.discard,
+          onClick: () => {
+            if (pending !== null) go(pending);
+          },
+        }}
+      />
       {dialog}
     </Stack>
   );

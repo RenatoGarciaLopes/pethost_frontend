@@ -3,6 +3,7 @@
 import { createContext, use, useMemo, type ReactNode } from "react";
 import type { PetWizardValues } from "../../../stores/petWizardStore";
 import { usePetWizard, usePetWizardStore } from "../../../stores/PetWizardProvider";
+import type { Ref } from "react";
 
 /** Quando o passo é uma seção da edição (spec 022): título curto, "Salvar {seção}" e o aviso da seção. */
 export interface PetSectionChrome {
@@ -16,6 +17,10 @@ export interface PetSectionChrome {
   focusSaveOnMount: boolean;
   /** O formulário da seção tem alteração não salva (REQ-PEDIT-017). */
   onDirtyChange: (dirty: boolean) => void;
+  /** Formulário atual, para "Salvar e ir" usar a validação normal do passo. */
+  formRef?: Ref<HTMLFormElement>;
+  actions?: ReactNode;
+  onPreview?: (values: PetWizardValues) => void;
 }
 
 /**

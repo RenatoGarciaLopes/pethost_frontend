@@ -642,3 +642,7 @@ src/shared/ui/data-display/ListingCardFace/ cara do card do cantinho (+ Attribut
 ```
 
 Saíram `ListingSectionsPanel.tsx` e `sections/{HomeSection,HouseholdSection,GuestsSection,SimpleSections}.tsx`.
+
+## Cadastro e edição do pet em passos (107)
+
+PetWizardScreen deixa de ter grade própria; steps/StepForm compõe StepWizard, StepWizardActions e LivePetCard. PetEditor compõe a mesma casca em modo navegável, com EditSection e PetStepHost hospedando um formulário por seção. Novos arquivos internos: `features/pets/lib/petEditSections.ts` (ids/resumos de URL) e `components/client/steps/usePetPreview.ts` (preview RHF). WizardProgress/navigation, ConfirmDialog/alternative e ChoiceCardGroup/grid são extensões nos diretórios existentes. Sem pasta técnica nova em produção, store ou provider novo. Contratos e validação em `specs/107-editar-pet-em-passos/`.

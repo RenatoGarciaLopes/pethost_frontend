@@ -110,5 +110,8 @@ it("REQ-PEDIT-003 voltar pra lista tira o selo", async () => {
 
 it("REQ-PEDIT-001 sem foto oferece pôr uma foto direto na seção de fotos", async () => {
   setup({ photos: [] });
-  expect(await screen.findByRole("link", { name: "Pôr uma foto" })).toHaveAttribute("href", `/pets/${THOR}/edit#fotos`);
+  expect(await screen.findByRole("link", { name: "Pôr uma foto" })).toHaveAttribute(
+    "href",
+    `/pets/${THOR}/edit?secao=fotos`,
+  );
 });

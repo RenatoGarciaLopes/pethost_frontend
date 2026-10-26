@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Link } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type Ref } from "react";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
 import { translateError, translateFieldErrors } from "@/shared/api/errors/translateError";
 import { Notice } from "@/shared/ui/feedback/Notice";
@@ -33,6 +33,12 @@ interface EditSectionProps {
   /** Seção da qual vem cada campo, para o link do aviso de outra seção. */
   sectionOfField: (field: string) => EditSectionDefinition | undefined;
   onDirtyChange: (sectionId: string, dirty: boolean) => void;
+  onBusyChange: (busy: boolean) => void;
+  formRef?: Ref<HTMLFormElement>;
+  actions?: ReactNode;
+  onSaved?: () => void;
+  onPreview?: (values: PetWizardValues) => void;
+  onNavigate?: (id: string) => void;
 }
 
 type Status =
@@ -45,12 +51,25 @@ type Status =
  * Uma seção da edição da ficha (REQ-PEDIT-004, 005, 015): hospeda um passo da 021 com "Salvar {seção}".
  * Ao salvar, valida a ficha inteira resultante, manda só o que mudou (`toUpdatePetRequest`) e, sem mudança,
  * nem chama a API. Erro de campo da seção volta ao campo (o formulário remonta com o que foi digitado);
- * de outra seção, vira aviso com link para ela. As outras seções continuam editáveis enquanto esta salva.
+ * de outra seção, vira aviso com link para ela. A navegação entre seções fica bloqueada enquanto esta salva.
  *
  * @example <EditSection accountId={user.id} pet={pet} section={health} sectionOfField={find} onDirtyChange={report} />
  */
-export function EditSection({ accountId, pet, section, sectionOfField, onDirtyChange }: EditSectionProps) {
+export function EditSection({
+  accountId,
+  pet,
+  section,
+  sectionOfField,
+  onDirtyChange,
+  onBusyChange,
+  formRef,
+  actions,
+  onSaved,
+  onPreview,
+  onNavigate,
+}: EditSectionProps) {
   const { mutateAsync: savePatch, isPending: saving } = useUpdatePet(accountId, pet.id);
+  useEffect(() => onBusyChange(saving), [saving, onBusyChange]);
   const [status, setStatus] = useState<Status | null>(null);
   // Remonta o formulário: depois de salvar (novos valores de origem) ou para aplicar erros de campo da API.
   const [version, setVersion] = useState(0);
@@ -100,13 +119,16 @@ export function EditSection({ accountId, pet, section, sectionOfField, onDirtyCh
       if (Object.keys(body).length === 0) {
         setAttempt(null);
         setVersion((current) => current + 1);
-        return setStatus({ kind: "nothingChanged" });
+        setStatus({ kind: "nothingChanged" });
+        onSaved?.();
+        return;
       }
       try {
         await savePatch(body);
         setAttempt(null);
         setVersion((current) => current + 1);
         setStatus({ kind: "saved" });
+        onSaved?.();
       } catch (error) {
         const fieldErrors = translateFieldErrors(error);
         if (Object.keys(fieldErrors).length > 0) return showFieldErrors(fieldErrors, tried);
@@ -115,7 +137,7 @@ export function EditSection({ accountId, pet, section, sectionOfField, onDirtyCh
         setStatus({ kind: "error", message: translateError(error) });
       }
     },
-    [pet.values, savePatch, showFieldErrors],
+    [pet.values, savePatch, showFieldErrors, onSaved],
   );
 
   const host = useMemo<PetStepHostValue>(
@@ -138,11 +160,28 @@ export function EditSection({ accountId, pet, section, sectionOfField, onDirtyCh
         anchorId: section.id,
         focusSaveOnMount: version > 0,
         busy: saving,
-        status: status && <SectionStatus status={status} />,
+        status: status && <SectionStatus status={status} onNavigate={onNavigate} />,
         onDirtyChange: reportDirty,
+        formRef,
+        actions,
+        onPreview,
       },
     }),
-    [attempt, pet.values, accept, section.title, section.id, version, saving, status, reportDirty],
+    [
+      attempt,
+      pet.values,
+      accept,
+      section.title,
+      section.id,
+      version,
+      saving,
+      status,
+      reportDirty,
+      formRef,
+      actions,
+      onPreview,
+      onNavigate,
+    ],
   );
 
   return (
@@ -155,7 +194,7 @@ export function EditSection({ accountId, pet, section, sectionOfField, onDirtyCh
   );
 }
 
-function SectionStatus({ status }: { status: Status }) {
+function SectionStatus({ status, onNavigate }: { status: Status; onNavigate?: (id: string) => void }) {
   if (status.kind === "saved") return <Notice tone="ok" title={copy.saved} />;
   if (status.kind === "nothingChanged") return <Notice tone="info" title={copy.nothingChanged} />;
   if (status.kind === "error") return <Notice tone="erro" title={status.message} />;
@@ -164,7 +203,9 @@ function SectionStatus({ status }: { status: Status }) {
       {status.sections.map((other, index) => (
         <span key={other.id}>
           {index > 0 && " · "}
-          <Link href={`#${other.id}`}>{other.title}</Link>
+          <Link component="button" type="button" onClick={() => onNavigate?.(other.id)}>
+            {other.title}
+          </Link>
         </span>
       ))}
     </Notice>

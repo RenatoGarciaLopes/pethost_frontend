@@ -5,7 +5,7 @@ import type { ReactNode, Ref } from "react";
 import { MOTION_ASSENTAR } from "@/shared/theme/tokens/springs";
 import { FormActions, type FormActionsProps } from "@/shared/ui/forms/FormActions";
 import { Reveal } from "@/shared/ui/motion/Reveal";
-import { WizardProgress, type WizardStep } from "@/shared/ui/navigation/WizardProgress";
+import { WizardProgress, type WizardNavigation, type WizardStep } from "@/shared/ui/navigation/WizardProgress";
 
 export interface StepWizardProps {
   /** Passos da trilha. Pode ter mais passos do que telas (o cadastro do tutor mostra "Seu pet" como próximo). */
@@ -35,13 +35,19 @@ export interface StepWizardProps {
    * ela, a casca é a de duas colunas do cadastro.
    */
   aside?: ReactNode;
+  /**
+   * Edição em seções (107): a trilha leva a qualquer passo e o anel abre a lista numa folha embaixo (ver
+   * `WizardProgress`). Sem ela, a trilha é só leitura, como no cadastro.
+   */
+  navigation?: WizardNavigation;
 }
 
 /**
  * Casca de um assistente em passos, a do cadastro de conta (074): trilha de cartões à esquerda (anel no celular),
  * posição, título e conteúdo do passo à direita, com a entrada animada a cada troca; com `aside`, uma terceira coluna
  * com o resultado ao vivo. Só apresentação: quem usa decide o passo, o formulário, a validação e o foco. Reúne o
- * cadastro (011/012), a verificação do anfitrião (098) e o cadastro do cantinho (104).
+ * cadastro (011/012), a verificação do anfitrião (098), o cadastro do cantinho (104) e a edição da ficha do pet em
+ * seções (107, com `navigation`).
  *
  * @example
  * <StepWizard steps={steps} currentIndex={0} progressTitle="Criar conta" position="Passo 1 de 2" title="Você">
@@ -61,15 +67,17 @@ export function StepWizard({
   children,
   footer,
   aside,
+  navigation,
 }: StepWizardProps) {
   return (
     <Box
       sx={{
         display: "grid",
+        minWidth: 0,
         gap: { xs: 3, md: 6, ...(aside ? { lg: 5 } : {}) },
         // Com a coluna ao vivo, as três cabem na grade do cabeçalho (1136 px a partir de `lg`).
         gridTemplateColumns: {
-          xs: "1fr",
+          xs: "minmax(0, 1fr)",
           md: "272px minmax(0, 720px)",
           ...(aside ? { lg: "240px minmax(0, 1fr) 288px" } : {}),
         },
@@ -78,7 +86,7 @@ export function StepWizard({
         "& .MuiOutlinedInput-root": { boxShadow: "none" },
       }}
     >
-      <Reveal order={0}>
+      <Reveal order={0} sx={{ minWidth: 0 }}>
         <Typography
           sx={{
             display: { xs: "none", md: "block" },
@@ -92,10 +100,16 @@ export function StepWizard({
         >
           {progressTitle}
         </Typography>
-        <WizardProgress steps={steps} currentIndex={currentIndex} label={progressLabel} appearance="cards" />
+        <WizardProgress
+          steps={steps}
+          currentIndex={currentIndex}
+          label={progressLabel}
+          appearance="cards"
+          navigation={navigation}
+        />
       </Reveal>
 
-      <Reveal order={1}>
+      <Reveal order={1} sx={{ minWidth: 0 }}>
         <Box>
           <motion.div
             key={steps[currentIndex]?.id}

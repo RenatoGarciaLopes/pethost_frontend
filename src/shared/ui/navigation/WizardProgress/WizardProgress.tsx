@@ -1,8 +1,10 @@
 "use client";
-import { Box, Typography, useMediaQuery } from "@mui/material";
+import { useState } from "react";
+import { Box, Button, ButtonBase, Drawer, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { OkIcon } from "@/shared/ui/feedback/feedbackIcons";
 import { visuallyHidden } from "../../a11y/visuallyHidden";
+import { focusRing, keyboardFocus } from "@/shared/theme/focus";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
 
@@ -17,6 +19,16 @@ export interface WizardStep {
 
 export type WizardProgressVariant = "trail" | "ring" | "auto";
 
+/** Trilha de edição (107): cada passo é um botão que leva direto a ele, em qualquer ordem. */
+export interface WizardNavigation {
+  /** Bloqueia a troca enquanto a seção está salvando. */
+  disabled?: boolean;
+  /** Pedido de ir ao passo; quem usa decide se vai (pergunta antes quando há alteração não salva). */
+  onSelect: (index: number) => void;
+  /** Botão do anel (celular) que abre a lista dos passos numa folha embaixo ("Ir para outra seção"). */
+  menuLabel: string;
+}
+
 export interface WizardProgressProps {
   steps: readonly WizardStep[];
   /** Índice (base 0) do passo atual. */
@@ -30,6 +42,12 @@ export interface WizardProgressProps {
   label?: string;
   /** Cards da trilha de cadastro; o anel compacto mantém a mesma interface. */
   appearance?: "connected" | "cards";
+  /**
+   * Edição (107): a trilha vira botões, sem "concluído" nem "a fazer" (tudo já existe); a descrição de cada passo
+   * mostra o valor atual. No anel, o "Próximo" dá lugar à descrição do passo atual e a um botão que abre a lista. Sem
+   * ela, a trilha só mostra onde a pessoa está.
+   */
+  navigation?: WizardNavigation;
 }
 
 type StepState = "feito" | "atual" | "falta";
@@ -38,9 +56,11 @@ const stateText: Record<StepState, string> = { feito: "concluído", atual: "pass
 
 /**
  * Progresso de um assistente em passos (REQ-DS-012). O passo atual tem `aria-current="step"`;
- * cada passo diz o estado em texto (não só pela cor). Não navega: só mostra onde a pessoa está.
+ * cada passo diz o estado em texto (não só pela cor). Sem `navigation`, não navega: só mostra onde a pessoa está.
+ * Com `navigation` (edição em seções, 107), cada passo é um botão e o anel ganha a lista numa folha embaixo.
  *
  * @example <WizardProgress steps={[{ id: "voce", label: "Você" }, { id: "endereco", label: "Onde você mora" }]} currentIndex={0} />
+ * @example <WizardProgress steps={sections} currentIndex={2} navigation={{ onSelect: goTo, menuLabel: "Ir para outra seção" }} />
  */
 export function WizardProgress({
   steps,
@@ -48,16 +68,18 @@ export function WizardProgress({
   variant = "auto",
   label = "Etapas",
   appearance = "connected",
+  navigation,
 }: WizardProgressProps) {
   const theme = useTheme();
   const narrow = useMediaQuery(theme.breakpoints.down("md"));
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [navigatedFromMenu, setNavigatedFromMenu] = useState(false);
   const resolved = variant === "auto" ? (narrow ? "ring" : "trail") : variant;
-  const stateOf = (index: number): StepState =>
-    index < currentIndex ? "feito" : index === currentIndex ? "atual" : "falta";
 
   if (resolved === "ring") {
     const total = steps.length;
     const position = Math.min(currentIndex + 1, total);
+    const current = steps[currentIndex];
     const next = steps[currentIndex + 1];
     const radius = 22;
     const circumference = 2 * Math.PI * radius;
@@ -94,122 +116,242 @@ export function WizardProgress({
             {position}/{total}
           </Box>
         </Box>
-        <Box>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography component="p" aria-current="step" sx={{ fontWeight: 800, m: 0 }}>
             <Box component="span" sx={visuallyHidden}>
-              Passo {position} de {total}:{" "}
+              {navigation ? `${position} de ${total}: ` : `Passo ${position} de ${total}: `}
             </Box>
-            {steps[currentIndex]?.label}
+            {current?.label}
           </Typography>
-          {next ? (
+          {navigation ? (
+            current?.description && (
+              <Typography component="p" noWrap sx={{ color: "text.secondary", fontSize: "0.9rem", m: 0 }}>
+                {current.description}
+              </Typography>
+            )
+          ) : next ? (
             <Typography component="p" sx={{ color: "text.secondary", fontSize: "0.9rem", m: 0 }}>
               Próximo: {next.label}
             </Typography>
           ) : null}
         </Box>
+        {navigation && (
+          <>
+            <Button
+              disabled={navigation.disabled}
+              aria-haspopup="dialog"
+              aria-expanded={menuOpen}
+              onClick={() => {
+                setNavigatedFromMenu(false);
+                setMenuOpen(true);
+              }}
+              sx={{ flexShrink: 0, px: 2 }}
+            >
+              {navigation.menuLabel}
+            </Button>
+            <Drawer
+              disableRestoreFocus={navigatedFromMenu}
+              anchor="bottom"
+              open={menuOpen}
+              onClose={() => setMenuOpen(false)}
+              slotProps={{
+                paper: {
+                  "aria-label": label,
+                  sx: {
+                    bgcolor: "background.default",
+                    backgroundImage: "none",
+                    border: "2px solid",
+                    borderColor: "text.primary",
+                    borderBottom: 0,
+                    borderRadius: `${quintalRadii.card}px ${quintalRadii.card}px 0 0`,
+                    maxHeight: "92dvh",
+                    px: 2,
+                    pt: 2.5,
+                    pb: "max(16px, env(safe-area-inset-bottom))",
+                  },
+                },
+              }}
+            >
+              <Typography component="h2" sx={{ fontWeight: 800, fontSize: 18, mb: 1.5, px: 1.5 }}>
+                {label}
+              </Typography>
+              <Trail
+                steps={steps}
+                currentIndex={currentIndex}
+                appearance="cards"
+                disabled={navigation.disabled}
+                onSelect={(index) => {
+                  setNavigatedFromMenu(true);
+                  setMenuOpen(false);
+                  navigation.onSelect(index);
+                }}
+              />
+            </Drawer>
+          </>
+        )}
       </Box>
     );
   }
 
   return (
     <Box component="nav" aria-label={label}>
-      <Box
-        component="ol"
-        sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: appearance === "cards" ? 0.5 : 0 }}
-      >
-        {steps.map((step, index) => {
-          const state = stateOf(index);
-          const last = index === steps.length - 1;
-          return (
-            <Box
-              component="li"
-              key={step.id}
-              aria-current={state === "atual" ? "step" : undefined}
-              data-state={state}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "32px 1fr",
-                columnGap: 1.5,
-                minHeight: last ? 32 : 56,
-                ...(appearance === "cards"
-                  ? {
-                      p: 1.5,
-                      border: "2px solid",
-                      borderColor: state === "atual" ? "text.primary" : "transparent",
-                      borderRadius: `${quintalRadii.field}px`,
-                      bgcolor: state === "atual" ? "background.paper" : "transparent",
-                      boxShadow: state === "atual" ? hardShadow(3) : "none",
-                    }
-                  : {}),
-              }}
-            >
-              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Trail
+        steps={steps}
+        currentIndex={currentIndex}
+        appearance={appearance}
+        onSelect={navigation?.onSelect}
+        disabled={navigation?.disabled}
+      />
+    </Box>
+  );
+}
+
+interface TrailProps {
+  disabled?: boolean;
+  steps: readonly WizardStep[];
+  currentIndex: number;
+  appearance: "connected" | "cards";
+  onSelect?: (index: number) => void;
+}
+
+/** A lista dos passos: só leitura (cadastro) ou com um botão por passo (edição). */
+function Trail({ steps, currentIndex, appearance, onSelect, disabled }: TrailProps) {
+  const theme = useTheme();
+  const navigable = Boolean(onSelect);
+  const cards = appearance === "cards";
+  const stateOf = (index: number): StepState =>
+    index < currentIndex ? "feito" : index === currentIndex ? "atual" : "falta";
+
+  return (
+    <Box component="ol" sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: cards ? 0.5 : 0 }}>
+      {steps.map((step, index) => {
+        // Na edição nada está "feito" nem "a fazer": só o atual se destaca.
+        const state = navigable ? (index === currentIndex ? "atual" : "falta") : stateOf(index);
+        const current = state === "atual";
+        const last = index === steps.length - 1;
+        const box = {
+          display: "grid",
+          gridTemplateColumns: "32px 1fr",
+          columnGap: 1.5,
+          minHeight: last && !navigable ? 32 : 56,
+          ...(cards
+            ? {
+                p: 1.5,
+                border: "2px solid",
+                borderColor: current ? "text.primary" : "transparent",
+                borderRadius: `${quintalRadii.field}px`,
+                bgcolor: current ? "background.paper" : "transparent",
+                boxShadow: current ? hardShadow(3) : "none",
+              }
+            : {}),
+        } as const;
+        const content = (
+          <>
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <Box
+                aria-hidden="true"
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                  fontWeight: 800,
+                  fontSize: "0.9rem",
+                  border: `2px solid ${theme.palette.quintal.tinta}`,
+                  backgroundColor: cards
+                    ? current
+                      ? theme.palette.text.primary
+                      : "transparent"
+                    : state === "feito"
+                      ? theme.palette.success.main
+                      : current
+                        ? theme.palette.primary.main
+                        : theme.palette.background.paper,
+                  color: cards && current ? theme.palette.background.paper : "inherit",
+                  boxShadow: !cards && current ? `2px 2px 0 ${theme.palette.quintal.tinta}` : "none",
+                  "& svg": { width: 18, height: 18 },
+                }}
+              >
+                {state === "feito" ? <OkIcon /> : index + 1}
+              </Box>
+              {last || cards ? null : (
                 <Box
                   aria-hidden="true"
                   sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    display: "grid",
-                    placeItems: "center",
-                    fontWeight: 800,
-                    fontSize: "0.9rem",
-                    border: `2px solid ${theme.palette.quintal.tinta}`,
-                    backgroundColor:
-                      appearance === "cards"
-                        ? state === "atual"
-                          ? theme.palette.text.primary
-                          : "transparent"
-                        : state === "feito"
-                          ? theme.palette.success.main
-                          : state === "atual"
-                            ? theme.palette.primary.main
-                            : theme.palette.background.paper,
-                    color: appearance === "cards" && state === "atual" ? theme.palette.background.paper : "inherit",
-                    boxShadow:
-                      appearance === "connected" && state === "atual"
-                        ? `2px 2px 0 ${theme.palette.quintal.tinta}`
-                        : "none",
-                    "& svg": { width: 18, height: 18 },
+                    flex: 1,
+                    width: 0,
+                    my: 0.5,
+                    borderLeft: `2px ${state === "feito" ? "solid" : "dashed"} ${theme.palette.quintal.tinta}`,
                   }}
-                >
-                  {state === "feito" ? <OkIcon /> : index + 1}
-                </Box>
-                {last || appearance === "cards" ? null : (
-                  <Box
-                    aria-hidden="true"
-                    sx={{
-                      flex: 1,
-                      width: 0,
-                      my: 0.5,
-                      borderLeft: `2px ${state === "feito" ? "solid" : "dashed"} ${theme.palette.quintal.tinta}`,
-                    }}
-                  />
-                )}
-              </Box>
-              <Box>
-                <Typography
-                  component="span"
-                  sx={{
-                    pt: "4px",
-                    fontWeight: state === "atual" ? 800 : 500,
-                    color: state === "falta" ? "text.secondary" : "text.primary",
-                  }}
-                >
-                  {step.label}
+                />
+              )}
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                component="span"
+                sx={{
+                  // No botão, o rótulo e o valor atual empilham; na trilha só leitura, o rótulo segue em linha.
+                  display: navigable ? "block" : undefined,
+                  pt: "4px",
+                  fontWeight: current ? 800 : navigable ? 700 : 500,
+                  color: state === "falta" && !navigable ? "text.secondary" : "text.primary",
+                }}
+              >
+                {step.label}
+                {!navigable && (
                   <Box component="span" sx={visuallyHidden}>
                     {" "}
                     ({stateText[state]})
                   </Box>
-                </Typography>
-                {step.description && (
-                  <Typography sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}>{step.description}</Typography>
                 )}
-              </Box>
+              </Typography>
+              {step.description && (
+                <Typography
+                  component="span"
+                  // Na edição o valor atual pode ser longo (a alimentação): uma linha só, com reticências.
+                  noWrap={navigable}
+                  sx={{ display: "block", mt: 0.5, fontSize: 13, color: "text.secondary" }}
+                >
+                  {step.description}
+                </Typography>
+              )}
             </Box>
-          );
-        })}
-      </Box>
+          </>
+        );
+        return (
+          <Box
+            component="li"
+            key={step.id}
+            aria-current={!navigable && current ? "step" : undefined}
+            data-state={state}
+            sx={navigable ? undefined : box}
+          >
+            {onSelect ? (
+              <ButtonBase
+                disabled={disabled}
+                aria-current={current ? "step" : undefined}
+                onClick={() => onSelect(index)}
+                sx={{
+                  ...box,
+                  width: "100%",
+                  textAlign: "left",
+                  alignItems: "start",
+                  justifyContent: "stretch",
+                  font: "inherit",
+                  color: "inherit",
+                  "&:hover": current ? undefined : { bgcolor: "quintal.cartao" },
+                  [keyboardFocus()]: focusRing,
+                }}
+              >
+                {content}
+              </ButtonBase>
+            ) : (
+              content
+            )}
+          </Box>
+        );
+      })}
     </Box>
   );
 }

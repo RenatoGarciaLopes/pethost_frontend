@@ -17,6 +17,7 @@ import type { PetSpecies } from "../../../types";
 import { usePetStep } from "./PetStepHost";
 import { SizeField } from "./SizeField";
 import { StepForm } from "./StepForm";
+import { usePetPreview } from "./usePetPreview";
 import { useServerErrors } from "./useServerErrors";
 
 const copy = petWizardCopy.species;
@@ -40,6 +41,7 @@ export function SpeciesStep({ title = copy.title }: { title?: string }) {
     resolver: zodResolver(mode === "section" ? speciesSectionSchema : petStepSchemas.species),
     defaultValues: { species: values.species, speciesDescription: values.speciesDescription ?? "", size: values.size },
   });
+  usePetPreview(control);
   useServerErrors(setError, ["species", "speciesDescription", "size"]);
   const species = useWatch({ control, name: "species" }) as PetSpecies | undefined;
   const effects =
@@ -64,6 +66,7 @@ export function SpeciesStep({ title = copy.title }: { title?: string }) {
               ref={(node: HTMLDivElement | null) => field.ref(node?.querySelector("input[type=radio]") ?? null)}
             >
               <ChoiceCardGroup
+                layout="grid"
                 label={copy.legend}
                 options={OPTIONS}
                 value={field.value ?? ""}

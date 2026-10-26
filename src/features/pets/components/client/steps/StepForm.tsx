@@ -1,13 +1,14 @@
 "use client";
 
-import { Box, Button, ButtonBase, Collapse, Stack, Typography, useMediaQuery, type Theme } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, type FormEventHandler, type ReactNode } from "react";
-import { FormActions } from "@/shared/ui/forms/FormActions";
-import { StepHeading } from "@/shared/ui/navigation/StepHeading";
+import { useEffect, useRef, useState, type FormEventHandler, type ReactNode } from "react";
+import { StepWizard, StepWizardActions } from "@/shared/ui/navigation/StepWizard";
 import { petEditCopy } from "../../../lib/petEditCopy";
 import { petWizardCopy as copy } from "../../../lib/petWizardCopy";
 import { usePetWizard } from "../../../stores/PetWizardProvider";
+import { PET_WIZARD_STEPS } from "../../../stores/petWizardStore";
+import { LivePetCard } from "../LivePetCard";
 import { usePetStep, type PetSectionChrome } from "./PetStepHost";
 
 /** "Voltar" no primeiro passo sai do cadastro para a lista (spec 020). */
@@ -27,7 +28,7 @@ export interface StepFormProps {
 /**
  * Moldura de cada passo. No assistente (REQ-PNEW-001, 014): `h1` que recebe o foco quando o passo muda, um
  * `form` só do passo e "Voltar"/"Continuar"; voltar nunca valida e no passo 1 sai para "Meus pets". Na
- * edição (REQ-PEDIT-004): `section` com `h2` e "Salvar {seção}".
+ * edição (REQ-PEDIT-004): formulário da seção atual, sem repetir o h1 da casca, e "Salvar {seção}".
  *
  * @example <StepForm title="Saúde" onSubmit={form.handleSubmit(accept)} dirty={formState.isDirty}>…campos…</StepForm>
  */
@@ -49,12 +50,20 @@ function WizardStepForm({ title, onSubmit, children, nextLabel = copy.next, busy
   }, [navigated]);
 
   return (
-    <Stack spacing={3}>
-      <StepHeading ref={heading}>{title}</StepHeading>
+    <StepWizard
+      steps={PET_WIZARD_STEPS.map((id, index) => ({ id, label: copy.stepLabels[index] }))}
+      currentIndex={step - 1}
+      progressTitle={copy.progressTitle}
+      progressLabel={copy.progressLabel}
+      position={copy.position(step, PET_WIZARD_STEPS.length)}
+      title={title}
+      titleRef={heading}
+      aside={<LivePetCard />}
+    >
       <Box component="form" noValidate onSubmit={onSubmit}>
         <Stack spacing={3}>
           {children}
-          <FormActions
+          <StepWizardActions
             backLabel={copy.back}
             nextLabel={nextLabel}
             nextType="submit"
@@ -63,89 +72,59 @@ function WizardStepForm({ title, onSubmit, children, nextLabel = copy.next, busy
           />
         </Stack>
       </Box>
-    </Stack>
+    </StepWizard>
   );
 }
 
 function SectionForm({ onSubmit, children, dirty = false, section }: StepFormProps & { section: PetSectionChrome }) {
-  const headingId = useId();
-  const contentId = useId();
-  const { onDirtyChange } = section;
-  // No celular as seções empilham e recolhem; começam abertas e o formulário fica montado ao recolher.
-  const mobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
-  const [open, setOpen] = useState(true);
+  const { onDirtyChange, focusSaveOnMount, anchorId, title, formRef, busy, status, actions } = section;
   const save = useRef<HTMLButtonElement>(null);
   // Só na montagem: erro de campo da API foca o campo depois (os efeitos do passo rodam depois deste).
-  const focusOnMount = useRef(section.focusSaveOnMount);
+  const [focusOnMount] = useState(focusSaveOnMount);
 
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
   useEffect(() => {
-    if (focusOnMount.current) save.current?.focus();
-  }, []);
+    if (focusOnMount) save.current?.focus();
+  }, [focusOnMount]);
 
   return (
-    <Stack component="section" id={section.anchorId} aria-labelledby={headingId} spacing={2}>
-      <Typography id={headingId} component="h2" variant="h3" sx={{ fontSize: 22 }}>
-        {mobile ? (
-          <ButtonBase
-            aria-expanded={open}
-            aria-controls={contentId}
-            onClick={() => setOpen((current) => !current)}
-            sx={{ width: "100%", minHeight: 48, justifyContent: "space-between", font: "inherit", textAlign: "left" }}
-          >
-            {section.title}
-            <Chevron open={open} />
-          </ButtonBase>
-        ) : (
-          section.title
-        )}
-      </Typography>
-      <Collapse in={!mobile || open} id={contentId}>
-        <Box component="form" noValidate onSubmit={onSubmit}>
-          <Stack spacing={3}>
-            {children}
-            <Box>
+    <Stack component="section" id={anchorId} aria-label={title} spacing={2}>
+      <Box component="form" ref={formRef} noValidate onSubmit={onSubmit}>
+        <Stack spacing={3}>
+          {children}
+          {status}
+          <Box sx={{ pb: { xs: 20, md: 0 } }}>
+            <Stack
+              direction="row"
+              sx={{
+                position: { xs: "fixed", md: "static" },
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1100,
+                bgcolor: "background.paper",
+                p: { xs: 2, md: 0 },
+                gap: 1,
+                flexWrap: "wrap",
+                pb: { xs: "max(16px, env(safe-area-inset-bottom))", md: 0 },
+                "& .MuiButton-root": { minHeight: 56 },
+              }}
+            >
               <Button
                 ref={save}
                 type="submit"
                 variant="contained"
-                disabled={section.busy}
-                aria-busy={section.busy || undefined}
-                aria-label={petEditCopy.saveSection(section.title)}
+                disabled={busy}
+                aria-busy={busy || undefined}
+                aria-label={petEditCopy.saveSection(title)}
               >
                 {petEditCopy.save}
               </Button>
-            </Box>
-            {section.status}
-          </Stack>
-        </Box>
-      </Collapse>
+              {actions}
+            </Stack>
+          </Box>
+        </Stack>
+      </Box>
     </Stack>
-  );
-}
-
-function Chevron({ open }: { open: boolean }) {
-  return (
-    <Box
-      component="svg"
-      viewBox="0 0 24 24"
-      aria-hidden
-      sx={{
-        width: 24,
-        height: 24,
-        flexShrink: 0,
-        transition: "transform 160ms",
-        transform: open ? "rotate(180deg)" : "none",
-      }}
-    >
-      <path
-        d="M6 9l6 6 6-6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Box>
   );
 }
