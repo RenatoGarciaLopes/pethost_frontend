@@ -24,6 +24,15 @@ export const Conjunto: Story = {
           <Typography>{species}</Typography>
         </Stack>
       ))}
+      <Typography>Cachorros no chip</Typography>
+      {[24, 32].map((size) => (
+        <Stack key={size} direction="row" spacing={2} sx={{ alignItems: "center" }}>
+          {["0", "1", "2", "3"].map((petId) => (
+            <PetAvatar key={petId} petId={petId} name={`Cachorro ${petId}`} species="dog" size={size} />
+          ))}
+          <Typography>{size} px</Typography>
+        </Stack>
+      ))}
       <Stack direction="row" spacing={1}>
         {[28, 30, 40, 48, 64, 72].map((size) => (
           <PetAvatar key={size} petId="mel" name="Mel" species="cat" size={size} />

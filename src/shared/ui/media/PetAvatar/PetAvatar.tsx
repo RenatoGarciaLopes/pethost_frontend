@@ -27,7 +27,7 @@ export function PetAvatar({ petId, name, species, src, size = 40, sx = [], ...pr
           : ["rabbit", "fish", "turtle"].includes(species ?? "")
             ? species
             : "other";
-  const coat = [c.gema, c.texto2, c.papel, c.coral][variant];
+  const coat = (group === "dog" ? [c.gema, c.tinta, c.papel, c.texto2] : [c.gema, c.texto2, c.papel, c.coral])[variant];
   const face = variant === 1 ? c.papel : c.tinta;
   return (
     <Avatar
@@ -53,23 +53,34 @@ export function PetAvatar({ petId, name, species, src, size = 40, sx = [], ...pr
                 <path
                   d={
                     variant % 2 === 0
-                      ? "M18 19C8 13 6 24 11 40L20 36M46 19C56 13 58 24 53 40L44 36"
-                      : "M17 25L15 10Q28 10 27 23M47 25L49 10Q36 10 37 23"
+                      ? "M20 21C8 13 5 26 10 42Q13 47 21 36M44 21C56 13 59 26 54 42Q51 47 43 36"
+                      : "M20 22C8 15 5 29 12 43Q16 46 22 35M44 22C56 15 59 29 52 43Q48 46 42 35"
                   }
-                  fill={coat}
+                  fill={variant === 3 ? c.tinta : coat}
                 />
               ) : (
                 <path d="M15 29L14 11L29 21M49 29L50 11L35 21" fill={coat} />
               )}
               <path d="M15 31Q15 19 32 19Q49 19 49 31L48 42Q46 54 32 54Q18 54 16 42Z" fill={coat} />
               {variant === 2 && <path d="M17 29Q20 18 29 21L27 35Q19 39 17 29Z" fill={c.texto2} />}
-              {variant === 3 && <path d="M28 20L30 28M36 20L34 28" />}
+              {group === "cat" && variant === 3 && <path d="M28 20L30 28M36 20L34 28" />}
               <g stroke={face} fill={face}>
                 <circle cx="24" cy="34" r="1.4" />
                 <circle cx="40" cy="34" r="1.4" />
-                <path d="M29 41Q32 44 35 41Z" />
-                <path d="M32 44Q28 49 25 45M32 44Q36 49 39 45" fill="none" />
+                {group === "cat" && (
+                  <>
+                    <path d="M29 41Q32 44 35 41Z" />
+                    <path d="M32 44Q28 49 25 45M32 44Q36 49 39 45" fill="none" />
+                  </>
+                )}
               </g>
+              {group === "dog" && (
+                <>
+                  <ellipse cx="32" cy="44" rx="12" ry="9" fill={variant === 0 ? c.luz : c.cartao} />
+                  <path d="M27 39Q32 36 37 39Q37 43 32 45Q27 43 27 39Z" fill={c.tinta} />
+                  <path d="M32 45V48M32 48Q27 52 25 48M32 48Q37 52 39 48" fill="none" />
+                </>
+              )}
               {group === "cat" && <path d="M13 39L23 41M13 45L23 44M51 39L41 41M51 45L41 44" />}
               {group === "dog" && variant === 0 && <path d="M30 48Q32 57 35 48" fill={c.coral} />}
             </>

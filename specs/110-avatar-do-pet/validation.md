@@ -1,5 +1,11 @@
 # Validação 110
 
+## Revisão 1 — leitura dos cães no chip
+
+`npm test -- src/shared/ui/media/PetAvatar --maxWorkers=1`: 9/9 aprovados. `npx vitest run --config vitest.storybook-r1.config.ts src/shared/ui/media/PetAvatar --maxWorkers=1`: 3/3 stories aprovadas, usando fs.allow temporário para o workspace, removido após execução. Typecheck, ESLint do diretório e diff-check aprovados. Testes existentes continuam cobrindo identidade, variações, foto/falha e espécies; inspeção visual cobre a alteração artística, sem teste que replique paths SVG.
+
+Refeitos `conjunto-1440.png`, `conjunto-390.png`, `quem-vai-390.png` e `chips-390.png`, em `test-results/110/`, com os componentes reais e dados sintéticos no harness temporário removido. Conjunto inclui os quatro cães em 24 e 32 px. Conferidos orelhas curvas caídas, focinho/nariz maiores, ausência de listras nos cães e preservação dos gatos. Capturas anteriores não solicitadas nesta rodada continuam como evidência histórica da primeira entrega. E2E não executado.
+
 ## Níveis e comportamento
 
 - Unitário/funcional: `PetAvatar.test.tsx` (9 casos) verifica foto, falha da foto, nome acessível, desenho decorativo, id estável apesar de nome/tamanho, quatro pelagens de cão/gato, diferenças entre grupos e aliases do enum. A regra de hash é interna e coberta pelo componente, sem export artificial.

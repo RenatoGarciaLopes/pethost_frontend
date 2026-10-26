@@ -9,3 +9,7 @@ SVG inline evita 14 requisições e arquivos com geometria repetida: a face de c
 API: `PetAvatar({petId,name,species,src,size=40,...AvatarProps})`. `src` inválido usa o fallback nativo do MUI; SVG `aria-hidden`, contêiner `role=img` e `aria-label=name`. Consumidores com nome visível passam `aria-hidden=true`. `PetProfileCard.petId` permite id estável em ficha e reserva; cadastro usa `draft`. `StayBookingPet.species` é opcional para compatibilidade com projeções antigas, mas a rota real o fornece.
 
 Exceção de marca: desenho apenas substitui foto ausente, inclusive formulário/ficha; não é decoração da tela. Registro no vault em `decisoes/2026-10-25-avatar-do-pet.md`.
+
+## Revisão 1
+
+Pedido de Renato: os cães escuro e laranja pareciam gatos. Os quatro cães passam a ter orelhas caídas curvas, focinho claro amplo e nariz maior, sem listras. Pelagens: caramelo, preto com focinho claro, branco com mancha no olho e marrom com orelhas escuras. O hash e a ordem das variantes permanecem estáveis. Gatos mantêm orelhas triangulares, bigodes e pelagens anteriores. A story Conjunto inclui os quatro cães em 24 e 32 px para inspeção da silhueta no chip; não há nova interface ou consumidor.
