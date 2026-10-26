@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { useId, type ReactNode } from "react";
 import { formatBRL, fromCents } from "@/shared/lib/money";
-import { StatusPill } from "@/shared/ui/feedback/StatusPill";
+import { PetAvatar } from "@/shared/ui/media/PetAvatar";
 import { Surface } from "@/shared/ui/layout/Surface";
 import { paymentCopy } from "../../lib/paymentCopy";
 import { bookingCopy } from "../../lib/bookingCopy";
@@ -29,6 +29,31 @@ export function StaySummary({
   cover?: ReactNode;
 }) {
   const headingId = useId();
+  const petChips = booking.pets.map((pet) => (
+    <Box
+      key={pet.id}
+      component="span"
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 0.75,
+        border: "2px solid",
+        borderRadius: "999px",
+        pr: 1,
+        fontSize: 13,
+        fontWeight: 700,
+      }}
+    >
+      <PetAvatar
+        aria-hidden="true"
+        petId={pet.id}
+        name={pet.name ?? bookingCopy.unknownPet}
+        species={pet.species}
+        size={28}
+      />
+      {pet.name ?? bookingCopy.unknownPet}
+    </Box>
+  ));
   const nightly = formatBRL(fromCents(booking.nightlyRateCents));
   return (
     <Surface
@@ -109,9 +134,7 @@ export function StaySummary({
                 {copy.pets}
               </Typography>
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap" }}>
-                {booking.pets.map((pet) => (
-                  <StatusPill key={pet.id} label={pet.name ?? bookingCopy.unknownPet} size="sm" />
-                ))}
+                {petChips}
               </Stack>
             </Box>
           </Stack>
@@ -137,9 +160,7 @@ export function StaySummary({
             <dt>{copy.pets}</dt>
             <dd>
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap" }}>
-                {booking.pets.map((pet) => (
-                  <StatusPill key={pet.id} label={pet.name ?? bookingCopy.unknownPet} size="sm" />
-                ))}
+                {petChips}
               </Stack>
             </dd>
             {booking.listing && (

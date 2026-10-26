@@ -69,7 +69,13 @@ export function PetProfile({ accountId, petId }: { accountId: string; petId: str
           <ErrorNotice message={reactivate.isError ? translateError(reactivate.error) : null} tone="erro" />
         </Stack>
       )}
-      <PetProfileCard values={pet.values} coverUrl={pet.photos[0]?.url ?? null} now={now} showEmptyBlocks />
+      <PetProfileCard
+        petId={petId}
+        values={pet.values}
+        coverUrl={pet.photos[0]?.url ?? null}
+        now={now}
+        showEmptyBlocks
+      />
       <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }}>
         <Button component={NextLink} href={petEditPath(petId)} variant="contained">
           {copy.edit}

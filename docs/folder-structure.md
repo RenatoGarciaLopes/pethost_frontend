@@ -642,3 +642,7 @@ src/shared/ui/data-display/ListingCardFace/ cara do card do cantinho (+ Attribut
 ```
 
 Saíram `ListingSectionsPanel.tsx` e `sections/{HomeSection,HouseholdSection,GuestsSection,SimpleSections}.tsx`.
+
+### 110: PetAvatar
+
+`src/shared/ui/media/PetAvatar/`: PetAvatar.tsx (SVGs inline), index.ts (API), PetAvatar.test.tsx, PetAvatar.stories.tsx e ARTWORK-LICENSE.md. Sem pasta de assets: geometria compartilhada em SVG inline. Spec: `specs/110-avatar-do-pet/{requirements,design,tasks,validation}.md`.

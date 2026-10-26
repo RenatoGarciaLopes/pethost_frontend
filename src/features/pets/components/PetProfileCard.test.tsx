@@ -16,7 +16,7 @@ it("REQ-PNEW-013 carteirinha só mostra respostas conhecidas e foto decorativa",
   expect(screen.getByRole("article", { name: "Carteirinha de Mel" })).toHaveTextContent("Gato");
   expect(screen.queryByText("Saúde")).not.toBeInTheDocument();
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
-  expect(screen.getByRole("presentation")).toHaveAttribute("alt", "");
+  expect(screen.getByRole("presentation", { hidden: true })).toHaveAttribute("alt", "");
 });
 it("REQ-PNEW-013/015 convivência não é escondida quando a resposta é Não e edição indica o passo", async () => {
   const edit = vi.fn();

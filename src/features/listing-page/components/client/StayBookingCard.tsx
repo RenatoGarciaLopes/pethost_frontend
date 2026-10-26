@@ -1,6 +1,8 @@
 "use client";
 
-import { Avatar, Box, Button, ButtonBase, Link as MuiLink, Stack, Typography } from "@mui/material";
+import { PetAvatar } from "@/shared/ui/media/PetAvatar";
+
+import { Box, Button, ButtonBase, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -8,7 +10,6 @@ import { loginRedirectPath, switchAccountPath } from "@/shared/config/appRoutes"
 import { earliestRequestCheckIn, nightsBetween, validateRequestStay } from "@/shared/lib/date/stayRules";
 import { formatBRL } from "@/shared/lib/money";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
-import { PawMark } from "@/shared/ui/brand/PawMark";
 import { DateRangeField } from "@/shared/ui/forms/DateRangeField";
 import { listingClosedDays, type ListingClosedPeriod } from "../../lib/listingClosedDays";
 import { stayTotal } from "../../lib/stayTotal";
@@ -17,6 +18,7 @@ import { NightlyPrice } from "../NightlyPrice";
 
 /** Pet ativo do tutor, como aparece na pílula de "Quem vai se hospedar". */
 export interface StayBookingPet {
+  species?: string | null;
   id: string;
   name: string;
   coverUrl: string | null;
@@ -221,9 +223,7 @@ function PetPill({ pet, selected, onToggle }: { pet: StayBookingPet; selected: b
         bgcolor: selected ? "quintal.luz" : "transparent",
       }}
     >
-      <Avatar src={pet.coverUrl ?? undefined} alt="" sx={{ width: 30, height: 30, bgcolor: "background.paper" }}>
-        <PawMark size={16} />
-      </Avatar>
+      <PetAvatar aria-hidden="true" petId={pet.id} name={pet.name} species={pet.species} src={pet.coverUrl} size={30} />
       {pet.name}
       {selected && <span aria-hidden> ✓</span>}
     </ButtonBase>

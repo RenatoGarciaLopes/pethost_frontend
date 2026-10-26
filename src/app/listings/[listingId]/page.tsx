@@ -95,7 +95,7 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
                   to: query.to,
                   petIds: selectedPets.map((pet) => pet.id),
                   count: query.count,
-                  pets: activePets.map(({ id, name, coverUrl }) => ({ id, name, coverUrl })),
+                  pets: activePets.map(({ id, name, species, coverUrl }) => ({ id, name, species, coverUrl })),
                   closedPeriods,
                 }
               : undefined

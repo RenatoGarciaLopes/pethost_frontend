@@ -1,6 +1,8 @@
 "use client";
 
-import { Avatar, Box, ButtonBase, Checkbox, FormHelperText, Typography } from "@mui/material";
+import { PetAvatar } from "@/shared/ui/media/PetAvatar";
+
+import { Box, ButtonBase, Checkbox, FormHelperText, Typography } from "@mui/material";
 import { useId } from "react";
 import { focusRing, keyboardFocus } from "@/shared/theme/focus";
 import { quintalColors as c } from "@/shared/theme/tokens/colors";
@@ -90,13 +92,14 @@ export function PetPickCards({ label, pets, value, onChange, error, disabled = f
                 onChange={(event) => toggle(pet.id, event.target.checked)}
                 sx={{ p: 0 }}
               />
-              <Avatar
-                src={pet.coverUrl ?? undefined}
-                alt=""
-                sx={{ width: 48, height: 48, bgcolor: c.gema, color: c.tinta }}
-              >
-                {pet.name.slice(0, 1).toUpperCase()}
-              </Avatar>
+              <PetAvatar
+                aria-hidden="true"
+                petId={pet.id}
+                name={pet.name}
+                species={pet.species}
+                src={pet.coverUrl}
+                size={48}
+              />
               <Box sx={{ minWidth: 0 }}>
                 <Typography component="span" sx={{ display: "block", fontWeight: 800 }}>
                   {pet.name}

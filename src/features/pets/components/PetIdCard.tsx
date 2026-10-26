@@ -1,7 +1,7 @@
-import { Avatar, Box, Typography } from "@mui/material";
+import { PetAvatar } from "@/shared/ui/media/PetAvatar";
+import { Box, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
-import { PawMark } from "@/shared/ui/brand/PawMark";
 import { Surface } from "@/shared/ui/layout/Surface";
 import { describePet } from "../lib/describePet";
 import { petPath } from "../lib/petPaths";
@@ -15,7 +15,7 @@ export interface PetIdCardProps {
 }
 
 /**
- * Carteirinha compacta do pet (REQ-PETS-001, 002): foto de capa redonda (ou patinha), nome e o resumo de
+ * Carteirinha compacta do pet (REQ-PETS-001, 002): foto de capa redonda (ou avatar da espécie), nome e o resumo de
  * `describePet`. A carteirinha inteira é um link para a ficha, sem controle dentro. O nome acessível é o próprio
  * texto da carteirinha, começando por "Ficha de {nome}" (o "Ficha de" fica só para o leitor de tela): quem usa
  * comando de voz fala o que vê, e o título segue a hierarquia da página. Sem hooks: renderiza no servidor e no navegador.
@@ -37,13 +37,14 @@ export function PetIdCard({ pet, now }: PetIdCardProps) {
         }}
       >
         {/* A foto é decorativa: o nome já está no texto (alt vazio). */}
-        <Avatar
-          src={pet.coverUrl ?? undefined}
-          alt=""
-          sx={{ width: 64, height: 64, flexShrink: 0, bgcolor: "quintal.cartao", color: "text.secondary" }}
-        >
-          <PawMark size={32} />
-        </Avatar>
+        <PetAvatar
+          aria-hidden="true"
+          petId={pet.id}
+          name={pet.name}
+          species={pet.species}
+          src={pet.coverUrl}
+          size={64}
+        />
         <Box sx={{ minWidth: 0 }}>
           <Typography component="h2" variant="h3" sx={{ fontSize: 20 }}>
             <Box component="span" sx={visuallyHidden}>
