@@ -1,5 +1,21 @@
 # Estrutura real do frontend
 
+## Caixa de entrada persistente
+
+```text
+src/app/(account)/conversations/
+  layout.tsx                    sessão e casca persistente
+  page.tsx                      índice: convite fornecido pela casca
+  [conversationId]/page.tsx      detalhe com Suspense só no painel
+  [conversationId]/loading.tsx   fallback do painel
+src/widgets/conversation-panel/components/
+  client/ConversationsShell.tsx  seleção da rota e ConversationLoading
+  client/ConversationsShell.test.tsx  preservação da lista durante Suspense
+  server/ConversationsScreen/    lista hidratada e ConversationContent isolado
+```
+
+Responsabilidades e interfaces em `development/resources/conversations-layout.md` no vault.
+
 ## Conversa na reserva (105)
 
 R1: `src/features/conversations/components/client/UnreadBadge.tsx` concentra o selo antes privado de ConversationList, público por `index.client.ts` e reutilizado no widget. `conversationsCopy.booking` reúne os textos no arquivo de copy existente. Sem nova pasta técnica.

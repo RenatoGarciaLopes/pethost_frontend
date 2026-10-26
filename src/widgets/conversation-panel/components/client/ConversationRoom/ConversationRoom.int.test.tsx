@@ -51,7 +51,9 @@ describe("ConversationRoom", () => {
   it("REQ-CHAT-004 abre a conversa da API com as mensagens e a estadia, e marca como lidas", async () => {
     const reads = api();
     setup();
+    expect(screen.getByRole("status")).toHaveTextContent("Abrindo a conversa");
     expect(await screen.findByRole("region", { name: "Dona Cida" })).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(
       screen.getByText("Hoje tem jogo e vai ter rojão. Já separei a toalha dela no banheiro."),
     ).toBeInTheDocument();

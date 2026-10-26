@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton } from "@mui/material";
+import { ConversationLoading } from "../ConversationsShell";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import {
@@ -49,8 +49,7 @@ export function ConversationRoom({ accountId, viewer, conversationId, stay }: Co
     if (newestIncomingId) markRead();
   }, [newestIncomingId, markRead]);
 
-  if (detail.isPending || messages.isPending)
-    return <Skeleton variant="rounded" height="100%" aria-label={conversationsCopy.loadingConversation} />;
+  if (detail.isPending || messages.isPending) return <ConversationLoading />;
   if (detail.isError || messages.isError)
     return (
       <ErrorState

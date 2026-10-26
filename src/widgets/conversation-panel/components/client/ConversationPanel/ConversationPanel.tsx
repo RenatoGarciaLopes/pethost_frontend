@@ -84,7 +84,7 @@ export function ConversationPanel({
         height: "100%",
         minHeight: 0,
         overflow: "hidden",
-        bgcolor: "background.default",
+        bgcolor: "background.paper",
         // No celular a conversa é a tela inteira: sem contorno, canto ou sombra.
         borderWidth: { xs: 0, md: 2 },
         borderRadius: { xs: 0, md: `${quintalRadii.card}px` },

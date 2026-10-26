@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, within } from "storybook/test";
 import { ConversationList } from "@/features/conversations/index.client";
 import { previewConversations } from "@/test/conversationsPreview";
+import { ConversationLoading } from "../../client/ConversationsShell";
 import { ConversationsLayout } from "./ConversationsLayout";
 
 /** Caixas no lugar da lista e da conversa: mostra só a distribuição da página. */
@@ -30,6 +31,21 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Computador: Story = { name: "Lista e conversa lado a lado" };
+export const CarregandoConversa: Story = {
+  name: "Carregamento apenas no painel",
+  args: { panel: <ConversationLoading /> },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const sidebar = canvas.getByRole("region", { name: "Suas conversas" });
+    const loading = canvas.getByRole("status");
+    await expect(sidebar).toBeVisible();
+    await expect(loading).toHaveTextContent("Abrindo a conversa");
+    await expect(getComputedStyle(loading.parentElement!).backgroundColor).toBe(
+      getComputedStyle(sidebar).backgroundColor,
+    );
+    await expect(loading.getBoundingClientRect().left).toBeGreaterThan(sidebar.getBoundingClientRect().right);
+  },
+};
 export const SemConversaAberta: Story = {
   name: "Nenhuma conversa aberta",
   args: { panel: undefined, focus: "list" },

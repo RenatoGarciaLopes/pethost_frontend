@@ -4,7 +4,7 @@ import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { previewConversation, previewMessages } from "@/test/conversationsPreview";
 import { CIDA_CONVERSATION_ID } from "@/test/fixtures/conversations";
 import { renderWithProviders } from "@/test/render";
-import { ConversationsScreen } from "./ConversationsScreen";
+import { ConversationContent, ConversationsScreen } from "./ConversationsScreen";
 
 const server = vi.hoisted(() => ({
   getConversation: vi.fn(),
@@ -20,12 +20,17 @@ vi.mock("@/features/conversations/index.server", () => ({
 }));
 vi.mock("@/features/bookings/index.server", () => ({ getBookingDetail: server.getBookingDetail }));
 // As ilhas têm testes próprios; aqui só importa o que o servidor entrega a elas.
-vi.mock("@/features/conversations/index.client", () => ({
-  MyConversations: ({ selectedId }: { selectedId?: string }) => <p>lista {selectedId ?? "sem seleção"}</p>,
-}));
 vi.mock("../../client/ConversationRoom", () => ({
   ConversationRoom: ({ stay }: { stay: { listingTitle: string } | null }) => (
     <p>sala {stay ? stay.listingTitle : "sem estadia"}</p>
+  ),
+}));
+vi.mock("../../client/ConversationsShell", () => ({
+  ConversationsShell: ({ children }: { children: import("react").ReactNode }) => (
+    <>
+      <p>lista persistente</p>
+      {children}
+    </>
   ),
 }));
 
@@ -48,17 +53,19 @@ describe("ConversationsScreen", () => {
   });
 
   it("REQ-CHAT-001 sem conversa aberta, só a lista e nada de conversa", async () => {
-    renderWithProviders(await ConversationsScreen({ accountId: "a1", viewer: "owner" }), { theme: quintalTheme });
-    expect(screen.getByText("lista sem seleção")).toBeInTheDocument();
+    renderWithProviders(await ConversationsScreen({ accountId: "a1", viewer: "owner", children: null }), {
+      theme: quintalTheme,
+    });
+    expect(screen.getByText("lista persistente")).toBeInTheDocument();
     expect(server.getConversation).not.toHaveBeenCalled();
   });
 
   it("REQ-CHAT-011 conversa aberta: busca a estadia pela mensagem mais recente com reserva", async () => {
     renderWithProviders(
-      await ConversationsScreen({ accountId: "a1", viewer: "owner", conversationId: CIDA_CONVERSATION_ID }),
+      await ConversationContent({ accountId: "a1", viewer: "owner", conversationId: CIDA_CONVERSATION_ID }),
       { theme: quintalTheme },
     );
-    expect(screen.getByText(`lista ${CIDA_CONVERSATION_ID}`)).toBeInTheDocument();
+    expect(server.prefetchMyConversations).not.toHaveBeenCalled();
     expect(screen.getByText("sala Casa da Cida")).toBeInTheDocument();
     expect(server.getBookingDetail).toHaveBeenCalledWith("a1", previewMessages()[0]?.bookingId);
   });
@@ -66,7 +73,7 @@ describe("ConversationsScreen", () => {
   it("REQ-CHAT-011 reserva que não abre deixa a conversa sem estadia, sem derrubar a página", async () => {
     server.getBookingDetail.mockRejectedValue(new Error("404"));
     renderWithProviders(
-      await ConversationsScreen({ accountId: "a1", viewer: "owner", conversationId: CIDA_CONVERSATION_ID }),
+      await ConversationContent({ accountId: "a1", viewer: "owner", conversationId: CIDA_CONVERSATION_ID }),
       { theme: quintalTheme },
     );
     expect(screen.getByText("sala sem estadia")).toBeInTheDocument();

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, within } from "storybook/test";
 import { previewConversation, previewMessages, usePreviewMessages } from "@/test/conversationsPreview";
 import { CONVERSATIONS_NOW, previewStay } from "@/test/fixtures/conversations";
 import { ConversationPanel } from "./ConversationPanel";
@@ -41,7 +42,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const EstadiaAcontecendo: Story = { name: "REQ-CHAT-011 Com a estadia acontecendo" };
-export const SemEstadia: Story = { name: "Sem estadia (conversa antes de pedir)", args: { withStay: false } };
+export const SemEstadia: Story = {
+  name: "Sem estadia (conversa antes de pedir)",
+  args: { withStay: false },
+  play: async ({ canvasElement }) => {
+    const panel = within(canvasElement).getByRole("region", { name: "Dona Cida" });
+    await expect(getComputedStyle(panel).backgroundColor).toBe("rgb(255, 255, 255)");
+  },
+};
 export const BloqueadaPorMim: Story = {
   name: "REQ-CHAT-010 Bloqueada por quem vê",
   args: { overrides: { blocked: true, blockedByMe: true } },
