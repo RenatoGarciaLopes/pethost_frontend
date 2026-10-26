@@ -174,6 +174,31 @@ describe("vagas de foto", () => {
 describe("vagas de foto com reordenação", () => {
   const saved = (n: number) => `https://fotos.test/casa-${n}.jpg`;
 
+  it("106 r1 troca e remoção ficam no menu sem disputar a linha da foto", async () => {
+    const onReplace = vi.fn();
+    const onRemove = vi.fn();
+    const { user } = renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={[saved(1), saved(2), null]}
+        onPick={vi.fn()}
+        onReplace={onReplace}
+        onRemove={onRemove}
+        onMove={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.queryByRole("button", { name: "Tirar foto 2" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Opções da foto 2" }));
+    await user.click(screen.getByRole("menuitem", { name: "Trocar foto 2" }));
+    const file = photo("nova.jpg");
+    await user.upload(screen.getByLabelText("Trocar foto 2"), file);
+    expect(onReplace).toHaveBeenCalledWith(1, file);
+    await user.click(screen.getByRole("button", { name: "Opções da foto 2" }));
+    await user.click(screen.getByRole("menuitem", { name: "Tirar foto 2" }));
+    expect(onRemove).toHaveBeenCalledExactlyOnceWith(1);
+  });
+
   it("REQ-LIST-014 com onMove, cada foto ganha capa e mover por botão (nunca só arrastar)", async () => {
     const onMove = vi.fn();
     const { user } = renderWithProviders(
@@ -186,15 +211,14 @@ describe("vagas de foto com reordenação", () => {
       />,
       { theme: quintalTheme },
     );
-    expect(screen.queryByRole("button", { name: "Usar como capa: foto 1" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Mover a foto 1 para cima" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Mover a foto 3 para baixo" })).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Usar como capa: foto 3" }));
+    await user.click(screen.getByRole("button", { name: "Opções da foto 3" }));
+    expect(screen.queryByRole("menuitem", { name: "Mover para depois" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("menuitem", { name: "Usar como capa" }));
     expect(onMove).toHaveBeenLastCalledWith(2, 0);
-    await user.click(screen.getByRole("button", { name: "Mover a foto 2 para cima" }));
-    expect(onMove).toHaveBeenLastCalledWith(1, 0);
-    await user.click(screen.getByRole("button", { name: "Mover a foto 1 para baixo" }));
+    await user.click(screen.getByRole("button", { name: "Opções da foto 1" }));
+    expect(screen.queryByRole("menuitem", { name: "Usar como capa" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Mover para antes" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("menuitem", { name: "Mover para depois" }));
     expect(onMove).toHaveBeenLastCalledWith(0, 1);
   });
 
@@ -205,5 +229,39 @@ describe("vagas de foto com reordenação", () => {
     );
     expect(screen.getByLabelText("Adicionar foto 5")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /como capa|Mover a foto/ })).not.toBeInTheDocument();
+  });
+  it.each([true, false])("envio ou disabled bloqueia sensores (%s)", (uploading) => {
+    renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={[saved(1), null]}
+        uploadingIndex={uploading ? 0 : null}
+        disabled={!uploading}
+        onPick={vi.fn()}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.queryByRole("button", { name: /Arrastar/ })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Adicionar foto 2")).toBeDisabled();
+  });
+  it("vagas vazias não são alvos; Escape cancela sem chamar onMove", async () => {
+    const onMove = vi.fn();
+    const { user } = renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={[saved(1), saved(2), null]}
+        onPick={vi.fn()}
+        onRemove={vi.fn()}
+        onMove={onMove}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.getAllByRole("button", { name: /Arrastar foto/ })).toHaveLength(2);
+    screen.getByRole("button", { name: "Arrastar foto 2" }).focus();
+    await user.keyboard("[Space][Escape]");
+    expect(onMove).not.toHaveBeenCalled();
+    expect(screen.getByRole("status")).toHaveTextContent("Arraste cancelado");
   });
 });

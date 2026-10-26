@@ -11,8 +11,7 @@ import type { Listing } from "../../types";
 const copy = listingCopy.photos;
 
 /**
- * "Fotos da casa" (REQ-LIST-014): até 5 vagas com as fotos salvas; pôr (no fim), trocar, tirar e reordenar ("Usar
- * como capa" e mover por botão), direto na API, uma operação por vez; a primeira é a capa. Sugestões do que fotografar.
+ * "Fotos da casa" (REQ-LIST-014): até 5 vagas com as fotos salvas; pôr (no fim), trocar, tirar e reordenar (arraste, teclado e menu da foto), direto na API, uma operação por vez; a primeira é a capa. Sugestões do que fotografar.
  *
  * @example <ListingPhotosSection accountId={user.id} listing={listing} />
  */

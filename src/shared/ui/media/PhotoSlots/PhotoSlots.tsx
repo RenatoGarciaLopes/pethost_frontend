@@ -1,9 +1,33 @@
 "use client";
 
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from "@dnd-kit/core";
+import { SortableContext, useSortable, rectSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { SPRING_ASSENTAR } from "@/shared/theme/tokens/springs";
+import { hardShadow } from "@/shared/theme/tokens/shadows";
 import { keyboardFocus } from "@/shared/theme/focus";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
-import { Box, Button, CircularProgress, FormHelperText, Stack, Typography } from "@mui/material";
-import { useId, useState, type ChangeEvent } from "react";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  FormHelperText,
+  Stack,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+  useMediaQuery,
+} from "@mui/material";
+import { useId, useRef, useState, type ChangeEvent } from "react";
 import { useObjectUrl } from "../../../hooks/useObjectUrl";
 import { validateImageFile } from "../../../lib/files/validateImageFile";
 import { visuallyHidden } from "../../a11y/visuallyHidden";
@@ -34,8 +58,8 @@ export interface PhotoSlotsProps {
   onReplace?: (index: number, file: File) => void;
   onRemove: (index: number) => void;
   /**
-   * Reordenar (spec 044, REQ-LIST-014): se vier, cada foto ganha "Usar como capa" e "Mover a foto N para cima/baixo",
-   * por botão (nunca só arrastando). Recebe a posição de origem e a de destino.
+   * Reordena arrastando, com teclado ou menu (106). Recebe índices base zero uma vez ao soltar.
+   * Cancelar não chama. Envio, disabled e vagas vazias não permitem arraste.
    */
   onMove?: (from: number, to: number) => void;
   disabled?: boolean;
@@ -61,6 +85,24 @@ export function PhotoSlots({
   onMove,
   disabled = false,
 }: PhotoSlotsProps) {
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const filled = files.flatMap((file, index) => (file === null ? [] : [index]));
+  const locked = disabled || uploadingIndex !== null;
+  // Mantém o destino durante a gravação; ao encerrar, descarta também a prévia de uma operação que falhou.
+  const [pending, setPending] = useState<{
+    source: PhotoSlotsProps["files"];
+    order: PhotoSlotsProps["files"];
+    saving?: boolean;
+  } | null>(null);
+  if (pending && uploadingIndex !== null && !pending.saving) setPending({ ...pending, saving: true });
+  if (pending?.saving && uploadingIndex === null) setPending(null);
+  const visibleFiles =
+    uploadingIndex !== null && pending && pending.source.every((file, i) => file === files[i]) ? pending.order : files;
+  const [overIndex, setOverIndex] = useState<number | null>(null);
   const lastFilled = files.findLastIndex((file) => file !== null);
   const [invalid, setInvalid] = useState<readonly boolean[]>(() => files.map(() => false));
 
@@ -78,49 +120,76 @@ export function PhotoSlots({
   }
 
   return (
-    <Box
-      role="group"
-      aria-label={label}
-      sx={{
-        display: "grid",
-        gap: 2,
-        gridTemplateColumns: {
-          xs: "repeat(3, minmax(0, 1fr))",
-          sm: `repeat(${Math.min(files.length, MAX_COLUMNS)}, 120px)`,
-        },
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      accessibility={{
+        announcements: copy.announcements(filled.length),
+        screenReaderInstructions: { draggable: copy.instructions },
+      }}
+      onDragOver={({ over }) => setOverIndex(over ? Number(over.id) : null)}
+      onDragCancel={() => setOverIndex(null)}
+      onDragEnd={({ active, over }) => {
+        setOverIndex(null);
+        if (!locked && onMove && over && active.id !== over.id) {
+          const order = [...files];
+          const [moved] = order.splice(Number(active.id), 1);
+          order.splice(Number(over.id), 0, moved);
+          setPending({ source: files, order });
+          onMove(Number(active.id), Number(over.id));
+        }
       }}
     >
-      {files.map((file, index) => (
-        <Slot
-          key={index}
-          index={index}
-          file={file}
-          error={invalid[index] ? copy.invalid : (errors[index] ?? null)}
-          uploading={uploadingIndex === index}
-          disabled={disabled || uploadingIndex !== null}
-          onPick={deliverChecked(index, onPick)}
-          onReplace={onReplace && deliverChecked(index, onReplace)}
-          onRemove={() => {
-            markInvalid(index, false);
-            onRemove(index);
+      <SortableContext items={filled} strategy={rectSortingStrategy}>
+        <Box
+          role="group"
+          aria-label={label}
+          sx={{
+            display: "grid",
+            gap: 2,
+            gridTemplateColumns: {
+              xs: "repeat(3, minmax(0, 1fr))",
+              sm: `repeat(${Math.min(files.length, MAX_COLUMNS)}, 120px)`,
+            },
           }}
-          moves={
-            onMove && file !== null
-              ? {
-                  cover: index > 0 ? () => onMove(index, 0) : undefined,
-                  up: index > 0 ? () => onMove(index, index - 1) : undefined,
-                  down: index < lastFilled ? () => onMove(index, index + 1) : undefined,
-                }
-              : undefined
-          }
-        />
-      ))}
-    </Box>
+        >
+          {visibleFiles.map((file, index) => (
+            <Slot
+              key={index}
+              index={index}
+              destination={overIndex === index}
+              sortable={Boolean(onMove && file !== null && !locked)}
+              file={file}
+              error={invalid[index] ? copy.invalid : (errors[index] ?? null)}
+              uploading={uploadingIndex === index}
+              disabled={disabled || uploadingIndex !== null}
+              onPick={deliverChecked(index, onPick)}
+              onReplace={onReplace && deliverChecked(index, onReplace)}
+              onRemove={() => {
+                markInvalid(index, false);
+                onRemove(index);
+              }}
+              moves={
+                onMove && file !== null
+                  ? {
+                      cover: index > 0 ? () => onMove(index, 0) : undefined,
+                      up: index > 0 ? () => onMove(index, index - 1) : undefined,
+                      down: index < lastFilled ? () => onMove(index, index + 1) : undefined,
+                    }
+                  : undefined
+              }
+            />
+          ))}
+        </Box>
+      </SortableContext>
+    </DndContext>
   );
 }
 
 interface SlotProps {
   index: number;
+  sortable: boolean;
+  destination: boolean;
   file: File | string | null;
   error: string | null;
   uploading: boolean;
@@ -132,7 +201,28 @@ interface SlotProps {
   moves?: { cover?: () => void; up?: () => void; down?: () => void };
 }
 
-function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRemove, moves }: SlotProps) {
+/** Vaga interna: sensor na foto, ações fora do alvo e menu por posição. */
+function Slot({
+  index,
+  sortable,
+  destination,
+  file,
+  error,
+  uploading,
+  disabled,
+  onPick,
+  onReplace,
+  onRemove,
+  moves,
+}: SlotProps) {
+  const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: index,
+    disabled: !sortable,
+    transition: { duration: reduced ? 0 : SPRING_ASSENTAR.duration, easing: SPRING_ASSENTAR.easing },
+  });
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const replaceInput = useRef<HTMLInputElement>(null);
   const id = useId();
   const objectUrl = useObjectUrl(file instanceof File ? file : null);
   const preview = typeof file === "string" ? file : objectUrl;
@@ -155,146 +245,308 @@ function Slot({ index, file, error, uploading, disabled, onPick, onReplace, onRe
   }
 
   return (
-    <Stack spacing={0.75} sx={{ minWidth: 0 }}>
-      <Box
-        sx={{
-          position: "relative",
-          aspectRatio: "1",
-          borderRadius: `${quintalRadii.card}px`,
-          border: 2,
-          borderStyle: preview ? "solid" : "dashed",
-          borderColor: error ? "error.main" : "divider",
-          overflow: "hidden",
-          display: "grid",
-          placeItems: "center",
-          bgcolor: "background.paper",
-          [keyboardFocus("&:has(input:focus-visible)")]: {
-            outline: "2px solid",
-            outlineColor: "text.primary",
-            outlineOffset: 3,
-          },
-        }}
-        aria-busy={uploading || undefined}
-      >
-        {index === 0 && (
-          <Typography
-            component="span"
-            variant="caption"
-            sx={{
-              position: "absolute",
-              top: 6,
-              left: 6,
-              px: 1,
-              borderRadius: `${quintalRadii.control}px`,
-              bgcolor: "quintal.gema",
-              fontWeight: 700,
-              zIndex: 1,
-            }}
-          >
-            {copy.cover}
-          </Typography>
-        )}
-        {preview ? (
-          <Box
-            component="img"
-            src={preview}
-            alt={typeof file === "string" ? copy.saved(number) : copy.preview(number)}
-            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <>
-            <Box
-              component="label"
-              htmlFor={id}
-              sx={{ px: 1, textAlign: "center", fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer" }}
-            >
-              {copy.add(number)}
-            </Box>
-            <Box
-              component="input"
-              id={id}
-              {...fileInputProps(onPick)}
-              sx={{
-                position: "absolute",
-                inset: 0,
-                opacity: 0,
-                width: "100%",
-                height: "100%",
-                cursor: disabled ? "not-allowed" : "pointer",
-              }}
-            />
-          </>
-        )}
-        {uploading && (
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              display: "grid",
-              placeItems: "center",
-              bgcolor: "rgba(255,255,255,0.6)",
-            }}
-          >
-            <CircularProgress size={28} aria-label={copy.uploading} />
-          </Box>
-        )}
-      </Box>
-      {preview && onReplace && (
+    <Box sx={{ position: "relative", minWidth: 0 }}>
+      {destination && !isDragging && (
         <Box
-          component="label"
+          aria-hidden="true"
           sx={{
-            minHeight: 48,
+            position: "absolute",
+            inset: 0,
+            border: "2px dashed",
+            borderColor: "text.primary",
+            borderRadius: `${quintalRadii.card}px`,
+          }}
+        />
+      )}
+      <Stack
+        ref={setNodeRef}
+        spacing={0.75}
+        style={{ transform: CSS.Transform.toString(transform), transition: reduced ? undefined : transition }}
+        sx={{
+          minWidth: 0,
+          position: "relative",
+          zIndex: isDragging ? 2 : 0,
+        }}
+      >
+        <Box
+          ref={setActivatorNodeRef}
+          {...(sortable ? attributes : {})}
+          {...(sortable ? listeners : {})}
+          aria-label={sortable ? `${copy.drag(number)}${index === 0 ? `, ${copy.cover}` : ""}` : undefined}
+          sx={{
+            cursor: sortable ? (isDragging ? "grabbing" : "grab") : undefined,
+            touchAction: sortable ? "pan-y" : undefined,
+            boxShadow: isDragging ? hardShadow(8) : undefined,
+            transform: isDragging && !reduced ? "rotate(1.5deg)" : undefined,
+            transition: reduced ? "none" : `transform ${SPRING_ASSENTAR.duration}ms ${SPRING_ASSENTAR.easing}`,
+            "&:hover .photo-grip, &:focus-visible .photo-grip": { opacity: 1 },
+            [keyboardFocus("&:focus-visible")]: { outline: "2px solid", outlineOffset: 3 },
+            position: "relative",
+            aspectRatio: "1",
+            borderRadius: `${quintalRadii.card}px`,
+            border: 2,
+            borderStyle: preview ? "solid" : "dashed",
+            borderColor: error ? "error.main" : "divider",
+            overflow: "hidden",
             display: "grid",
             placeItems: "center",
-            borderRadius: `${quintalRadii.control}px`,
-            fontWeight: 700,
-            fontSize: "0.8125rem",
-            textAlign: "center",
-            color: disabled ? "text.disabled" : "text.primary",
-            cursor: disabled ? "not-allowed" : "pointer",
+            bgcolor: "background.paper",
             [keyboardFocus("&:has(input:focus-visible)")]: {
               outline: "2px solid",
               outlineColor: "text.primary",
-              outlineOffset: 2,
+              outlineOffset: 3,
             },
           }}
+          aria-busy={uploading || undefined}
         >
-          {copy.replace(number)}
-          <Box component="input" {...fileInputProps(onReplace)} sx={visuallyHidden} />
-        </Box>
-      )}
-      {preview && (
-        <Button size="small" variant="text" onClick={onRemove} disabled={disabled} sx={{ minHeight: 48 }}>
-          {copy.remove(number)}
-        </Button>
-      )}
-      {preview && moves && (
-        <Stack spacing={0.25}>
-          {moves.cover && (
-            <Button size="small" variant="text" onClick={moves.cover} disabled={disabled}>
-              {copy.makeCover}
-              <Box component="span" sx={visuallyHidden}>
-                {copy.makeCoverOf(number)}
+          {sortable && (
+            <Box
+              component="span"
+              className="photo-grip"
+              aria-hidden="true"
+              sx={{
+                position: "absolute",
+                right: 6,
+                top: 6,
+                zIndex: 1,
+                bgcolor: "background.paper",
+                borderRadius: `${quintalRadii.control}px`,
+                px: 0.5,
+                opacity: 0,
+                "@media (hover: none)": { opacity: 1 },
+              }}
+            >
+              ⠿
+            </Box>
+          )}
+          {index === 0 && (
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{
+                position: "absolute",
+                top: 6,
+                left: 6,
+                px: 1,
+                borderRadius: `${quintalRadii.control}px`,
+                bgcolor: "quintal.gema",
+                fontWeight: 700,
+                zIndex: 1,
+              }}
+            >
+              {copy.cover}
+            </Typography>
+          )}
+          {preview ? (
+            <Box
+              component="img"
+              src={preview}
+              alt={typeof file === "string" ? copy.saved(number) : copy.preview(number)}
+              sx={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+              draggable={false}
+            />
+          ) : (
+            <>
+              <Box
+                component="label"
+                htmlFor={id}
+                sx={{ px: 1, textAlign: "center", fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer" }}
+              >
+                {copy.add(number)}
               </Box>
+              <Box
+                component="input"
+                id={id}
+                {...fileInputProps(onPick)}
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  opacity: 0,
+                  width: "100%",
+                  height: "100%",
+                  cursor: disabled ? "not-allowed" : "pointer",
+                }}
+              />
+            </>
+          )}
+          {uploading && (
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                display: "grid",
+                placeItems: "center",
+                bgcolor: "rgba(255,255,255,0.6)",
+              }}
+            >
+              <CircularProgress size={28} aria-label={copy.uploading} />
+            </Box>
+          )}
+        </Box>
+        <Stack
+          direction="row"
+          sx={{ minHeight: 48, alignItems: "center", justifyContent: "center", gap: 1, flexWrap: "wrap" }}
+        >
+          {preview && onReplace && !moves && (
+            <Box
+              component="label"
+              sx={{
+                minHeight: 48,
+                minWidth: 44,
+                px: 1,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: `${quintalRadii.control}px`,
+                fontWeight: 700,
+                fontSize: "0.875rem",
+                textAlign: "center",
+                color: disabled ? "text.disabled" : "text.primary",
+                cursor: disabled ? "not-allowed" : "pointer",
+                [keyboardFocus("&:has(input:focus-visible)")]: {
+                  outline: "2px solid",
+                  outlineColor: "text.primary",
+                  outlineOffset: 2,
+                },
+              }}
+            >
+              <Box component="span" sx={visuallyHidden}>
+                {copy.replace(number)}
+              </Box>
+              <span aria-hidden="true">{copy.replaceShort}</span>
+              <Box
+                component="input"
+                aria-label={copy.replace(number)}
+                {...fileInputProps(onReplace)}
+                sx={visuallyHidden}
+              />
+            </Box>
+          )}
+          {preview && !moves && (
+            <Button
+              size="small"
+              variant="quiet"
+              onClick={onRemove}
+              disabled={disabled}
+              sx={{ minHeight: 48, minWidth: 44, px: 1, fontSize: "0.875rem", fontWeight: 700, color: "text.primary" }}
+            >
+              <Box component="span" sx={visuallyHidden}>
+                {copy.remove(number)}
+              </Box>
+              <span aria-hidden="true">{copy.removeShort}</span>
             </Button>
           )}
-          {moves.up && (
-            <Button size="small" variant="text" onClick={moves.up} disabled={disabled}>
-              {copy.moveUp(number)}
-            </Button>
-          )}
-          {moves.down && (
-            <Button size="small" variant="text" onClick={moves.down} disabled={disabled}>
-              {copy.moveDown(number)}
-            </Button>
+          {preview && moves && (
+            <>
+              <IconButton
+                sx={{
+                  p: 1,
+                  minHeight: 44,
+                  minWidth: 44,
+                  fontSize: "0.9375rem",
+                  fontWeight: 700,
+                  color: "text.primary",
+                }}
+                aria-label={copy.options(number)}
+                aria-haspopup="menu"
+                aria-expanded={Boolean(anchor)}
+                aria-controls={anchor ? `${id}-menu` : undefined}
+                disabled={disabled}
+                onClick={(event) => setAnchor(event.currentTarget)}
+              >
+                ⋯
+              </IconButton>
+              <Menu
+                id={`${id}-menu`}
+                anchorEl={anchor}
+                open={Boolean(anchor) && !disabled}
+                onClose={() => setAnchor(null)}
+                slotProps={{
+                  list: {
+                    sx: {
+                      "& .MuiMenuItem-root": {
+                        minWidth: 44,
+                        minHeight: 44,
+                        px: 2,
+                        py: 1,
+                        my: 0.5,
+                        fontSize: "0.875rem",
+                        fontWeight: 700,
+                        color: "text.primary",
+                      },
+                    },
+                  },
+                }}
+              >
+                {onReplace && (
+                  <MenuItem
+                    aria-label={copy.replace(number)}
+                    onClick={() => {
+                      setAnchor(null);
+                      replaceInput.current?.click();
+                    }}
+                  >
+                    {copy.replaceShort}
+                  </MenuItem>
+                )}
+                <MenuItem
+                  aria-label={copy.remove(number)}
+                  onClick={() => {
+                    setAnchor(null);
+                    onRemove();
+                  }}
+                >
+                  {copy.removeShort}
+                </MenuItem>
+                {moves.cover && (
+                  <MenuItem
+                    onClick={() => {
+                      setAnchor(null);
+                      moves.cover?.();
+                    }}
+                  >
+                    {copy.makeCover}
+                  </MenuItem>
+                )}
+                {moves.up && (
+                  <MenuItem
+                    onClick={() => {
+                      setAnchor(null);
+                      moves.up?.();
+                    }}
+                  >
+                    {copy.moveBefore}
+                  </MenuItem>
+                )}
+                {moves.down && (
+                  <MenuItem
+                    onClick={() => {
+                      setAnchor(null);
+                      moves.down?.();
+                    }}
+                  >
+                    {copy.moveAfter}
+                  </MenuItem>
+                )}
+              </Menu>
+              {onReplace && (
+                <Box
+                  component="input"
+                  ref={replaceInput}
+                  aria-label={copy.replace(number)}
+                  tabIndex={-1}
+                  {...fileInputProps(onReplace)}
+                  sx={visuallyHidden}
+                />
+              )}
+            </>
           )}
         </Stack>
-      )}
-      {error && (
-        <FormHelperText id={errorId} role="alert" error sx={{ m: 0 }}>
-          {error}
-        </FormHelperText>
-      )}
-    </Stack>
+        {error && (
+          <FormHelperText id={errorId} role="alert" error sx={{ m: 0 }}>
+            {error}
+          </FormHelperText>
+        )}
+      </Stack>
+    </Box>
   );
 }

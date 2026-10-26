@@ -646,3 +646,7 @@ Saíram `ListingSectionsPanel.tsx` e `sections/{HomeSection,HouseholdSection,Gue
 ### 110: PetAvatar
 
 `src/shared/ui/media/PetAvatar/`: PetAvatar.tsx (SVGs inline), index.ts (API), PetAvatar.test.tsx, PetAvatar.stories.tsx e ARTWORK-LICENSE.md. Sem pasta de assets: geometria compartilhada em SVG inline. Spec: `specs/110-avatar-do-pet/{requirements,design,tasks,validation}.md`.
+
+## Fotos por arraste (106)
+
+PhotoSlots permanece em `src/shared/ui/media/PhotoSlots/`, com componente, copy, index, testes e stories existentes. Novo teste da composição: `src/features/host-listings/components/client/ListingPhotosSection.int.test.tsx`. Spec real `specs/106-fotos-arrastar/{requirements,design,tasks,validation}.md`. Sem nova pasta técnica, store ou provider. Prints são relatórios em test-results/106, fora da árvore autoral.
