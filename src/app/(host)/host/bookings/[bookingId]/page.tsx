@@ -1,3 +1,4 @@
+import { BookingConversation } from "@/widgets/booking-conversation";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -32,6 +33,7 @@ async function HostBookingContent({ params }: HostBookingPageProps) {
   const booking = await getBookingDetail(user.id, bookingId);
   return (
     <HostBookingDetailScreen
+      conversation={<BookingConversation accountId={user.id} bookingId={bookingId} side="host" />}
       accountId={user.id}
       bookingId={bookingId}
       petProfiles={<BookingPetProfiles accountId={user.id} pets={booking.pets} />}

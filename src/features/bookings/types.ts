@@ -36,6 +36,9 @@ export interface BookingContact {
 /** A reserva como as telas usam (specs 050 a 054). Dinheiro em centavos; datas de calendário `yyyy-MM-dd`. */
 export interface Booking {
   id: string;
+  /** Stable API identifiers, available even without display objects. */
+  listingId: string;
+  ownerId: string;
   status: BookingStatus;
   listing: { id: string; title: string; neighborhood: string; city: string } | null;
   owner: BookingPerson | null;

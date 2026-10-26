@@ -66,6 +66,8 @@ function BillRow({ label, value, strong = false }: { label: string; value: strin
 }
 
 export interface HostBookingDetailProps {
+  /** Application-composed chat action beside the other party. */
+  conversation?: ReactNode;
   accountId: string;
   bookingId: string;
   /** A ficha dos pets (widget `booking-pet-profiles`), composta pela página. */
@@ -83,7 +85,7 @@ export interface HostBookingDetailProps {
  *
  * @example <HostBookingDetail accountId={user.id} bookingId={id} petProfiles={<BookingPetProfiles … />} />
  */
-export function HostBookingDetail({ accountId, bookingId, petProfiles, now }: HostBookingDetailProps) {
+export function HostBookingDetail({ accountId, bookingId, petProfiles, now, conversation }: HostBookingDetailProps) {
   const [moment] = useState(() => now ?? new Date());
   const [justConfirmed, setJustConfirmed] = useState(false);
   const answerId = useId();
@@ -139,6 +141,7 @@ export function HostBookingDetail({ accountId, bookingId, petProfiles, now }: Ho
           }
           title={requested ? copy.headline(pets, booking.pets.length > 1, nights) : copy.stayOf(pets)}
         />
+        {conversation}
         {justConfirmed && booking.status === "confirmed" && <Notice tone="ok" title={bookingCopy.accept.done} />}
         {closed && <Notice tone="info" title={closed} />}
         {steps && <StatusTimeline label={copy.trail} steps={steps} />}

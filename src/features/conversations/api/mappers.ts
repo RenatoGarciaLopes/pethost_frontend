@@ -27,6 +27,7 @@ export function toMessage(dto: MessageDto): ConversationMessage {
 export function toConversation(dto: ConversationDto): Conversation {
   return {
     id: dto.id,
+    ownerId: dto.ownerId,
     owner: party(dto.owner),
     host: party(dto.host),
     lastMessage: dto.lastMessage ? toMessage(dto.lastMessage) : null,

@@ -1,3 +1,4 @@
+import { BookingConversation } from "@/widgets/booking-conversation";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -31,5 +32,11 @@ async function OwnerBookingContent({ params }: OwnerBookingPageProps) {
   // Espera a requisição antes de ler a sessão: o prerender não pode tocar o relógio dela.
   await connection();
   const user = await requireRole("owner", `/owner/bookings/${bookingId}`);
-  return <OwnerStayDetailScreen accountId={user.id} bookingId={bookingId} />;
+  return (
+    <OwnerStayDetailScreen
+      conversation={<BookingConversation accountId={user.id} bookingId={bookingId} side="owner" />}
+      accountId={user.id}
+      bookingId={bookingId}
+    />
+  );
 }

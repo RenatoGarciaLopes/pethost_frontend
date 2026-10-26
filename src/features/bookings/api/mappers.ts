@@ -13,6 +13,8 @@ export function toBooking(dto: BookingDto): Booking {
   const { listing, contact } = dto;
   return {
     id: dto.id,
+    listingId: dto.listingId,
+    ownerId: dto.ownerId,
     status: dto.status,
     listing: listing
       ? { id: listing.id, title: listing.title, neighborhood: listing.neighborhood, city: listing.city }

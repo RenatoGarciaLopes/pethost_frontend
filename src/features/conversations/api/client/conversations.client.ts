@@ -1,3 +1,8 @@
+import { unwrapData } from "@/shared/api/contracts/unwrapData";
+import {
+  PostApiV1ConversationsBody,
+  PostApiV1ConversationsResponse,
+} from "@/shared/api/generated/conversations/conversations.zod";
 import { bffClient } from "@/shared/api/client/bffClient";
 import { withSessionRetry } from "@/shared/api/client/withSessionRetry";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
@@ -49,4 +54,14 @@ export async function markConversationRead(conversationId: string, transport: Ht
     readMarkerSchema,
   );
   return total;
+}
+
+/** Tutor only: creates or returns the existing pair conversation, without automatic retries.
+ * @example await openConversation(listingId)
+ */
+export function openConversation(listingId: string, transport: HttpTransport = bffClient) {
+  return transport.request(
+    { method: "POST", path: "/conversations", body: PostApiV1ConversationsBody.parse({ listingId }) },
+    unwrapData(PostApiV1ConversationsResponse),
+  );
 }
