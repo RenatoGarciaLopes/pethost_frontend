@@ -6,6 +6,21 @@ import config from "../next.config";
 const root = path.resolve(import.meta.dirname, "..");
 
 describe("assets públicos da marca usados pelo site e e-mails", () => {
+  it("entrega todos os títulos registrados no backend como PNGs Caprasimo em 2x, sem assets órfãos", () => {
+    const entries = JSON.parse(
+      fs.readFileSync(path.join(root, "src/test/fixtures/emailHeadingAssets.json"), "utf8"),
+    ) as Array<{ title: string; image: string; width: number; height: number }>;
+    expect(entries.length).toBeGreaterThanOrEqual(34);
+    const files = fs.readdirSync(path.join(root, "public/brand/email-headings")).sort();
+    expect(files).toEqual(entries.map((entry) => entry.image).sort());
+    for (const entry of entries) {
+      const image = fs.readFileSync(path.join(root, "public/brand/email-headings", entry.image));
+      expect(image.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+      expect(image.readUInt32BE(16)).toBe(entry.width * 2);
+      expect(image.readUInt32BE(20)).toBeGreaterThanOrEqual((entry.height - 1) * 2);
+    }
+  });
+
   it("mantém todas as fontes do layout acessíveis em arquivos WOFF2 públicos válidos", () => {
     const layout = fs.readFileSync(path.join(root, "src/app/layout.tsx"), "utf8");
     const files = [...layout.matchAll(/public\/(fonts\/[^"']+\.woff2)/g)].map((match) => match[1]);

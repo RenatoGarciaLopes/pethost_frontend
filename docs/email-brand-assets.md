@@ -1,5 +1,13 @@
 # Marca pública dos e-mails
 
+## Títulos de produção em Caprasimo (29/10/2026)
+
+`npm run brand:email-headings` executa `scripts/generate-email-headings.mjs`, lê os assuntos reais dos notifiers no backend vizinho e exporta 34 PNGs em 2x para `public/brand/email-headings/`. Gera também o catálogo interno `EmailHeadingAssets.g.cs` no backend e a fixture local `src/test/fixtures/emailHeadingAssets.json`, usada somente nos testes. O build/CI do frontend consome assets e fixture versionados e não exige o repositório backend; apenas regenerar exige ambos os clones. Nenhum helper do gerador é exportado.
+
+Títulos são desenhados em Caprasimo 36 px sobre largura de 340 px e reduzidos responsivamente no e-mail; têm alt com o título completo. Apenas um PNG de título é usado por mensagem, além da logo existente. O gerador falha caso a fonte ou um assunto dinâmico não mapeado não possa ser processado e remove imagens obsoletas da pasta gerada. Regenerar ao mudar fonte/assuntos. Publicar assets antes do template backend. Propósito, interfaces, limites e testes em `pethost_backend/docs/email-brand-fidelity.md`.
+
+Validação atual: quatro testes de assets aprovados (PNG/metadados/ausência de órfãos, fontes, logo, CORS), typecheck, ESLint e Prettier aprovados. Prévias Chromium conferidas com fontes habilitadas e bloqueadas: Caprasimo dos títulos permanece na imagem sem overflow em 390 px. Corpo segue Atkinson onde suportado; não se promete webfont no Gmail. Deploy e clientes de e-mail reais não validados. Esta revisão acrescenta imagens de títulos ao contrato descrito abaixo.
+
 Atualizado em 28/10/2026. `public/fonts/` contém os mesmos quatro arquivos WOFF2 usados por `src/app/layout.tsx` via `next/font/local`, com as duas licenças OFL. Foram movidos de `src/assets/fonts/`, sem cópia duplicada. Caprasimo 400 é a fonte de títulos/marca; Atkinson Hyperlegible Next 400/700 é a fonte do corpo/botões. A versão itálica continua consumida pelo site. `/fonts/:path*` tem CORS público em `next.config.ts` para clientes de e-mail carregarem esses assets sem cookies. As rotas privadas não recebem essa permissão.
 
 `public/brand/email-logo.png` é a assinatura porta + pethost, rasterizada em 3x (exibição 177×52), com fundo transparente e nome acessível no HTML do backend. A imagem preserva Caprasimo em clientes como Gmail que não carregam webfonts. Não transforma corpo ou CTA em imagem: texto continua selecionável, acessível e funciona quando imagens são bloqueadas. Layout mantém contraste e fallbacks locais.

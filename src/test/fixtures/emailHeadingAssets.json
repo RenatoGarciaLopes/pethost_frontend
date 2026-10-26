@@ -1,0 +1,206 @@
+[
+  {
+    "title": "a estadia começa amanhã",
+    "image": "05b7fd4e53860604.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "como foi a estadia? Deixe sua avaliação",
+    "image": "9ae06722d7d2c238.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "estadia concluída",
+    "image": "5b493c3927e73ddd.png",
+    "width": 340,
+    "height": 53
+  },
+  {
+    "title": "falta pagar para garantir a reserva",
+    "image": "3b478bed399d0b75.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "falta pouco para você receber hóspedes",
+    "image": "7abb56f6cb85ff0c.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "nova denúncia de avaliação",
+    "image": "e5c37dcade97eece.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "nova denúncia no chat",
+    "image": "d2c9931241d8535a.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "não foi possível aprovar sua conta de recebimento",
+    "image": "fb7b881c21e0059e.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "o Stripe recusou a conta de um anfitrião",
+    "image": "84815553018a45fc.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "o pet já voltou pra casa? Marque o check-out",
+    "image": "f72142f993c79eab.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "pagamento confirmado, reserva garantida!",
+    "image": "7a6e06ff09aabca1.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "pagamento precisa de atenção",
+    "image": "5bd11cdd68463af3.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "pagamento recebido",
+    "image": "32980c69edd2c27a.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "parcela ainda em atraso",
+    "image": "90df58291df0bd32.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "parcela em atraso",
+    "image": "66f92707445e3925.png",
+    "width": 340,
+    "height": 53
+  },
+  {
+    "title": "precisamos de uma nova verificação",
+    "image": "bf03c0cce8003e04.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "redefinição de senha",
+    "image": "6b36bd7deee3e011.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "reembolso a caminho",
+    "image": "48a94df9abb607a1.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "repasse enviado",
+    "image": "c4e5142339c3eedd.png",
+    "width": 340,
+    "height": 53
+  },
+  {
+    "title": "repasse estornado",
+    "image": "e81441a0fda39315.png",
+    "width": 340,
+    "height": 53
+  },
+  {
+    "title": "repasses bloqueados de um anfitrião com reservas em aberto",
+    "image": "f34902f96736371c.png",
+    "width": 340,
+    "height": 233
+  },
+  {
+    "title": "reserva cancelada",
+    "image": "a5b28029da6cbda3.png",
+    "width": 340,
+    "height": 53
+  },
+  {
+    "title": "seu cadastro de anfitrião foi aprovado!",
+    "image": "25eba619860fb6c3.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "sua conta de recebimento foi aprovada!",
+    "image": "50b844ae06aa02a1.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "sua conta foi liberada",
+    "image": "d39d7cb0b13623cb.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "sua parcela vence em breve",
+    "image": "c50effc17e38cca3.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "sua reserva foi aceita!",
+    "image": "0ae4f77fa2c7790a.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "sua reserva não foi aceita",
+    "image": "93e8709ba7405f71.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "sua senha foi alterada",
+    "image": "206f417988fdf5fb.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "um pedido ainda espera a sua resposta",
+    "image": "900e900256f26b88.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "você recebeu um pedido de reserva",
+    "image": "8a2797c1fb7aed32.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "você recebeu uma avaliação",
+    "image": "147edc91457be2fb.png",
+    "width": 340,
+    "height": 98
+  },
+  {
+    "title": "você tem mensagens esperando",
+    "image": "b9b68264442b8cf6.png",
+    "width": 340,
+    "height": 143
+  },
+  {
+    "title": "você tem uma reserva confirmada",
+    "image": "ed9db5a470ccdf0d.png",
+    "width": 340,
+    "height": 143
+  }
+]

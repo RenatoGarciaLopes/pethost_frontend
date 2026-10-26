@@ -28,6 +28,7 @@
     "api:sync": "node scripts/api-sync.mjs && npm run api:generate",
     "api:generate": "orval",
     "brand:email-logo": "node scripts/generate-email-logo.mjs",
+    "brand:email-headings": "node scripts/generate-email-headings.mjs",
     "api:check": "node scripts/api-check.mjs"
   },
   "dependencies": {

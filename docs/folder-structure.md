@@ -318,6 +318,7 @@ pethost_frontend/
   public/
     animations/
     brand/
+      email-headings/ # 34 PNGs gerados de títulos transacionais em Caprasimo
       email-logo.png
       turma/
         corgi.webp
@@ -341,6 +342,7 @@ pethost_frontend/
   scripts/
     email-brand-assets.test.ts
     generate-email-logo.mjs
+    generate-email-headings.mjs
     api-check.mjs
     api-sync.mjs
     openapi-transformer.mjs
