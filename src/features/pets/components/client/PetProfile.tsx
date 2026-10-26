@@ -81,7 +81,7 @@ export function PetProfile({ accountId, petId }: { accountId: string; petId: str
           {copy.edit}
         </Button>
         {pet.photos.length === 0 && (
-          <Link component={NextLink} href={`${petEditPath(petId)}#fotos`}>
+          <Link component={NextLink} href={`${petEditPath(petId)}?secao=fotos`}>
             {copy.addPhoto}
           </Link>
         )}

@@ -23,6 +23,27 @@ export const petEditCopy = {
     social: "Convivência",
     photos: "Fotos",
   },
+  /** A edição em seções (107): trilha, posição, rodapé e a pergunta ao trocar com alteração não salva. */
+  wizard: {
+    progressLabel: "Seções da ficha",
+    menu: "Seções",
+    position: (section: number, total: number) => `Seção ${section} de ${total}`,
+    previous: (section: string) => `Anterior: ${section}`,
+    next: (section: string) => `Próxima: ${section}`,
+  },
+  switchSection: {
+    title: (section: string) => `Salvar ${section} antes de ir?`,
+    message: (section: string) => `Você mexeu em ${section} e ainda não salvou.`,
+    save: "Salvar e ir",
+    discard: "Descartar",
+    stay: "Ficar",
+  },
+  summary: {
+    photos: (count: number) => (count === 0 ? "Sem foto ainda" : count === 1 ? "1 foto" : `${count} fotos`),
+    vaccinated: "vacinas em dia",
+    notVaccinated: "vacinas pendentes",
+    noCompany: "Nenhum sim marcado",
+  },
   photosHelp: "A primeira é a capa. Pra trocar a capa, tira a primeira e põe outra.",
   photosLabel: (name: string) => `Fotos de ${name}`,
   speciesRemoves: {

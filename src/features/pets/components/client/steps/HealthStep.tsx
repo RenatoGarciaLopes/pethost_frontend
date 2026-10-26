@@ -10,6 +10,7 @@ import { petWizardCopy } from "../../../lib/petWizardCopy";
 import { petStepSchemas } from "../../../schemas/petProfileSchema";
 import { usePetStep } from "./PetStepHost";
 import { StepForm } from "./StepForm";
+import { usePetPreview } from "./usePetPreview";
 import { useServerErrors } from "./useServerErrors";
 import { YesNoField } from "./YesNoField";
 
@@ -71,6 +72,7 @@ export function HealthStep() {
       microchip: values.microchip ?? "",
     },
   });
+  usePetPreview(control);
   useServerErrors(setError, ["isVaccinated", "isNeutered", "medicationNotes", "allergies", "vetContact", "microchip"]);
 
   return (

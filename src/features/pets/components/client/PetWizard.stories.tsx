@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { AnnouncerProvider } from "@/shared/ui/feedback/Announcer";
 import { petProfileValuesFixture } from "@/test/fixtures/pets";
+import { waitForEntrance } from "@/test/waitForEntrance";
 import { petDraftKey } from "../../lib/petDraft";
 import type { PetSpecies } from "../../types";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
@@ -52,6 +53,8 @@ const meta = {
     );
   },
   play: async ({ canvasElement, args }) => {
+    await within(canvasElement).findByRole("heading", { level: 1 });
+    await waitForEntrance({ canvasElement });
     const titles = [
       args.role === "host" ? "Quem mora com você?" : "Que bicho é o seu?",
       "Como seu pet se chama?",

@@ -10,7 +10,6 @@ import { useSessionDraft } from "@/shared/hooks/useSessionDraft";
 import { ErrorNotice } from "@/shared/ui/feedback/ErrorNotice";
 import { Hint } from "@/shared/ui/feedback/Hint";
 import { Notice } from "@/shared/ui/feedback/Notice";
-import { WizardProgress } from "@/shared/ui/navigation/WizardProgress";
 import { invalidatePetLists } from "../../api/invalidatePetLists";
 import { useCreatePet } from "../../hooks/useCreatePet";
 import { useUploadPetPhoto } from "../../hooks/useUploadPetPhoto";
@@ -19,7 +18,6 @@ import { petWizardCopy as copy } from "../../lib/petWizardCopy";
 import { petsCopy } from "../../lib/petsCopy";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
 import { petProfileSchema } from "../../schemas/petProfileSchema";
-import { PET_WIZARD_STEPS } from "../../stores/petWizardStore";
 import { usePetWizard, usePetWizardStore } from "../../stores/PetWizardProvider";
 import { PetWelcome } from "./PetWelcome";
 import { WizardStepHost } from "./steps/PetStepHost";
@@ -30,8 +28,6 @@ import { ReviewStep } from "./steps/ReviewStep";
 import { RoutineStep } from "./steps/RoutineStep";
 import { SocialStep } from "./steps/SocialStep";
 import { SpeciesStep } from "./steps/SpeciesStep";
-
-const STEPS = PET_WIZARD_STEPS.map((id, index) => ({ id, label: copy.stepLabels[index] }));
 
 /** Em que passo cada campo da ficha é respondido, para levar um erro da API ao lugar certo (REQ-PNEW-017). */
 const FIELD_STEP: Readonly<Record<string, number>> = {
@@ -184,7 +180,6 @@ export function PetWizard({ accountId, role = "owner" }: { accountId: string; ro
 
   return (
     <Stack spacing={3}>
-      <WizardProgress steps={STEPS} currentIndex={step - 1} label={copy.progressLabel} />
       {restoredName && step < 7 && (
         <Notice
           tone="info"

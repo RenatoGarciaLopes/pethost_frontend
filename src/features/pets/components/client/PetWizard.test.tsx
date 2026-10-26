@@ -153,5 +153,5 @@ it("REQ-PNEW-015 Editar por bloco volta ao passo e retorna à revisão", async (
   await user.type(screen.getByLabelText(/^Nome/), "Pipoca");
   await user.click(next());
   await waitFor(() => expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Confere a ficha"));
-  expect(screen.getByRole("button", { name: "Salvar a ficha de Pipoca" })).toBeVisible();
+  await waitFor(() => expect(screen.getByRole("button", { name: "Salvar a ficha de Pipoca" })).toBeVisible());
 }, 15_000);

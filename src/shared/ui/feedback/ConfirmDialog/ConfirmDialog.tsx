@@ -23,11 +23,16 @@ export interface ConfirmDialogProps {
   error?: string | null;
   /** Campos da confirmação (ex.: motivo opcional), abaixo do texto; não entram na descrição do diálogo. */
   children?: ReactNode;
+  /**
+   * Terceira saída, entre confirmar e a ação segura (ex.: "Salvar e ir" / "Descartar" / "Ficar" ao trocar de seção
+   * com alteração não salva, 107). Também um verbo do que vai acontecer.
+   */
+  alternative?: { label: string; onClick: () => void };
 }
 
 /**
  * Pergunta de confirmação neutra (spec 022, REQ-PEDIT-011): sem cor de alerta, ícone de perigo ou emoji; os dois
- * botões no tom padrão do tema. O foco começa na ação segura; Esc e clique fora cancelam (exceto `busy`); ao
+ * botões (três, com `alternative`) no tom padrão do tema. O foco começa na ação segura; Esc e clique fora cancelam (exceto `busy`); ao
  * fechar, o MUI devolve o foco a quem abriu. Controlado e sem HTTP: quem usa abre, fecha e faz a chamada.
  *
  * Quando usar: ação que tira algo de vista ou descarta trabalho (tirar o pet da lista, "Sair sem salvar?",
@@ -58,6 +63,7 @@ export function ConfirmDialog({
   busy = false,
   error = null,
   children,
+  alternative,
 }: ConfirmDialogProps) {
   const id = useId();
   const titleId = `${id}-titulo`;
@@ -100,6 +106,11 @@ export function ConfirmDialog({
         <Button type="button" onClick={onConfirm} disabled={busy} aria-busy={busy || undefined}>
           {confirmLabel}
         </Button>
+        {alternative && (
+          <Button type="button" onClick={alternative.onClick} disabled={busy}>
+            {alternative.label}
+          </Button>
+        )}
         <Button ref={cancelRef} type="button" autoFocus onClick={onCancel} disabled={busy}>
           {cancelLabel}
         </Button>

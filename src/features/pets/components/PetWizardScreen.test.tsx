@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, within, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
@@ -33,9 +33,9 @@ it("REQ-HPETS-003 bloqueia antes de montar o formulário e os providers do wizar
   expect(screen.queryByRole("radio")).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Continuar" })).not.toBeInTheDocument();
 });
-it("REQ-HPETS-004 abertura própria do anfitrião mantém os passos existentes", () => {
+it("REQ-HPETS-004 abertura própria do anfitrião mantém os passos existentes", async () => {
   sessionStorage.clear();
   renderWithProviders(<PetWizardScreen accountId="host-start" role="host" />, { theme: quintalTheme });
-  expect(screen.getByRole("heading", { name: "Quem mora com você?" })).toBeVisible();
+  await waitFor(() => expect(screen.getByRole("heading", { name: "Quem mora com você?" })).toBeVisible());
   expect(screen.getByRole("radio", { name: "Cachorro" })).toBeInTheDocument();
 });

@@ -35,11 +35,9 @@ test("REQ-PEDIT-001 abre a ficha pela carteirinha e apresenta os blocos completo
 });
 
 test("REQ-PEDIT-004/005 edita Saúde com PATCH mínimo e vê a alteração na ficha", async ({ page }) => {
-  await page.goto(`${profilePath}/edit`);
-  await expect(page.getByRole("heading", { level: 1, name: "Editar a ficha de Luna" })).toBeVisible();
-  const health = page
-    .locator("section")
-    .filter({ has: page.getByRole("heading", { level: 2, name: "Saúde", exact: true }) });
+  await page.goto(`${profilePath}/edit?secao=saude`);
+  await expect(page.getByRole("heading", { level: 1, name: "Sa\u00fade" })).toBeVisible();
+  const health = page.getByRole("region", { name: "Sa\u00fade", exact: true });
   const vet = health.getByLabel("Veterinário (nome e telefone)", { exact: true });
   await waitForHydration(vet);
   await vet.fill("Clínica do bairro, atendimento de manhã");
@@ -59,10 +57,8 @@ test("REQ-PEDIT-004/005 edita Saúde com PATCH mínimo e vê a alteração na fi
 });
 
 test("REQ-PEDIT-005 salvar sem alterações informa que nada mudou e não envia PATCH", async ({ page }) => {
-  await page.goto(`${profilePath}/edit`);
-  const health = page
-    .locator("section")
-    .filter({ has: page.getByRole("heading", { level: 2, name: "Saúde", exact: true }) });
+  await page.goto(`${profilePath}/edit?secao=saude`);
+  const health = page.getByRole("region", { name: "Sa\u00fade", exact: true });
   const save = health.getByRole("button", { name: "Salvar Saúde", exact: true });
   await waitForHydration(save);
   const patches: string[] = [];
@@ -161,7 +157,7 @@ test("REQ-PEDIT-002/016 pet de outra conta apresenta o mesmo estado 404", async 
 });
 
 test("REQ-PEDIT-017 continuar editando preserva alteração ao tentar voltar à ficha", async ({ page }) => {
-  await page.goto(`${profilePath}/edit`);
+  await page.goto(`${profilePath}/edit?secao=saude`);
   const vet = page.getByLabel("Veterinário (nome e telefone)", { exact: true });
   await waitForHydration(vet);
   await vet.fill("Clínica ainda não salva");
@@ -170,6 +166,6 @@ test("REQ-PEDIT-017 continuar editando preserva alteração ao tentar voltar à 
   await expect(dialog).toBeVisible();
   await dialog.getByRole("button", { name: "Continuar editando", exact: true }).click();
   await expect(dialog).toHaveCount(0);
-  await expect(page).toHaveURL(`${profilePath}/edit`, NAVIGATION);
+  await expect(page).toHaveURL(`${profilePath}/edit?secao=saude`, NAVIGATION);
   await expect(vet).toHaveValue("Clínica ainda não salva");
 });

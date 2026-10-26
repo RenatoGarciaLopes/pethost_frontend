@@ -8,6 +8,7 @@ import { petWizardCopy } from "../../../lib/petWizardCopy";
 import { petStepSchemas } from "../../../schemas/petProfileSchema";
 import { usePetStep } from "./PetStepHost";
 import { StepForm } from "./StepForm";
+import { usePetPreview } from "./usePetPreview";
 import { useServerErrors } from "./useServerErrors";
 import { YesNoField } from "./YesNoField";
 
@@ -31,6 +32,7 @@ export function SocialStep() {
       goodWithKids: values.goodWithKids,
     },
   });
+  usePetPreview(control);
   useServerErrors(setError, ["goodWithDogs", "goodWithCats", "goodWithKids"]);
 
   return (

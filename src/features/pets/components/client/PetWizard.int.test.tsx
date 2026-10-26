@@ -93,7 +93,7 @@ it("REQ-PNEW-017 400 retorna ao passo do campo, foca e permite reenviar", async 
   const { user } = setup();
   await screen.findByRole("heading", { name: "Confere a ficha" });
   await user.click(save());
-  expect(await screen.findByText("Falta o nome.")).toBeVisible();
+  await waitFor(() => expect(screen.getByText("Falta o nome.")).toBeVisible());
   expect(screen.getByLabelText(/^Nome/)).toHaveFocus();
   await user.click(screen.getByRole("button", { name: "Continuar" }));
   await user.click(save());
@@ -107,7 +107,7 @@ it("REQ-PNEW-010/017 microchip repetido volta à saúde com mensagem no campo", 
   const { user } = setup();
   await screen.findByRole("heading", { name: "Confere a ficha" });
   await user.click(save());
-  expect(await screen.findByRole("heading", { name: "Saúde" })).toBeVisible();
+  await waitFor(() => expect(screen.getByRole("heading", { name: "Saúde", level: 1 })).toBeVisible());
   expect(screen.getByLabelText("Microchip")).toHaveAccessibleDescription(
     "Esse microchip já está em outro pet. Se é o seu, fala com o suporte.",
   );

@@ -20,7 +20,8 @@ vi.setConfig({ testTimeout: 45_000 });
 const ACCOUNT = "account-1";
 const THOR = petDto().id;
 
-function setup(overrides: Record<string, unknown> = {}) {
+function setup(overrides: Record<string, unknown> = {}, initial = "fotos") {
+  window.history.replaceState(null, "", `/?secao=${initial}`);
   const queryClient = createTestQueryClient();
   queryClient.setQueryData(
     petQueries.detail(ACCOUNT, THOR).queryKey,
@@ -47,11 +48,59 @@ const section = (name: string) => screen.getByRole("region", { name });
 
 beforeEach(() => push.mockReset());
 
+it("107 abre URL, navega em qualquer ordem e foca o título", async () => {
+  const { user } = setup({}, "saude");
+  expect(await screen.findByRole("heading", { level: 1, name: "Saúde" })).toHaveFocus();
+  await user.click(screen.getByRole("button", { name: /^Nome e sexo/ }));
+  expect(screen.getByRole("heading", { level: 1, name: "Nome e sexo" })).toHaveFocus();
+  expect(window.location.search).toBe("?secao=nome");
+  expect(screen.queryByLabelText("Veterinário (nome e telefone)")).not.toBeInTheDocument();
+});
+
+it("107 Ficar conserva o rascunho; Descartar abre o destino sem PATCH", async () => {
+  const { user } = setup({}, "saude");
+  const field = screen.getByLabelText("Veterinário (nome e telefone)");
+  await user.type(field, "Rascunho");
+  await user.click(screen.getByRole("button", { name: /^Nome e sexo/ }));
+  let dialog = await screen.findByRole("dialog", { name: "Salvar Saúde antes de ir?" });
+  await user.click(within(dialog).getByRole("button", { name: "Ficar" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(field).toHaveValue("Rascunho");
+  await user.click(screen.getByRole("button", { name: /^Nome e sexo/ }));
+  dialog = await screen.findByRole("dialog", { name: "Salvar Saúde antes de ir?" });
+  await user.click(within(dialog).getByRole("button", { name: "Descartar" }));
+  await screen.findByRole("heading", { level: 1, name: "Nome e sexo" });
+  await user.click(screen.getByRole("button", { name: /^Saúde/ }));
+  expect(screen.getByLabelText("Veterinário (nome e telefone)")).toHaveValue("");
+});
+
+it("107 Salvar e ir envia o PATCH da seção e só então muda", async () => {
+  const bodies = acceptPatch();
+  const { user } = setup({}, "saude");
+  await user.type(screen.getByLabelText("Veterinário (nome e telefone)"), "Veterinária");
+  await user.click(screen.getByRole("button", { name: /^Nome e sexo/ }));
+  const dialog = await screen.findByRole("dialog", { name: "Salvar Saúde antes de ir?" });
+  await user.click(within(dialog).getByRole("button", { name: "Salvar e ir" }));
+  await screen.findByRole("heading", { level: 1, name: "Nome e sexo" });
+  expect(bodies).toEqual([{ vetContact: "Veterinária" }]);
+});
+
+it("107 Salvar e ir inválido mantém a seção e os campos", async () => {
+  const { user } = setup({}, "nome");
+  await user.clear(await screen.findByRole("textbox"));
+  await user.click(screen.getByRole("button", { name: /^Saúde/ }));
+  const dialog = await screen.findByRole("dialog", { name: "Salvar Nome e sexo antes de ir?" });
+  await user.click(within(dialog).getByRole("button", { name: "Salvar e ir" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(screen.getByRole("heading", { level: 1, name: "Nome e sexo" })).toBeInTheDocument();
+  expect(window.location.search).toBe("?secao=nome");
+});
+
 it("REQ-PEDIT-004 REQ-PEDIT-005 REQ-PEDIT-014 salva só o que mudou na seção e atualiza a carteirinha", async () => {
   const bodies = acceptPatch();
-  const { user, queryClient } = setup();
+  const { user, queryClient } = setup({}, "saude");
 
-  expect(screen.getByRole("heading", { level: 1, name: "Editar a ficha de Thor" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { level: 1, name: "Saúde" })).toBeInTheDocument();
   const health = section("Saúde");
   await user.type(within(health).getByLabelText("Veterinário (nome e telefone)"), "Dra. Ana");
   await user.click(within(health).getByRole("button", { name: "Salvar Saúde" }));
@@ -68,7 +117,7 @@ it("REQ-PEDIT-004 REQ-PEDIT-005 REQ-PEDIT-014 salva só o que mudou na seção e
 
 it("REQ-PEDIT-005 sem mudança não chama a API", async () => {
   // MSW estrito: um PATCH sem handler derrubaria o teste.
-  const { user } = setup();
+  const { user } = setup({}, "rotina");
   const routine = section("Rotina e manias");
   await user.click(within(routine).getByRole("button", { name: "Salvar Rotina e manias" }));
   expect(await within(section("Rotina e manias")).findByText("Nada mudou por aqui.")).toBeInTheDocument();
@@ -76,7 +125,7 @@ it("REQ-PEDIT-005 sem mudança não chama a API", async () => {
 
 it("REQ-PEDIT-005 texto opcional esvaziado vai como vazio para limpar", async () => {
   const bodies = acceptPatch({ feedingNotes: null });
-  const { user } = setup({ feedingNotes: "Ração 2× ao dia" });
+  const { user } = setup({ feedingNotes: "Ração 2× ao dia" }, "rotina");
   const routine = section("Rotina e manias");
   await user.clear(within(routine).getByLabelText("Alimentação"));
   await user.click(within(routine).getByRole("button", { name: "Salvar Rotina e manias" }));
@@ -85,7 +134,7 @@ it("REQ-PEDIT-005 texto opcional esvaziado vai como vazio para limpar", async ()
 });
 
 it("REQ-PEDIT-006 o peso troca, mas não fica em branco", async () => {
-  const { user } = setup({ weightKg: 12.5 });
+  const { user } = setup({ weightKg: 12.5 }, "corpo");
   const body = section("Corpo");
   const weight = within(body).getByLabelText("Peso aproximado (kg)");
   expect(within(body).getByText("Dá pra trocar o peso, mas não deixar em branco.")).toBeInTheDocument();
@@ -96,7 +145,7 @@ it("REQ-PEDIT-006 o peso troca, mas não fica em branco", async () => {
 
 it("REQ-PEDIT-007 virar coelho avisa que o porte sai; virar cachorro pede o porte na mesma seção", async () => {
   const bodies = acceptPatch();
-  const { user } = setup({ species: "cat", size: null });
+  const { user } = setup({ species: "cat", size: null }, "bicho");
   const species = section("Bicho");
 
   await user.click(within(species).getByRole("radio", { name: "Cachorro" }));
@@ -112,7 +161,7 @@ it("REQ-PEDIT-007 virar coelho avisa que o porte sai; virar cachorro pede o port
 });
 
 it("REQ-PEDIT-007 a troca para bicho sem porte avisa antes de salvar", async () => {
-  const { user } = setup();
+  const { user } = setup({}, "bicho");
   const species = section("Bicho");
   await user.click(within(species).getByRole("radio", { name: "Coelho" }));
   expect(await within(species).findByText("Mudando pra Coelho, o porte sai da ficha.")).toBeInTheDocument();
@@ -138,7 +187,7 @@ it("REQ-PEDIT-015 erro da API no campo da seção volta ao campo; de outra seç�
       ),
     ),
   );
-  const { user } = setup();
+  const { user } = setup({}, "saude");
   const health = section("Saúde");
   await user.type(within(health).getByLabelText("Veterinário (nome e telefone)"), "x");
   await user.click(within(health).getByRole("button", { name: "Salvar Saúde" }));
@@ -148,21 +197,21 @@ it("REQ-PEDIT-015 erro da API no campo da seção volta ao campo; de outra seç�
   ).toBeInTheDocument();
   // O que a pessoa digitou continua no campo depois da recusa.
   expect(within(section("Saúde")).getByLabelText("Veterinário (nome e telefone)")).toHaveValue("x");
-  expect(within(section("Saúde")).getByRole("link", { name: "Nome e sexo" })).toHaveAttribute("href", "#nome");
+  expect(within(section("Saúde")).getByRole("button", { name: "Nome e sexo" })).toBeInTheDocument();
 });
 
 it("REQ-PEDIT-015 microchip de outro pet aparece no campo", async () => {
   server.use(
     http.patch("*/api/pets/:id", () => HttpResponse.json(apiFail("PET_MICROCHIP_ALREADY_REGISTERED"), { status: 409 })),
   );
-  const { user } = setup();
+  const { user } = setup({}, "saude");
   await user.type(within(section("Saúde")).getByLabelText("Microchip"), "123456789012345");
   await user.click(within(section("Saúde")).getByRole("button", { name: "Salvar Saúde" }));
   expect(await within(section("Saúde")).findByText(/Esse microchip já está em outro pet/)).toBeInTheDocument();
 });
 
 it("REQ-PEDIT-017 sair por um link com seção alterada pergunta antes", async () => {
-  const { user } = setup();
+  const { user } = setup({}, "saude");
   await user.type(within(section("Saúde")).getByLabelText("Veterinário (nome e telefone)"), "Dra.");
   await user.click(screen.getByRole("link", { name: "Ficha de Thor" }));
 
@@ -210,44 +259,8 @@ it("REQ-PEDIT-015 erro de um campo que nenhuma seção edita aparece no aviso da
       ),
     ),
   );
-  const { user } = setup();
+  const { user } = setup({}, "saude");
   await user.type(within(section("Saúde")).getByLabelText("Veterinário (nome e telefone)"), "x");
   await user.click(within(section("Saúde")).getByRole("button", { name: "Salvar Saúde" }));
   expect(await within(section("Saúde")).findByText("Falta o responsável.")).toBeInTheDocument();
-});
-
-it("REQ-PEDIT-004 salvar a espécie não apaga o que está sendo digitado em outra seção", async () => {
-  acceptPatch();
-  const { user } = setup();
-  await user.type(within(section("Rotina e manias")).getByLabelText("Alimentação"), "Ração úmida");
-  await user.click(within(section("Bicho")).getByRole("radio", { name: "Gato" }));
-  await user.click(within(section("Bicho")).getByRole("button", { name: "Salvar Bicho" }));
-  await within(section("Bicho")).findByText("Salvo.");
-  expect(within(section("Rotina e manias")).getByLabelText("Alimentação")).toHaveValue("Ração úmida");
-});
-
-it("REQ-PEDIT-004 no celular as seções recolhem e reabrem sem perder o que foi digitado", async () => {
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn((query: string) => ({
-      matches: query.includes("max-width"),
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-    })),
-  );
-  try {
-    const { user } = setup();
-    const toggle = within(section("Saúde")).getByRole("button", { name: "Saúde" });
-    expect(toggle).toHaveAttribute("aria-expanded", "true");
-    await user.type(within(section("Saúde")).getByLabelText("Veterinário (nome e telefone)"), "Dra.");
-    await user.click(toggle);
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-    await user.click(toggle);
-    expect(within(section("Saúde")).getByLabelText("Veterinário (nome e telefone)")).toHaveValue("Dra.");
-  } finally {
-    vi.unstubAllGlobals();
-  }
 });

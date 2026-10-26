@@ -10,6 +10,43 @@ const steps = [
   { id: "done", label: "Confirmar" },
 ];
 afterEach(() => vi.unstubAllGlobals());
+it("107 bloqueia a navegação durante a gravação", () => {
+  const onSelect = vi.fn();
+  renderWithProviders(
+    <WizardProgress
+      steps={steps}
+      currentIndex={0}
+      variant="trail"
+      navigation={{ onSelect, menuLabel: "Seções", disabled: true }}
+    />,
+    { theme: quintalTheme },
+  );
+  const target = screen.getByRole("button", { name: "Confirmar" });
+  expect(target).toBeDisabled();
+  expect(onSelect).not.toHaveBeenCalled();
+});
+it("107 trilha navegável chama qualquer seção, com resumos e sem estados de cadastro", async () => {
+  const onSelect = vi.fn();
+  const { user } = renderWithProviders(
+    <WizardProgress steps={steps} currentIndex={1} variant="trail" navigation={{ onSelect, menuLabel: "Seções" }} />,
+    { theme: quintalTheme },
+  );
+  await user.click(screen.getByRole("button", { name: "Você" }));
+  expect(onSelect).toHaveBeenCalledWith(0);
+  expect(screen.getByRole("button", { name: /Endereço/ })).toHaveAttribute("aria-current", "step");
+  expect(screen.queryByText(/concluído|a fazer/)).not.toBeInTheDocument();
+});
+
+it("107 anel abre lista e fecha ao escolher uma seção", async () => {
+  const onSelect = vi.fn();
+  const { user } = renderWithProviders(
+    <WizardProgress steps={steps} currentIndex={0} variant="ring" navigation={{ onSelect, menuLabel: "Seções" }} />,
+    { theme: quintalTheme },
+  );
+  await user.click(screen.getByRole("button", { name: "Seções" }));
+  await user.click(await screen.findByRole("button", { name: "Confirmar" }));
+  expect(onSelect).toHaveBeenCalledWith(2);
+});
 it("REQ-DS-012 trilha descreve concluído, atual e futuro sem navegar", () => {
   const { rerender } = renderWithProviders(
     <WizardProgress steps={steps} currentIndex={1} variant="trail" appearance="cards" />,
