@@ -12,6 +12,7 @@ export function useSearchUrl() {
   const query = searchParamsToQuery(new URLSearchParams(params.toString()));
   const update = (next: SearchQuery) => {
     window.history.pushState(null, "", searchHref(next));
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   };
   return { query, update };
 }

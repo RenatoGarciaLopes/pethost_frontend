@@ -1,11 +1,13 @@
 import { screen } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { searchPetsFixture } from "@/test/fixtures/search";
 import { renderWithProviders } from "@/test/render";
 import { SearchSummaryBar } from "./SearchSummaryBar";
 
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search) }));
+
+beforeEach(() => vi.spyOn(window, "scrollTo").mockImplementation(() => {}));
 
 function renderBar(url: string) {
   window.history.replaceState(null, "", url);

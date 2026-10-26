@@ -4,6 +4,19 @@ import { loginAccount } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { openSearch } from "../../support/search";
 
+test("nova busca com poucos resultados volta ao topo mesmo partindo do rodape", async ({ page }) => {
+  await page.goto("/?where=Maring%C3%A1");
+  const apartment = page.getByRole("button", { name: "Apartamento", exact: true });
+  await waitForHydration(apartment);
+  await expect(page.getByRole("list", { name: "Buscar cantinhos" }).getByRole("link")).toHaveCount(12);
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  await apartment.click();
+  await expect(page).toHaveURL(/homeType=apartment/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.getByRole("heading", { level: 1, name: /casas com vaga perto/ })).toBeInViewport();
+});
+
 test("chips compactos preservam toque, rolagem e selecao no celular", async ({ page }, testInfo) => {
   const mobile = testInfo.project.name.includes("mobile");
   await page.setViewportSize({ width: mobile ? 360 : 1440, height: 900 });
