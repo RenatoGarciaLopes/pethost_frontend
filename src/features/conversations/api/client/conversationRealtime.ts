@@ -112,7 +112,8 @@ function connect(client: QueryClient, accountId: string) {
       // e dispara SESSION_EXPIRED quando necessário, mesmo fora da tela do chat.
       void bffClient.request({ method: "GET", path: "/users/me" }, sessionUserSchema).catch((error: unknown) => {
         // O stream pode já ter apagado os cookies: o proxy passa então o 401 anônimo da API.
-        if (!stopped && isApiError(error) && error.status === 401 && error.code !== "SESSION_EXPIRED") notifySessionExpired();
+        if (!stopped && isApiError(error) && error.status === 401 && error.code !== "SESSION_EXPIRED")
+          notifySessionExpired();
       });
     };
   };
