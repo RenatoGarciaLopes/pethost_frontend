@@ -118,3 +118,7 @@ Todo comportamento desenvolvido exige testes unitários, funcionais, de integra�
 `shared/lib/url/readSecretFromUrl.ts` lê o segredo do fragmento antes da query; `shared/hooks/useUrlSecret.ts` captura uma vez após montar e remove as ocorrências com `history.replaceState`, mantendo somente memória local. Configure o `ResetUrl` do emissor como `/reset-password#token=...` para que o segredo não chegue ao servidor em URLs e logs de acesso. O front mantém suporte a `?token=` para compatibilidade, mas só consegue removê-lo depois de receber a página; não apaga logs anteriores.
 
 Os clientes usam BFF e contratos gerados. Após reset confirmado, o hook tenta logout do BFF em melhor esforço e limpa queries e mutações antes de sinalizar sucesso. Falha de reset preserva o cache. Interfaces, limites e validação estão na nota `development/resources/auth.md` do vault.
+
+## Dependências de ordenação de fotos (106)
+
+`@dnd-kit/core` 6.3.1 fornece contexto e sensores; `@dnd-kit/sortable` 10.0.0 fornece grade e coordenadas de teclado; `@dnd-kit/utilities` 3.2.2 serializa transforms. Uso restrito ao PhotoSlots client; sem provider global nem transporte. Dependências já instaladas pelo solicitante, manifests incluídos na entrega. [Contrato e escolhas](../specs/106-fotos-arrastar/design.md).

@@ -621,3 +621,7 @@ Revisão da 093: sem diretórios novos. GrassFooter recebe accountRole da sessã
 ## Novidades de estadias (100)
 
 `shared/lib/seenSnapshots.ts` contém adapter IndexedDB nativo opaco; `features/bookings/lib/stayUpdates.ts` mantém assinatura/comparação de domínio e `hooks/useStayUpdates.ts` coordena cache e reconhecimento. `widgets/app-shell/components/client/OwnerHeaderNav.tsx` é a ilha do tutor composta por AppHeader; HeaderNav segue apresentacional. Testes adjacentes e HeaderNav.stories.tsx. Sem novas pastas técnicas, providers ou stores. Interfaces e limites em [spec 100](../specs/100-stays-update-dot/implementation.md).
+
+## Fotos por arraste (106)
+
+PhotoSlots permanece em `src/shared/ui/media/PhotoSlots/`, com componente, copy, index, testes e stories existentes. Novo teste da composição: `src/features/host-listings/components/client/ListingPhotosSection.int.test.tsx`. Spec real `specs/106-fotos-arrastar/{requirements,design,tasks,validation}.md`. Sem nova pasta técnica, store ou provider. Prints são relatórios em test-results/106, fora da árvore autoral.
