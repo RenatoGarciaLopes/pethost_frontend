@@ -95,6 +95,27 @@ export const Reordenar: Story = {
     await expect(args.onMove).toHaveBeenCalledTimes(1);
     fireEvent.mouseUp(document);
     await waitFor(() => expect(args.onMove).toHaveBeenLastCalledWith(0, 2));
+    const options = canvas.getByRole("button", { name: "Opções da foto 2" });
+    await expect(options.getBoundingClientRect().width).toBeGreaterThanOrEqual(44);
+    await expect(options.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+    await expect(getComputedStyle(options).fontSize).toBe("15px");
+    await expect(getComputedStyle(options).fontWeight).toBe("700");
+    await userEvent.click(options);
+    const menu = within(canvasElement.ownerDocument.body);
+    // Mede o alvo após a transição de abertura (Grow altera o retângulo durante a animação).
+    await waitFor(() =>
+      expect(
+        menu.getByRole("menuitem", { name: "Trocar foto 2" }).getBoundingClientRect().height,
+      ).toBeGreaterThanOrEqual(44),
+    );
+    for (const name of ["Trocar foto 2", "Tirar foto 2"]) {
+      const item = menu.getByRole("menuitem", { name });
+      await expect(item.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+      await expect(getComputedStyle(item).fontSize).toBe("14px");
+      await expect(getComputedStyle(item).fontWeight).toBe("700");
+      await expect(getComputedStyle(item).color).toBe(getComputedStyle(options).color);
+    }
+    await userEvent.keyboard("[Escape]");
   },
 };
 

@@ -1,5 +1,15 @@
 # Validação — 106
 
+## Revisão r1 — legibilidade e alvos de toque
+
+Trocar/Tirar passaram para o menu nas fotos com reordenação; o botão ⋯ usa alvo mínimo 44×44 px e fonte 15 px/700 em `text.primary`. Os itens do menu usam fonte 14 px/700 na mesma cor, altura mínima 44 px, padding e margem vertical. Sem reordenação, as ações diretas recebem os mesmos mínimos de legibilidade e toque, com gap e quebra de linha.
+
+- `node node_modules/vitest/vitest.mjs run src/shared/ui/media/PhotoSlots/PhotoSlots.test.tsx src/features/host-listings/components/client/ListingPhotosSection.int.test.tsx src/features/pets/components/client/PetEditor.int.test.tsx --maxWorkers=2`: **3 arquivos, 32 testes aprovados**. Inclui troca e remoção pelo menu, mantendo índices e validação do input nativo.
+- Storybook-vitest com configuração temporária de `server.fs.allow` e viewport 390×844: **6 stories aprovadas**, incluindo axe e medidas reais de botão/itens, tamanho/peso de fonte e igualdade da cor. Medição dos itens aguarda o Grow terminar para avaliar o alvo final, não seu retângulo durante a animação.
+- Typecheck global, ESLint de PhotoSlots, Prettier dos arquivos alterados e `git diff --check`: aprovados.
+- Refeitos `test-results/106/390-paradas.png`, `390-menu.png` e `1440-paradas.png`. Captura Chromium confirmou alvo ≥44×44 px, fontes 14/15 px em peso 700, cor igual entre opções e menu, e ausência de overflow. Os outros cinco prints permanecem como evidência da rodada inicial aprovada.
+- E2E não executado, conforme brief. A configuração temporária foi removida. Sem dependências novas, mudança no contrato, instalação, push ou PR.
+
 Executada em 25/10/2026, worktree `pethost_frontend-106`, branch `feat/106-fotos-arrastar`. Nenhum pacote instalado durante a execução; manifests previamente alterados pelo solicitante fazem parte da entrega.
 
 ## Componente e consumidores

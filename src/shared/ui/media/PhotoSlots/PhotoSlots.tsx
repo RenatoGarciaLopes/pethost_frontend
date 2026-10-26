@@ -27,7 +27,7 @@ import {
   MenuItem,
   useMediaQuery,
 } from "@mui/material";
-import { useId, useState, type ChangeEvent } from "react";
+import { useId, useRef, useState, type ChangeEvent } from "react";
 import { useObjectUrl } from "../../../hooks/useObjectUrl";
 import { validateImageFile } from "../../../lib/files/validateImageFile";
 import { visuallyHidden } from "../../a11y/visuallyHidden";
@@ -222,6 +222,7 @@ function Slot({
     transition: { duration: reduced ? 0 : SPRING_ASSENTAR.duration, easing: SPRING_ASSENTAR.easing },
   });
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const replaceInput = useRef<HTMLInputElement>(null);
   const id = useId();
   const objectUrl = useObjectUrl(file instanceof File ? file : null);
   const preview = typeof file === "string" ? file : objectUrl;
@@ -382,17 +383,22 @@ function Slot({
             </Box>
           )}
         </Box>
-        <Stack direction="row" sx={{ minHeight: 48, alignItems: "center", justifyContent: "space-evenly" }}>
-          {preview && onReplace && (
+        <Stack
+          direction="row"
+          sx={{ minHeight: 48, alignItems: "center", justifyContent: "center", gap: 1, flexWrap: "wrap" }}
+        >
+          {preview && onReplace && !moves && (
             <Box
               component="label"
               sx={{
                 minHeight: 48,
+                minWidth: 44,
+                px: 1,
                 display: "grid",
                 placeItems: "center",
                 borderRadius: `${quintalRadii.control}px`,
                 fontWeight: 700,
-                fontSize: "0.75rem",
+                fontSize: "0.875rem",
                 textAlign: "center",
                 color: disabled ? "text.disabled" : "text.primary",
                 cursor: disabled ? "not-allowed" : "pointer",
@@ -415,13 +421,13 @@ function Slot({
               />
             </Box>
           )}
-          {preview && (
+          {preview && !moves && (
             <Button
               size="small"
               variant="quiet"
               onClick={onRemove}
               disabled={disabled}
-              sx={{ minHeight: 48, minWidth: 0, px: 0.5, fontSize: "0.75rem" }}
+              sx={{ minHeight: 48, minWidth: 44, px: 1, fontSize: "0.875rem", fontWeight: 700, color: "text.primary" }}
             >
               <Box component="span" sx={visuallyHidden}>
                 {copy.remove(number)}
@@ -432,7 +438,14 @@ function Slot({
           {preview && moves && (
             <>
               <IconButton
-                sx={{ px: 0.5, minHeight: 48 }}
+                sx={{
+                  p: 1,
+                  minHeight: 44,
+                  minWidth: 44,
+                  fontSize: "0.9375rem",
+                  fontWeight: 700,
+                  color: "text.primary",
+                }}
                 aria-label={copy.options(number)}
                 aria-haspopup="menu"
                 aria-expanded={Boolean(anchor)}
@@ -447,7 +460,43 @@ function Slot({
                 anchorEl={anchor}
                 open={Boolean(anchor) && !disabled}
                 onClose={() => setAnchor(null)}
+                slotProps={{
+                  list: {
+                    sx: {
+                      "& .MuiMenuItem-root": {
+                        minWidth: 44,
+                        minHeight: 44,
+                        px: 2,
+                        py: 1,
+                        my: 0.5,
+                        fontSize: "0.875rem",
+                        fontWeight: 700,
+                        color: "text.primary",
+                      },
+                    },
+                  },
+                }}
               >
+                {onReplace && (
+                  <MenuItem
+                    aria-label={copy.replace(number)}
+                    onClick={() => {
+                      setAnchor(null);
+                      replaceInput.current?.click();
+                    }}
+                  >
+                    {copy.replaceShort}
+                  </MenuItem>
+                )}
+                <MenuItem
+                  aria-label={copy.remove(number)}
+                  onClick={() => {
+                    setAnchor(null);
+                    onRemove();
+                  }}
+                >
+                  {copy.removeShort}
+                </MenuItem>
                 {moves.cover && (
                   <MenuItem
                     onClick={() => {
@@ -479,6 +528,16 @@ function Slot({
                   </MenuItem>
                 )}
               </Menu>
+              {onReplace && (
+                <Box
+                  component="input"
+                  ref={replaceInput}
+                  aria-label={copy.replace(number)}
+                  tabIndex={-1}
+                  {...fileInputProps(onReplace)}
+                  sx={visuallyHidden}
+                />
+              )}
             </>
           )}
         </Stack>

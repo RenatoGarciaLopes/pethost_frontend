@@ -174,6 +174,31 @@ describe("vagas de foto", () => {
 describe("vagas de foto com reordenação", () => {
   const saved = (n: number) => `https://fotos.test/casa-${n}.jpg`;
 
+  it("106 r1 troca e remoção ficam no menu sem disputar a linha da foto", async () => {
+    const onReplace = vi.fn();
+    const onRemove = vi.fn();
+    const { user } = renderWithProviders(
+      <PhotoSlots
+        label="Fotos"
+        files={[saved(1), saved(2), null]}
+        onPick={vi.fn()}
+        onReplace={onReplace}
+        onRemove={onRemove}
+        onMove={vi.fn()}
+      />,
+      { theme: quintalTheme },
+    );
+    expect(screen.queryByRole("button", { name: "Tirar foto 2" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Opções da foto 2" }));
+    await user.click(screen.getByRole("menuitem", { name: "Trocar foto 2" }));
+    const file = photo("nova.jpg");
+    await user.upload(screen.getByLabelText("Trocar foto 2"), file);
+    expect(onReplace).toHaveBeenCalledWith(1, file);
+    await user.click(screen.getByRole("button", { name: "Opções da foto 2" }));
+    await user.click(screen.getByRole("menuitem", { name: "Tirar foto 2" }));
+    expect(onRemove).toHaveBeenCalledExactlyOnceWith(1);
+  });
+
   it("REQ-LIST-014 com onMove, cada foto ganha capa e mover por botão (nunca só arrastar)", async () => {
     const onMove = vi.fn();
     const { user } = renderWithProviders(

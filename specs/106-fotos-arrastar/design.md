@@ -6,7 +6,7 @@ Estende `src/shared/ui/media/PhotoSlots/`, encontrado no catálogo e nos consumi
 
 `Slot` é componente interno no mesmo arquivo, responsável por prévia, entrada nativa de arquivo, foco, alvo sortable, indicação visual e menu contextual. Não deve ser exportado. Recebe estado e callbacks do grupo. O sensor fica apenas na foto; ações abaixo não iniciam arraste. O menu fica fora desse alvo. `destination` desenha uma borda tracejada fixa na célula, enquanto os irmãos se deslocam. Não há clonagem de fotos nem upload adicional.
 
-Escolha visual: manter Trocar/Tirar numa linha curta preserva a descoberta e o fluxo existente dos pets, sem a torre anterior. O menu contém só ordenação, com nome acessível `Opções da foto N`. A ação da primeira foto inclui capa no nome acessível, de acordo com o texto visível.
+Escolha visual após revisão r1: fotos reordenáveis oferecem Trocar/Tirar no mesmo menu da ordenação, aberto por `Opções da foto N`. Só o botão ⋯ permanece abaixo da foto, com alvo mínimo 44×44 px, fonte 15 px/700 e `text.primary`. Os itens usam fonte 14 px/700, a mesma cor, altura mínima 44 px e espaço vertical. Sem onMove, as ações diretas preservam os nomes e recebem fonte 14 px, alvos de pelo menos 44 px e quebra de linha quando necessário. A ação da primeira foto inclui capa no nome acessível, de acordo com o texto visível.
 
 Persistência: a seção continua usando `useListingPhotoMutations.move`. O consumidor salva sem atualização otimista do cache. Uma ordem visual transitória no PhotoSlots mantém o destino enquanto `uploadingIndex` está ativo e os arquivos controlados ainda são os da origem. Resposta substitui essa ordem; erro devolve a ordem controlada. Nenhum callback adicional nem alteração de API.
 
