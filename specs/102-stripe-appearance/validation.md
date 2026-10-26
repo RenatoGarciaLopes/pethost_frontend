@@ -1,6 +1,6 @@
 # Validação 102 — 25/10/2026
 
-Implementação e checks concluídos. **Pendência: quatro prints válidos de Cartão/Pix em 1440/390 com Stripe real.** Não declarar aceite visual completo.
+Implementação, checks e aceite visual concluídos. Os quatro prints com o Stripe real foram feitos pelo coordenador (seção abaixo).
 
 ## Checks executados
 
@@ -23,6 +23,17 @@ Fallback pelo portal Maestri `102 Stripe`: login e iframe real carregados, botã
 `test-results/102/0-plano-1440.png` é captura real anterior à abertura da sessão. `stripe-unavailable-1440.png` registra a falha do Stripe no runner; ambos são diagnósticos, **não atendem aos quatro prints solicitados**. Pasta ignorada pelo git. É necessário repetir as capturas reais em ambiente com acesso ao Stripe e captura funcional.
 
 Servidor encerrado ao final. Scripts/config temporários removidos. Portal mantido no canvas conforme regra da skill, sem servidor ativo. E2E não executado por instrução expressa do brief; seletores antigos não encontrados no arquivo indicado. Stories e SDK simulado não comprovam integração financeira completa nem substituem esses prints ou o CI.
+
+## Aceite visual com o Stripe real (coordenador)
+
+Ambiente com acesso a js.stripe.com: `next dev --webpack --port 3002` nesta worktree, API local em :8080 com o sandbox Stripe e a tutora de teste do seed. Nenhum pagamento confirmado.
+
+Prints em `C:/Users/Renato Lopes/Desktop/PetHost/prints-102/`: `1-pix-1440`, `2-cartao-1440`, `3-cartao-390`, `4-pix-390`.
+
+- Abas e campos com borda de tinta de 2px e fundo papel; a aba selecionada fica verde, como o `ChoiceCard`. Fonte do site dentro do iframe.
+- "Pagar R$ 220,00" é coral e ocupa a largura toda; o botão abaixo diz "Trocar o plano".
+- O aviso "No Pix, o código vale até…" aparece só na aba Pix: contagem 1 no Pix e 0 no Cartão, em 1440 e em 390.
+- Sem rolagem horizontal em 390. Os selos "N" (Next) e "stripe" no canto são só do modo de desenvolvimento.
 
 ## Documentação
 
