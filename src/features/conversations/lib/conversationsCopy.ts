@@ -55,6 +55,6 @@ export const conversationsCopy = {
   },
   pickConversation: {
     title: "Escolha uma conversa",
-    description: "As mensagens aparecem aqui.",
+    description: "Selecione alguém na lista ao lado para ler as mensagens e continuar o papo.",
   },
 } as const;

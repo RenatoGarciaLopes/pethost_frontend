@@ -13,10 +13,15 @@ describe("ConversationsLayout", () => {
     expect(screen.getByRole("heading", { level: 1, name: conversationsCopy.heading })).toBeInTheDocument();
     expect(screen.getByText("lista")).toBeInTheDocument();
     expect(screen.getByText("conversa")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: conversationsCopy.listLabel })).toHaveTextContent("lista");
+    expect(screen.queryByText(conversationsCopy.pickConversation.description)).not.toBeInTheDocument();
   });
 
   it("REQ-CHAT-012 sem conversa aberta, pede para escolher uma", () => {
     renderWithProviders(<ConversationsLayout focus="list" list={<p>lista</p>} />, { theme: quintalTheme });
     expect(screen.getByRole("heading", { name: conversationsCopy.pickConversation.title })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: conversationsCopy.pickConversation.title })).toHaveTextContent(
+      conversationsCopy.pickConversation.description,
+    );
   });
 });
