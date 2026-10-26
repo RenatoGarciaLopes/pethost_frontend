@@ -34,11 +34,22 @@ export function EmptyState({ title, description, action, illustration, headingCo
         gap: 1.5,
         py: 4,
         px: 2,
+        width: "100%",
         maxWidth: 480,
         mx: "auto",
+        alignSelf: "center",
       }}
     >
-      <Box aria-hidden="true" sx={{ width: 200, mb: 1 }}>
+      <Box
+        aria-hidden="true"
+        sx={{
+          width: 200,
+          mb: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         {illustration ?? <DefaultGarden />}
       </Box>
       <Typography component={headingComponent} variant="h3">

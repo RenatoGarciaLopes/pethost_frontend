@@ -48,15 +48,17 @@ export function PetList({ accountId, role = "owner" }: { accountId: string; role
   const { active, inactive } = pets.data;
   if (active.length === 0 && inactive.length === 0)
     return (
-      <EmptyState
-        illustration={<PawMark size={56} />}
-        title={roleCopy.empty.title}
-        action={
-          <Button component={NextLink} href={NEW_PET_PATH} variant="contained">
-            {roleCopy.empty.action}
-          </Button>
-        }
-      />
+      <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+        <EmptyState
+          illustration={<PawMark size={56} />}
+          title={roleCopy.empty.title}
+          action={
+            <Button component={NextLink} href={NEW_PET_PATH} variant="contained">
+              {roleCopy.empty.action}
+            </Button>
+          }
+        />
+      </Box>
     );
 
   return (
