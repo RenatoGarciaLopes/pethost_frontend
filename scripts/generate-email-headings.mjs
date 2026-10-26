@@ -6,6 +6,9 @@ import { chromium } from "playwright";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const backend = path.resolve(root, "../pethost_backend");
+const palette = await fs.readFile(path.join(root, "src/shared/theme/tokens/colors.ts"), "utf8");
+const paper = palette.match(/papel: "(#[A-Fa-f0-9]+)"/)?.[1];
+if (!paper) throw new Error("Missing Quintal paper token.");
 const titles = new Set();
 async function discover(directory) {
   for (const item of await fs.readdir(directory, { withFileTypes: true })) {
@@ -37,7 +40,7 @@ try {
     }),
   );
   await page.setContent(
-    "<style>@font-face{font-family:Caprasimo;src:url('https://brand.pethost.invalid/caprasimo.woff2')}body{margin:0;background:#FFFFFF}h1{box-sizing:border-box;width:340px;padding:3px 0 5px;margin:0;background:#FFFFFF;font:400 36px/1.25 Caprasimo;color:#1F1A17;overflow-wrap:break-word}</style><h1></h1>",
+    `<style>@font-face{font-family:Caprasimo;src:url('https://brand.pethost.invalid/caprasimo.woff2')}body{margin:0;background:${paper}}h1{box-sizing:border-box;width:340px;padding:3px 0 5px;margin:0;background:${paper};font:400 36px/1.25 Caprasimo;color:#1F1A17;overflow-wrap:break-word}</style><h1></h1>`,
   );
   await page.evaluate(() => document.fonts.load("36px Caprasimo"));
   if (!(await page.evaluate(() => document.fonts.check("36px Caprasimo")))) throw new Error("Caprasimo não carregou.");

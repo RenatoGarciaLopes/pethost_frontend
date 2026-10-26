@@ -1,5 +1,9 @@
 # Marca pública dos e-mails
 
+## Tema fixo vigente (30/10/2026)
+
+Por instrução do usuário, mensagem, logo, cartão e 34 títulos usam papel #FEFAF3 e tinta escura em qualquer tema. Títulos continuam PNGs Caprasimo, regenerados pelo comando existente; o gerador agora lê o token papel. Não há adaptação escura nem placas HTML adicionais. Fonte técnica: [email-fixed-theme.md](../../pethost_backend/docs/email-fixed-theme.md). A seção abaixo registra a etapa anterior, substituída. Cinco testes de assets aprovados, incluindo RGB papel exato e opacidade. Publicar frontend antes do backend.
+
 ## Contraste no modo escuro (30/10/2026)
 
 Logo e 34 títulos agora têm fundo claro incorporado nos pixels PNG, sem depender do CSS do cliente. Os geradores mantêm caminhos, dimensões, Caprasimo e marca; screenshot usa fundo opaco. O template backend inclui placas claras, estilos para modo escuro e versão fixa dos assets para caches. Geradores executados; cinco testes de assets aprovados, incluindo alpha de todos os pixels. Publicar frontend antes do backend. Fonte técnica e limites: [email-dark-mode.md](../../pethost_backend/docs/email-dark-mode.md).

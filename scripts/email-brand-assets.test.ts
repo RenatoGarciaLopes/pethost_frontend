@@ -7,7 +7,7 @@ import sharp from "sharp";
 const root = path.resolve(import.meta.dirname, "..");
 
 describe("assets públicos da marca usados pelo site e e-mails", () => {
-  it("preserva fundo claro opaco dentro da logo e de todos os títulos quando o cliente escurece o HTML", async () => {
+  it("usa o mesmo papel opaco da marca na logo e em todos os títulos, sem placas brancas", async () => {
     const files = [
       path.join(root, "public/brand/email-logo.png"),
       ...fs
@@ -24,9 +24,7 @@ describe("assets públicos da marca usados pelo site e e-mails", () => {
       }
       expect(minimumAlpha, file).toBe(255);
       expect(darkPixels, file).toBeGreaterThan(100);
-      expect(data[0], file).toBeGreaterThan(240);
-      expect(data[1], file).toBeGreaterThan(240);
-      expect(data[2], file).toBeGreaterThan(230);
+      expect([...data.subarray(0, 3)], file).toEqual([254, 250, 243]);
     }
   });
   it("entrega todos os títulos registrados no backend como PNGs Caprasimo em 2x, sem assets órfãos", () => {
