@@ -2,6 +2,29 @@
 import { initialsOf } from "@/shared/lib/text/initials";
 import type { avatarTones } from "@/shared/theme/tokens/semantic";
 
+/** Dados legados do storage local não podem iniciar requests ao dispositivo de visitantes. */
+function avatarSource(src: string | null | undefined): string | undefined {
+  if (!src || process.env.NODE_ENV !== "production") return src ?? undefined;
+  if (src.startsWith("/") && !src.startsWith("//")) return src;
+  try {
+    const url = new URL(src.startsWith("//") ? `https:${src}` : src);
+    const host = url.hostname.toLowerCase();
+    const local =
+      host === "localhost" ||
+      host.endsWith(".localhost") ||
+      host.endsWith(".local") ||
+      !host.includes(".") ||
+      host.includes(":") ||
+      /^(?:0|10|127)\./.test(host) ||
+      /^169\.254\./.test(host) ||
+      /^192\.168\./.test(host) ||
+      /^172\.(?:1[6-9]|2\d|3[01])\./.test(host);
+    return !local && (url.protocol === "https:" || url.protocol === "http:") ? src : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export interface InitialsAvatarProps extends Omit<AvatarProps, "children" | "src"> {
   /** Nome usado apenas para gerar o fallback; não é reescrito para exibição. */
   name: string;
@@ -32,7 +55,7 @@ export function InitialsAvatar({
   return (
     <Avatar
       {...props}
-      src={src ?? undefined}
+      src={avatarSource(src)}
       alt={alt}
       sx={[
         {
