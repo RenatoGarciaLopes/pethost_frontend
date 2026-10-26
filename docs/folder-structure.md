@@ -621,3 +621,7 @@ Revisão da 093: sem diretórios novos. GrassFooter recebe accountRole da sessã
 ## Novidades de estadias (100)
 
 `shared/lib/seenSnapshots.ts` contém adapter IndexedDB nativo opaco; `features/bookings/lib/stayUpdates.ts` mantém assinatura/comparação de domínio e `hooks/useStayUpdates.ts` coordena cache e reconhecimento. `widgets/app-shell/components/client/OwnerHeaderNav.tsx` é a ilha do tutor composta por AppHeader; HeaderNav segue apresentacional. Testes adjacentes e HeaderNav.stories.tsx. Sem novas pastas técnicas, providers ou stores. Interfaces e limites em [spec 100](../specs/100-stays-update-dot/implementation.md).
+
+### 110: PetAvatar
+
+`src/shared/ui/media/PetAvatar/`: PetAvatar.tsx (SVGs inline), index.ts (API), PetAvatar.test.tsx, PetAvatar.stories.tsx e ARTWORK-LICENSE.md. Sem pasta de assets: geometria compartilhada em SVG inline. Spec: `specs/110-avatar-do-pet/{requirements,design,tasks,validation}.md`.

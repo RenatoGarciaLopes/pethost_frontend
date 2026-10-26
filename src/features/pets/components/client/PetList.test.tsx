@@ -47,7 +47,7 @@ describe("meus pets", () => {
     }
   });
 
-  it("REQ-PETS-001 sem foto mostra a patinha; com foto, a capa decorativa", async () => {
+  it("REQ-PETS-001 sem foto mostra o avatar da esp?cie; com foto, a capa decorativa", async () => {
     respond([petDto({ id: THOR }), petDto({ id: LUNA, name: "Luna", photos: [] })]);
     const { container } = setup();
     const thor = await screen.findByRole("link", { name: /^Ficha de Thor/ });

@@ -102,7 +102,13 @@ export function PetEditor({ accountId, petId }: { accountId: string; petId: stri
         }}
       >
         <Box sx={{ position: { md: "sticky" }, top: { md: 24 }, order: { md: 2 } }}>
-          <PetProfileCard values={pet.values} coverUrl={pet.photos[0]?.url ?? null} now={now} showEmptyBlocks />
+          <PetProfileCard
+            petId={petId}
+            values={pet.values}
+            coverUrl={pet.photos[0]?.url ?? null}
+            now={now}
+            showEmptyBlocks
+          />
         </Box>
         <Stack spacing={4} divider={<Divider />} sx={{ order: { md: 1 }, minWidth: 0 }}>
           <PetPhotosSection accountId={accountId} pet={pet} />

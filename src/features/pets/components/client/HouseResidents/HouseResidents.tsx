@@ -1,9 +1,11 @@
 "use client";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+
+import { PetAvatar } from "@/shared/ui/media/PetAvatar";
+
+import { Box, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId } from "react";
 import { isApiError } from "@/shared/api/errors/ApiError";
-import { PawMark } from "@/shared/ui/brand/PawMark";
 import { petQueries } from "../../../api/queries";
 import { coexistenceSummary } from "../../../lib/coexistenceSummary";
 import { speciesLabel, sizeLabel } from "../../../lib/describePet";
@@ -48,20 +50,15 @@ export function HouseResidents({ hostId }: HouseResidentsProps) {
           const summary = coexistenceSummary(resident);
           return (
             <Stack component="li" key={resident.id} direction="row" spacing={2} sx={{ alignItems: "center" }}>
-              <Avatar
-                src={resident.coverUrl ?? undefined}
-                alt=""
-                sx={{
-                  width: 64,
-                  height: 64,
-                  bgcolor: "background.paper",
-                  color: "text.secondary",
-                  border: "2px solid",
-                  borderColor: "text.primary",
-                }}
-              >
-                <PawMark size={28} />
-              </Avatar>
+              <PetAvatar
+                aria-hidden="true"
+                petId={resident.id}
+                name={resident.name}
+                species={resident.species}
+                src={resident.coverUrl}
+                size={64}
+                sx={{ border: "2px solid", borderColor: "text.primary" }}
+              />
               <Box sx={{ minWidth: 0, overflowWrap: "anywhere" }}>
                 <Typography sx={{ fontWeight: 700 }}>{resident.name}</Typography>
                 <Typography color="text.secondary">

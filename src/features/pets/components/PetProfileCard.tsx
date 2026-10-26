@@ -1,6 +1,6 @@
+import { PetAvatar } from "@/shared/ui/media/PetAvatar";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
-import { Avatar, Box, Button, Divider, Stack, Typography } from "@mui/material";
-import { PawMark } from "@/shared/ui/brand/PawMark";
+import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 import { describePet, speciesLabel } from "../lib/describePet";
 import { petWizardCopy } from "../lib/petWizardCopy";
 import type { PetWizardValues } from "../stores/petWizardStore";
@@ -87,6 +87,8 @@ function blocksOf(values: PetWizardValues): Block[] {
 
 export interface PetProfileCardProps {
   values: PetWizardValues;
+  /** Id persistido; cadastro usa a chave fixa de rascunho. */
+  petId?: string;
   /** Prévia da capa (object URL da foto da vaga 1) ou `null`. */
   coverUrl: string | null;
   /** Data de referência da idade. */
@@ -104,7 +106,14 @@ export interface PetProfileCardProps {
  *
  * @example <PetProfileCard values={values} coverUrl={cover} now={now} onEdit={(step) => goTo(step)} />
  */
-export function PetProfileCard({ values, coverUrl, now, onEdit, showEmptyBlocks = false }: PetProfileCardProps) {
+export function PetProfileCard({
+  values,
+  coverUrl,
+  now,
+  onEdit,
+  showEmptyBlocks = false,
+  petId = "draft",
+}: PetProfileCardProps) {
   const pet = previewPet(values, coverUrl);
   const name = values.name || petWizardCopy.fallbackName;
   const blocks = blocksOf(values).map((block) => ({
@@ -126,13 +135,7 @@ export function PetProfileCard({ values, coverUrl, now, onEdit, showEmptyBlocks 
       }}
     >
       <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-        <Avatar
-          src={coverUrl ?? undefined}
-          alt=""
-          sx={{ width: 72, height: 72, bgcolor: "quintal.cartao", color: "text.secondary" }}
-        >
-          <PawMark size={32} />
-        </Avatar>
+        <PetAvatar aria-hidden="true" petId={petId} name={name} species={values.species} src={coverUrl} size={72} />
         <Box sx={{ minWidth: 0 }}>
           <Typography component="h2" variant="h3" sx={{ fontSize: 22 }}>
             {name}

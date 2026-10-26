@@ -52,6 +52,7 @@ export function BookingPetProfiles({ accountId, pets }: BookingPetProfilesProps)
         return (
           <Box key={pet.id}>
             <PetProfileCard
+              petId={pet.id}
               values={result.data.values}
               coverUrl={result.data.photos[0]?.url ?? null}
               now={now}
