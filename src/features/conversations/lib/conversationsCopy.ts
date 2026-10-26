@@ -2,6 +2,7 @@
 export const conversationsCopy = {
   heading: "Conversas",
   retryPhoto: "Tentar carregar a foto",
+  openPhoto: "Ampliar foto",
   loadingPhoto: "Carregando foto...",
   booking: {
     action: (name: string) => `Conversar com ${name}`,

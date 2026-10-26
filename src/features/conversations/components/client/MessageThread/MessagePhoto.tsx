@@ -1,12 +1,14 @@
 "use client";
 
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, ButtonBase, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { unwrapData } from "@/shared/api/contracts/unwrapData";
 import { GetApiV1ConversationsConversationIdMessagesMessageIdPhotoResponse } from "@/shared/api/generated/conversations/conversations.zod";
 import { bffClient } from "@/shared/api/client/bffClient";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
+import { focusRing, keyboardFocus } from "@/shared/theme/focus";
+import { PhotoLightbox } from "@/shared/ui/media/PhotoLightbox";
 import { conversationsCopy as copy } from "../../../lib/conversationsCopy";
 import type { ConversationMessage } from "../../../types";
 
@@ -30,6 +32,7 @@ export function MessagePhoto({
   );
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [open, setOpen] = useState(false);
   const recovered = useRef(false);
 
   useEffect(() => {
@@ -94,29 +97,53 @@ export function MessagePhoto({
     );
   if (expired) return <Typography role="status">{copy.loadingPhoto}</Typography>;
   return (
-    <Box
-      component="img"
-      src={url}
-      alt={mine ? copy.photoAlt(copy.you) : copy.photoAlt(otherName)}
-      onError={() => {
-        if (initialLink.expiresAt != null && !recovered.current) {
-          recovered.current = true;
-          setAttempt((value) => value + 1);
-        } else setFailed(true);
-      }}
-      sx={{
-        display: "block",
-        width: "min(340px, 85%)",
-        aspectRatio: "4 / 3",
-        objectFit: "cover",
-        border: "2px solid",
-        borderColor: "text.primary",
-        borderRadius: `${quintalRadii.media}px`,
-        boxShadow: hardShadow(5),
-        bgcolor: "quintal.cartao",
-        transform: mine ? "rotate(1deg)" : "rotate(-1deg)",
-        mb: 0.75,
-      }}
-    />
+    <>
+      <ButtonBase
+        aria-label={copy.openPhoto}
+        aria-haspopup="dialog"
+        onClick={() => setOpen(true)}
+        sx={{
+          display: "block",
+          width: "min(340px, 85%)",
+          borderRadius: `${quintalRadii.media}px`,
+          transform: mine ? "rotate(1deg)" : "rotate(-1deg)",
+          mb: 0.75,
+          cursor: "zoom-in",
+          [keyboardFocus()]: focusRing,
+        }}
+      >
+        <Box
+          component="img"
+          src={url}
+          alt={mine ? copy.photoAlt(copy.you) : copy.photoAlt(otherName)}
+          onError={() => {
+            if (initialLink.expiresAt != null && !recovered.current) {
+              recovered.current = true;
+              setAttempt((value) => value + 1);
+            } else setFailed(true);
+          }}
+          sx={{
+            display: "block",
+            width: "100%",
+            aspectRatio: "4 / 3",
+            objectFit: "cover",
+            border: "2px solid",
+            borderColor: "text.primary",
+            borderRadius: `${quintalRadii.media}px`,
+            boxShadow: hardShadow(5),
+            bgcolor: "quintal.cartao",
+          }}
+        />
+      </ButtonBase>
+      {open && (
+        <PhotoLightbox
+          photos={[{ id: message.id, url }]}
+          title={mine ? copy.photoAlt(copy.you) : copy.photoAlt(otherName)}
+          initialIndex={0}
+          open
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
   );
 }

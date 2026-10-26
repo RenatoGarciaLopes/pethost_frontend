@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { renderWithProviders } from "@/test/render";
@@ -20,6 +20,51 @@ const message = (expired = false) =>
   );
 
 describe("MessagePhoto", () => {
+  it("opens the original photo by keyboard, zooms and closes with Escape", async () => {
+    const photo = { ...message(), imageUrlExpiresAt: null };
+    const { user } = renderWithProviders(<MessagePhoto message={photo} mine={false} otherName="Cida" />);
+    const trigger = screen.getByRole("button", { name: "Ampliar foto" });
+    trigger.focus();
+    await user.keyboard("{Enter}");
+    const dialog = await screen.findByRole("dialog", { name: "Foto enviada por Cida" });
+    const image = within(dialog).getByRole("img", { name: /^Foto/ });
+    expect(image).toHaveAttribute("src", photo.imageUrl);
+    expect(image).toHaveStyle({ objectFit: "contain" });
+    await user.click(within(dialog).getByRole("button", { name: "Aumentar zoom" }));
+    expect(image).toHaveStyle({ transform: "translate(0px, 0px) scale(1.5)" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(trigger).toHaveFocus();
+    await user.click(trigger);
+    await user.click(screen.getByRole("button", { name: "Fechar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("keeps an open viewer on the renewed private URL", async () => {
+    const photo = message();
+    server.use(
+      http.get(`*/api/conversations/${photo.conversationId}/messages/${photo.id}/photo`, () =>
+        HttpResponse.json(
+          apiOk({
+            messageId: photo.id,
+            url: "https://bucket.test/renewed-viewer",
+            expiresAt: Math.floor(Date.now() / 1000) + 300,
+          }),
+        ),
+      ),
+    );
+    const { user } = renderWithProviders(<MessagePhoto message={photo} mine otherName="Cida" />);
+    const thumbnail = screen.getByRole("img");
+    await user.click(screen.getByRole("button", { name: "Ampliar foto" }));
+    fireEvent.error(thumbnail);
+    const dialog = screen.getByRole("dialog");
+    await waitFor(() =>
+      expect(within(dialog).getByRole("img", { name: /^Foto/ })).toHaveAttribute(
+        "src",
+        "https://bucket.test/renewed-viewer",
+      ),
+    );
+  });
   it("does not reload an unchanged photo when polling rotates its signed URL", () => {
     const photo = message();
     const { rerender } = renderWithProviders(<MessagePhoto message={photo} mine={false} otherName="Cida" />);
