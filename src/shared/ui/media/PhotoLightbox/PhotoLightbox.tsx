@@ -189,7 +189,8 @@ export function PhotoLightbox({ photos, title, initialIndex, open, onClose }: Ph
           }}
           sx={{
             flex: 1,
-            height: "100%",
+            position: "relative",
+            minHeight: 0,
             minWidth: 0,
             overflow: "hidden",
             display: "grid",
@@ -206,6 +207,8 @@ export function PhotoLightbox({ photos, title, initialIndex, open, onClose }: Ph
             draggable={false}
             onLoad={() => update(view.scale)}
             sx={{
+              position: "absolute",
+              inset: 0,
               width: "100%",
               height: "100%",
               objectFit: "contain",

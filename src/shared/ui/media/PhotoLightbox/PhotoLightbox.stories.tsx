@@ -15,6 +15,40 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** Dimensões extremas reproduzem o recorte causado pelo tamanho intrínseco no grid. */
+export const ProporcoesOriginais: Story = {
+  args: {
+    photos: [
+      [1600, 900],
+      [600, 1600],
+      [1200, 1200],
+    ].map(([width, height], index) => ({
+      id: `proportion-${index}`,
+      url: `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="100%" height="100%" fill="#7FC4E0"/><rect x="4" y="4" width="${width - 8}" height="${height - 8}" fill="none" stroke="#1F1A17" stroke-width="8"/><circle cx="${width / 2}" cy="${height / 2}" r="${Math.min(width, height) / 3}" fill="#FFC93C"/></svg>`)}`,
+    })),
+  },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    for (let index = 0; index < 3; index++) {
+      const image = body.getByRole("img", { name: `Foto ${index + 1} de Casa da Cida` }) as HTMLImageElement;
+      await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0));
+      const stage = body.getByTestId("photo-stage").getBoundingClientRect();
+      const box = image.getBoundingClientRect();
+      await expect(getComputedStyle(image).objectFit).toBe("contain");
+      await expect(Math.abs(box.height - stage.height)).toBeLessThan(1);
+      await expect(Math.abs(box.width - stage.width)).toBeLessThan(1);
+      await expect(stage.bottom).toBeLessThanOrEqual(window.innerHeight);
+      await expect(stage.height).toBeGreaterThan(100);
+      await userEvent.click(body.getByRole("button", { name: "Próxima foto" }));
+    }
+  },
+};
+
+export const ProporcoesOriginaisCelular: Story = {
+  ...ProporcoesOriginais,
+  globals: { viewport: { value: "celular", isRotated: false } },
+};
+
 /** Abertura, foco preso, zoom, navegação e retorno de foco no Chromium real. */
 export const Navegacao: Story = {
   render: function Exemplo(args) {
