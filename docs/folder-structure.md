@@ -654,3 +654,7 @@ PhotoSlots permanece em `src/shared/ui/media/PhotoSlots/`, com componente, copy,
 ## Linha do tempo ?nica (108)
 
 `src/shared/ui/data-display/StatusTimeline/` mant?m componente, tipos, teste e stories da trilha horizontal. `features/bookings/lib/stayDetailView.ts` monta os marcos consumidos por StayDetail e HostBookingDetail. `StayTimeline.tsx`, seu teste e `bookingStatus.trailSteps` foram removidos; n?o h? pasta nova de produ??o. Spec e valida??o: `specs/108-linha-do-tempo/`.
+
+## Fotos ampliadas (111)
+
+`shared/ui/media/PhotoLightbox/` cont?m componente client, index p?blico, testes e stories do visualizador de fotos; ListingGallery mant?m a composi??o da p?gina e detector de arraste. Sem HTTP, provider ou depend?ncia nova. Interfaces e valida??o em `specs/111-fotos-ampliadas/`.
