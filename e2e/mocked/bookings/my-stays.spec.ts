@@ -74,6 +74,16 @@ test("REQ-STAYS-001 a REQ-STAYS-005 da lista à estadia confirmada, com a trilha
   const trail = page.getByRole("list", { name: "Andamento da estadia" });
   await expect(trail).toBeVisible();
   await expect(trail.getByRole("listitem").nth(1)).toHaveAttribute("aria-current", "step");
+  await expect(trail.getByRole("listitem")).toHaveCount(4);
+  // A trilha continua horizontal no projeto mobile; não vira uma lista de passos vertical.
+  const markers = await trail
+    .getByRole("listitem")
+    .evaluateAll((items) =>
+      items.map((item) => ({ top: item.getBoundingClientRect().top, left: item.getBoundingClientRect().left })),
+    );
+  expect(markers.every((marker) => Math.abs(marker.top - markers[0].top) < 1)).toBe(true);
+  expect(markers[3].left).toBeGreaterThan(markers[0].left);
+  expect(await trail.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
   await expect(page.getByRole("region", { name: "Resumo" })).toContainText("R$ 60,00 × 5 noites × 1 pet");
   const contact = page.getByRole("region", { name: "Contato do anfitrião" });
   await expect(contact.getByRole("link", { name: "(44) 98888-7777" })).toHaveAttribute("href", "tel:44988887777");
@@ -110,6 +120,10 @@ test("REQ-STAYS-006 REQ-STAYS-007 cancela a estadia confirmada com motivo e vê 
 
   await expect(page.getByText("Estadia cancelada.")).toBeVisible();
   await expect(page.getByText("Reembolso de 100%")).toBeVisible();
+  const stopped = page.getByRole("list", { name: "Andamento da estadia" });
+  await expect(stopped.getByText("parou", { exact: true })).toBeVisible();
+  await expect(stopped.locator("[aria-current]")).toHaveCount(0);
+  await expect(stopped.getByText("Chegou", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Contato do anfitrião" })).toHaveCount(0);
 
   await page.goto("/owner/bookings");

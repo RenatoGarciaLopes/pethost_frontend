@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { visuallyHidden } from "../../a11y/visuallyHidden";
 
 export type TimelineStepState = "done" | "current" | "todo" | "stopped";
@@ -163,7 +164,7 @@ export function StatusTimeline({ label, steps }: StatusTimelineProps) {
                       mt: 0.5,
                       px: 1,
                       py: "1px",
-                      borderRadius: 99,
+                      borderRadius: `${quintalRadii.pill}px`,
                       fontSize: 12,
                       fontWeight: 800,
                       border: `${LINE}px solid ${theme.palette.quintal.tinta}`,
