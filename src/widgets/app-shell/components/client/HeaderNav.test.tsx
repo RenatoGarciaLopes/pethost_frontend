@@ -40,16 +40,46 @@ describe("atalhos do cabeçalho", () => {
     navigation.pathname = "/pets/0199d2a0-0000-7000-8000-000000000001";
   });
 
-  it("REQ-SHELL-006 a gaveta abre com os mesmos atalhos, fecha com Esc e devolve o foco ao botão", async () => {
+  it("REQ-SHELL-006 o botão do menu tem nome e estado, e a gaveta abre pela direita com os mesmos atalhos", async () => {
+    const { user } = setup();
+    const trigger = screen.getByRole("button", { name: "Abrir a navegação" });
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(trigger);
+
+    const drawer = await screen.findByRole("presentation");
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(trigger).toHaveAttribute("aria-controls", drawer.id);
+    expect(drawer).toHaveClass("MuiDrawer-anchorRight");
+    const nav = within(drawer).getByRole("navigation", { name: "Navegação principal" });
+    expect(within(nav).getByRole("link", { name: "Meus pets" })).toHaveAttribute("href", "/pets");
+    expect(within(nav).getByRole("link", { name: "Meus pets" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("REQ-SHELL-006 o X fecha a gaveta e devolve o foco ao botão", async () => {
     const { user } = setup();
     const trigger = screen.getByRole("button", { name: "Abrir a navegação" });
     await user.click(trigger);
-    const drawer = await screen.findByRole("presentation");
-    expect(within(drawer).getByRole("link", { name: "Meus pets" })).toHaveAttribute("href", "/pets");
+    const close = within(await screen.findByRole("presentation")).getByRole("button", { name: "Fechar menu" });
+    expect(close).toHaveFocus();
 
-    await user.keyboard("{Escape}");
+    await user.click(close);
 
     await waitFor(() => expect(screen.queryByRole("presentation")).not.toBeInTheDocument());
     expect(trigger).toHaveFocus();
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("REQ-SHELL-006 Esc fecha a gaveta e tocar num atalho também", async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole("button", { name: "Abrir a navegação" }));
+    await screen.findByRole("presentation");
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("presentation")).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: "Abrir a navegação" }));
+    const drawer = await screen.findByRole("presentation");
+    await user.click(within(drawer).getByRole("link", { name: "Minhas estadias" }));
+    await waitFor(() => expect(screen.queryByRole("presentation")).not.toBeInTheDocument());
   });
 });

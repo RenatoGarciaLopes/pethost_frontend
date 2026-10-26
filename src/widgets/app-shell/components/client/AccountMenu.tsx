@@ -58,6 +58,7 @@ export function AccountMenu({ user }: AccountMenuProps) {
           pr: { md: 1.5 },
           gap: 1,
           minHeight: 48,
+          minWidth: 48,
           color: "text.primary",
           border: "2px solid",
           borderColor: "text.primary",
