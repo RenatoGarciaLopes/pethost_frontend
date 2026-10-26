@@ -18,6 +18,18 @@ test("REQ-LPAGE-001/003/004/005/008/009/010/011 abre o cantinho como na prancha,
   await expect(page.getByText("neighbor")).toHaveCount(0);
   await expect(page.getByText(/O endereço chega quando a estadia for confirmada\./)).toBeVisible();
 
+  // 111: o visualizador abre a foto original, admite zoom e devolve o foco ao fechar.
+  const photo = page.getByRole("button", { name: /^Ver a foto 1 de \d+ de Quintal da Cida$/ });
+  await waitForHydration(photo);
+  await photo.click();
+  const viewer = page.getByRole("dialog", { name: "Quintal da Cida" });
+  await expect(viewer).toBeVisible();
+  await viewer.getByRole("button", { name: "Aumentar zoom" }).click();
+  await expect(viewer.getByRole("button", { name: "Voltar ao tamanho" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(viewer).toHaveCount(0);
+  await expect(photo).toBeFocused();
+
   // Voltar leva à home com a busca de origem (a rota /search sai na 079).
   const back = new URL(
     (await page.getByRole("link", { name: "← Casas perto de Zona 7" }).getAttribute("href"))!,
