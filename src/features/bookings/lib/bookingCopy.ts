@@ -168,7 +168,6 @@ export const bookingCopy = {
     arrival: "Chegada",
     departure: "Saída",
     nights: "Noites",
-    planned: (day: string) => `previsto ${day}`,
     now: {
       heading: "O que acontece agora",
       closedHeading: "O que aconteceu",

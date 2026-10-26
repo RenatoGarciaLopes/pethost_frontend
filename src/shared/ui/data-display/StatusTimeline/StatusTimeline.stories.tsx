@@ -33,7 +33,7 @@ export const Concluida: Story = {
   },
 };
 
-/** Celular: a trilha fica em coluna. */
+/** Celular: continua em linha, em colunas iguais. */
 export const Celular: Story = {
   name: "REQ-HVER-012 Celular",
   globals: { viewport: { value: "celular", isRotated: false } },
