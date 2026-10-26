@@ -1,12 +1,15 @@
 "use client";
 
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, type Appearance } from "@stripe/stripe-js";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { translateError } from "@/shared/api/errors/translateError";
 import { formatBRL } from "@/shared/lib/money";
 import { quintalColors } from "@/shared/theme/tokens/colors";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { quintalTypography } from "@/shared/theme/tokens/typography";
+import { formatDeadline } from "../../lib/formatStay";
 import type { PaymentSession } from "../../api/paymentContracts";
 import { paymentCopy as copy } from "../../lib/paymentCopy";
 
@@ -15,6 +18,41 @@ interface StripePaymentFormProps {
   returnPath: string;
   onSubmitted: () => Promise<void>;
 }
+
+/** Aparência única do iframe Stripe; usa tokens Quintal, sem depender de CSS do documento pai. */
+const stripeAppearance: Appearance = {
+  theme: "stripe",
+  variables: {
+    colorPrimary: quintalColors.tinta,
+    colorText: quintalColors.tinta,
+    colorTextSecondary: quintalColors.texto2,
+    colorBackground: quintalColors.papel,
+    colorDanger: quintalColors.erro,
+    borderRadius: `${quintalRadii.field}px`,
+    fontFamily: quintalTypography.fontFamily.replace(/var\(--font-body, (.*?)\)/, "$1"),
+    fontSizeBase: `${quintalTypography.fontSize}px`,
+  },
+  rules: {
+    ".Input, .Tab": {
+      border: `2px solid ${quintalColors.tinta}`,
+      backgroundColor: quintalColors.papel,
+      boxShadow: "none",
+    },
+    ".Tab--selected": {
+      backgroundColor: quintalColors.grama,
+      color: quintalColors.tinta,
+      borderColor: quintalColors.tinta,
+      boxShadow: "none",
+    },
+    ".TabLabel--selected, .TabIcon--selected": { color: quintalColors.tinta },
+    ".Input:focus, .Tab:focus": {
+      outline: `3px solid ${quintalColors.tinta}`,
+      outlineOffset: "3px",
+      boxShadow: "none",
+    },
+    ".Label": { color: quintalColors.tinta, fontWeight: "700" },
+  },
+};
 
 /** Checkout Stripe real. Chave pública só do env; sem suporte a confirmação simulada em produção. */
 export function StripePaymentForm(props: StripePaymentFormProps) {
@@ -27,7 +65,10 @@ export function StripePaymentForm(props: StripePaymentFormProps) {
       options={{
         clientSecret: props.session.clientSecret,
         locale: "pt-BR",
-        appearance: { theme: "stripe", variables: { colorPrimary: quintalColors.tinta, borderRadius: "12px" } },
+        appearance: stripeAppearance,
+        fonts: [
+          { cssSrc: "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap" },
+        ],
       }}
     >
       <PaymentForm {...props} />
@@ -39,6 +80,7 @@ function PaymentForm({ session, returnPath, onSubmitted }: StripePaymentFormProp
   const stripe = useStripe();
   const elements = useElements();
   const [sending, setSending] = useState(false);
+  const [method, setMethod] = useState("pix");
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submitted = useRef(false);
@@ -83,6 +125,7 @@ function PaymentForm({ session, returnPath, onSubmitted }: StripePaymentFormProp
       <Stack spacing={2}>
         <PaymentElement
           options={{ layout: "tabs", paymentMethodOrder: ["pix", "card"] }}
+          onChange={(event) => setMethod(event.value.type)}
           onReady={() => {
             setReady(true);
             setError(null);
@@ -98,9 +141,20 @@ function PaymentForm({ session, returnPath, onSubmitted }: StripePaymentFormProp
           </Typography>
         )}
         {!ready && !error && <Typography role="status">{copy.loading}</Typography>}
-        <Button type="submit" variant="contained" disabled={!stripe || !elements || !ready || sending}>
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+          size="large"
+          disabled={!stripe || !elements || !ready || sending}
+        >
           {sending ? copy.waiting : `${copy.pay} ${formatBRL(session.amount)}`}
         </Button>
+        {method === "pix" && (
+          <Typography variant="body2">
+            {copy.pixDeadline(formatDeadline(new Date(session.pixExpiresAt * 1000).toISOString()))}
+          </Typography>
+        )}
       </Stack>
     </Box>
   );

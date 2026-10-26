@@ -272,16 +272,10 @@ export function BookingPaymentView({
                         returnPath={ownerBookingPaymentPath(bookingId)}
                         onSubmitted={() => state.synchronize(state.session?.installmentNumber === 1)}
                       />
-                      <Typography variant="body2">
-                        {copy.pixDeadline(
-                          formatDeadline(
-                            new Date(state.session.pixExpiresAt * 1000).toISOString(),
-                            new Date(state.now),
-                          ),
-                        )}
-                      </Typography>
                       <Button variant="text" onClick={state.resetSession}>
-                        {copy.change}
+                        {payment.options?.length && payment.paidAmount === 0 && state.session.installmentNumber === 1
+                          ? copy.changePlan
+                          : copy.return}
                       </Button>
                     </Stack>
                   ) : state.waiting || !canOpen ? (

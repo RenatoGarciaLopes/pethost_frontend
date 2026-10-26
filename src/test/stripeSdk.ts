@@ -10,7 +10,7 @@ export function createStripeSdkFixture(
   } = {},
 ) {
   let currentSecret = "";
-  let method = "card";
+  let method = "pix";
   const elements = {
     update() {},
     create() {
@@ -45,6 +45,7 @@ export function createStripeSdkFixture(
             radio.checked = value === method;
             radio.addEventListener("change", () => {
               method = value!;
+              listeners.get("change")?.({ value: { type: method } });
             });
             container.append(radio, document.createTextNode(label!));
             container.style.display = "block";
