@@ -1,4 +1,3 @@
-import type { TimelineStep } from "@/shared/ui/data-display/StatusTimeline";
 import type { BookingStatus } from "../types";
 
 /**
@@ -40,29 +39,4 @@ export const HOST_TABS: readonly BookingTab[] = [
  */
 export function hostTabOf(id: string | undefined): BookingTab {
   return HOST_TABS.find((tab) => tab.id === id) ?? HOST_TABS[0]!;
-}
-
-export const TRAIL_LABELS = ["Pedido", "Confirmada", "Chegou", "Voltou pra casa"] as const;
-const TRAIL_POSITION: Partial<Record<BookingStatus, number>> = {
-  requested: 0,
-  accepted: 1,
-  confirmed: 1,
-  in_progress: 2,
-  completed: 4,
-};
-
-/**
- * A trilha da estadia para o `StatusTimeline`: Pedido → Confirmada → Chegou → Voltou pra casa (REQ-STDAY-007). Recusada,
- * expirada ou cancelada não tem trilha (`null`): o detalhe explica o que houve.
- *
- * @example const steps = trailSteps(booking.status); steps && <StatusTimeline label="Andamento" steps={steps} />
- */
-export function trailSteps(status: BookingStatus): TimelineStep[] | null {
-  const position = TRAIL_POSITION[status];
-  if (position === undefined) return null;
-  return TRAIL_LABELS.map((label, index) => ({
-    id: label,
-    label,
-    state: index < position ? "done" : index === position ? "current" : "todo",
-  }));
 }

@@ -1,41 +1,50 @@
 import type { TimelineStep } from "@/shared/ui/data-display/StatusTimeline";
 import type { NoticeProps } from "@/shared/ui/feedback/Notice";
-import type { Booking } from "../types";
+import type { Booking, BookingStatus } from "../types";
 import { bookingCopy } from "./bookingCopy";
 import { formatDeadline, formatMoment, formatStayDay } from "./formatStay";
-import { TRAIL_LABELS, trailSteps } from "./bookingStatus";
+import { statusLabel } from "./bookingStatus";
 
 const copy = bookingCopy.stay;
 
-export interface StayTrailStep {
-  id: string;
-  label: string;
-  state: TimelineStep["state"];
-  /** Quando aconteceu ("10 de dez., 14h30") ou, se falta, "previsto sáb., 20 de dez."; sem dado, `null`. */
-  when: string | null;
-}
+const TRAIL_LABELS = ["Pedido", "Confirmada", "Chegou", "Voltou pra casa"] as const;
+const TRAIL_POSITION: Partial<Record<BookingStatus, number>> = {
+  requested: 0,
+  accepted: 1,
+  confirmed: 1,
+  in_progress: 2,
+  completed: 4,
+};
 
 /**
  * A linha do tempo da estadia (Pedido, Confirmada, Chegou, Voltou pra casa) com o momento de cada marco, só do que a
- * API informa. Recusada, expirada e cancelada não têm trilha (`null`).
+ * API informa; o que falta mostra só o dia previsto. Recusada, expirada e cancelada acabam no marco em que pararam
+ * (feitos até ali + uma etapa "parou" com o nome da situação), sem etapas futuras: o motivo vem do detalhe da reserva.
  *
- * @example const steps = stayTrail(booking); steps && <StayTimeline steps={steps} />
+ * @example <StatusTimeline label="Andamento" steps={stayTrail(booking)} />
  */
-export function stayTrail(booking: Booking): StayTrailStep[] | null {
-  const steps = trailSteps(booking.status);
-  if (!steps) return null;
+export function stayTrail(booking: Booking): TimelineStep[] {
   const happened = [booking.requestedAt, booking.confirmedAt, booking.checkedInAt, booking.checkedOutAt];
+  const position = TRAIL_POSITION[booking.status];
+  if (position === undefined) {
+    const reached = Math.max(1, happened.findIndex((moment) => !moment) === -1 ? 4 : happened.findIndex((m) => !m));
+    return [
+      ...TRAIL_LABELS.slice(0, reached).map((label, index) => ({
+        id: label,
+        label,
+        state: "done" as const,
+        detail: formatMoment(happened[index]!),
+      })),
+      { id: booking.status, label: statusLabel[booking.status], state: "stopped" },
+    ];
+  }
   const planned = [null, null, booking.checkIn, booking.checkOut];
-  return steps.map((step, index) => {
+  return TRAIL_LABELS.map((label, index) => {
+    const state = index < position ? "done" : index === position ? "current" : "todo";
     const moment = happened[index];
     const day = planned[index];
-    const when =
-      step.state === "todo" && day
-        ? copy.planned(formatStayDay(day))
-        : step.state !== "todo" && moment
-          ? formatMoment(moment)
-          : null;
-    return { id: TRAIL_LABELS[index]!, label: step.label, state: step.state, when };
+    const detail = state === "todo" ? (day ? formatStayDay(day) : null) : moment ? formatMoment(moment) : null;
+    return { id: label, label, state, detail };
   });
 }
 

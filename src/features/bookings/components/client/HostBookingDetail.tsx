@@ -15,7 +15,8 @@ import { Surface } from "@/shared/ui/layout/Surface";
 import { bookingQueries } from "../../api/queries";
 import { bookingCopy } from "../../lib/bookingCopy";
 import { hostBookingsPath } from "../../lib/bookingPaths";
-import { statusLabel, trailSteps } from "../../lib/bookingStatus";
+import { statusLabel } from "../../lib/bookingStatus";
+import { stayTrail } from "../../lib/stayDetailView";
 import { describeBookingPet } from "../../lib/describeBookingPet";
 import { formatDeadline, formatPeriod, isDeadlineNear } from "../../lib/formatStay";
 import type { Booking, BookingStatus } from "../../types";
@@ -104,7 +105,7 @@ export function HostBookingDetail({ accountId, bookingId, petProfiles, now, conv
 
   const booking = query.data;
   const owner = booking.owner?.name ?? "";
-  const steps = trailSteps(booking.status);
+  const steps = stayTrail(booking);
   const closed = copy.closed[booking.status];
   const requested = booking.status === "requested";
   const pets = names.format(booking.pets.map((pet) => pet.name ?? bookingCopy.unknownPet));
@@ -145,7 +146,7 @@ export function HostBookingDetail({ accountId, bookingId, petProfiles, now, conv
         {conversation}
         {justConfirmed && booking.status === "confirmed" && <Notice tone="ok" title={bookingCopy.accept.done} />}
         {closed && <Notice tone="info" title={closed} />}
-        {steps && <StatusTimeline label={copy.trail} steps={steps} />}
+        <StatusTimeline label={copy.trail} steps={steps} />
         {petProfiles}
       </Stack>
       <Surface

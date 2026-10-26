@@ -110,7 +110,7 @@ describe("StayDetail", () => {
     setup({ status: "declined", responseDeadline: null, declineReason: "Já estou com a casa cheia" });
     expect(screen.getByText("Aparecida Souza não pôde receber dessa vez.")).toBeInTheDocument();
     expect(screen.getByText("Nada foi cobrado.")).toBeInTheDocument();
-    expect(screen.queryByRole("list", { name: copy.trail })).not.toBeInTheDocument();
+    expect(within(screen.getByRole("list", { name: copy.trail })).getAllByRole("listitem")).toHaveLength(2);
     expect(screen.getByText("Motivo: Já estou com a casa cheia")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: copy.searchAgain })).toHaveAttribute("href", "/");
   });

@@ -11,15 +11,15 @@ const stay = (overrides: Record<string, unknown> = {}): Booking =>
 
 describe("stayTrail", () => {
   it("REQ-STAYS-011 pedido esperando: o pedido é o atual e os outros mostram o dia previsto", () => {
-    const steps = stayTrail(stay({ status: "requested" }))!;
+    const steps = stayTrail(stay({ status: "requested" }));
     expect(steps.map((step) => [step.label, step.state])).toEqual([
       ["Pedido", "current"],
       ["Confirmada", "todo"],
       ["Chegou", "todo"],
       ["Voltou pra casa", "todo"],
     ]);
-    expect(steps[2]!.when).toBe("previsto dom., 20 de dez.");
-    expect(steps[3]!.when).toBe("previsto sex., 25 de dez.");
+    expect(steps[2]!.detail).toBe("dom., 20 de dez.");
+    expect(steps[3]!.detail).toBe("sex., 25 de dez.");
   });
 
   it("REQ-STAYS-011 em andamento: passados com o momento, o atual sem inventar hora, o futuro previsto", () => {
@@ -30,17 +30,34 @@ describe("stayTrail", () => {
         confirmedAt: "2026-12-10T17:30:00Z",
         checkedInAt: "2026-12-20T15:00:00Z",
       }),
-    )!;
+    );
     expect(steps.map((step) => step.state)).toEqual(["done", "done", "current", "todo"]);
-    expect(steps[0]!.when).toBe("10 de dez., 9h");
-    expect(steps[1]!.when).toBe("10 de dez., 14h30");
-    expect(steps[2]!.when).toBe("20 de dez., 12h");
-    expect(steps[3]!.when).toBe("previsto sex., 25 de dez.");
+    expect(steps[0]!.detail).toBe("10 de dez., 9h");
+    expect(steps[1]!.detail).toBe("10 de dez., 14h30");
+    expect(steps[2]!.detail).toBe("20 de dez., 12h");
+    expect(steps[3]!.detail).toBe("sex., 25 de dez.");
   });
 
-  it("REQ-STAYS-011 concluída: tudo feito; recusada, expirada e cancelada não têm trilha", () => {
-    expect(stayTrail(stay({ status: "completed" }))!.every((step) => step.state === "done")).toBe(true);
-    for (const status of ["declined", "expired", "cancelled"]) expect(stayTrail(stay({ status }))).toBeNull();
+  it("REQ-STAYS-011 concluída: tudo feito", () => {
+    expect(stayTrail(stay({ status: "completed" })).every((step) => step.state === "done")).toBe(true);
+  });
+
+  it("REQ-STAYS-011 recusada, expirada e cancelada acabam onde pararam, sem etapas futuras", () => {
+    const shape = (overrides: Record<string, unknown>) =>
+      stayTrail(stay(overrides)).map((step) => [step.label, step.state]);
+    expect(shape({ status: "declined" })).toEqual([
+      ["Pedido", "done"],
+      ["Não aceita", "stopped"],
+    ]);
+    expect(shape({ status: "expired" })).toEqual([
+      ["Pedido", "done"],
+      ["Expirou", "stopped"],
+    ]);
+    expect(shape({ status: "cancelled", confirmedAt: "2026-12-10T17:30:00Z" })).toEqual([
+      ["Pedido", "done"],
+      ["Confirmada", "done"],
+      ["Cancelada", "stopped"],
+    ]);
   });
 });
 

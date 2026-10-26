@@ -21,7 +21,7 @@ import type { Booking, BookingStatus } from "../../types";
 import { CancelStayDialog } from "./CancelStayDialog";
 import { StayPhotoFrame } from "./StayPhotoFrame";
 import { StaySummary } from "./StaySummary";
-import { StayTimeline } from "./StayTimeline";
+import { StatusTimeline } from "@/shared/ui/data-display/StatusTimeline";
 
 const copy = bookingCopy.stay;
 /** Só nestes status o contato do anfitrião aparece (REQ-STAYS-005). */
@@ -134,13 +134,10 @@ export function StayDetail({ accountId, bookingId, now, conversation }: StayDeta
 
   const booking = query.data;
   const view = ownerStayView(booking, moment);
-  const trail = stayTrail(booking);
   const cancellable = CANCELLABLE.includes(booking.status);
   const contact = showsContact(booking);
-  const left = [trail && "trail", "now", contact && "contact", cancellable && "actions"].filter(Boolean) as string[];
-  const mobileAreas = [trail && "trail", "now", "summary", contact && "contact", cancellable && "actions"].filter(
-    Boolean,
-  );
+  const left = ["trail", "now", contact && "contact", cancellable && "actions"].filter(Boolean) as string[];
+  const mobileAreas = ["trail", "now", "summary", contact && "contact", cancellable && "actions"].filter(Boolean);
 
   return (
     <Stack spacing={3}>
@@ -176,11 +173,9 @@ export function StayDetail({ accountId, bookingId, now, conversation }: StayDeta
           gridTemplateRows: { md: `${"auto ".repeat(left.length - 1)}1fr` },
         }}
       >
-        {trail && (
-          <Box sx={{ gridArea: "trail" }}>
-            <StayTimeline label={copy.trail} steps={trail} />
-          </Box>
-        )}
+        <Box sx={{ gridArea: "trail" }}>
+          <StatusTimeline label={copy.trail} steps={stayTrail(booking)} />
+        </Box>
         <Box sx={{ gridArea: "now" }}>
           <NowPanel now={stayNow(booking, moment)} booking={booking} />
         </Box>

@@ -1,7 +1,8 @@
 import { Box, Typography } from "@mui/material";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { visuallyHidden } from "../../a11y/visuallyHidden";
 
-export type TimelineStepState = "done" | "current" | "todo";
+export type TimelineStepState = "done" | "current" | "todo" | "stopped";
 
 export interface TimelineStep {
   /** Identificador estável. */
@@ -9,57 +10,85 @@ export interface TimelineStep {
   /** Nome curto da etapa ("Enviado", "Em análise"). */
   label: string;
   state: TimelineStepState;
+  /** Quando aconteceu ou está previsto ("10 de dez., 9h", "dom., 20 de dez."); sem dado, omita. */
+  detail?: string | null;
 }
 
 export interface StatusTimelineProps {
   /** Nome acessível da trilha ("Andamento da verificação"). */
   label: string;
-  /** Etapas na ordem; uma só `current`. */
+  /** Etapas na ordem; uma só `current` (ou nenhuma, se terminar em `stopped`). */
   steps: readonly TimelineStep[];
 }
 
-/** Estado em texto para o leitor de tela (a marca visual só reforça). */
-const STATE_TEXT: Readonly<Record<TimelineStepState, string>> = { done: "feito", current: "agora", todo: "falta" };
+const LINE = 2;
+/** Marcador menor no celular (390), para as etapas caberem lado a lado. */
+const MARKER = { xs: 26, sm: 32 } as const;
+const GAP = { xs: 4, sm: 6 } as const;
+const STATE_TEXT: Readonly<Record<TimelineStepState, string>> = {
+  done: "feito",
+  current: "agora",
+  todo: "falta",
+  stopped: "parou",
+};
 
 function Marker({ state }: { state: TimelineStepState }) {
+  const size = { xs: MARKER.xs, sm: MARKER.sm };
+  const icon = { xs: 14, sm: 18 };
   return (
     <Box
-      component="svg"
-      viewBox="0 0 28 28"
       aria-hidden="true"
-      sx={(theme) => ({ width: 28, height: 28, flexShrink: 0, color: theme.palette.quintal.tinta })}
-    >
-      <circle
-        cx="14"
-        cy="14"
-        r="11"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        fill={
+      sx={(theme) => ({
+        position: "relative",
+        zIndex: 1,
+        display: "grid",
+        placeItems: "center",
+        flexShrink: 0,
+        width: size,
+        height: size,
+        boxSizing: "border-box",
+        borderRadius: "50%",
+        border: `${LINE}px ${state === "todo" ? "dashed" : "solid"} ${theme.palette.quintal.tinta}`,
+        bgcolor:
           state === "done"
-            ? "var(--mui-palette-success-main)"
+            ? theme.palette.grama.main
             : state === "current"
-              ? "var(--mui-palette-ceu-main)"
-              : "none"
-        }
-      />
-      {state === "done" && (
-        <path d="M8.5 14.5l3.6 3.4 7.4-8" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+              ? theme.palette.gema.main
+              : state === "stopped"
+                ? theme.palette.primary.main
+                : "transparent",
+        boxShadow: state === "current" ? `0 0 0 4px ${theme.palette.quintal.luz}` : "none",
+        color: theme.palette.quintal.tinta,
+      })}
+    >
+      {(state === "done" || state === "stopped") && (
+        <Box component="svg" viewBox="0 0 28 28" sx={{ width: icon, height: icon }}>
+          <path
+            d={state === "done" ? "M6 14.5l5.2 5 10.8-11" : "M8 8l12 12M20 8L8 20"}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+          />
+        </Box>
       )}
-      {state === "current" && <circle cx="14" cy="14" r="4" fill="currentColor" />}
+      {state === "current" && <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "currentColor" }} />}
     </Box>
   );
 }
 
 /**
- * Trilha de status, em ordem, com a etapa de agora destacada (spec 030: Enviado → Em análise → Aprovado). Nunca só a
- * cor: cada etapa diz em texto se foi feita, é agora ou falta, e a atual leva `aria-current="step"`. Sem movimento
- * (status não quica).
+ * Linha do tempo do app: marcadores ligados por um trilho contínuo, sólido até onde já se chegou e tracejado no que falta.
+ * Feito = grama com ✓; agora = gema com anel e a pílula "agora"; falta = contorno tracejado; parou = coral com ✕ (recusada,
+ * expirada, cancelada: a trilha acaba ali, sem etapas futuras). Sempre horizontal, em colunas iguais (também no celular),
+ * com rótulo e data centralizados embaixo de cada marcador e o trilho atravessando entre eles. Nunca só a cor: cada
+ * etapa diz em texto se foi feita, é agora, falta ou parou, e a atual leva `aria-current="step"`. Nada é interativo e
+ * nada se mexe.
  *
- * Quando usar: acompanhar algo que anda sozinho do lado de lá (verificação, estadia 052/054). Quando não usar:
- * passos que a pessoa percorre num formulário (use `WizardProgress`).
+ * Quando usar: acompanhar algo que anda sozinho do lado de lá (verificação, estadia). Quando não usar: passos que a pessoa
+ * percorre num formulário (use `WizardProgress`).
  *
- * @example <StatusTimeline label="Andamento da verificação" steps={[{ id: "sent", label: "Enviado", state: "done" }]} />
+ * @example <StatusTimeline label="Andamento da estadia" steps={[{ id: "ask", label: "Pedido", state: "done", detail: "10 de dez., 9h" }]} />
  */
 export function StatusTimeline({ label, steps }: StatusTimelineProps) {
   return (
@@ -70,27 +99,100 @@ export function StatusTimeline({ label, steps }: StatusTimelineProps) {
         listStyle: "none",
         m: 0,
         p: 0,
-        display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        gap: { xs: 1.5, sm: 3 },
+        display: "grid",
+        gridAutoFlow: "column",
+        gridAutoColumns: "minmax(0, 1fr)",
       }}
     >
-      {steps.map((step) => (
-        <Box
-          component="li"
-          key={step.id}
-          aria-current={step.state === "current" ? "step" : undefined}
-          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-        >
-          <Marker state={step.state} />
-          <Typography component="span" sx={{ fontWeight: step.state === "current" ? 800 : 600 }}>
-            {step.label}
-          </Typography>
-          <Box component="span" sx={visuallyHidden}>
-            {`, ${STATE_TEXT[step.state]}`}
+      {steps.map((step, index) => {
+        const last = index === steps.length - 1;
+        const marked = step.state === "current" || step.state === "stopped";
+        return (
+          <Box
+            component="li"
+            key={step.id}
+            aria-current={step.state === "current" ? "step" : undefined}
+            sx={(theme) => ({
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1,
+              px: 0.25,
+              textAlign: "center",
+              ...(!last && {
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  height: 0,
+                  borderTop: `${LINE}px ${step.state === "done" ? "solid" : "dashed"} ${
+                    step.state === "done" ? theme.palette.quintal.tinta : theme.palette.text.secondary
+                  }`,
+                  // Do marcador ao próximo, passando por cima do espaço entre as colunas.
+                  top: { xs: MARKER.xs / 2 - LINE / 2, sm: MARKER.sm / 2 - LINE / 2 },
+                  left: {
+                    xs: `calc(50% + ${MARKER.xs / 2 + GAP.xs}px)`,
+                    sm: `calc(50% + ${MARKER.sm / 2 + GAP.sm}px)`,
+                  },
+                  right: {
+                    xs: `calc(-50% + ${MARKER.xs / 2 + GAP.xs}px)`,
+                    sm: `calc(-50% + ${MARKER.sm / 2 + GAP.sm}px)`,
+                  },
+                },
+              }),
+            })}
+          >
+            <Marker state={step.state} />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                component="span"
+                sx={{
+                  display: "block",
+                  fontWeight: marked ? 800 : 700,
+                  fontSize: { xs: 14, sm: 16 },
+                  lineHeight: 1.25,
+                  color: step.state === "todo" ? "text.secondary" : "text.primary",
+                }}
+              >
+                {step.label}
+                {marked ? (
+                  <Box
+                    component="span"
+                    sx={(theme) => ({
+                      display: "table",
+                      mx: "auto",
+                      mt: 0.5,
+                      px: 1,
+                      py: "1px",
+                      borderRadius: `${quintalRadii.pill}px`,
+                      fontSize: 12,
+                      fontWeight: 800,
+                      border: `${LINE}px solid ${theme.palette.quintal.tinta}`,
+                      bgcolor: step.state === "current" ? theme.palette.gema.main : theme.palette.primary.main,
+                    })}
+                  >
+                    <Box component="span" sx={visuallyHidden}>
+                      ,{" "}
+                    </Box>
+                    {STATE_TEXT[step.state]}
+                  </Box>
+                ) : (
+                  <Box component="span" sx={visuallyHidden}>{`, ${STATE_TEXT[step.state]}`}</Box>
+                )}
+              </Typography>
+              {step.detail && (
+                <Typography
+                  component="span"
+                  color="text.secondary"
+                  sx={{ display: "block", fontSize: { xs: 12, sm: 14 }, lineHeight: 1.3, mt: 0.25 }}
+                >
+                  {step.detail}
+                </Typography>
+              )}
+            </Box>
           </Box>
-        </Box>
-      ))}
+        );
+      })}
     </Box>
   );
 }
