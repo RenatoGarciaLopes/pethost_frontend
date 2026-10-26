@@ -2,13 +2,13 @@
 import { Button, Link, Stack, Typography, SvgIcon } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
 import { bookingQueries } from "@/features/bookings/index.client";
 import { conversationPath, conversationQueries, conversationsCopy, CONVERSATIONS_PATH } from "@/features/conversations";
-import { openConversation, UnreadBadge } from "@/features/conversations/index.client";
+import { UnreadBadge } from "@/features/conversations/index.client";
 import { translateError } from "@/shared/api/errors/translateError";
 import { Notice } from "@/shared/ui/feedback/Notice";
+
+import { HostConversation } from "./HostConversation";
 
 const copy = conversationsCopy.booking;
 
@@ -30,10 +30,6 @@ export function BookingConversation({
     ...conversationQueries.mine(accountId),
     enabled: side === "host" && !!booking.data,
   });
-  const router = useRouter();
-  const sending = useRef(false);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<unknown>(null);
   if (!booking.data) return null;
   const data = booking.data;
   const name = side === "owner" ? (data.host?.name ?? copy.host) : (data.owner?.name ?? copy.owner);
@@ -50,29 +46,7 @@ export function BookingConversation({
     maxWidth: "100%",
     textAlign: "left",
   } as const;
-  async function open() {
-    if (sending.current) return;
-    sending.current = true;
-    setPending(true);
-    setError(null);
-    try {
-      const conversation = await openConversation(data.listingId);
-      router.push(conversationPath(conversation.id));
-    } catch (failure) {
-      setError(failure);
-      sending.current = false;
-      setPending(false);
-    }
-  }
-  if (side === "owner")
-    return (
-      <Stack spacing={1}>
-        <Button variant="outlined" startIcon={chatIcon} loading={pending} onClick={() => void open()} sx={buttonStyle}>
-          {label}
-        </Button>
-        {error != null && <Notice tone="atencao" title={translateError(error)} />}
-      </Stack>
-    );
+  if (side === "owner") return <HostConversation listingId={data.listingId} hostName={data.host?.name} />;
   if (conversations.isPending) return <Typography role="status">{copy.loading}</Typography>;
   if (conversations.isError)
     return (

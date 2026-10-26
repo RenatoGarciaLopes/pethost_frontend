@@ -22,6 +22,7 @@ R1: `src/features/conversations/components/client/UnreadBadge.tsx` concentra o s
 
 ```text
 src/widgets/booking-conversation/
+  HostConversation.tsx             abertura de conversa pelo cantinho, com loading e erro
   BookingConversation.tsx           composição client bookings + conversations
   BookingConversation.int.test.tsx  MSW: criação, falhas, lookup e limite
   index.ts                         export público do widget

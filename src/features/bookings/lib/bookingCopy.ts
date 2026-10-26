@@ -218,6 +218,7 @@ export const bookingCopy = {
     notSpecies: (species: string) => `Esse cantinho não recebe ${species}`,
     notSize: (size: string) => `Esse cantinho não recebe ${size}`,
     summary: "Resumo do pedido",
+    contactHostHint: "Tire suas dúvidas sobre o cantinho com o anfitrião.",
     noCover: "Cantinho sem foto ainda",
     period: (period: string, nights: number) => `${period} · ${nights === 1 ? "1 noite" : `${nights} noites`}`,
     choose: "Escolhe as datas e pelo menos um pet pra ver o total.",

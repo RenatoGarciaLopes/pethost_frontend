@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { HostConversation } from "@/widgets/booking-conversation";
 import { RequestStayForm, type PickablePet, type RequestStayFormProps } from "@/features/bookings/index.client";
 import {
   listingClosedDays,
@@ -10,7 +11,10 @@ import {
   type ListingFitRules,
 } from "@/features/listing-page";
 
-export interface RequestStayComposerProps extends Omit<RequestStayFormProps, "pets" | "totalOf" | "closedDay"> {
+export interface RequestStayComposerProps extends Omit<
+  RequestStayFormProps,
+  "pets" | "totalOf" | "closedDay" | "conversation"
+> {
   /** Regras de espécie e porte do cantinho. */
   rules: ListingFitRules;
   pets: readonly Omit<PickablePet, "fit">[];
@@ -42,6 +46,7 @@ export function RequestStayComposer({
     <RequestStayForm
       {...props}
       listing={listing}
+      conversation={<HostConversation listingId={listing.id} hostName={listing.hostName} />}
       pets={pickable}
       closedDay={closedDay}
       totalOf={(checkIn, checkOut, count) => stayTotal(listing.nightlyRate, checkIn, checkOut, count)}

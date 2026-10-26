@@ -12,6 +12,7 @@ import { apiOk, apiFail } from "@/test/fixtures/session";
 import { createTestQueryClient, renderWithProviders } from "@/test/render";
 import { server } from "@/test/msw/server";
 import { BookingConversation } from "./BookingConversation";
+import { HostConversation } from "./HostConversation";
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 const booking = toBooking(bookingDtoSchema.parse(bookingDto()));
@@ -35,6 +36,24 @@ beforeEach(() => {
   server.use(http.get("*/api/bookings/:id", () => HttpResponse.json(apiOk(bookingDto()))));
 });
 describe("BookingConversation", () => {
+  it("abre a conversa antes de existir reserva sem submeter o formulário externo", async () => {
+    const submit = vi.fn((event: import("react").FormEvent) => event.preventDefault());
+    server.use(
+      http.post("*/api/conversations", async ({ request }) => {
+        expect(await request.json()).toEqual({ listingId: booking.listingId });
+        return HttpResponse.json(apiOk(conversationDto()), { status: 201 });
+      }),
+    );
+    const { user } = renderWithProviders(
+      <form onSubmit={submit}>
+        <HostConversation listingId={booking.listingId} hostName="Aparecida" />
+      </form>,
+      { theme: quintalTheme },
+    );
+    await user.click(screen.getByRole("button", { name: "Conversar com Aparecida" }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/conversations/" + CIDA_CONVERSATION_ID));
+    expect(submit).not.toHaveBeenCalled();
+  });
   it("tutor posts listingId once while pending and navigates to returned conversation", async () => {
     let calls = 0;
     server.use(

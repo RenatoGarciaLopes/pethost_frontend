@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
@@ -43,6 +43,8 @@ export interface RequestStayListing {
 }
 
 export interface RequestStayFormProps {
+  /** Ação de conversa composta pela rota; não envia o formulário. */
+  conversation?: ReactNode;
   accountId: string;
   listing: RequestStayListing;
   /** Pets ativos do tutor, com "combina" já calculado (`petFitsListing`, pela rota). */
@@ -60,7 +62,17 @@ export interface RequestStayFormProps {
 }
 
 /** "Pedido enviado!" com o prazo em Brasília e os dois caminhos (REQ-REQST-006). O foco vai para o título. */
-function RequestSent({ booking, hostName, now }: { booking: Booking; hostName: string; now: Date }) {
+function RequestSent({
+  booking,
+  hostName,
+  now,
+  conversation,
+}: {
+  booking: Booking;
+  hostName: string;
+  now: Date;
+  conversation?: ReactNode;
+}) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => headingRef.current?.focus(), []);
   return (
@@ -81,6 +93,7 @@ function RequestSent({ booking, hostName, now }: { booking: Booking; hostName: s
           {copy.backToSearch}
         </Button>
       </Stack>
+      {conversation}
     </Stack>
   );
 }
@@ -91,11 +104,13 @@ function RequestSummary({
   values,
   pets,
   total,
+  conversation,
 }: {
   listing: RequestStayListing;
   values: { checkIn: string; checkOut: string; petIds: readonly string[] };
   pets: readonly PickablePet[];
   total: string | null;
+  conversation?: ReactNode;
 }) {
   const headingId = useId();
   const nights = nightsBetween(values.checkIn, values.checkOut);
@@ -117,6 +132,14 @@ function RequestSummary({
       )}
       <Typography sx={{ fontWeight: 800 }}>{listing.title}</Typography>
       <Typography color="text.secondary">{`${listing.neighborhood}, ${listing.city}`}</Typography>
+      {conversation && (
+        <Stack spacing={1} sx={{ py: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            {copy.contactHostHint}
+          </Typography>
+          {conversation}
+        </Stack>
+      )}
       {total && Number.isInteger(nights) && nights > 0 ? (
         <>
           <Typography>{copy.period(formatPeriod(values.checkIn, values.checkOut), nights)}</Typography>
@@ -148,6 +171,7 @@ export function RequestStayForm({
   totalOf,
   now,
   closedDay,
+  conversation,
 }: RequestStayFormProps) {
   const fitting = useMemo(() => new Set(pets.filter((pet) => pet.fit.fits).map((pet) => pet.id)), [pets]);
   const { control, handleSubmit, setError, setValue, formState } = useForm<RequestStayValues>({
@@ -166,7 +190,8 @@ export function RequestStayForm({
   const [notice, setNotice] = useState<{ message: string; listingGone: boolean } | null>(null);
   const hostName = listing.hostName ?? copy.theHost;
 
-  if (sent) return <RequestSent booking={sent} hostName={hostName} now={now ?? new Date()} />;
+  if (sent)
+    return <RequestSent booking={sent} hostName={hostName} now={now ?? new Date()} conversation={conversation} />;
 
   async function send(values: RequestStayValues) {
     // Clique duplo antes do botão travar não manda um segundo pedido (REQ-REQST-005).
@@ -287,6 +312,7 @@ export function RequestStayForm({
         </Stack>
         <Stack spacing={2} sx={{ width: { xs: "100%", md: 340 }, flexShrink: 0 }}>
           <RequestSummary
+            conversation={conversation}
             listing={listing}
             values={{ checkIn, checkOut, petIds }}
             pets={pets}

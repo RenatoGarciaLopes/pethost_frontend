@@ -79,6 +79,19 @@ function serve(response: () => Response) {
 }
 
 describe("RequestStayForm", { timeout: 15000 }, () => {
+  it("mostra a conversa no resumo sem enviar a reserva e mantém a ação após o pedido", async () => {
+    const bodies = serve(() => HttpResponse.json(apiOk(bookingDto()), { status: 201 }));
+    const { user } = setup({ conversation: <button type="button">Conversar com Aparecida</button> });
+    const summary = screen.getByRole("region", { name: copy.summary });
+    await user.click(within(summary).getByRole("button", { name: "Conversar com Aparecida" }));
+    expect(bodies).toHaveLength(0);
+    expect(screen.getByLabelText("Chegada e saída")).toHaveValue("20 a 25 dez · 5 noites");
+    await checkCare(user);
+    await user.click(screen.getByRole("button", { name: copy.submit }));
+    await screen.findByRole("heading", { name: copy.sent });
+    expect(screen.getByRole("button", { name: "Conversar com Aparecida" })).toBeInTheDocument();
+    expect(bodies).toHaveLength(1);
+  });
   it("REQ-REQST-002 REQ-REQST-003 datas e pets da URL, cada pet com Combina ou o motivo; resumo com a conta", () => {
     setup();
     expect(screen.getByLabelText("Chegada e saída")).toHaveValue("20 a 25 dez · 5 noites");
