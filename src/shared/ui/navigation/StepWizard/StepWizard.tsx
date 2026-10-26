@@ -29,12 +29,19 @@ export interface StepWizardProps {
   children: ReactNode;
   /** Linha depois do formulário ("Já tem conta? Entrar"). */
   footer?: ReactNode;
+  /**
+   * Terceira coluna, só no computador largo (`lg` em diante): o resultado se montando ao vivo (o card do cantinho,
+   * 104). Fica presa ao rolar. Abaixo de `lg` some, e quem usa mostra o resultado em outro lugar (na revisão). Sem
+   * ela, a casca é a de duas colunas do cadastro.
+   */
+  aside?: ReactNode;
 }
 
 /**
  * Casca de um assistente em passos, a do cadastro de conta (074): trilha de cartões à esquerda (anel no celular),
- * posição, título e conteúdo do passo à direita, com a entrada animada a cada troca. Só apresentação: quem usa decide
- * o passo, o formulário, a validação e o foco. Reúne o cadastro (011/012) e a verificação do anfitrião (098).
+ * posição, título e conteúdo do passo à direita, com a entrada animada a cada troca; com `aside`, uma terceira coluna
+ * com o resultado ao vivo. Só apresentação: quem usa decide o passo, o formulário, a validação e o foco. Reúne o
+ * cadastro (011/012), a verificação do anfitrião (098) e o cadastro do cantinho (104).
  *
  * @example
  * <StepWizard steps={steps} currentIndex={0} progressTitle="Criar conta" position="Passo 1 de 2" title="Você">
@@ -53,13 +60,19 @@ export function StepWizard({
   notice,
   children,
   footer,
+  aside,
 }: StepWizardProps) {
   return (
     <Box
       sx={{
         display: "grid",
-        gap: { xs: 3, md: 6 },
-        gridTemplateColumns: { xs: "1fr", md: "272px minmax(0, 720px)" },
+        gap: { xs: 3, md: 6, ...(aside ? { lg: 5 } : {}) },
+        // Com a coluna ao vivo, as três cabem na grade do cabeçalho (1136 px a partir de `lg`).
+        gridTemplateColumns: {
+          xs: "1fr",
+          md: "272px minmax(0, 720px)",
+          ...(aside ? { lg: "240px minmax(0, 1fr) 288px" } : {}),
+        },
         justifyContent: "center",
         alignItems: "start",
         "& .MuiOutlinedInput-root": { boxShadow: "none" },
@@ -110,6 +123,12 @@ export function StepWizard({
           </motion.div>
         </Box>
       </Reveal>
+
+      {aside && (
+        <Box sx={{ display: { xs: "none", lg: "block" }, position: "sticky", top: 24 }}>
+          <Reveal order={2}>{aside}</Reveal>
+        </Box>
+      )}
     </Box>
   );
 }

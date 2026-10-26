@@ -50,3 +50,9 @@ export const UltimoPassoComAviso: Story = {
     footer: <Typography>Já tem conta? Entrar</Typography>,
   },
 };
+
+/** Com a terceira coluna (`aside`): o resultado ao vivo, só a partir do computador largo (`lg`). */
+export const ComResultadoAoLado: Story = {
+  name: "REQ-DS-012 Com resultado ao lado",
+  args: { aside: <Typography>O card do cantinho se monta aqui.</Typography> },
+};

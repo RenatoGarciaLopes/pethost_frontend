@@ -109,3 +109,11 @@ describe("StepWizardActions", () => {
     expect(next).toHaveAccessibleDescription("Falta a frente.");
   });
 });
+
+describe("StepWizard com aside", () => {
+  it("104 a terceira coluna mostra o resultado ao lado sem mudar o passo", () => {
+    renderWizard({ aside: <aside aria-label="Prévia">card ao vivo</aside> });
+    expect(screen.getByRole("complementary", { name: "Prévia" })).toHaveTextContent("card ao vivo");
+    expect(screen.getByRole("heading", { level: 1, name: "Onde você mora" })).toBeInTheDocument();
+  });
+});
