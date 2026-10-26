@@ -1,5 +1,9 @@
 # Marca pública dos e-mails
 
+## Contraste no modo escuro (30/10/2026)
+
+Logo e 34 títulos agora têm fundo claro incorporado nos pixels PNG, sem depender do CSS do cliente. Os geradores mantêm caminhos, dimensões, Caprasimo e marca; screenshot usa fundo opaco. O template backend inclui placas claras, estilos para modo escuro e versão fixa dos assets para caches. Geradores executados; cinco testes de assets aprovados, incluindo alpha de todos os pixels. Publicar frontend antes do backend. Fonte técnica e limites: [email-dark-mode.md](../../pethost_backend/docs/email-dark-mode.md).
+
 ## Títulos de produção em Caprasimo (29/10/2026)
 
 `npm run brand:email-headings` executa `scripts/generate-email-headings.mjs`, lê os assuntos reais dos notifiers no backend vizinho e exporta 34 PNGs em 2x para `public/brand/email-headings/`. Gera também o catálogo interno `EmailHeadingAssets.g.cs` no backend e a fixture local `src/test/fixtures/emailHeadingAssets.json`, usada somente nos testes. O build/CI do frontend consome assets e fixture versionados e não exige o repositório backend; apenas regenerar exige ambos os clones. Nenhum helper do gerador é exportado.

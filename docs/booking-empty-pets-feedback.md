@@ -1,0 +1,9 @@
+# Aviso de pedido sem pets
+
+Implementado em `src/features/bookings/components/client/RequestStayForm.tsx`, 29/10/2026. Interface e API permanecem. O callback de submissão inválida do React Hook Form leva foco ao Notice existente quando `pets.length === 0`, rola apenas o necessário e executa uma tremida horizontal de 320ms/até 6px pela Web Animations API. Repetir o clique cancela a animação anterior e reinicia; unmount cancela efeitos. Sem timer, remount do aviso ou novo componente/hook/export.
+
+Reutiliza Notice.ref, usePrefersReducedMotion, requestStaySchema e o fluxo de validação existente. Movimento reduzido mantém foco e rolagem automática sem tremida; browsers sem animate continuam com foco/validação. Com pets na lista, o callback não anima esse aviso. Não envia pedido inválido nem altera permissões/contratos. O link Apresentar meu pet segue /pets/new.
+
+`RequestStayForm.int.test.tsx`: **14 testes aprovados**, incluindo dois novos casos com/sem movimento reduzido, foco, cliques repetidos, cancelamento no unmount e ausência de POST. Comando: `npx vitest run src/features/bookings/components/client/RequestStayForm.int.test.tsx --maxWorkers=1`. Unitário isolado N/A: lógica interna trivial coberta pela composição React/Hook Form/MSW. Backend real N/A: não há alteração de endpoint. Verificação Chromium isolada usa formulário real com QueryClient/tema e não representa jornada Next/API publicada. Sem commit, push ou deploy desta alteração.
+
+Chromium 390px: dois cenários aprovados com preferência normal/reduzida. Duas tentativas focaram o aviso; normal registrou duas animações reais, reduzido nenhuma. Evidências privadas `.agent-tools/booking-feedback-*.png`. A tentativa anterior foi bloqueada pelo limite do serviço de aprovação automática e não executou comandos; esta validação posterior foi autorizada pelo serviço e concluída. Typecheck e ESLint aprovados.

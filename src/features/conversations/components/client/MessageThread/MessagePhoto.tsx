@@ -14,7 +14,7 @@ import type { ConversationMessage } from "../../../types";
 
 const linkSchema = unwrapData(GetApiV1ConversationsConversationIdMessagesMessageIdPhotoResponse);
 
-/** A private chat photo renews before expiry and after focus/errors; unmount aborts pending requests. */
+/** Accessible photo trigger with the shared zoom viewer; signed URLs renew in both views, cleanup aborts requests. */
 export function MessagePhoto({
   message,
   mine,

@@ -27,7 +27,7 @@ try {
     }),
   );
   await page.setContent(
-    `<style>@font-face{font-family:Caprasimo;src:url('${font}')}body{margin:0}.brand{display:inline-flex;align-items:center;gap:11px;padding:4px;font-family:Caprasimo;font-size:31px;line-height:1;letter-spacing:-.01em;color:${color("tinta")}}</style><div class="brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110" width="40" height="44"><path d="${paths[0]}" fill="${color("luz")}" stroke="${color("tinta")}" stroke-width="8" stroke-linejoin="round"/><path d="${paths[1]}" fill="${color("coral")}" stroke="${color("tinta")}" stroke-width="8" stroke-linejoin="round"/><circle cx="${circle[1]}" cy="${circle[2]}" r="4.5" fill="${color("tinta")}"/></svg><span>pethost</span></div>`,
+    `<style>@font-face{font-family:Caprasimo;src:url('${font}')}body{margin:0;background:${color("papel")}}.brand{display:inline-flex;align-items:center;gap:11px;padding:4px;background:${color("papel")};font-family:Caprasimo;font-size:31px;line-height:1;letter-spacing:-.01em;color:${color("tinta")}}</style><div class="brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110" width="40" height="44"><path d="${paths[0]}" fill="${color("luz")}" stroke="${color("tinta")}" stroke-width="8" stroke-linejoin="round"/><path d="${paths[1]}" fill="${color("coral")}" stroke="${color("tinta")}" stroke-width="8" stroke-linejoin="round"/><circle cx="${circle[1]}" cy="${circle[2]}" r="4.5" fill="${color("tinta")}"/></svg><span>pethost</span></div>`,
   );
   await page.evaluate(async () => {
     await document.fonts.load("31px Caprasimo");
@@ -37,7 +37,8 @@ try {
     throw new Error("A fonte da marca não carregou.");
   const logo = page.locator(".brand");
   const output = path.join(root, "public/brand/email-logo.png");
-  await logo.screenshot({ path: output, omitBackground: true });
+  // Bake the light surface into the pixels: email dark-mode CSS cannot protect transparent ink.
+  await logo.screenshot({ path: output, omitBackground: false });
   console.log(JSON.stringify({ output, size: await logo.boundingBox() }));
 } finally {
   await browser.close();

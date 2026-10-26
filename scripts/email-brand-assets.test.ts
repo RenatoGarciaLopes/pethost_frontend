@@ -2,10 +2,33 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import config from "../next.config";
+import sharp from "sharp";
 
 const root = path.resolve(import.meta.dirname, "..");
 
 describe("assets públicos da marca usados pelo site e e-mails", () => {
+  it("preserva fundo claro opaco dentro da logo e de todos os títulos quando o cliente escurece o HTML", async () => {
+    const files = [
+      path.join(root, "public/brand/email-logo.png"),
+      ...fs
+        .readdirSync(path.join(root, "public/brand/email-headings"))
+        .map((name) => path.join(root, "public/brand/email-headings", name)),
+    ];
+    for (const file of files) {
+      const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      let darkPixels = 0;
+      let minimumAlpha = 255;
+      for (let offset = 0; offset < data.length; offset += info.channels) {
+        minimumAlpha = Math.min(minimumAlpha, data[offset + 3]);
+        if (data[offset] < 70 && data[offset + 1] < 70 && data[offset + 2] < 70) darkPixels++;
+      }
+      expect(minimumAlpha, file).toBe(255);
+      expect(darkPixels, file).toBeGreaterThan(100);
+      expect(data[0], file).toBeGreaterThan(240);
+      expect(data[1], file).toBeGreaterThan(240);
+      expect(data[2], file).toBeGreaterThan(230);
+    }
+  });
   it("entrega todos os títulos registrados no backend como PNGs Caprasimo em 2x, sem assets órfãos", () => {
     const entries = JSON.parse(
       fs.readFileSync(path.join(root, "src/test/fixtures/emailHeadingAssets.json"), "utf8"),

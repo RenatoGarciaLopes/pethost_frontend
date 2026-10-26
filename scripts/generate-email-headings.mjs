@@ -37,7 +37,7 @@ try {
     }),
   );
   await page.setContent(
-    "<style>@font-face{font-family:Caprasimo;src:url('https://brand.pethost.invalid/caprasimo.woff2')}body{margin:0}h1{box-sizing:border-box;width:340px;padding:3px 0 5px;margin:0;font:400 36px/1.25 Caprasimo;color:#1F1A17;overflow-wrap:break-word}</style><h1></h1>",
+    "<style>@font-face{font-family:Caprasimo;src:url('https://brand.pethost.invalid/caprasimo.woff2')}body{margin:0;background:#FFFFFF}h1{box-sizing:border-box;width:340px;padding:3px 0 5px;margin:0;background:#FFFFFF;font:400 36px/1.25 Caprasimo;color:#1F1A17;overflow-wrap:break-word}</style><h1></h1>",
   );
   await page.evaluate(() => document.fonts.load("36px Caprasimo"));
   if (!(await page.evaluate(() => document.fonts.check("36px Caprasimo")))) throw new Error("Caprasimo não carregou.");
@@ -46,7 +46,7 @@ try {
     await page.locator("h1").evaluate((element, value) => {
       element.textContent = value.charAt(0).toLocaleUpperCase("pt-BR") + value.slice(1);
     }, title);
-    await page.locator("h1").screenshot({ path: path.join(output, image), omitBackground: true });
+    await page.locator("h1").screenshot({ path: path.join(output, image), omitBackground: false });
     const size = await page.locator("h1").boundingBox();
     entries.push({ title, image, width: Math.round(size.width), height: Math.ceil(size.height) });
   }
