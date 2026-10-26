@@ -651,10 +651,10 @@ Saíram `ListingSectionsPanel.tsx` e `sections/{HomeSection,HouseholdSection,Gue
 
 PhotoSlots permanece em `src/shared/ui/media/PhotoSlots/`, com componente, copy, index, testes e stories existentes. Novo teste da composição: `src/features/host-listings/components/client/ListingPhotosSection.int.test.tsx`. Spec real `specs/106-fotos-arrastar/{requirements,design,tasks,validation}.md`. Sem nova pasta técnica, store ou provider. Prints são relatórios em test-results/106, fora da árvore autoral.
 
-## Linha do tempo ?nica (108)
+## Linha do tempo Única (108)
 
-`src/shared/ui/data-display/StatusTimeline/` mant?m componente, tipos, teste e stories da trilha horizontal. `features/bookings/lib/stayDetailView.ts` monta os marcos consumidos por StayDetail e HostBookingDetail. `StayTimeline.tsx`, seu teste e `bookingStatus.trailSteps` foram removidos; n?o h? pasta nova de produ??o. Spec e valida??o: `specs/108-linha-do-tempo/`.
+`src/shared/ui/data-display/StatusTimeline/` mantém componente, tipos, teste e stories da trilha horizontal. `features/bookings/lib/stayDetailView.ts` monta os marcos consumidos por StayDetail e HostBookingDetail. `StayTimeline.tsx`, seu teste e `bookingStatus.trailSteps` foram removidos; não h? pasta nova de produção. Spec e validação: `specs/108-linha-do-tempo/`.
 
 ## Fotos ampliadas (111)
 
-`shared/ui/media/PhotoLightbox/` cont?m componente client, index p?blico, testes e stories do visualizador de fotos; ListingGallery mant?m a composi??o da p?gina e detector de arraste. Sem HTTP, provider ou depend?ncia nova. Interfaces e valida??o em `specs/111-fotos-ampliadas/`.
+`shared/ui/media/PhotoLightbox/` contém componente client, index público, testes e stories do visualizador de fotos; ListingGallery mantém a composição da página e detector de arraste. Sem HTTP, provider ou dependência nova. Interfaces e validação em `specs/111-fotos-ampliadas/`.

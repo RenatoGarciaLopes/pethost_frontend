@@ -15,12 +15,12 @@ Unitários: `stayDetailView.test.ts` e `bookingStatus.test.ts`, estados de estad
 
 A sessão anterior teve rodadas amplas com 30 e 38 falhas, seguidas de recortes verdes (55 e 25 testes), e foi interrompida antes das stories finais. Esses recortes não provam resolução de toda a rodada ampla. A retomada registra cada resultado novo separadamente; nenhuma falha histórica é atribuída a carga sem evidência. Não há helper de teste reutilizável novo.
 
-## Regress?o ampliada
+## Regressão ampliada
 
-`node node_modules/vitest/vitest.mjs run src/features/bookings src/shared/ui/data-display/StatusTimeline src/features/host-applications/components/client/ApplicationStatusView --maxWorkers=1`: **168 testes em 27 arquivos aprovados**, cobrindo consumidores de reservas e verifica??o. A repeti??o dos 32 testes da 106 ap?s merge tamb?m passou na dev.
+`node node_modules/vitest/vitest.mjs run src/features/bookings src/shared/ui/data-display/StatusTimeline src/features/host-applications/components/client/ApplicationStatusView --maxWorkers=1`: **168 testes em 27 arquivos aprovados**, cobrindo consumidores de reservas e verificação. A repetição dos 32 testes da 106 após merge também passou na dev.
 
-## Compartilhados e verifica??o
+## Compartilhados e verificação
 
-`node node_modules/vitest/vitest.mjs run src/shared/ui src/features/host-applications --maxWorkers=1`: 331/332 testes, 64/65 arquivos aprovados. ?nica falha: Calendar.test.tsx, caso de chegada/sa?da, excedeu 5000 ms. Reexecu??o isolada do arquivo, sem alterar timeout nem c?digo: 19/19 aprovados. A rodada ampla n?o ? declarada aprovada; instabilidade de tempo permanece registrada. Nenhum arquivo de Calendar foi modificado.
+`node node_modules/vitest/vitest.mjs run src/shared/ui src/features/host-applications --maxWorkers=1`: 331/332 testes, 64/65 arquivos aprovados. Única falha: Calendar.test.tsx, caso de chegada/saída, excedeu 5000 ms. Reexecução isolada do arquivo, sem alterar timeout nem código: 19/19 aprovados. A rodada ampla não é declarada aprovada; instabilidade de tempo permanece registrada. Nenhum arquivo de Calendar foi modificado.
 
-ESLint identificou borderRadius num?rico na p?lula; substitu?do por quintalRadii.pill. Ap?s corre??o, ESLint passou e as 5 stories passaram novamente. Typecheck global, Prettier e diff --check aprovados. E2E my-stays ganhou assertivas de geometria horizontal/sem overflow e de encerramento cancelado; execu??o coordenada ap?s integrar.
+ESLint identificou borderRadius numérico na pílula; substitu?do por quintalRadii.pill. Após correção, ESLint passou e as 5 stories passaram novamente. Typecheck global, Prettier e diff --check aprovados. E2E my-stays ganhou assertivas de geometria horizontal/sem overflow e de encerramento cancelado; execução coordenada após integrar.
