@@ -6,8 +6,21 @@ import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { ConversationsShell, ConversationLoading } from "./ConversationsShell";
 
 const route = vi.hoisted(() => ({ params: {} as { conversationId?: string } }));
-vi.mock("next/navigation", () => ({ useParams: () => route.params }));
-vi.mock("@/features/conversations/index.client", () => ({
+vi.mock("next/navigation", () => ({
+  useParams: () => route.params,
+  usePathname: () => "/",
+  useRouter: () => ({ replace: vi.fn() }),
+}));
+const realtime = vi.hoisted(() => ({ stop: vi.fn(), subscribe: vi.fn() }));
+vi.mock("@/features/conversations/api/client/conversationRealtime", () => ({
+  subscribeConversationRealtime: (...args: unknown[]) => {
+    realtime.subscribe(...args);
+    return realtime.stop;
+  },
+}));
+vi.mock("@/features/conversations/index.client", async () => ({
+  useConversationsRealtime: (await import("@/features/conversations/hooks/useConversationsRealtime"))
+    .useConversationsRealtime,
   MyConversations: ({ selectedId }: { selectedId?: string }) => (
     <button aria-current={selectedId ? "page" : undefined}>Contato</button>
   ),
@@ -56,4 +69,37 @@ it("mantém a mesma lista durante o carregamento e após abrir a conversa", asyn
   );
   expect(screen.getByRole("heading", { name: "Escolha uma conversa" })).toBeInTheDocument();
   expect(contact).not.toHaveAttribute("aria-current");
+});
+
+it("abre realtime apenas no chat, conserva ao trocar contato e encerra ao sair", () => {
+  realtime.subscribe.mockClear();
+  realtime.stop.mockClear();
+  route.params = {};
+  const header = <p>Outra pagina</p>;
+  const view = renderWithProviders(header, { theme: quintalTheme });
+  expect(realtime.subscribe).not.toHaveBeenCalled();
+  view.rerender(
+    <>
+      {header}
+      <ConversationsShell accountId="a1" viewer="owner">
+        {null}
+      </ConversationsShell>
+    </>,
+  );
+  expect(realtime.subscribe).toHaveBeenCalledTimes(1);
+  expect(realtime.subscribe).toHaveBeenLastCalledWith(view.queryClient, "a1");
+  route.params = { conversationId: "conversation-b" };
+  view.rerender(
+    <>
+      {header}
+      <ConversationsShell accountId="a1" viewer="owner">
+        <p>Mensagens</p>
+      </ConversationsShell>
+    </>,
+  );
+  expect(realtime.subscribe).toHaveBeenCalledTimes(1);
+  expect(realtime.stop).not.toHaveBeenCalled();
+  view.rerender(<>{header}</>);
+  expect(realtime.stop).toHaveBeenCalledTimes(1);
+  route.params = {};
 });

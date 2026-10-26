@@ -42,7 +42,7 @@ src/features/conversations/
   lib/withNewMessage.test.ts                        deduplicação e cursores
 ```
 
-AppHeader monta a assinatura via índice client; a rota usa índice server. Não há dependência npm nova nem implementação de envio pelo hub. Contratos e limites: `development/resources/conversations-realtime.md` no vault.
+ConversationsShell monta a assinatura via índice client apenas em /conversations e subrotas; AppHeader não abre realtime. A rota usa índice server. Não há dependência npm nova nem implementação de envio pelo hub. Contratos e limites: `development/resources/conversations-realtime.md` no vault.
 
 ## Caixa de entrada persistente
 

@@ -92,3 +92,14 @@ it("096 mede busca e chips, atualiza o offset ao redimensionar e limpa ao desmon
   rect.mockRestore();
   vi.unstubAllGlobals();
 });
+
+it("nao abre stream de conversas fora do chat", () => {
+  const stream = vi.fn();
+  vi.stubGlobal("EventSource", stream);
+  try {
+    renderWithProviders(<AppHeader user={sessionUserFixture} />, { theme: quintalTheme });
+    expect(stream).not.toHaveBeenCalled();
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});

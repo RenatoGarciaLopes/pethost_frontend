@@ -6,7 +6,7 @@ import { subscribeConversationRealtime } from "../api/client/conversationRealtim
 import { conversationQueries } from "../api/queries";
 import { LIST_POLL_MS, THREAD_POLL_MS } from "../lib/constants";
 
-/** Montado no cabeçalho autenticado, inclusive fora da tela de chat; nenhum efeito para visitantes/admin. */
+/** Montado apenas na casca autenticada de conversas; libera a assinatura ao sair do chat. */
 export function useConversationsRealtime(accountId: string | undefined) {
   const client = useQueryClient();
   useEffect(() => (accountId ? subscribeConversationRealtime(client, accountId) : undefined), [client, accountId]);

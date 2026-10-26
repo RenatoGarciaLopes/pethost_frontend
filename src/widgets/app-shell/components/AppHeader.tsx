@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Button } from "@mui/material";
-import { useConversationsRealtime } from "@/features/conversations/index.client";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import NextLink from "next/link";
 import type { SessionUser } from "@/shared/auth/contracts/session";
@@ -42,7 +41,6 @@ const HOME_OWNER_ITEMS = navItemsFor("owner").filter(
  * @example <AppHeader user={user} variant="home" />
  */
 export function AppHeader({ user, variant = "shell", search, filters, returnTo }: AppHeaderProps) {
-  useConversationsRealtime(user?.role === "owner" || user?.role === "host" ? user.id : undefined);
   const headerRef = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
     const header = headerRef.current;
