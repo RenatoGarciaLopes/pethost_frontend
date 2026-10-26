@@ -23,8 +23,8 @@ export const MobileUpdates: Story = {
   globals: { viewport: { value: "celular", isRotated: false } },
   play: async ({ canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole("button", { name: "Abrir a navegação (há novidades)" }));
-    await expect(
-      within(canvasElement.ownerDocument.body).getByRole("link", { name: "Minhas estadias (há novidades)" }),
-    ).toBeVisible();
+    const body = within(canvasElement.ownerDocument.body);
+    await expect(body.getByRole("link", { name: "Minhas estadias (há novidades)" })).toBeVisible();
+    await expect(body.getByRole("button", { name: "Fechar menu" })).toBeVisible();
   },
 };

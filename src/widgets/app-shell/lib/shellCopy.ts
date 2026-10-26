@@ -4,6 +4,7 @@ export const shellCopy = {
   skipToContent: "Pular para o conteúdo",
   nav: "Navegação principal",
   openNav: "Abrir a navegação",
+  closeNav: "Fechar menu",
   menu: (fullName: string) => `Menu da conta de ${fullName}`,
   myAccount: "Minha conta",
   switchTo: (account: string) => `Trocar pra conta de ${account}`,
