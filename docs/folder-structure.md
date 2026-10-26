@@ -1,5 +1,9 @@
 # Estrutura real do frontend
 
+## Edição de cantinho por seções
+
+`src/features/host-listings/components/client/ListingEditor.tsx` compõe a navegação livre com `WizardProgress`, fotos e `ListingSections.tsx`. `sections/ListingSectionHost.tsx` mantém os formulários montados, preserva rascunhos e salva cada seção. Nenhuma pasta nova: campos, schemas e mutations existentes continuam na feature. Documentação: `development/resources/listing-editor-tabs.md` no vault.
+
 ## Tempo real de conversas
 
 ```text

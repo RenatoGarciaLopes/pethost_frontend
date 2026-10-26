@@ -3,7 +3,8 @@
 import { Box, Button, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { WizardProgress } from "@/shared/ui/navigation/WizardProgress";
 import { translateError, translateFieldErrors } from "@/shared/api/errors/translateError";
 import { useUnsavedChangesGuard } from "@/shared/hooks/useUnsavedChangesGuard";
 import { ConfirmDialog } from "@/shared/ui/feedback/ConfirmDialog";
@@ -21,6 +22,21 @@ import type { HostKind, Listing } from "../../types";
 import { ListingPhotosSection } from "./ListingPhotosSection";
 import { ListingSections } from "./ListingSections";
 import type { ListingSectionHostValue, SectionSaveOutcome } from "./sections/ListingSectionHost";
+
+const EDITOR_TABS = ["home", "photos", "household", "guests", "address", "rules", "weekdays", "rate"] as const;
+type EditorTab = (typeof EDITOR_TABS)[number];
+function currentTab(): EditorTab {
+  const id = window.location.hash.replace(/^#secao-/, "");
+  return EDITOR_TABS.find((tab) => tab === id) ?? "home";
+}
+function watchTab(notify: () => void) {
+  window.addEventListener("hashchange", notify);
+  window.addEventListener("popstate", notify);
+  return () => {
+    window.removeEventListener("hashchange", notify);
+    window.removeEventListener("popstate", notify);
+  };
+}
 
 export interface ListingEditorProps {
   accountId: string;
@@ -72,6 +88,36 @@ function ListingEditorView({
   const [serverErrors, setServerErrors] = useState<ListingSectionHostValue["serverErrors"]>({});
   const [dirty, setDirty] = useState<ReadonlySet<ListingSectionId>>(() => new Set());
   const { dialog } = useUnsavedChangesGuard(dirty.size > 0);
+  const selected = useSyncExternalStore(watchTab, currentTab, () => "home" as EditorTab);
+  const previousTab = useRef(selected);
+  const panel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (previousTab.current === selected) return;
+    previousTab.current = selected;
+    const heading = panel.current?.querySelector<HTMLElement>(`#secao-${selected}-titulo`);
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
+  }, [selected]);
+  const tabs = EDITOR_TABS.map((id) => ({
+    id,
+    label: id === "photos" ? copy.photos.heading : copy.sections[id],
+    description:
+      id === "photos"
+        ? copy.editor.photoSummary(listing.photos.length)
+        : dirty.has(id)
+          ? copy.editor.unsavedTab
+          : copy.wizard.steps[id].description,
+  }));
+  function selectTab(index: number) {
+    const next = EDITOR_TABS[index];
+    if (!next || saving || next === selected) return;
+    const url = new URL(window.location.href);
+    url.hash = `secao-${next}`;
+    window.history.pushState(window.history.state, "", url);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  }
 
   const reportDirty = useCallback((section: ListingSectionId, isDirty: boolean) => {
     setDirty((current) => {
@@ -140,8 +186,36 @@ function ListingEditorView({
         />
       </Stack>
       <PauseControls accountId={accountId} listing={listing} />
-      <ListingPhotosSection accountId={accountId} listing={listing} />
-      <ListingSections host={host} />
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "260px minmax(0, 1fr)" },
+          gap: { xs: 3, md: 5 },
+          alignItems: "start",
+        }}
+      >
+        <Box sx={{ position: { md: "sticky" }, top: "calc(var(--app-header-height, 80px) + 24px)" }}>
+          <Typography sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, mb: 2 }}>
+            {copy.editor.navigationTitle}
+          </Typography>
+          <WizardProgress
+            steps={tabs}
+            currentIndex={EDITOR_TABS.indexOf(selected)}
+            appearance="cards"
+            label={copy.editor.sectionsLabel}
+            navigation={{ onSelect: selectTab, menuLabel: copy.editor.chooseSection, disabled: saving !== null }}
+          />
+        </Box>
+        <Box ref={panel} sx={{ minWidth: 0 }}>
+          <Typography color="text.secondary" sx={{ mb: 3 }}>
+            {copy.editor.sectionsHint}
+          </Typography>
+          <Box hidden={selected !== "photos"}>
+            <ListingPhotosSection accountId={accountId} listing={listing} />
+          </Box>
+          <ListingSections host={host} active={selected} />
+        </Box>
+      </Box>
       {dialog}
     </Stack>
   );

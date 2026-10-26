@@ -35,7 +35,7 @@ const HostContext = createContext<ListingSectionHostValue | null>(null);
  * Liga as seções do cantinho à edição do cantinho aberto (REQ-LIST-013). O cadastro novo é o assistente em passos
  * (104), com um formulário só; as seções ficam para a edição, em qualquer ordem.
  *
- * @example <ListingSectionHost value={host}><ListingSection id="rules">…</ListingSection></ListingSectionHost>
+ * @example <ListingSectionHost value={host}><ListingSection id="rules" visible>…</ListingSection></ListingSectionHost>
  */
 export function ListingSectionHost({ value, children }: { value: ListingSectionHostValue; children: ReactNode }) {
   return <HostContext value={value}>{children}</HostContext>;
@@ -52,6 +52,7 @@ const sectionAnchor = (section: ListingSectionId) => `secao-${section}`;
 
 interface ListingSectionProps {
   id: ListingSectionId;
+  visible: boolean;
   /** Campos da seção (`fields/`), dentro do formulário (RHF) da seção. */
   children: ReactNode;
 }
@@ -60,9 +61,9 @@ interface ListingSectionProps {
  * Uma seção do cantinho aberto: `section` com `h2`, um formulário próprio validado pelo schema da seção, "Salvar
  * {seção}" e o retorno ("Salvo." ou "Nada mudou por aqui."). Erro da API chega aos campos da seção (REQ-LIST-013).
  *
- * @example <ListingSection id="rules"><RulesField /></ListingSection>
+ * @example <ListingSection id="rules" visible><RulesField /></ListingSection>
  */
-export function ListingSection({ id, children }: ListingSectionProps) {
+export function ListingSection({ id, children, visible }: ListingSectionProps) {
   const host = useListingSectionHost();
   const title = copy.sections[id];
   const [outcome, setOutcome] = useState<SectionSaveOutcome | null>(null);
@@ -73,9 +74,11 @@ export function ListingSection({ id, children }: ListingSectionProps) {
       return result.success ? { values, errors: {} } : { values: {}, errors: toFieldErrors(result.error) };
     },
     values: host.values,
-    resetOptions: { keepDirtyValues: false },
+    resetOptions: { keepDirtyValues: true },
   });
-  const { isDirty } = form.formState;
+  // RHF exige a assinatura de dirtyFields para preservar os rascunhos durante reset de valores externos.
+  const hasDirtyFields = Object.keys(form.formState.dirtyFields).length > 0;
+  const isDirty = form.formState.isDirty || hasDirtyFields;
   const serverErrors = host.serverErrors[id];
   const { reportDirty } = host;
 
@@ -88,13 +91,15 @@ export function ListingSection({ id, children }: ListingSectionProps) {
 
   const submit = form.handleSubmit(async (values) => {
     setOutcome(null);
-    setOutcome(await host.save(id, values));
+    const result = await host.save(id, values);
+    if (result === "saved" || result === "unchanged") form.reset(values);
+    setOutcome(result);
   });
 
   const feedback = outcome === "unchanged" ? copy.unchanged : outcome === "saved" ? copy.saved : null;
 
   return (
-    <Box component="section" id={sectionAnchor(id)} aria-labelledby={`${sectionAnchor(id)}-titulo`}>
+    <Box component="section" hidden={!visible} id={sectionAnchor(id)} aria-labelledby={`${sectionAnchor(id)}-titulo`}>
       <FormProvider {...form}>
         <Stack component="form" noValidate spacing={2.5} onSubmit={submit}>
           <Typography id={`${sectionAnchor(id)}-titulo`} variant="h2" sx={{ fontSize: { xs: 22, md: 26 } }}>

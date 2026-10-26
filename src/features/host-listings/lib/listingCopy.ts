@@ -234,6 +234,12 @@ export const listingCopy = {
   },
   panelHeading: "Meu painel",
   editor: {
+    navigationTitle: "Editar cantinho",
+    sectionsLabel: "Seções do cantinho",
+    chooseSection: "Escolher seção",
+    sectionsHint: "Escolha uma seção para editar e salve as alterações nessa aba. Você pode ir direto a qualquer uma.",
+    unsavedTab: "Alterações não salvas",
+    photoSummary: (count: number) => `${count} de 5 fotos`,
     back: "Meu painel",
     active: "Aberto",
     paused: "Pausado",
