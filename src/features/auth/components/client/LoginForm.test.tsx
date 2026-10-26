@@ -1,4 +1,5 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { Activity, type ActivityProps } from "react";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GENERIC_ERROR_MESSAGE, translateCode } from "@/shared/api/errors/translateError";
@@ -86,6 +87,23 @@ describe("LoginForm", { timeout: 15000 }, () => {
     await waitFor(() => expect(requests).toEqual([{ email: "teste@exemplo.com", password: "senha", role: "owner" }]));
     complete();
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
+  });
+  it("REQ-AUTH-004 ao voltar ao login escondido depois de entrar, o envio está livre e a senha vazia", async () => {
+    server.use(http.post(endpoint, () => HttpResponse.json(apiOk({ user: sessionUserFixture }))));
+    const form = (mode: ActivityProps["mode"]) => (
+      <Activity mode={mode}>
+        <LoginForm variant="account" initialRole="owner" next={null} />
+      </Activity>
+    );
+    const { user, rerender } = renderWithProviders(form("visible"), { theme: quintalTheme });
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
+    expect(screen.getByRole("button", { name: authCopy.submitting })).toBeDisabled();
+    rerender(form("hidden"));
+    rerender(form("visible"));
+    expect(await screen.findByRole("button", { name: "Entrar" })).toBeEnabled();
+    expect(screen.getByLabelText(/^Senha/)).toHaveValue("");
   });
   it("REQ-AUTH-007 conta errada anuncia erro, recebe foco, mantém email e limpa senha", async () => {
     server.use(http.post(endpoint, () => HttpResponse.json(apiFail("AUTH_INVALID_CREDENTIALS"), { status: 401 })));

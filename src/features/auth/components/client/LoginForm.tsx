@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Link, Stack, TextField, Typography } from "@mui/material";
 import { AnimatePresence, motion } from "motion/react";
 import NextLink from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
@@ -64,6 +64,20 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
     defaultValues: { role: initialRole, email: "", password: "" },
   });
   const role = useWatch({ control, name: "role" });
+  const { reset: resetLogin } = loginMutation;
+  const { reset: resetReactivate } = reactivateMutation;
+
+  // O router do Next (Activity) mantém esta tela montada e escondida depois de entrar, e roda as limpezas de layout
+  // ao esconder: zera o envio e a senha para quem sair da conta e voltar não ficar preso em "Entrando…".
+  useLayoutEffect(
+    () => () => {
+      resetLogin();
+      resetReactivate();
+      resetField("password");
+      setNotice(null);
+    },
+    [resetLogin, resetReactivate, resetField],
+  );
 
   // O aviso recebe o foco para o leitor de tela anunciar e o teclado continuar dali (REQ-AUTH-007).
   useEffect(() => {
