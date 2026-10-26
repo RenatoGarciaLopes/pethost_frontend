@@ -52,6 +52,10 @@ describe("BookingConversation", () => {
     );
     await user.click(screen.getByRole("button", { name: "Conversar com Aparecida" }));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/conversations/" + CIDA_CONVERSATION_ID));
+    const contact = screen.getByRole("button", { name: "Conversar com Aparecida" });
+    await waitFor(() => expect(contact).toBeEnabled());
+    await user.click(contact);
+    await waitFor(() => expect(push).toHaveBeenCalledTimes(2));
     expect(submit).not.toHaveBeenCalled();
   });
   it("tutor posts listingId once while pending and navigates to returned conversation", async () => {

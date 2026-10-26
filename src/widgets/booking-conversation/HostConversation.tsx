@@ -24,6 +24,7 @@ export function HostConversation({ listingId, hostName }: { listingId: string; h
       router.push(conversationPath(conversation.id));
     } catch (failure) {
       setError(failure);
+    } finally {
       sending.current = false;
       setPending(false);
     }
