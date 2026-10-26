@@ -46,7 +46,7 @@ test("REQ-LPAGE-001/003/004/005/008/009/010/011 abre o cantinho como na prancha,
   expect(request.searchParams.getAll("pets")).toEqual([LUNA]);
   await expect(page.locator("meta[name=robots]")).toHaveAttribute("content", /noindex/);
 
-  // Tirar a Luna de "Quem vai" leva a escolha para a URL e some com a caixa de compatibilidade.
+  // Tirar a Luna de "Quem vai se hospedar" leva a escolha para a URL e some com a caixa de compatibilidade.
   await page.getByRole("button", { name: "Luna" }).click();
   await expect(page).not.toHaveURL(/pets=/);
   await expect(page.getByText("A Luna combina com essa casa.")).toHaveCount(0);
@@ -65,7 +65,7 @@ test("REQ-LPAGE-012 visitante abre o cantinho sem login e só entra na hora de p
   await expect(page.getByRole("banner").getByRole("link", { name: "Entrar" })).toBeVisible();
   await expect(page.getByText("“Recebi foto todo dia.”")).toBeVisible();
   // O que exige conta não aparece: quem vai, compatibilidade e os pets da casa.
-  await expect(page.getByText("Quem vai", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Quem vai se hospedar", { exact: true })).toHaveCount(0);
   await expect(page.getByText(/combina com essa casa/)).toHaveCount(0);
 
   await page.getByRole("link", { name: "Pedir estadia" }).filter({ visible: true }).click();
@@ -82,7 +82,7 @@ test("REQ-LPAGE-012 visitante abre o cantinho sem login e só entra na hora de p
 
   // De volta ao cantinho, com as datas e agora com os pets do tutor; o pedido vai para a tela de pedir.
   await expect(page).toHaveURL(path);
-  await expect(page.getByText("Quem vai", { exact: true })).toBeVisible();
+  await expect(page.getByText("Quem vai se hospedar", { exact: true })).toBeVisible();
   const request = new URL(
     (await page.getByRole("link", { name: "Pedir estadia" }).first().getAttribute("href"))!,
     page.url(),
@@ -99,7 +99,7 @@ test("REQ-LPAGE-007 anfitrião vê o card de compra e só ao pedir troca para a 
   const path = `/listings/${LISTING_ID}?from=2026-10-15&to=2026-10-20`;
   await page.goto(path);
   await expect(page.getByRole("heading", { level: 1, name: "Quintal da Cida" })).toBeVisible();
-  await expect(page.getByText("Quem vai", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Quem vai se hospedar", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Trocar de conta")).toHaveCount(0);
 
   await page.getByRole("link", { name: "Pedir estadia" }).filter({ visible: true }).click();
@@ -114,7 +114,7 @@ test("REQ-LPAGE-007 anfitrião vê o card de compra e só ao pedir troca para a 
   await password.fill(accountFixture("both", "owner").password);
   await page.getByRole("button", { name: "Entrar na conta de tutor" }).click();
 
-  // De volta ao cantinho como tutor, com as datas e "Quem vai".
+  // De volta ao cantinho como tutor, com as datas e "Quem vai se hospedar".
   await expect(page).toHaveURL(path, { timeout: 15_000 });
-  await expect(page.getByText("Quem vai", { exact: true })).toBeVisible();
+  await expect(page.getByText("Quem vai se hospedar", { exact: true })).toBeVisible();
 });

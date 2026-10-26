@@ -14,8 +14,8 @@ export const homeCopy = {
   supportSecond: "Você conversa antes, paga pelo app e recebe foto todo dia.",
   guestHint: "Pode olhar à vontade: a conta só entra na hora de pedir.",
   ownerEmptyHint: "Você pode buscar antes de cadastrar seu pet.",
-  ownerPetsHint: "Escolha quem vai viajar com você.",
-  hostHint: "Quantos pets viajam com você?",
+  ownerPetsHint: "Escolha quem vai se hospedar.",
+  hostHint: "Quantos pets vão se hospedar?",
   petError: "Não conseguimos carregar seus pets agora. Você pode buscar por cão ou gato.",
   trust: [
     { title: "Conversa antes de fechar", description: "Pergunte tudo sobre a casa e a rotina.", icon: "chat" },

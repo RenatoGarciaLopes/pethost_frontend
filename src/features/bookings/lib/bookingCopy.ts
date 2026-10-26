@@ -212,7 +212,7 @@ export const bookingCopy = {
     hostAccount: "Pra pedir uma estadia, entra com a conta de tutor.",
     switchAccount: "Trocar de conta",
     dates: "Quando?",
-    pets: "Quem vai?",
+    pets: "Quem vai se hospedar?",
     noPets: "Você ainda não tem pet na lista. Apresenta o seu pet pra pedir.",
     addPet: "Apresentar meu pet",
     fits: "Combina",

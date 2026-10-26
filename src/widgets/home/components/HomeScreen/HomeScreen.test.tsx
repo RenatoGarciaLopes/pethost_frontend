@@ -91,7 +91,7 @@ it("REQ-UIC-007 faixa única mostra datas legíveis e mantém três controles ro
 it("REQ-UIC-007 pergunta de quantidade do anfitrião fica fora da faixa de busca", () => {
   renderHome({ viewer: "host" });
   expect(screen.getByRole("form", { name: "Busca de cantinhos" })).not.toContainElement(
-    screen.getByText("Quantos pets viajam com você?"),
+    screen.getByText("Quantos pets vão se hospedar?"),
   );
 });
 

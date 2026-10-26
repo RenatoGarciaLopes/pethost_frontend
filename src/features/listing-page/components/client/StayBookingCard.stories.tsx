@@ -58,7 +58,7 @@ export const DiasFechados: Story = {
     closedPeriods: [{ startDate: "2026-12-26", endDate: "2026-12-28" }],
   },
 };
-/** Visitante (sem conta): as datas valem, sem "Quem vai"; "Pedir estadia" leva ao login de tutor e volta aqui. */
+/** Visitante (sem conta): as datas valem, sem "Quem vai se hospedar"; "Pedir estadia" leva ao login de tutor e volta aqui. */
 export const Visitante: Story = {
   args: { account: "visitor", pets: [], petIds: [], count: 1, search: "from=2026-12-20&to=2026-12-25" },
 };

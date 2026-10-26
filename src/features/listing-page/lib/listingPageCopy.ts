@@ -36,7 +36,7 @@ export const listingPageCopy = {
   reviewStars: (rating: number) => `Nota ${rating} de 5`,
   price: "por pet, por noite",
   perNight: "/noite",
-  whoGoes: "Quem vai",
+  whoGoes: "Quem vai se hospedar",
   noPets: "Pra pedir, cadastra seu pet primeiro.",
   newPet: "Cadastrar pet",
   closedDays: {

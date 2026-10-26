@@ -44,7 +44,7 @@ test("REQ-REQST-002 a REQ-REQST-006 pede a estadia com o que veio da URL e acomp
 
   await expect(page.getByRole("heading", { name: "Pedir estadia", level: 1 })).toBeVisible();
   await expect(page.getByLabel("Chegada e saída")).toHaveValue(/ · 2 noites$/);
-  const who = page.getByRole("group", { name: "Quem vai?" });
+  const who = page.getByRole("group", { name: "Quem vai se hospedar?" });
   await expect(who.getByRole("checkbox", { name: /Luna/ })).toBeChecked();
   await expect(who.getByRole("checkbox", { name: /Thor/ })).not.toBeChecked();
   const summary = page.getByRole("region", { name: "Resumo do pedido" });
@@ -113,7 +113,9 @@ test("REQ-REQST-002 REQ-REQST-005 da busca ao cantinho e ao pedido, com as datas
   await expect(page.getByLabel("Chegada e saída", { exact: true }).filter({ visible: true })).toHaveValue(
     / · 2 noites$/,
   );
-  await expect(page.getByRole("group", { name: "Quem vai?" }).getByRole("checkbox", { name: /Luna/ })).toBeChecked();
+  await expect(
+    page.getByRole("group", { name: "Quem vai se hospedar?" }).getByRole("checkbox", { name: /Luna/ }),
+  ).toBeChecked();
   const summary = page.getByRole("region", { name: "Resumo do pedido" });
   await expect(summary).toContainText(title);
   await expect(summary).toContainText(/R\$\s60,00 × 2 noites × 1 pet = R\$\s120,00/);

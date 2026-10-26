@@ -85,7 +85,7 @@ export const SemAvaliacao: Story = {
 export const TutorSemEscolha: Story = {
   args: { stay: { ...stay, search: "", from: undefined, to: undefined, petIds: [], where: undefined } },
 };
-/** Outra conta de anfitrião visitando: o card de compra sem "Quem vai"; o pedido passa pela troca de conta. */
+/** Outra conta de anfitrião visitando: o card de compra sem "Quem vai se hospedar"; o pedido passa pela troca de conta. */
 export const AnfitriaoVisitante: Story = {
   args: {
     accountRole: "host",

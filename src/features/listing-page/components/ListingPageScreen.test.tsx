@@ -129,7 +129,7 @@ it("REQ-LPAGE-007 outra conta de anfitrião vê o card de compra, e o pedir pass
     />,
   );
   expect(screen.getByLabelText("Chegada e saída")).toBeVisible();
-  expect(screen.queryByText("Quem vai")).not.toBeInTheDocument();
+  expect(screen.queryByText("Quem vai se hospedar")).not.toBeInTheDocument();
   expect(screen.queryByText(/Pra pedir uma estadia|Trocar de conta/)).not.toBeInTheDocument();
   const url = new URL(screen.getAllByRole("link", { name: "Pedir estadia" })[0]!.getAttribute("href")!, "http://test");
   expect(url.pathname).toBe("/users/switch");
