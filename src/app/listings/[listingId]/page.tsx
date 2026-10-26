@@ -23,6 +23,7 @@ import { backendForRequest } from "@/shared/api/server/backendForRequest";
 import { brasiliaToday } from "@/shared/lib/date/stayRules";
 import type { SearchParams } from "@/shared/lib/url/searchParams";
 import { AppShell } from "@/widgets/app-shell/index.server";
+import { HostConversation } from "@/widgets/booking-conversation";
 
 interface ListingPageProps {
   params: Promise<{ listingId: string }>;
@@ -81,6 +82,11 @@ async function ListingPageContent({ params, searchParams }: ListingPageProps) {
     <AppShell user={user} returnTo={path} mobileBottomSpace={isOwner ? 0 : 12}>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ListingPageScreen
+          conversation={
+            user?.role === "owner" && !isOwner ? (
+              <HostConversation listingId={listing.id} hostName={listing.host?.name} />
+            ) : undefined
+          }
           listing={listing}
           isOwner={isOwner}
           accountRole={user?.role ?? "visitor"}

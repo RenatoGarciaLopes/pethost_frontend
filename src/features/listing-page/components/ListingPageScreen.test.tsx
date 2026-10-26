@@ -19,6 +19,22 @@ const stay: ListingPageStay = {
 };
 const render = (ui: React.ReactElement) => renderWithProviders(ui, { theme: quintalTheme });
 
+it.each(["owner", "host", "visitor"] as const)("contato em Quem cuida aparece só para tutor: %s", (accountRole) => {
+  render(
+    <ListingPageScreen
+      listing={listingDetailFixture()}
+      isOwner={false}
+      accountRole={accountRole}
+      reviews={[]}
+      conversation={<button type="button">Conversar com anfitrião</button>}
+    />,
+  );
+  const section = screen.getByRole("heading", { name: "Quem cuida" }).closest("section")!;
+  if (accountRole === "owner")
+    expect(within(section).getByRole("button", { name: "Conversar com anfitrião" })).toBeInTheDocument();
+  else expect(screen.queryByRole("button", { name: "Conversar com anfitrião" })).not.toBeInTheDocument();
+});
+
 it("REQ-LPAGE-001/003/010 mostra a casa como na prancha, em português, sem rua e com as avaliações", () => {
   render(
     <ListingPageScreen

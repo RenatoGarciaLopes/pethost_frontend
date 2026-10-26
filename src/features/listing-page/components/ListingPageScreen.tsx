@@ -49,6 +49,8 @@ export interface ListingPageScreenProps {
   compatibility?: ReactNode;
   /** `HouseResidents` composto pela rota (pets da casa vêm da feature pets). */
   residents?: ReactNode;
+  /** Ação de contato com o anfitrião, composta pela rota para o tutor autenticado. */
+  conversation?: ReactNode;
 }
 
 function formatAverage(average: number) {
@@ -71,6 +73,7 @@ export function ListingPageScreen({
   stay,
   compatibility,
   residents,
+  conversation,
 }: ListingPageScreenProps) {
   const address = listing.address;
   const ownerNotice = isOwner && accountRole === "host";
@@ -193,6 +196,7 @@ export function ListingPageScreen({
                 {listing.description && (
                   <Typography sx={{ mt: 1, whiteSpace: "pre-line" }}>“{listing.description}”</Typography>
                 )}
+                {!isOwner && accountRole === "owner" && conversation && <Box sx={{ mt: 2 }}>{conversation}</Box>}
               </Box>
             </Stack>
           </Section>
