@@ -77,7 +77,13 @@ function AvatarPicker({ name, avatarUrl, busy, error, onUpload, onRemove, disabl
     onRemove();
   }
   return (
-    <Stack role="group" aria-label={copy.group} aria-busy={busy} spacing={2} sx={{ alignItems: "flex-start" }}>
+    <Stack
+      role="group"
+      aria-label={copy.group}
+      aria-busy={busy}
+      spacing={2}
+      sx={{ alignItems: "center", textAlign: "center" }}
+    >
       <InitialsAvatar
         name={name}
         src={source}
@@ -128,7 +134,7 @@ function AvatarPicker({ name, avatarUrl, busy, error, onUpload, onRemove, disabl
         </FormHelperText>
       ) : null}
       {file ? (
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", justifyContent: "center" }} useFlexGap>
           <Button
             type="button"
             variant="contained"
