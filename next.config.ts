@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  async redirects() {
+    return [{ source: "/admin", destination: "/admin/host-applications", permanent: false }];
+  },
   // Só vale no `next dev`: libera o JS e o HMR quando a página é aberta por um túnel do ngrok.
   allowedDevOrigins: ["*.ngrok-free.app", "*.ngrok.app"],
   async headers() {

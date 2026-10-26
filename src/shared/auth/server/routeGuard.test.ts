@@ -9,6 +9,7 @@ describe("guardRoute", () => {
   it.each([
     ["/host?tab=house", "/login"],
     ["/admin/users", "/admin/login"],
+    ["/admin", "/admin/login"],
     ["/pets", "/login"],
   ])("REQ-SHELL-009 envia visitante ao login e preserva next: %s", (path, login) => {
     const response = guardRoute(new NextRequest(`http://app.test${path}`));
@@ -21,6 +22,9 @@ describe("guardRoute", () => {
     ["host", "/host", undefined],
     ["owner", "/host", "/"],
     ["admin", "/pets", "/admin/host-applications"],
+    ["admin", "/admin", undefined],
+    ["owner", "/admin", "/"],
+    ["host", "/admin", "/host"],
   ])("REQ-SHELL-009 usa papel apenas como indicação: %s em %s", (role, path, destination) => {
     const token = `e30.${Buffer.from(JSON.stringify({ role })).toString("base64url")}.sig`;
     const request = new NextRequest(`http://app.test${path}`, { headers: { cookie: `pethost_at=${token}` } });

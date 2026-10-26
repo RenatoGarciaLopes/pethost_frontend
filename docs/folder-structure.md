@@ -730,3 +730,8 @@ PetWizardScreen deixa de ter grade própria; steps/StepForm compõe StepWizard, 
 ## Listing route loading
 
 `src/app/listings/[listingId]/loading.tsx` reuses `src/app/loading.tsx`; the page no longer hides pending data behind a null fallback. `src/app/layout.tsx` preloads existing loader images, and `shared/ui/brand/TurmaWalker/TurmaDog.tsx` requests them eagerly. Tests live beside the route/layout; full responsibility and validation note: [listing-loading.md](listing-loading.md).
+
+
+## Entrada administrativa (03/11/2026)
+
+next.config.ts encaminha /admin para a fila protegida existente; nenhuma pagina/pasta adicionada. Testes: src/shared/config/adminEntry.test.ts e e2e/mocked/admin/entry.spec.ts. Interface e limites: docs/admin-entry-route.md.
