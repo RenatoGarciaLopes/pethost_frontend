@@ -58,5 +58,5 @@ it("REQ-PAYOUT-008 recusa é neutra, sem cadastrar nem continuar", () => {
 it("REQ-PAYOUT-009 conta habilitada oferece o próximo passo", () => {
   setup("enabled");
   expect(screen.getByText("Recebimento conectado ✓")).toBeVisible();
-  expect(screen.getByRole("link", { name: "Montar meu cantinho" })).toHaveAttribute("href", "/host/listings");
+  expect(screen.getByRole("link", { name: "Montar meu cantinho" })).toHaveAttribute("href", "/host/listings/new");
 });
