@@ -7,9 +7,10 @@ export interface FormActionsProps {
   /** Visible back action label. */ backLabel: string;
   /** Visible next action label (should name the destination). */ nextLabel: string;
   /** Back callback; form owns draft preservation. */ onBack: () => void;
-  /** Continue callback. */ onNext: () => void;
+  /** Continue callback; optional when `nextType="submit"` (the form handles it). */ onNext?: () => void;
   /** Explanation disabling continue, displayed and associated with the button. */ disabledReason?: string;
   /** Continue button type, default button; submit belongs to the owning form. */ nextType?: "button" | "submit";
+  /** Request in flight: continue is disabled and marked `aria-busy` (prevents double submit). */ busy?: boolean;
 }
 /**
  * Responsive back/continue bar with mobile safe-area padding and content spacer.
@@ -23,6 +24,7 @@ export function FormActions({
   onNext,
   disabledReason,
   nextType = "button",
+  busy = false,
 }: FormActionsProps) {
   const id = useId();
   return (
@@ -43,9 +45,10 @@ export function FormActions({
           left: 0,
           right: 0,
           zIndex: 10,
-          bgcolor: "background.default",
-          p: 2,
-          pb: "max(16px, env(safe-area-inset-bottom))",
+          // Fixa no celular com o fundo da página; no computador some no cartão de quem usa.
+          bgcolor: { xs: "background.default", sm: "transparent" },
+          p: { xs: 2, sm: 0 },
+          pb: { xs: "max(16px, env(safe-area-inset-bottom))", sm: 0 },
           borderTop: { xs: "2px solid", sm: "none" },
           borderColor: "text.primary",
         }}
@@ -63,7 +66,8 @@ export function FormActions({
             variant="contained"
             type={nextType}
             onClick={onNext}
-            disabled={Boolean(disabledReason)}
+            disabled={busy || Boolean(disabledReason)}
+            aria-busy={busy || undefined}
             aria-describedby={disabledReason ? id : undefined}
           >
             {nextLabel}

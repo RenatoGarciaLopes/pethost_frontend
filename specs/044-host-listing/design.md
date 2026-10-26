@@ -1,0 +1,86 @@
+---
+spec: 044-host-listing
+status: in-progress
+updated: 2026-10-15
+---
+
+# 044 · Design técnico
+
+## Rotas
+
+| Arquivo                                         | Faz                                                                                                                                                                                  |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app/(host)/host/page.tsx`                      | Painel: `requireRole(["host"], "/host")`; prefetch de `myApplicationQuery` (030), `payoutQueries.account` (043) e `listingQueries.mine`; `HostOnboardingPanel` + `MyListingsSummary` |
+| `app/(host)/host/listings/new/page.tsx`         | Gate de `payoutsEnabled` e do limite PF (prefetch de `listingQueries.mine`); `ListingDraftScreen`                                                                                    |
+| `app/(host)/host/listings/[listingId]/page.tsx` | UUID conferido (`notFound()` se inválido); prefetch de `listingQueries.detail`; `LISTING_NOT_FOUND` → `notFound()`; `ListingEditorScreen`                                            |
+
+Todas dinâmicas, `Suspense` com esqueleto, `noindex`.
+
+## Feature `features/host-listings`
+
+```
+api/contracts.ts        listingDtoSchema (estreita homeType, species, weekdays), myListingsSchema
+api/mappers.ts          toListing, toListingValues (DTO → formulário), toCreateListingRequest, toUpdateListingRequest (diffPatch)
+api/queries.ts          listingQueries.all/mine/detail
+api/server/*.server.ts  prefetch + getListingDetail (cache())
+api/client/listingMutations.client.ts  create, update, deactivate, reactivate, addPhoto, replacePhoto, removePhoto, reorderPhotos
+hooks/                  useCreateListing, useUpdateListing, usePauseListing, useListingPhotoMutations (uma por vez, como usePetPhotoMutations)
+schemas/listingSchema.ts  um schema por seção + listingSchema (ficha inteira; regras PF × PJ por parâmetro)
+lib/ (netEarnings em shared/lib/money/earnings.ts desde a 005, junto do splitEarnings dos pedidos)
+lib/listingDraft.ts     chave por conta, schema do rascunho (sem fotos)
+lib/listingCopy.ts
+components/client/ListingSectionsPanel.tsx   painel com check por seção (rascunho e edição)
+components/client/sections/*                  HomeSection, HouseholdSection, GuestsSection, AddressSection, RulesSection, WeekdaysSection, RateSection
+components/client/ListingPhotosSection.tsx    PhotoSlots (5 vagas) + reordenar por botões
+components/client/ListingOpened.tsx            comemoração
+components/MyListingsSummary.tsx, ListingDraftScreen.tsx, ListingEditorScreen.tsx (server)
+```
+
+As seções seguem o padrão da 022: recebem `values` e `accept` de um anfitrião de seção (rascunho: grava no store do rascunho; edição: `PATCH` com o diff), mostram "Salvar" e o aviso da seção. Reusar a ideia do `PetStepHost` (não o código, que é da feature pets): um contexto `ListingSectionHost` dentro da feature.
+
+## Peças a criar em `shared`
+
+| Recurso                                                       | Onde                                                     | Quem mais usa                    |
+| ------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------- |
+| `formatBRL(value)` e `toCents`/`fromCents`                    | `shared/lib/money`                                       | 041, 042, 050, 052 (preço total) |
+| `Stepper` numérico acessível ("+" e "−", `role="spinbutton"`) | `shared/ui/forms/NumberStepper`                          | 041 (pets), 050                  |
+| `WeekdayPicker`                                               | `shared/ui/forms/WeekdayPicker`                          | 041 (filtro de dias)             |
+| `PhotoSlots` com mais vagas e reordenação                     | ampliar `shared/ui/media/PhotoSlots` (`slots`, `onMove`) | 044                              |
+
+## Erros
+
+| Código                                                      | Onde                                     |
+| ----------------------------------------------------------- | ---------------------------------------- |
+| `VALIDATION_ERROR`                                          | campos da seção (o painel marca a seção) |
+| `LISTING_HOST_PAYOUTS_NOT_ENABLED`, `LISTING_LIMIT_REACHED` | gate da página                           |
+| `LISTING_GEOCODER_UNAVAILABLE`                              | `Notice` atenção, rascunho mantido       |
+| `LISTING_PHOTO_*`                                           | vaga                                     |
+| `LISTING_NOT_FOUND`                                         | 404 da casca                             |
+
+## Matriz de testes
+
+| REQ                         | Nível              | Arquivo                                                                                                              |
+| --------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| 009                         | Unitário           | `shared/lib/money/earnings.test.ts` (arredondamento em centavos, 90%)                                                |
+| 005/007/010                 | Unitário           | `listingSchema.test.ts` (PF × PJ, portes só com cão ou gato, faixas)                                                 |
+| 013/016                     | Unitário           | `toUpdateListingRequest.test.ts` (lista substitui, endereço parcial, `""` limpa)                                     |
+| 002                         | Integração (Node)  | gate da página com `payoutsEnabled` e PF com cantinho                                                                |
+| 003/004/011/012             | Integração (jsdom) | `ListingDraftScreen.int.test.tsx` (rascunho restaurado, POST único, erro de campo leva à seção, geocodificador fora) |
+| 013/015                     | Integração (jsdom) | `ListingEditorScreen.int.test.tsx`                                                                                   |
+| 014                         | Integração (jsdom) | `useListingPhotoMutations.int.test.tsx` (ordem, capa, limite)                                                        |
+| todos                       | Storybook          | painel, cada seção, comemoração, celular                                                                             |
+| 001/002/003/011/013/014/015 | E2E simulado       | `e2e/mocked/host/listing.spec.ts`                                                                                    |
+
+## Como ficou na implementação (15/10/2026)
+
+- **Recebimento sem a 043:** o perfil do anfitrião (`GET /hosts/me`) dá o tipo de pessoa, o primeiro nome, o endereço da conta e `stripePayoutsEnabled`/`stripeStatus`. É lido por `listingQueries.host` e `getHostListingProfile` (`cache()`, `null` antes da verificação). Nada importa a feature do Stripe.
+- **Painel:** o widget `host-onboarding` (030) ganhou `hostStages`, com a situação real das três etapas e o caminho da etapa da vez. A etapa 2 mostra a situação do Stripe em texto e leva a `/host/payments`; a etapa 3 leva a `/host/listings/new`.
+- **Seções:** `ListingSectionHost` (contexto) liga as sete seções ao rascunho (sessão do navegador) ou à edição (`PATCH` com `toUpdateListingRequest`). Cada seção é um formulário próprio, validado pelo schema da seção. Uma seção só conta como pronta depois de salva e válida: assim "Regras da casa", que é opcional, também entra no "Faltam 7".
+- **Peças de shared:** `Counter` (já existia) no lugar do `NumberStepper`; `WeekdayPicker` novo; `PhotoSlots` ganhou `onMove` ("Usar como capa" e mover por botão) e até 5 colunas; `formatBRL`/`toCents`/`fromCents` em `shared/lib/money`, com a assinatura combinada com a 041.
+- **Erros:** além dos da spec, `LISTING_ADDRESS_NOT_LOCATED` (422) volta à seção Endereço. As frases dos códigos `LISTING_*` estão no `errorCopy`.
+- **Layout:** as sete seções ficam empilhadas na mesma página, com o painel de seções ao lado (fixo no computador). Não é "uma seção por tela" no celular.
+- **Pets da casa:** a 023 ainda não chegou ao `dev`, então "Apresentar quem mora aqui" leva a `/pets`. O rascunho fica na sessão do navegador.
+
+### Revisão 099 (25/10/2026)
+
+O painel de etapas não renderiza seção ou título quando todas estão prontas. `hasListing` exige ao menos um cantinho `isActive`; somente pausados mantêm a pendência. O painel retorna quando qualquer etapa volta a pendente. Contratos HTTP preservados. Cobertura e validação: nota `development/resources/host-verification`, seção Tarefa 099 no vault.

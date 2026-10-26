@@ -1,8 +1,11 @@
 import { Box, Container, Paper, Stack, Typography } from "@mui/material";
 import type { AccountRole } from "@/shared/auth/contracts/session";
+import type { LoginNotice } from "@/shared/config/appRoutes";
 import { DoorMark } from "@/shared/ui/brand/DoorMark";
 import { DoorScene } from "@/shared/ui/brand/DoorScene";
 import { TrustList } from "@/shared/ui/data-display/TrustList";
+import { Notice } from "@/shared/ui/feedback/Notice";
+import { Reveal } from "@/shared/ui/motion/Reveal";
 import { authCopy } from "../lib/authCopy";
 import { LoginForm } from "./client/LoginForm";
 
@@ -11,28 +14,43 @@ export interface LoginScreenProps {
   variant: "account" | "admin";
   initialRole: AccountRole;
   next: string | null;
+  /** Aviso fixo acima do formulário (ex.: conta pausada, REQ-ACC-024). */
+  notice?: LoginNotice;
 }
 
 /**
- * Tela de entrar (spec 010), Server Component. A cena, o título e as garantias são servidor;
- * a única ilha é o `LoginForm`.
+ * Tela de entrar (spec 010), Server Component. Ilhas client: o `LoginForm`, a `DoorScene` e os `Reveal`.
+ * A tela se monta em ordem (REQ-AUTH-020): saudação, título, cartão e campos, um a um; a cena se
+ * desenha sozinha ao lado; as garantias chegam por último.
  * - Computador: cena da porta e garantias à esquerda, formulário à direita (REQ-AUTH-016).
- * - Celular (até 700 px): título e cena pequena centralizados acima do formulário, sem garantias (REQ-AUTH-017).
+ * - Celular (abaixo de 900 px, breakpoint `md`): cena pequena e título centralizados acima do formulário, sem saudação nem
+ *   garantias (REQ-AUTH-017). O mesmo `h1` serve aos dois tamanhos.
  * - Admin: só o formulário, com o logo (REQ-AUTH-015).
  */
-export function LoginScreen({ variant, initialRole, next }: LoginScreenProps) {
-  const form = <LoginForm variant={variant} initialRole={initialRole} next={next} />;
+export function LoginScreen({ variant, initialRole, next, notice }: LoginScreenProps) {
+  const form = (
+    <Stack spacing={3}>
+      {notice && <Notice tone="info">{authCopy.notices[notice]}</Notice>}
+      <LoginForm variant={variant} initialRole={initialRole} next={next} />
+    </Stack>
+  );
 
   if (variant === "admin") {
     return (
       <Container component="main" id="conteudo" maxWidth="xs" sx={{ py: { xs: 4, md: 8 } }}>
         <Stack spacing={3} sx={{ alignItems: "center", mb: 3 }}>
-          <DoorMark size="header" withWordmark title="PetHost" interactive={false} />
-          <Typography variant="h1" component="h1" sx={{ fontSize: { xs: 28, md: 34 }, textAlign: "center" }}>
-            {authCopy.adminTitle}
-          </Typography>
+          <Reveal order={0}>
+            <DoorMark size="header" withWordmark title="PetHost" interactive={false} />
+          </Reveal>
+          <Reveal order={1}>
+            <Typography variant="h1" component="h1" sx={{ fontSize: { xs: 28, md: 34 }, textAlign: "center" }}>
+              {authCopy.adminTitle}
+            </Typography>
+          </Reveal>
         </Stack>
-        <Paper sx={{ p: { xs: 3, md: 4 } }}>{form}</Paper>
+        <Reveal order={2}>
+          <Paper sx={{ p: { xs: 3, md: 4 } }}>{form}</Paper>
+        </Reveal>
       </Container>
     );
   }
@@ -53,29 +71,38 @@ export function LoginScreen({ variant, initialRole, next }: LoginScreenProps) {
         mx: "auto",
       }}
     >
-      {/* Computador: cena grande, título e garantias. */}
-      <Stack spacing={4} sx={{ display: { xs: "none", md: "flex" }, alignItems: "flex-start" }}>
+      <Stack
+        useFlexGap
+        spacing={{ xs: 1, md: 4 }}
+        sx={{ alignItems: { xs: "center", md: "flex-start" }, textAlign: { xs: "center", md: "left" } }}
+      >
         <Box>
-          <Typography color="text.secondary" sx={{ fontWeight: 700 }}>
-            {authCopy.greeting}
-          </Typography>
-          <Typography variant="h1" component="h1" sx={{ fontSize: 48, maxWidth: 520 }}>
-            {authCopy.title}
-          </Typography>
+          <Reveal order={0} sx={{ display: { xs: "none", md: "block" } }}>
+            <Typography color="text.secondary" sx={{ fontWeight: 700 }}>
+              {authCopy.greeting}
+            </Typography>
+          </Reveal>
+          <Reveal order={1}>
+            <Typography variant="h1" component="h1" sx={{ fontSize: { xs: 26, md: 48 }, maxWidth: 520 }}>
+              {authCopy.title}
+            </Typography>
+          </Reveal>
         </Box>
-        <DoorScene size="lg" />
-        <TrustList items={authCopy.trust} />
+
+        {/* No celular a cena vem antes do título; a ordem do DOM (título primeiro) vale para leitores de tela.
+            A cena é interativa (REQ-AUTH-021) e se monta sozinha. */}
+        <Box sx={{ width: "100%", maxWidth: { xs: 200, md: 440 }, order: { xs: -1, md: 0 } }}>
+          <DoorScene />
+        </Box>
+
+        <Reveal order={7} sx={{ display: { xs: "none", md: "block" } }}>
+          <TrustList items={authCopy.trust} />
+        </Reveal>
       </Stack>
 
-      {/* Celular: título e cena pequena acima do formulário, para o botão caber sem rolar. */}
-      <Stack spacing={1} sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", textAlign: "center" }}>
-        <DoorScene size="sm" />
-        <Typography variant="h1" component="p" aria-hidden sx={{ fontSize: 26 }}>
-          {authCopy.title}
-        </Typography>
-      </Stack>
-
-      <Paper sx={{ p: { xs: 2.5, md: 4 } }}>{form}</Paper>
+      <Reveal order={2}>
+        <Paper sx={{ p: { xs: 2.5, md: 4 } }}>{form}</Paper>
+      </Reveal>
     </Box>
   );
 }

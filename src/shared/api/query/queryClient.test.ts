@@ -1,6 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "../errors/ApiError";
-import { accountQueryKey, createQueryClient, getQueryClient, shouldRetry } from "./queryClient";
+import { accountQueryKey, adminAuditQueryKey, createQueryClient, getQueryClient, shouldRetry } from "./queryClient";
+
+it("prefixo de auditoria limita invalidação ao admin e ao alvo", () => {
+  const target = { targetType: "owner", targetId: "owner-1" };
+  expect(adminAuditQueryKey("admin-1")).toEqual(["account", "admin-1", "admin", "audit"]);
+  expect(adminAuditQueryKey("admin-1", target)).toEqual([...adminAuditQueryKey("admin-1"), target]);
+  expect(adminAuditQueryKey("admin-2", target)).not.toEqual(adminAuditQueryKey("admin-1", target));
+  expect(adminAuditQueryKey("admin-1", { ...target, targetId: "owner-2" })).not.toEqual(
+    adminAuditQueryKey("admin-1", target),
+  );
+  expect(adminAuditQueryKey("admin-1", { ...target, targetType: "host" })).not.toEqual(
+    adminAuditQueryKey("admin-1", target),
+  );
+});
+
+it("REQ-SWITCH-003 chave de conta separa usuários e mantém o prefixo para consultas", () => {
+  expect(accountQueryKey("user-1")).toEqual(["account", "user-1"]);
+  expect(accountQueryKey("user-1", "linked-accounts")).toEqual(["account", "user-1", "linked-accounts"]);
+  expect(accountQueryKey("user-2", "linked-accounts")).not.toEqual(accountQueryKey("user-1", "linked-accounts"));
+  expect(accountQueryKey("user-1", "pets", "pet-2")).toEqual(["account", "user-1", "pets", "pet-2"]);
+});
 
 describe("getQueryClient", () => {
   it("REQ-HTTP-018 no servidor cria uma instância nova por chamada", () => {
@@ -24,11 +44,5 @@ describe("shouldRetry", () => {
     expect(shouldRetry(0, new ApiError({ status: 404, code: "X", message: "x" }))).toBe(false);
     expect(shouldRetry(0, new ApiError({ status: 401, code: "SESSION_EXPIRED", message: "x" }))).toBe(false);
     expect(shouldRetry(0, new Error("bug"))).toBe(false);
-  });
-});
-
-describe("accountQueryKey", () => {
-  it("REQ-HTTP-018 toda chave começa pela conta, para nunca misturar dados de tutor e anfitrião", () => {
-    expect(accountQueryKey("acc-1", "pets", { page: 2 })).toEqual(["account", "acc-1", "pets", { page: 2 }]);
   });
 });

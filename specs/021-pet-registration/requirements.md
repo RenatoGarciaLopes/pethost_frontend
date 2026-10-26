@@ -1,7 +1,7 @@
 ---
 spec: 021-pet-registration
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-14
 area: PNEW
 ---
 

@@ -9,6 +9,7 @@ export type LockedFieldProps = Omit<TextFieldProps, "label" | "value" | "onChang
 };
 /**
  * Readable locked text field with decorative lock and a visible reason.
+ * Preserves caller adornments while enforcing read-only, including callback slots.
  * Use for immutable public data; never render secrets or rely on read-only for authorization.
  * @example <LockedField label="Documento" value={value} reason="Já confirmado" />
  */
@@ -22,15 +23,21 @@ export function LockedField({ label, value, reason, slotProps, ...rest }: Locked
       helperText={reason}
       slotProps={{
         ...slotProps,
-        input: (state) => ({
-          ...(typeof inputProps === "function" ? inputProps(state) : inputProps),
-          readOnly: true,
-          endAdornment: (
-            <InputAdornment position="end">
-              <span aria-hidden="true">🔒</span>
-            </InputAdornment>
-          ),
-        }),
+        input: (state) => {
+          const resolved = typeof inputProps === "function" ? inputProps(state) : inputProps;
+          return {
+            ...resolved,
+            readOnly: true,
+            endAdornment: (
+              <>
+                {resolved?.endAdornment}
+                <InputAdornment position="end">
+                  <span aria-hidden="true">🔒</span>
+                </InputAdornment>
+              </>
+            ),
+          };
+        },
       }}
     />
   );

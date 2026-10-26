@@ -9,15 +9,22 @@ import * as zod from 'zod';
 
 
 /**
- * @summary Todos os anfitriões, com os dados da conta. Sem paginação nem filtro no MVP.
+ * `?stripeStatus=` filtra pela situação do cadastro de recebimento: `not_started`,
+ *         `in_progress`, `under_review`, `restricted`, `rejected` ou `enabled`
+ *         (ex.: `in_progress` = quem começou e travou). Valor desconhecido: 400 em `stripeStatus`.
+ * @summary Todos os anfitriões, com os dados da conta. Sem paginação no MVP.
  */
+export const GetApiV1HostsQueryParams = zod.object({
+  "stripeStatus": zod.string().optional()
+})
+
 export const GetApiV1HostsResponse = zod.object({
-  "success": zod.boolean(),
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
   "data": zod.array(zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -38,6 +45,7 @@ export const GetApiV1HostsResponse = zod.object({
   "identityReleasedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin liberou o CPF/CNPJ (disputa). Esse perfil não volta mais.'),
   "stripeConnected": zod.boolean().describe('Já existe conta conectada no Stripe (onboarding começou).'),
   "stripePayoutsEnabled": zod.boolean().describe('O Stripe liberou os repasses: o cantinho pode aparecer na busca.'),
+  "stripeStatus": zod.string().describe('Cadastro de recebimento: `not_started`, `in_progress`, `under_review`, `restricted` ou `enabled`.'),
   "createdAt": zod.string().datetime({"offset":true}),
   "user": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -61,14 +69,9 @@ export const GetApiV1HostsResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')).nullish(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')).nullish(),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * @summary Um anfitrião, pelo <b>id do anfitrião</b>, com os dados da conta.
@@ -78,12 +81,12 @@ export const GetApiV1HostsHostIdParams = zod.object({
 })
 
 export const GetApiV1HostsHostIdResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -104,6 +107,7 @@ export const GetApiV1HostsHostIdResponse = zod.object({
   "identityReleasedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin liberou o CPF/CNPJ (disputa). Esse perfil não volta mais.'),
   "stripeConnected": zod.boolean().describe('Já existe conta conectada no Stripe (onboarding começou).'),
   "stripePayoutsEnabled": zod.boolean().describe('O Stripe liberou os repasses: o cantinho pode aparecer na busca.'),
+  "stripeStatus": zod.string().describe('Cadastro de recebimento: `not_started`, `in_progress`, `under_review`, `restricted` ou `enabled`.'),
   "createdAt": zod.string().datetime({"offset":true}),
   "user": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -127,14 +131,9 @@ export const GetApiV1HostsHostIdResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * As sessões caem na hora; login responde 403 `AUTH_ACCOUNT_SUSPENDED` e a pessoa não
@@ -150,12 +149,12 @@ export const PostApiV1HostsHostIdSuspensionBody = zod.object({
 }).describe('Corpo das ações do admin que exigem motivo. Vai para a trilha de auditoria.')
 
 export const PostApiV1HostsHostIdSuspensionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -176,6 +175,7 @@ export const PostApiV1HostsHostIdSuspensionResponse = zod.object({
   "identityReleasedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin liberou o CPF/CNPJ (disputa). Esse perfil não volta mais.'),
   "stripeConnected": zod.boolean().describe('Já existe conta conectada no Stripe (onboarding começou).'),
   "stripePayoutsEnabled": zod.boolean().describe('O Stripe liberou os repasses: o cantinho pode aparecer na busca.'),
+  "stripeStatus": zod.string().describe('Cadastro de recebimento: `not_started`, `in_progress`, `under_review`, `restricted` ou `enabled`.'),
   "createdAt": zod.string().datetime({"offset":true}),
   "user": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -199,14 +199,9 @@ export const PostApiV1HostsHostIdSuspensionResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Anfitrião com CPF/CNPJ liberado não volta: 422 `HOST_IDENTITY_RELEASED`.
@@ -217,12 +212,12 @@ export const DeleteApiV1HostsHostIdSuspensionParams = zod.object({
 })
 
 export const DeleteApiV1HostsHostIdSuspensionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -243,6 +238,7 @@ export const DeleteApiV1HostsHostIdSuspensionResponse = zod.object({
   "identityReleasedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin liberou o CPF/CNPJ (disputa). Esse perfil não volta mais.'),
   "stripeConnected": zod.boolean().describe('Já existe conta conectada no Stripe (onboarding começou).'),
   "stripePayoutsEnabled": zod.boolean().describe('O Stripe liberou os repasses: o cantinho pode aparecer na busca.'),
+  "stripeStatus": zod.string().describe('Cadastro de recebimento: `not_started`, `in_progress`, `under_review`, `restricted` ou `enabled`.'),
   "createdAt": zod.string().datetime({"offset":true}),
   "user": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -266,14 +262,9 @@ export const DeleteApiV1HostsHostIdSuspensionResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Pessoa física: o CPF. Empresa: o CNPJ e o CPF do representante. Os valores ficam no perfil
@@ -290,12 +281,12 @@ export const PostApiV1HostsHostIdIdentityReleaseBody = zod.object({
 }).describe('Corpo das ações do admin que exigem motivo. Vai para a trilha de auditoria.')
 
 export const PostApiV1HostsHostIdIdentityReleaseResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -316,6 +307,7 @@ export const PostApiV1HostsHostIdIdentityReleaseResponse = zod.object({
   "identityReleasedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin liberou o CPF/CNPJ (disputa). Esse perfil não volta mais.'),
   "stripeConnected": zod.boolean().describe('Já existe conta conectada no Stripe (onboarding começou).'),
   "stripePayoutsEnabled": zod.boolean().describe('O Stripe liberou os repasses: o cantinho pode aparecer na busca.'),
+  "stripeStatus": zod.string().describe('Cadastro de recebimento: `not_started`, `in_progress`, `under_review`, `restricted` ou `enabled`.'),
   "createdAt": zod.string().datetime({"offset":true}),
   "user": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -339,12 +331,78 @@ export const PostApiV1HostsHostIdIdentityReleaseResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
+
+/**
+ * Para recusa por engano ou por dado digitado errado (`rejected.other`, por exemplo). Fraude
+ * (`rejected.fraud`) pede suspensão, não nova chance. A conta recusada fica no histórico
+ * (`host.stripe_account_reset` na trilha); o anfitrião volta para `not_started` e a
+ * próxima abertura do cadastro cria uma conta nova no Stripe. Só de conta recusada:
+ * 422 `HOST_STRIPE_ACCOUNT_NOT_REJECTED`.
+ * @summary Desliga a conta do Stripe recusada, para o anfitrião cadastrar o recebimento de novo. Com motivo.
+ */
+export const PostApiV1HostsHostIdStripeAccountResetParams = zod.object({
+  "hostId": zod.string().uuid()
+})
+
+export const PostApiV1HostsHostIdStripeAccountResetBody = zod.object({
+  "reason": zod.string().nullish()
+}).describe('Corpo das ações do admin que exigem motivo. Vai para a trilha de auditoria.')
+
+export const PostApiV1HostsHostIdStripeAccountResetResponse = zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
+  "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
+  "userId": zod.string().uuid(),
+  "personType": zod.string(),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
+  "company": zod.union([zod.null(),zod.object({
+  "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
+  "legalName": zod.string().describe('Razão social.'),
+  "tradeName": zod.string().describe('Nome fantasia: o nome que o tutor vê.'),
+  "address": zod.object({
+  "zipCode": zod.string().nullish(),
+  "street": zod.string().nullish(),
+  "number": zod.string().nullish(),
+  "complement": zod.string().nullish(),
+  "neighborhood": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish()
+}).describe('Endereço como vem na request e como sai na resposta.')
+}).describe('Dados da empresa. Só pessoa jurídica.')]).optional(),
+  "verifiedAt": zod.string().datetime({"offset":true}),
+  "isActive": zod.boolean().describe('Status do perfil. Anda junto com `user.isActive`.'),
+  "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu. O motivo vem em `user.suspensionReason`.'),
+  "identityReleasedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin liberou o CPF/CNPJ (disputa). Esse perfil não volta mais.'),
+  "stripeConnected": zod.boolean().describe('Já existe conta conectada no Stripe (onboarding começou).'),
+  "stripePayoutsEnabled": zod.boolean().describe('O Stripe liberou os repasses: o cantinho pode aparecer na busca.'),
+  "stripeStatus": zod.string().describe('Cadastro de recebimento: `not_started`, `in_progress`, `under_review`, `restricted` ou `enabled`.'),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "user": zod.union([zod.null(),zod.object({
+  "id": zod.string().uuid(),
+  "fullName": zod.string(),
+  "email": zod.string(),
+  "role": zod.string(),
+  "phone": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "birthDate": zod.string().date().nullish(),
+  "address": zod.union([zod.null(),zod.object({
+  "zipCode": zod.string().nullish(),
+  "street": zod.string().nullish(),
+  "number": zod.string().nullish(),
+  "complement": zod.string().nullish(),
+  "neighborhood": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish()
+}).describe('Endereço como vem na request e como sai na resposta.')]).optional(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
+  "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
+}).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Resposta de sucesso.')
 

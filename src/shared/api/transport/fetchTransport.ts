@@ -2,7 +2,7 @@ import { ApiError } from "../errors/ApiError";
 import type { HttpTransport, QueryValue } from "./HttpTransport";
 import { readApiResponse } from "./readApiResponse";
 
-export const DEFAULT_TIMEOUT_MS = 15_000;
+const DEFAULT_TIMEOUT_MS = 15_000;
 
 export interface FetchTransportOptions {
   /** Base absoluta (`http://api/api/v1`) ou relativa (`/api`). */

@@ -55,7 +55,8 @@ test("mutação sem o cabeçalho do app é recusada (CSRF)", async ({ page }) =>
 });
 
 test("Server Component com access vencido passa pelo refresh e volta ao next", async ({ page, request, baseURL }) => {
-  const seeded = await request.post("http://localhost:5099/__e2e/refresh-token");
+  const mockURL = process.env.E2E_ACCOUNT_MOCK_URL ?? "http://localhost:5099";
+  const seeded = await request.post(`${mockURL}/__e2e/refresh-token`);
   const { refreshToken } = await seeded.json();
   const host = new URL(baseURL!).hostname;
   await page

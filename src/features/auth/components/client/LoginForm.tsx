@@ -2,20 +2,24 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Link, Stack, TextField, Typography } from "@mui/material";
+import { AnimatePresence, motion } from "motion/react";
 import NextLink from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { ApiError, isApiError } from "@/shared/api/errors/ApiError";
-import { getErrorMessage } from "@/shared/api/errors/getErrorMessage";
-import type { AccountRole } from "@/shared/auth/contracts/session";
+import { translateError } from "@/shared/api/errors/translateError";
+import type { AccountRole, PersonalRole } from "@/shared/auth/contracts/session";
+import { forgotPasswordPath, registerPath } from "@/shared/config/appRoutes";
 import { useCountdown } from "@/shared/hooks/useCountdown";
+import { MOTION_ASSENTAR } from "@/shared/theme/tokens/springs";
 import { DOOR_TARGET_ATTR, DOOR_WARM_ATTR } from "@/shared/ui/brand/DoorScene";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import { PasswordField } from "@/shared/ui/forms/PasswordField";
 import { SegmentedControl } from "@/shared/ui/forms/SegmentedControl";
+import { Reveal } from "@/shared/ui/motion/Reveal";
 import { useLoginMutation, useReactivateMutation } from "../../hooks/useLoginMutation";
-import { authCopy, type SelectableRole } from "../../lib/authCopy";
+import { authCopy } from "../../lib/authCopy";
 import { loginFormSchema, type LoginFormInput, type LoginFormValues } from "../../schemas/loginFormSchema";
 
 export interface LoginFormProps {
@@ -37,12 +41,13 @@ type FormNotice =
 const ROLE_OPTIONS = (["owner", "host"] as const).map((role) => ({ value: role, label: authCopy.roles[role].label }));
 const FORM_FIELDS = ["email", "password", "role"] as const;
 
-const isSelectableRole = (role: AccountRole): role is SelectableRole => role === "owner" || role === "host";
+const isSelectableRole = (role: AccountRole): role is PersonalRole => role === "owner" || role === "host";
 
 /**
  * Formulário de entrar (spec 010). Única ilha client da tela: valida no blur e no envio, chama o BFF,
  * traduz os erros da API em avisos sem culpa e oferece reativar a conta pausada.
  * Marca o `<form>` e o botão para a `DoorScene` reagir (abre no foco, esquenta no hover de "Entrar").
+ * Os campos entram um a um logo depois do cartão (ordens 3 a 7 do `Reveal`, REQ-AUTH-020).
  *
  * @example <LoginForm variant="account" initialRole="owner" next={null} />
  */
@@ -59,6 +64,20 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
     defaultValues: { role: initialRole, email: "", password: "" },
   });
   const role = useWatch({ control, name: "role" });
+  const { reset: resetLogin } = loginMutation;
+  const { reset: resetReactivate } = reactivateMutation;
+
+  // O router do Next (Activity) mantém esta tela montada e escondida depois de entrar, e roda as limpezas de layout
+  // ao esconder: zera o envio e a senha para quem sair da conta e voltar não ficar preso em "Entrando…".
+  useLayoutEffect(
+    () => () => {
+      resetLogin();
+      resetReactivate();
+      resetField("password");
+      setNotice(null);
+    },
+    [resetLogin, resetReactivate, resetField],
+  );
 
   // O aviso recebe o foco para o leitor de tela anunciar e o teclado continuar dali (REQ-AUTH-007).
   useEffect(() => {
@@ -66,7 +85,7 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
   }, [notice]);
 
   function handleApiError(error: unknown, values: LoginFormValues) {
-    const message = getErrorMessage(error, isSelectableRole(values.role) ? { role: values.role } : {});
+    const message = translateError(error, isSelectableRole(values.role) ? { role: values.role } : {});
     if (!isApiError(error)) {
       // Falha do próprio front (bug), não da API: aparece no console em desenvolvimento.
       if (process.env.NODE_ENV !== "production") console.error("[login] falha inesperada", error);
@@ -114,33 +133,43 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
   return (
     <Box component="form" noValidate onSubmit={onSubmit} {...{ [DOOR_TARGET_ATTR]: "" }}>
       <Stack spacing={3}>
-        {visibleNotice && (
-          <Notice
-            ref={noticeRef}
-            tone={visibleNotice.kind === "deactivated" || visibleNotice.kind === "rateLimited" ? "atencao" : "erro"}
-            action={
-              visibleNotice.kind === "deactivated" ? (
-                <Button
-                  variant="contained"
-                  onClick={reactivate}
-                  disabled={reactivateMutation.isPending}
-                  aria-busy={reactivateMutation.isPending}
-                >
-                  {reactivateMutation.isPending ? authCopy.reactivating : authCopy.reactivate}
-                </Button>
-              ) : undefined
-            }
-          >
-            {visibleNotice.kind === "rateLimited"
-              ? getErrorMessage(
-                  new ApiError({ ...visibleNotice.error.toJSON(), retryAfterSeconds: countdown.remaining }),
-                )
-              : visibleNotice.message}
-          </Notice>
-        )}
+        <AnimatePresence initial={false}>
+          {visibleNotice && (
+            <motion.div
+              key="notice"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={MOTION_ASSENTAR}
+            >
+              <Notice
+                ref={noticeRef}
+                tone={visibleNotice.kind === "deactivated" || visibleNotice.kind === "rateLimited" ? "atencao" : "erro"}
+                action={
+                  visibleNotice.kind === "deactivated" ? (
+                    <Button
+                      variant="contained"
+                      onClick={reactivate}
+                      disabled={reactivateMutation.isPending}
+                      aria-busy={reactivateMutation.isPending}
+                    >
+                      {reactivateMutation.isPending ? authCopy.reactivating : authCopy.reactivate}
+                    </Button>
+                  ) : undefined
+                }
+              >
+                {visibleNotice.kind === "rateLimited"
+                  ? translateError(
+                      new ApiError({ ...visibleNotice.error.toJSON(), retryAfterSeconds: countdown.remaining }),
+                    )
+                  : visibleNotice.message}
+              </Notice>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {variant === "account" && (
-          <Box>
+          <Reveal order={3}>
             <Controller
               control={control}
               name="role"
@@ -160,34 +189,37 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }} aria-live="polite">
               {authCopy.roles[selectableRole].help}
             </Typography>
-          </Box>
+          </Reveal>
         )}
 
-        <Controller
-          control={control}
-          name="email"
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              label={authCopy.email}
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              required
-              error={Boolean(fieldState.error)}
-              helperText={fieldState.error?.message}
-              fullWidth
-            />
-          )}
-        />
+        <Reveal order={4}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { ref, ...field }, fieldState }) => (
+              <TextField
+                {...field}
+                inputRef={ref}
+                label={authCopy.email}
+                type="email"
+                autoComplete="email"
+                required
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                fullWidth
+              />
+            )}
+          />
+        </Reveal>
 
-        <Box>
+        <Reveal order={5}>
           <Controller
             control={control}
             name="password"
-            render={({ field, fieldState }) => (
+            render={({ field: { ref, ...field }, fieldState }) => (
               <PasswordField
                 {...field}
+                inputRef={ref}
                 label={authCopy.password}
                 autoComplete="current-password"
                 required
@@ -199,24 +231,26 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
           />
           <Link
             component={NextLink}
-            href={`/forgot-password?as=${variant === "admin" ? "admin" : selectableRole}`}
+            href={forgotPasswordPath(variant === "admin" ? "admin" : selectableRole)}
             sx={{ display: "inline-block", mt: 1 }}
           >
             {authCopy.forgotPassword}
           </Link>
-        </Box>
+        </Reveal>
 
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-          fullWidth
-          disabled={isBusy || blocked}
-          aria-busy={isBusy}
-          {...{ [DOOR_WARM_ATTR]: "" }}
-        >
-          {isBusy ? authCopy.submitting : authCopy.submit}
-        </Button>
+        <Reveal order={6}>
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            fullWidth
+            disabled={isBusy || blocked}
+            aria-busy={isBusy}
+            {...{ [DOOR_WARM_ATTR]: "" }}
+          >
+            {isBusy ? authCopy.submitting : authCopy.submit}
+          </Button>
+        </Reveal>
 
         {blocked && (
           <Typography variant="body2" color="text.secondary" role="timer" aria-live="off">
@@ -225,12 +259,14 @@ export function LoginForm({ variant, initialRole, next }: LoginFormProps) {
         )}
 
         {variant === "account" && (
-          <Typography sx={{ textAlign: "center" }}>
-            {authCopy.noAccount}{" "}
-            <Link component={NextLink} href={`/register/${selectableRole}`}>
-              {authCopy.register}
-            </Link>
-          </Typography>
+          <Reveal order={7}>
+            <Typography sx={{ textAlign: "center" }}>
+              {authCopy.noAccount}{" "}
+              <Link component={NextLink} href={registerPath(selectableRole, next)}>
+                {authCopy.register}
+              </Link>
+            </Typography>
+          </Reveal>
         )}
 
         {/* Mantém o RHF ciente de erros de formulário vindos da API sem campo (applyFieldErrors → root). */}

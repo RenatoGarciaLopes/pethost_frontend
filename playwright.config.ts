@@ -16,6 +16,9 @@ if (isReal && !backendUrl) {
 /** Browser projects and managed local servers; real mode requires a running .NET API. */
 const config = defineConfig({
   testDir: "e2e",
+  // Um worker: o backend simulado guarda estado (senha trocada, conta pausada, sessões) e é um só
+  // para todos os testes. Em paralelo, o reset de um teste derrubava a sessão de outro (spec 015).
+  workers: 1,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3100",
@@ -44,10 +47,13 @@ const config = defineConfig({
       : []),
     {
       command: "node node_modules/next/dist/bin/next dev -p 3100",
-      url: "http://localhost:3100",
+      // Pronto quando a tela de entrar responde (a home chega na spec 040).
+      url: "http://localhost:3100/login",
       env: {
         BACKEND_URL: isReal ? backendUrl! : "http://localhost:5099",
         BACKEND_API_PREFIX: process.env.E2E_BACKEND_API_PREFIX ?? "/api/v1",
+        // Chave sintética: no mocked o Stripe.js é trocado pelo fixture do navegador (e2e/support/stripePayment.ts).
+        ...(!isReal ? { NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_synthetic" } : {}),
       },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

@@ -16,21 +16,16 @@ import * as zod from 'zod';
  */
 export const PostApiV1AuthPasswordForgotBody = zod.object({
   "email": zod.string().nullish(),
-  "role": zod.string().nullish().describe('Obrigatório pelo mesmo motivo do login: o e-mail sozinho não identifica a conta,\nporque a mesma pessoa pode ter conta `owner` e `host`.')
+  "role": zod.string().nullish().describe('Obrigatório pelo mesmo motivo do login: o e-mail sozinho não identifica a conta,\r\nporque a mesma pessoa pode ter conta `owner` e `host`.')
 }).describe('"Esqueci a senha": pede o envio do token de troca por e-mail.')
 
 export const PostApiV1AuthPasswordForgotResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
 
-}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * A senha nova precisa ser forte (8 a 128 caracteres, maiúscula, minúscula,
@@ -44,15 +39,10 @@ export const PostApiV1AuthPasswordResetBody = zod.object({
 }).describe('Troca a senha usando o token recebido por e-mail.')
 
 export const PostApiV1AuthPasswordResetResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
 
-}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).passthrough().describe('Ausência de valor de retorno. O envelope acompanha toda resposta — nunca 204 (§7).'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

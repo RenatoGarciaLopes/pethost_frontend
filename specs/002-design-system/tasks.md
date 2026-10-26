@@ -1,4 +1,4 @@
-﻿---
+---
 spec: 002-design-system
 status: in-progress
 updated: 2026-10-11
@@ -6,9 +6,9 @@ updated: 2026-10-11
 
 # 002 · Tarefas
 
-- [x] (2026-10-11) **T1 · Tokens e contraste** (REQ-DS-001, 002): `colors.test.ts`, `contrast.test.ts` → `tokens/*`, `shared/lib/color/contrastRatio.ts`
+- [x] (2026-10-11) **T1 · Tokens e contraste** (REQ-DS-001, 002): `colors.test.ts`, `contrast.test.ts` → `tokens/*`, `shared/lib/color/contrastRatio.ts` (movido para `src/test/a11y/` em 2026-10-12: só teste usa)
 - [x] (2026-10-11) **T2 · Fontes locais** (REQ-DS-003): baixar os arquivos com licença OFL para `src/assets/fonts`, `app/layout.tsx`, `tokens/typography.ts`; E2E de fontes
-- [x] (2026-10-11) **T3 · Tema + providers** (REQ-DS-004 a 007): `overrides/Button.test.tsx` → `createQuintalTheme.ts`, `overrides/*`, `variants/*`, `types/mui.d.ts`, `bootstrap/providers/ThemeProviders.tsx`; trocar a home do scaffold por uma página de verificação do tema (temporária, removida na 040)
+- [x] (2026-10-11) **T3 · Tema + providers** (REQ-DS-004 a 007): `overrides/Button.test.tsx` → `createQuintalTheme.ts`, `overrides/*`, `variants/*`, `types/mui.d.ts`, `bootstrap/providers/ThemeProviders.tsx`; trocar a home do scaffold por uma página de verificação do tema (temporária; removida em 2026-10-12, os E2E do tema usam `/login`)
 - [x] (2026-10-11) **T4 · Movimento** (REQ-DS-008): `usePrefersReducedMotion`, `tokens/springs.ts`
 - [x] (2026-10-11) **T5 · Máscaras** (base para a 011): `masks.test.ts` → `shared/lib/masks`
 - [x] (2026-10-11) **T6 · Formulário I** (REQ-DS-010, 011): `SegmentedControl`, `PasswordField`, `PasswordStrengthChecklist`
@@ -37,7 +37,7 @@ nenhum primitivo chama API ou conhece entidades de produto.
 | ------ | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | T1     | `src/shared/theme/tokens/{colors,shadows,radii}.ts`; `src/shared/lib/color/contrastRatio.ts`                               | `quintalColors`, `hardShadow(0/3/5/8)`, raios e contraste WCAG para hex RGB opaco. Não calcula contraste de transparência.                                                                           |
 | T2     | `tokens/typography.ts`; `src/app/layout.tsx`; `.storybook/fonts.css`                                                       | Next usa `next/font/local` e as variáveis `--font-display`/`--font-body`. Storybook carrega os mesmos arquivos por CSS/Vite. Base 17px; h1–h4 Caprasimo.                                             |
-| T3     | `createQuintalTheme.ts`, `overrides/*.ts`, `variants/quintalVariants.ts`, `types/mui.d.ts`, `public/brand/paper-grain.png` | Tema claro CSS variables; cada override MUI em seu módulo. Primário coral/tinta, foco azul 3px e sombras sem blur. Grão PNG determinístico, local e sutil.                                           |
+| T3     | `createQuintalTheme.ts`, `overrides/*.ts`, `variants/quintalVariants.ts`, `types/mui.d.ts`, `public/brand/paper-grain.png` | Tema claro CSS variables; cada override MUI em seu módulo. Primário coral/tinta, foco de teclado em tinta 3px e sombras sem blur. Grão PNG determinístico, local e sutil.                            |
 | T3     | `src/bootstrap/providers/ThemeProviders.tsx` e pasta `ThemeProviders/`                                                     | Entrada estável reexporta a implementação com anatomia de componente. `ThemeProviders({children})` aplica cache App Router, tema e baseline. Não gerencia queries/sessão.                            |
 | T3     | `src/app/page.tsx`, `src/app/globals.css`, `.storybook/preview.ts`                                                         | Home temporária sem lógica de domínio; baseline substitui cores/fontes do scaffold. Stories recebem o mesmo tema.                                                                                    |
 | T4     | `tokens/springs.ts`; `src/shared/lib/motion/usePrefersReducedMotion.ts`                                                    | Curvas exatas da marca, assentar 340ms e acolher 660ms. Hook assina matchMedia via useSyncExternalStore; SSR/ambiente sem matchMedia prefere redução. CSS desliga transições e animações.            |
@@ -136,7 +136,7 @@ Componentes (anatomia `Nome.tsx` + `Nome.stories.tsx` + `index.ts`, TSDoc em pt-
 Decisões:
 
 - `DoorMark` segue `marca/04-logo.md` à risca (viewBox 100 × 110, traço igual na folha e no batente, folha coral fixa via `palette.quintal.coral`, luz `palette.scene.doorLight`); hover/foco do próprio símbolo ou do link pai abre a folha (`scaleX(.55)`, mola "acolher") e esquenta a luz. Prop `withWordmark` dá a assinatura com "pethost" em Caprasimo para o cabeçalho (004).
-- `DoorScene` reage ao formulário por `:has()` com os atributos exportados `DOOR_TARGET_ATTR` (form) e `DOOR_WARM_ATTR` (botão "Entrar"); prop `state` fixa o estado para stories. Luz respira 3,6 s; cachorro passa a cada 16 s (`TurmaWalker crossingMs=7000 intervalMs=16000`).
+- (Substituído em 2026-10-12, ver o registro abaixo.) `DoorScene` reagia ao formulário por `:has()` com os atributos exportados `DOOR_TARGET_ATTR` (form) e `DOOR_WARM_ATTR` (botão "Entrar"); prop `state` fixa o estado para stories. Luz respira 3,6 s; cachorro passa a cada 16 s (`TurmaWalker crossingMs=7000 intervalMs=16000`).
 - `SniffLoader`: dois cachorros por vez (2 s por travessia, um a cada 0,667 s) e o empurrãozinho da folha. A interação de plantar flores (design/14-loading) ficou fora desta entrega.
 - `Notice`: `erro` com `role="alert"`, demais `role="status"`; aceita `ref` e `tabIndex={-1}` para o login levar o foco ao erro.
 - Movimento reduzido: o `CssBaseline` já desliga animações e transições; os WebP animados viram quadro parado.
@@ -154,5 +154,19 @@ O Renato pediu para deixar os testes novos para depois. Sem teste de componente 
 - **Camada semântica de cores:** `tokens/semantic.ts`, com `accountTones`, `surfaceColors`, `sceneColors` e `feedbackColors`. No tema:
   - `palette.account` e `palette.scene` (tipados em `types/mui.d.ts`);
   - mapeamento conforme `design/09-componentes-mui.md`: `secondary` e `info` céu, `success` grama, `warning` gema, `background.paper` branco.
-- **`overrides/Link.ts`:** links em tinta com sublinhado coral (contraste AA) e foco na cor `foco`.
+- **`overrides/Link.ts`:** links em tinta com sublinhado coral (contraste AA) e foco de teclado em tinta.
 - **Dívida de testes:** `semantic.ts` sem teste de contraste para os tons de conta; sem teste do override de Link.
+
+## Registro (2026-10-12, Claude Code)
+
+- **Motion** (`motion` 14, instalado com `--ignore-scripts`): molas `MOTION_ASSENTAR` (`bounce 0`) e `MOTION_ACOLHER` (`bounce 0.39`, cerca de 9% de quique) em `tokens/springs.ts`, com teste que confere duração e quique contra as curvas CSS; `EASE_AMBIENTE` para fundo. `bootstrap/providers/MotionProvider.tsx` (`reducedMotion="user"`) entra no `AppProviders`.
+- **`Reveal`** (`shared/ui/motion/Reveal`): monta a tela em ordem (`order` × 60 ms, mola "assentar"); story `Quintal/Motion/Reveal`.
+- **`DoorScene` reescrita em Motion**, sem o cachorro e sem a prop `size` (ocupa a largura do contêiner; quem usa limita):
+  - tudo num SVG só (`viewBox` 360 × 300): céu em arco com degradê (`sceneColors.sky*`, antes sem uso) e duas nuvens, gramado, horizonte traçado, facho, porta, capacho, margaridas e pólen;
+  - monta-se sozinha; depois liga o ambiente (luz respirando, pólen, nuvens, flores balançando);
+  - de brincar: mouse na porta entreabre; clique na porta ou no capacho abre e volta; clique no gramado planta margarida (até 6); flores se sacodem; parallax com mouse fino;
+  - `useDoorTarget` troca o `:has()`: escuta `pointerover`/`focusin` no documento e procura os atributos, então a cena e o formulário continuam sem importar um ao outro;
+  - `onPointerDown` com `preventDefault`: brincar não tira o foco do campo.
+- **`Daisy`**: o desenho virou `DaisyGlyph`, usado pela `Daisy` e dentro da cena.
+- **Código morto removido:** variantes de Chip `sticker`/`attention` e de Paper `panel` (sem uso; o `Sticker` e o `StatusPill` são componentes próprios). Fica só o Chip `ok`, usado pelo `ChipPicker`. A página de teste do tema e os SVGs do modelo do Next em `public/` saíram.
+- **Dívida de testes:** `Reveal`, `DoorScene` (interações), `useDoorTarget`, `usePointerParallax`, `DaisyGlyph`.

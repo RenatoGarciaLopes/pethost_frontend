@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { LoginScreen } from "@/features/auth/index.server";
-import { getSession } from "@/shared/auth/server/getSession";
-import { resolvePostLoginPath } from "@/shared/config/appRoutes";
+import { redirectIfSignedIn } from "@/shared/auth/server/redirectIfSignedIn";
 import { firstParam, type SearchParams } from "@/shared/lib/url/searchParams";
 import { AuthPageFallback } from "../../AuthPageFallback";
 
@@ -24,8 +22,7 @@ export default function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
 
 async function AdminLoginGate({ searchParams }: AdminLoginPageProps) {
   const next = firstParam((await searchParams).next) ?? null;
-  const user = await getSession();
-  if (user) redirect(resolvePostLoginPath(user.role, next));
+  await redirectIfSignedIn(next);
 
   return <LoginScreen variant="admin" initialRole="admin" next={next} />;
 }

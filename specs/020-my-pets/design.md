@@ -1,10 +1,22 @@
 ---
 spec: 020-my-pets
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-13
 ---
 
 # 020 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-13)
+
+- **`/pets` no grupo `(account)`:** a casca do tutor e do anfitrião já cobre `/pets`; a página usa `requirePersonalUser("/pets")`.
+- **Primeiro atalho do cabeçalho:** "Meus pets" entra em `NAV_ITEMS` (`shared/config/navigation.ts`, só telas que existem, sem `available`) e traz o `HeaderNav` com a gaveta do celular (pendências da 004: REQ-SHELL-002, 006, 008). Anfitrião ganha o atalho dele na 023 ("Pets da casa").
+- **Patinha no lugar das silhuetas por espécie:** sem ilustrações por espécie ainda, pet sem foto e o tile "Apresentar outro pet" usam `PawMark` (`shared/ui/brand`), traço de mão como os ícones de feedback. Silhuetas por espécie ficam para o design.
+- **Carteirinha só `compact`:** a variante `full` nasce na ficha (022), que é o primeiro uso. O modelo `Pet` traz só o que a carteirinha usa; a ficha amplia.
+- **Enums no contrato:** espécie, porte e sexo são estreitados em `petDtoSchema` (maiúsculas aceitas, como a API); valor desconhecido vira `CONTRACT_MISMATCH`, sem rótulo inventado.
+- **`describePet`:** raça ou espécie (exótico usa a descrição) · porte · idade (anos para baixo; meses abaixo de 1 ano; "menos de 1 mês") · sexo (desconhecido fica de fora) · castração ("castrada" só para fêmea). Uma data só por visita para todas as carteirinhas.
+- **`backendForRequest()`** (`shared/api/server`): o cliente do backend da requisição (cookie + IP) estava copiado no prefetch da 014 e da 015; virou peça única, usada também aqui.
+- **Rascunho (T6, REQ-PETS-009) fica para a 021:** a faixa depende do `readPetDraft` da 021; sem ele seria código sem uso.
+- **Sem `loading.tsx` e `error.tsx` próprios:** o fallback do `<Suspense>` da página é a grade-esqueleto com o título; erro de rota usa o `error.tsx` do app (004); erro da API aparece dentro da lista (`ErrorState`).
 
 ## Rota e renderização
 

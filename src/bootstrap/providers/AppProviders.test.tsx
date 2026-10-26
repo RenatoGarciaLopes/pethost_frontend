@@ -2,6 +2,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@mui/material/styles";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { useFlashMessage } from "@/shared/hooks/useFlashMessage";
+import { useAnnounce } from "@/shared/ui/feedback/Announcer";
 import { AppProviders } from "./AppProviders";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
@@ -9,11 +11,13 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 function Probe() {
   const theme = useTheme();
   const queryClient = useQueryClient();
+  useAnnounce();
+  useFlashMessage();
   return <p>{`${theme.palette.primary.main} ${queryClient ? "query" : ""}`}</p>;
 }
 
 describe("AppProviders", () => {
-  it("REQ-HTTP-017 entrega o tema Quintal e o QueryClient aos filhos", () => {
+  it("REQ-HTTP-017 REQ-SWITCH-006 REQ-PEDIT-012 entrega o tema Quintal, o QueryClient, a região viva e o aviso de navegação aos filhos", () => {
     render(
       <AppProviders>
         <Probe />
@@ -22,5 +26,6 @@ describe("AppProviders", () => {
 
     expect(screen.getByText(/query$/)).toBeInTheDocument();
     expect(screen.getByText(/#F26B3A/i)).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
   });
 });

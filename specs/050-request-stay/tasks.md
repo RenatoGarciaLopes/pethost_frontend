@@ -1,0 +1,16 @@
+---
+spec: 050-request-stay
+status: in-progress
+updated: 2026-10-15
+---
+
+# 050 · Tarefas
+
+- [x] **T1 · Base de bookings** (2026-10-15, feita na 053): contratos, `toBooking`, `bookingQueries`, `formatStay`, `bookingErrorDetail`, frases no `errorCopy`
+- [x] **T2 · Schema e mutation** (2026-10-15) (REQ-REQST-002, 005, 009)
+- [x] **T3 · Formulário e resumo** (2026-10-15) (REQ-REQST-002, 003, 004, 007, 008)
+- [x] **T4 · Pedido enviado** (2026-10-15) (REQ-REQST-006)
+- [x] **T5 · Rota e guarda** (2026-10-15) (REQ-REQST-001)
+- [x] **T6 · Stories, E2E e documentação** (2026-10-15)
+- [x] **T8 · Dias fechados no calendário** (2026-10-23, tarefa 092) (REQ-REQST-011) · a rota busca a agenda (`getListingClosedPeriods`) e o `RequestStayComposer` passa `closedDay` (`listingClosedDays`) ao `RequestStayForm`, que só repassa ao `DateRangeField`. E2E: `request.spec.ts` REQ-LPAGE-013.
+- [x] **T7 · Aceite do cuidado e 72 h** (2026-10-23, bug 091) (REQ-REQST-004, 010)

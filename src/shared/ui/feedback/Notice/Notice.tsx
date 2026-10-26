@@ -1,4 +1,6 @@
 "use client";
+
+import { keyboardFocus } from "@/shared/theme/focus";
 import { Box, Typography } from "@mui/material";
 import type { ReactNode, Ref } from "react";
 import { toneIcon, type FeedbackTone } from "../feedbackIcons";
@@ -23,10 +25,10 @@ export interface NoticeProps {
 
 /**
  * Aviso em bloco com ícone desenhado e cor do tom (REQ-DS-013). Nunca só a cor: sempre ícone e texto.
- * Primitivo sem domínio: o texto chega pronto (ex.: `getErrorMessage(error)`).
+ * Primitivo sem domínio: o texto chega pronto (ex.: `translateError(error)`).
  *
  * @example
- * <Notice tone="erro" ref={noticeRef} title={getErrorMessage(error)} />
+ * <Notice tone="erro" ref={noticeRef} title={translateError(error)} />
  * <Notice tone="atencao" title="Essa conta está pausada." action={<Button>Reativar</Button>} />
  */
 export function Notice({ tone, title, children, action, ref, id }: NoticeProps) {
@@ -50,7 +52,7 @@ export function Notice({ tone, title, children, action, ref, id }: NoticeProps) 
           border: surface.border,
           color: "text.primary",
           "& > svg": { color: surface.icon, flexShrink: 0, marginTop: "1px" },
-          "&:focus-visible": { outlineOffset: 3 },
+          [keyboardFocus()]: { outlineOffset: 3 },
         };
       }}
     >

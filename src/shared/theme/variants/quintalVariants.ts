@@ -9,11 +9,10 @@ export const quietVariant = {
     "&:hover": { backgroundColor: c.cartao, boxShadow: "none", borderColor: "transparent" },
   },
 };
-/** Semantic chip variants with ink text on light colored surfaces. */
-export const chipVariants = [
-  { props: { variant: "sticker" as const }, style: { backgroundColor: c.gema } },
-  { props: { variant: "ok" as const }, style: { backgroundColor: c.grama } },
-  { props: { variant: "attention" as const }, style: { backgroundColor: c.luz } },
-];
-/** Panel surface used by forms and previews. */
-export const panelVariant = { props: { variant: "panel" as const }, style: { backgroundColor: c.cartao, padding: 24 } };
+/** Chip marcado (`ChipPicker`): fundo grama com texto tinta. */
+export const okChipVariant = { props: { variant: "ok" as const }, style: { backgroundColor: c.grama } };
+/** Botão marcado (chips de filtro): fundo grama com texto tinta, como o `ok` do Chip. */
+export const okButtonVariant = {
+  props: { variant: "ok" as const },
+  style: { backgroundColor: c.grama, "&:hover": { backgroundColor: c.grama } },
+};

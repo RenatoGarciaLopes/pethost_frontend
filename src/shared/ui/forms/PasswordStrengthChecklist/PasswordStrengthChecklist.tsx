@@ -1,40 +1,68 @@
 "use client";
 import { Box } from "@mui/material";
+import { PASSWORD_RULES, type PasswordRule } from "../../../lib/validation";
+import { OkIcon } from "../../feedback/feedbackIcons";
 import { formCopy } from "../formCopy";
+import { quintalRadii } from "../../../theme/tokens/radii";
+import { visuallyHidden } from "../../a11y/visuallyHidden";
 
-/** Keys of the five password rules from Auth.Domain.Users.Password (8–128 UTF-16 chars). */
-export type PasswordRule = "length" | "uppercase" | "lowercase" | "digit" | "special";
 /** Presentation of password creation hints; API remains the validation authority. */
 export interface PasswordStrengthChecklistProps {
   /** Current password, used in memory only and never printed. */ password: string;
-  /** Visible labels for the five API rules supplied by the form. */ labels: Record<PasswordRule, string>;
   /** Visible/accessible list title. */ label?: string;
 }
 /**
- * Live five-rule checklist; excludes whitespace from special characters.
+ * Live five-rule pill checklist reading `PASSWORD_RULES` (the same source as the form schema), with the
+ * rule labels from `formCopy.passwordRules` (the same in every screen that creates a password).
+ * The polite live region is not atomic: only the item whose state changed is announced, never each key.
  * Use when choosing a new password, not when checking an existing login password.
- * @example <PasswordStrengthChecklist password={password} labels={labels} />
+ * @example <PasswordStrengthChecklist password={password} />
  */
 export function PasswordStrengthChecklist({
   password,
-  labels,
   label = formCopy.passwordRequirements,
 }: PasswordStrengthChecklistProps) {
-  const rules: Record<PasswordRule, boolean> = {
-    length: password.length >= 8 && password.length <= 128,
-    uppercase: /\p{Lu}/u.test(password),
-    lowercase: /\p{Ll}/u.test(password),
-    digit: /\p{Nd}/u.test(password),
-    special: /[^\p{L}\p{Nd}\s]/u.test(password),
-  };
   return (
-    <Box component="ul" aria-label={label} aria-live="polite" aria-atomic="true" sx={{ pl: 3 }}>
-      {(Object.keys(rules) as PasswordRule[]).map((rule) => (
-        <li key={rule}>
-          <span aria-hidden="true">{rules[rule] ? "✓ " : "○ "}</span>
-          {rules[rule] ? formCopy.met : formCopy.missing} {labels[rule]}
-        </li>
-      ))}
+    <Box
+      component="ul"
+      aria-label={label}
+      aria-live="polite"
+      aria-atomic="false"
+      sx={{ listStyle: "none", p: 0, m: 0, display: "flex", flexWrap: "wrap", gap: 0.75 }}
+    >
+      {(Object.keys(PASSWORD_RULES) as PasswordRule[]).map((rule) => {
+        const met = PASSWORD_RULES[rule](password);
+        return (
+          <Box
+            component="li"
+            key={rule}
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              border: "2px solid",
+              borderColor: "text.primary",
+              borderRadius: `${quintalRadii.pill}px`,
+              px: 1,
+              py: 0.25,
+              fontSize: 12,
+              fontWeight: 700,
+              bgcolor: met ? "success.main" : "transparent",
+              color: "text.primary",
+            }}
+          >
+            {met && (
+              <Box component="span" aria-hidden="true" sx={{ display: "inline-flex" }}>
+                <OkIcon width={14} height={14} />
+              </Box>
+            )}
+            <Box component="span" sx={visuallyHidden}>
+              {met ? formCopy.met : formCopy.missing}{" "}
+            </Box>
+            <span>{formCopy.passwordRules[rule]}</span>
+          </Box>
+        );
+      })}
     </Box>
   );
 }

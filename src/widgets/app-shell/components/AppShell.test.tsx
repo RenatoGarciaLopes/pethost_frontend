@@ -1,0 +1,133 @@
+import { screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import type { AccountRole } from "@/shared/auth/contracts/session";
+import { accountTones } from "@/shared/theme/tokens/semantic";
+import { quintalTheme } from "@/shared/theme/createQuintalTheme";
+import { sessionUserFixture } from "@/test/fixtures/session";
+import { renderWithProviders } from "@/test/render";
+import { AppShell } from "./AppShell";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }), usePathname: () => "/pets" }));
+
+function setup(role: AccountRole) {
+  return renderWithProviders(
+    <AppShell user={{ ...sessionUserFixture, role }}>
+      <h1>Conteúdo da página</h1>
+    </AppShell>,
+    { theme: quintalTheme },
+  );
+}
+
+describe("casca do app", () => {
+  it.each(["owner", "host", "admin"] as const)("REQ-SHELL-001 cabeçalho no tom da conta de %s", (role) => {
+    setup(role);
+    // O tema usa variáveis CSS; o jsdom não resolve o valor, então confere a variável do tom da conta.
+    expect(getComputedStyle(screen.getByRole("banner")).backgroundColor).toBe(`var(--mui-palette-account-${role})`);
+    expect(accountTones[role]).toMatch(/^#/);
+  });
+
+  it.each([
+    ["owner", "/"],
+    ["host", "/host"],
+    ["admin", "/admin/host-applications"],
+  ] as const)("REQ-SHELL-016 o logo da conta de %s leva à casa dela", (role, home) => {
+    setup(role);
+    expect(within(screen.getByRole("banner")).getByRole("link", { name: "PetHost" })).toHaveAttribute("href", home);
+  });
+
+  it("REQ-SHELL-007 'Pular para o conteúdo' é o primeiro foco e aponta para o main da casca", async () => {
+    const { user } = setup("owner");
+    await user.tab();
+    const skip = screen.getByRole("link", { name: "Pular para o conteúdo" });
+    expect(skip).toHaveFocus();
+    expect(skip).toHaveAttribute("href", "#conteudo");
+    const main = screen.getByRole("main");
+    expect(main).toHaveAttribute("id", "conteudo");
+    expect(within(main).getByRole("heading", { name: "Conteúdo da página" })).toBeInTheDocument();
+  });
+
+  it("REQ-LPAGE-012 visitante (página aberta do cantinho) tem o cabeçalho sem atalhos, com Entrar, e o rodapé", () => {
+    renderWithProviders(
+      <AppShell user={null}>
+        <h1>Conteúdo da página</h1>
+      </AppShell>,
+      { theme: quintalTheme },
+    );
+    const header = within(screen.getByRole("banner"));
+    expect(header.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+    expect(header.getByRole("link", { name: "PetHost" })).toHaveAttribute("href", "/");
+    expect(screen.queryByRole("navigation", { name: "Navegação principal" })).not.toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveAttribute("id", "conteudo");
+    expect(screen.getByTestId("grass-footer")).toBeInTheDocument();
+  });
+
+  it("REQ-SHELL-003 menu da conta com o nome", () => {
+    setup("host");
+    expect(
+      screen.getByRole("button", { name: new RegExp(`Menu da conta de ${sessionUserFixture.fullName}$`) }),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("atalhos na casca", () => {
+  it("REQ-SHELL-002 REQ-HVER-001 REQ-HPETS-010 tutor tem Meus pets; anfitrião tem Minha verificação e Pets da casa; admin tem a fila de verificação", () => {
+    const { unmount } = setup("owner");
+    expect(screen.getByRole("navigation", { name: "Navegação principal" })).toBeInTheDocument();
+    unmount();
+    const host = setup("host");
+    const hostNav = within(screen.getByRole("navigation", { name: "Navegação principal" }));
+    const hostLinks = hostNav.getAllByRole("link");
+    expect(hostLinks[0]).toHaveAccessibleName("Painel");
+    expect(hostLinks[0]).toHaveAttribute("href", "/host");
+    expect(hostNav.getByRole("link", { name: "Minha verificação" })).toHaveAttribute("href", "/host/application");
+    expect(
+      within(screen.getByRole("navigation", { name: "Navegação principal" })).getByRole("link", {
+        name: "Pets da casa",
+      }),
+    ).toHaveAttribute("href", "/pets");
+    host.unmount();
+    setup("admin");
+    expect(
+      within(screen.getByRole("navigation", { name: "Navegação principal" })).getByRole("link", {
+        name: "Fila de verificação",
+      }),
+    ).toHaveAttribute("href", "/admin/host-applications");
+  });
+
+  it("REQ-UIC-003 aplica geometria responsiva no cabeçalho sem duplicar o logo", () => {
+    setup("host");
+    const header = screen.getByRole("banner");
+    const injectedCss = [...document.querySelectorAll("style")].map((style) => style.textContent).join(" ");
+    expect(injectedCss).toMatch(/min-height:74px/);
+    expect(injectedCss).toMatch(/min-height:80px/);
+    expect(within(header).getAllByRole("link", { name: "PetHost" })).toHaveLength(1);
+  });
+  it("REQ-AQUEUE-001 admin tem atalho para a fila de verificação", () => {
+    setup("admin");
+    expect(screen.getByRole("link", { name: "Fila de verificação" })).toHaveAttribute(
+      "href",
+      "/admin/host-applications",
+    );
+  });
+  it("REQ-AACC-001 admin tem atalho para as contas", () => {
+    setup("admin");
+    expect(screen.getByRole("link", { name: "Contas" })).toHaveAttribute("href", "/admin/users");
+  });
+});
+
+it.each([
+  ["owner", true],
+  ["host", true],
+  ["admin", false],
+] as const)("REQ-UIC-011 rodapé de gramado depois do conteúdo para %s: %s", (role, shown) => {
+  setup(role);
+  const footer = screen.queryByTestId("grass-footer");
+  if (!shown) return expect(footer).not.toBeInTheDocument();
+  expect(footer).toBe(screen.getByRole("contentinfo"));
+  expect(within(footer!).queryByRole("link", { name: "Entrar" })).not.toBeInTheDocument();
+  expect(within(footer!).getByRole("link", { name: role === "owner" ? "Minhas estadias" : "Painel" })).toHaveAttribute(
+    "href",
+    role === "owner" ? "/owner/bookings" : "/host",
+  );
+  expect(screen.getByRole("main").compareDocumentPosition(footer!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+});

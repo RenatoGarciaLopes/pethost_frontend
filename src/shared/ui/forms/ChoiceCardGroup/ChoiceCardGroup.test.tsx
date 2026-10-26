@@ -34,3 +34,19 @@ it("REQ-DS-009 cards preservam avisos e seleção por teclado e clique", async (
   await user.click(screen.getByRole("radio", { name: /Cachorro/ }));
   expect(change).toHaveBeenLastCalledWith("dog");
 });
+
+it("section label remains the accessible group name", () => {
+  renderWithProviders(
+    <ChoiceCardGroup label="Plano" labelVariant="section" options={options} value="dog" onChange={() => {}} />,
+  );
+  expect(screen.getByRole("heading", { name: "Plano", level: 2 })).toBeVisible();
+  expect(screen.getByRole("radiogroup", { name: "Plano" })).toBeVisible();
+});
+
+it("104 layout row deixa as opções lado a lado em qualquer largura, com o rótulo em negrito", () => {
+  renderWithProviders(
+    <ChoiceCardGroup label="Sua casa é…" options={options} value="dog" onChange={() => {}} layout="row" />,
+  );
+  expect(getComputedStyle(screen.getByRole("radiogroup")).gridTemplateColumns).toBe("repeat(3, minmax(0, 1fr))");
+  expect(getComputedStyle(screen.getByText("Sua casa é…")).fontWeight).toBe("700");
+});

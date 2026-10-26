@@ -48,3 +48,9 @@ export const Mobile: Story = {
   name: "REQ-DS-018 Mobile",
   globals: { viewport: { value: "celular", isRotated: false } },
 };
+
+/** Equal desktop columns, stacked on mobile; same native radio keyboard behavior. */
+export const Responsive: Story = { args: { layout: "responsive", labelVariant: "section" } };
+
+/** Duas escolhas curtas lado a lado também no celular (tipo de casa no cantinho, 104). */
+export const LadoALado: Story = { name: "REQ-DS-018 Lado a lado", args: { layout: "row" } };

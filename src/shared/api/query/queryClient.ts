@@ -4,6 +4,22 @@ import { isApiError } from "../errors/ApiError";
 const STALE_TIME_MS = 60_000;
 const MAX_RETRIES = 2;
 
+/**
+ * Prefixo de consultas por usuário; nunca use senha ou token em parts (REQ-SWITCH-003/010).
+ * @example accountQueryKey(user.id, "linked-accounts") // ["account", user.id, "linked-accounts"]
+ */
+export function accountQueryKey(userId: string, ...parts: readonly unknown[]) {
+  return ["account", userId, ...parts] as const;
+}
+
+/** Prefixo privado da trilha, opcionalmente limitado ao alvo; permite invalidar sem importar features.
+ * @example adminAuditQueryKey(adminId, { targetType: "owner", targetId: ownerId })
+ */
+export function adminAuditQueryKey(userId: string, target?: { targetType: string; targetId: string }) {
+  const prefix = accountQueryKey(userId, "admin", "audit");
+  return target ? ([...prefix, target] as const) : prefix;
+}
+
 /** Repete só o que pode passar sozinho: rede caída e erro 5xx da API. */
 export function shouldRetry(failureCount: number, error: unknown): boolean {
   if (failureCount >= MAX_RETRIES || !isApiError(error)) return false;
@@ -30,14 +46,4 @@ export function getQueryClient({ isServer = runningOnServer }: { isServer?: bool
   if (isServer) return createQueryClient();
   browserClient ??= createQueryClient();
   return browserClient;
-}
-
-/**
- * Chave de query com a conta na frente. A mesma pessoa pode ter conta de tutor e de anfitrião;
- * com a conta na chave, trocar de conta nunca mostra dado da outra (REQ-HTTP-018).
- *
- * @example useQuery({ queryKey: accountQueryKey(user.id, "pets"), ... })
- */
-export function accountQueryKey(accountId: string, ...parts: unknown[]): readonly unknown[] {
-  return ["account", accountId, ...parts];
 }

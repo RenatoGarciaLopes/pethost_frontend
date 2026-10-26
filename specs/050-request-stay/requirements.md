@@ -1,0 +1,49 @@
+---
+spec: 050-request-stay
+status: in-progress
+updated: 2026-10-15
+area: REQST
+---
+
+# 050 · Pedir estadia
+
+## Contexto
+
+O tutor escolheu o cantinho (042) e pede a estadia. O pedido **não segura vaga**: o anfitrião tem 24h para responder e é o aceite que ocupa a vaga ([[jornada-da-estadia]], `modulo-bookings.md` seções 4 e 5). Hoje, **aceitar já confirma** (o pagamento ainda não existe).
+
+## Referências
+
+- **Design:** canvas → `Fluxo-Reserva` → "Pedir estadia" e "Pedido enviado" (checklist de ração e remédio antes de pedir). Vault: `produto/jornada-da-estadia.md`, `design/12-pagamento-e-fechado.md` (o "Fechado!" é da 051).
+- **API:** `POST /api/v1/bookings` `{ listingId, petIds (1 a 10), checkIn, checkOut }` (datas `yyyy-MM-dd`), resposta `BookingResponse` com `status: requested`, `nights`, `petCount`, `nightlyRate`, `totalPrice`, `responseDeadline`. Erros na ordem da seção 4: `400` (campos e período), `404 BOOKING_OWNER_NOT_FOUND`, `403 BOOKING_OWNER_DEACTIVATED`, `404 BOOKING_LISTING_NOT_FOUND`, `404 BOOKING_PET_NOT_FOUND`, `422 BOOKING_PET_INACTIVE`, `422 BOOKING_PET_SPECIES_NOT_ACCEPTED`, `422 BOOKING_PET_SIZE_NOT_ACCEPTED`, `409 BOOKING_PET_PERIOD_CONFLICT`, `422 BOOKING_WEEKDAY_NOT_AVAILABLE` (com a data), `422 BOOKING_CAPACITY_EXCEEDED` (com a noite).
+- **Depende de:** 042 (cantinho, `petFitsListing`), 041 (`stayRules`, `DateRangeField`), 020 (pets do tutor), 044 (`formatBRL`).
+
+## Critérios de aceite
+
+| ID            | Critério                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| REQ-REQST-001 | `/listings/{id}/request` DEVE exigir conta de **tutor**; anfitrião vê "Pra pedir uma estadia, entra com a conta de tutor." com a troca de conta (014)                                                                                                                                                                                                                                                                                                                                                                                |
+| REQ-REQST-002 | A tela DEVE vir preenchida com datas e pets da URL e permitir mudar: datas com as regras de `stayRules`; pets ativos do tutor como cartões marcáveis (1 a 10), cada um com "Combina" ou o motivo de não combinar (`petFitsListing`); pet que não combina não pode ser marcado                                                                                                                                                                                                                                                        |
+| REQ-REQST-003 | O resumo DEVE mostrar cantinho (capa, título, bairro), período ("20 a 25 de dezembro · 5 noites"), pets e o total `diária × noites × pets` com a conta visível ("R$ 60,50 × 5 noites × 2 pets")                                                                                                                                                                                                                                                                                                                                      |
+| REQ-REQST-004 | Antes de enviar, o checklist "Combinou de levar?" DEVE trazer as duas caixas, "A ração de costume" e "Os remédios e como dar", **obrigatórias**: sem as duas marcadas o erro "Marca os dois pra confirmar que a ração e os remédios vão junto." aparece no grupo e nada é enviado; o corpo do `POST /bookings` leva `careTermsAccepted: true`. A frase "O pedido não segura a vaga: {anfitrião} tem até 24 horas pra responder." continua                                                                                            |
+| REQ-REQST-005 | "Pedir estadia" DEVE mandar `POST /bookings` uma vez (botão ocupado, sem repetir em clique duplo)                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| REQ-REQST-006 | QUANDO der certo, O SISTEMA DEVE mostrar "Pedido enviado!" com o prazo de resposta (`responseDeadline` em horário de Brasília: "{anfitrião} responde até amanhã às 14h") e os caminhos "Ver minhas estadias" (052) e "Voltar pra busca"                                                                                                                                                                                                                                                                                              |
+| REQ-REQST-007 | Erros de campo do `400` DEVEM voltar ao campo (datas, pets); os `422`/`409` de regra DEVEM virar frase da PetHost no topo do formulário, com o dado que a API manda (a data do dia fechado, a noite sem vaga, o pet em conflito)                                                                                                                                                                                                                                                                                                     |
+| REQ-REQST-008 | `BOOKING_LISTING_NOT_FOUND` DEVE dizer "Esse cantinho não está recebendo pedidos agora." com "Voltar pra busca"                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| REQ-REQST-009 | A lista de estadias (`bookingQueries.all`) DEVE ser invalidada depois do pedido                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| REQ-REQST-011 | O calendário do pedido DEVE riscar os dias em que o cantinho não recebe e os que o anfitrião fechou, com o motivo, e não deixar o período atravessá-los (042 REQ-LPAGE-013); datas da URL que passam por um deles mostram o motivo no campo antes do envio. O `422` da API continua tratado (REQ-REQST-007) para a corrida (agenda mudou entre abrir e enviar)                                                                                                                                                                       |
+| REQ-REQST-010 | A chegada DEVE ter 72 h de antecedência (`Booking.MinimumRequestNotice`: 24 h do anfitrião responder + 48 h até a chegada em que ele ainda aceita, contadas até a meia-noite de Brasília do dia da chegada). Na régua de dias, a primeira chegada é hoje + 4 dias (`earliestRequestCheckIn`); o calendário do pedido e o card da lateral do cantinho bloqueiam antes disso e o schema do pedido diz "A chegada precisa ser daqui a pelo menos 3 dias: o anfitrião tem 24 horas pra responder.". A busca não usa a regra (só procura) |
+
+## Microcopy
+
+Título "Pedir estadia" · "Quem vai?" · "Combinou de levar?" ("A ração de costume", "Os remédios e como dar") · "Pedir estadia" · "Pedido enviado!" · erros (para o `errorCopy`):
+
+- `BOOKING_PET_PERIOD_CONFLICT`: "Esse pet já tem outra estadia nessas datas."
+- `BOOKING_WEEKDAY_NOT_AVAILABLE`: "O cantinho não recebe em {dia}. Tenta outras datas."
+- `BOOKING_CAPACITY_EXCEEDED`: "Não tem vaga pra todos na noite de {data}. Tenta outras datas ou menos pets."
+- `BOOKING_PET_SPECIES_NOT_ACCEPTED` / `…SIZE…`: "Esse cantinho não recebe {espécie ou porte}."
+- `BOOKING_PET_INACTIVE`: "Esse pet está fora da sua lista. Volta ele pra lista pra pedir."
+- `BOOKING_OWNER_DEACTIVATED`: "Sua conta de tutor está pausada."
+
+## Fora do escopo
+
+Pagamento e "Fechado!" (051: sem módulo de pagamento). Conversa (055).

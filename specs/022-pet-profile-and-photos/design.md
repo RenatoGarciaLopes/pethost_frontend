@@ -1,18 +1,18 @@
 ---
 spec: 022-pet-profile-and-photos
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-14
 ---
 
 # 022 · Design técnico
 
 ## Rota e renderização
 
-| Arquivo                                  | Tipo         | Faz                                                                                                                                                                                                                                      |
-| ---------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/(owner)/pets/[petId]/page.tsx`      | RSC dinâmico | `requireRole(["owner","host"])`; valida `petId` (UUID; inválido → `notFound()`); prefetch de `petQueries.detail(user.id, petId)` pelo `backendClient`; `PET_NOT_FOUND` → `notFound()`; `HydrationBoundary`; renderiza `PetProfileScreen` |
-| `app/(owner)/pets/[petId]/edit/page.tsx` | RSC dinâmico | mesmo prefetch; renderiza `PetEditScreen`                                                                                                                                                                                                |
-| `…/[petId]/loading.tsx`                  | RSC          | esqueleto da carteirinha                                                                                                                                                                                                                 |
+| Arquivo                                    | Tipo         | Faz                                                                                                                                                                                                                                                             |
+| ------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/(account)/pets/[petId]/page.tsx`      | RSC dinâmico | `requirePersonalUser` (tutor ou anfitrião, como a 020); valida `petId` (UUID; inválido → `notFound()`); prefetch de `petQueries.detail(user.id, petId)` pelo `backendClient`; `PET_NOT_FOUND` → `notFound()`; `HydrationBoundary`; renderiza `PetProfileScreen` |
+| `app/(account)/pets/[petId]/edit/page.tsx` | RSC dinâmico | mesmo prefetch; renderiza `PetEditScreen`                                                                                                                                                                                                                       |
+| `…/[petId]/loading.tsx`                    | RSC          | esqueleto da carteirinha                                                                                                                                                                                                                                        |
 
 Metadados: `title` = "{nome} · Meus pets" (gerado a partir do prefetch), `robots: noindex`. Sem `'use cache'`.
 
@@ -108,3 +108,26 @@ Regras do `toUpdatePetRequest`:
 | 001/004/008/011/012 | E2E simulado              | `e2e/mocked/pets/pet-profile.spec.ts` (desktop e celular)                                | editar saúde; trocar foto; tirar da lista e voltar; id de outra conta mostra 404                         |
 | 004/011             | E2E real                  | `e2e/real/pets/pet-profile.spec.ts`                                                      | edita o pet criado no E2E real da 021 e tira da lista (limpeza)                                          |
 | 016                 | Integração + E2E simulado | `requireRole` no layout (004) e `e2e/mocked/pets/profile.spec.ts`                        | outra conta recebe 404/403 da API e vê o estado de erro; "Editar" só para o dono                         |
+
+## Notas da implementação (14/10/2026)
+
+O que mudou em relação ao desenho acima, e por quê:
+
+- **Passos como seções:** no lugar da prop `mode`, os passos leem `usePetStep()` (`steps/PetStepHost.tsx`). O assistente hospeda o passo com `WizardStepHost` (store da 021); a edição, com `PetStepHostProvider` dentro de `EditSection`. Assim os passos deixam de depender do store do assistente, e a seção não precisa de um store falso.
+- **Nomes:** `PetProfileScreen` e `PetEditScreen` são os componentes de servidor (prefetch e `HydrationBoundary`); os de cliente são `PetProfile` e `PetEditor`, como `MyPetsScreen` e `PetList` na 020.
+- **Carregando:** `Suspense` com `PetProfileSkeleton` na própria página, como `/pets`; sem `loading.tsx`.
+- **Busca única:** `getPetDetail` usa `cache()` do React, e os metadados e o prefetch dividem o mesmo `GET`.
+- **Invalidação (REQ-PEDIT-014):** grava o detalhe com a resposta e invalida só a lista (`mine`). Sob `petQueries.all` só existem a lista e os detalhes de outros pets, que a mutação não muda. Invalidar a raiz buscaria de novo o detalhe que acabou de chegar.
+- **Ficha:** mostra os quatro blocos mesmo vazios ("Nada contado ainda.", `showEmptyBlocks`). Sem foto, oferece "Pôr uma foto", que leva a `/edit#fotos`. A silhueta por espécie continua pendente (a carteirinha usa a patinha).
+- **Celular:** as seções da edição recolhem pelo título (`aria-expanded`). Começam abertas, e o formulário continua montado ao recolher.
+- **Revisão independente** (Antigravity, só leitura): 7 achados corrigidos.
+  - Só Bicho e Corpo remontam quando a espécie salva muda.
+  - Erro de campo desconhecido aparece no aviso.
+  - Blocos vazios na prévia da edição.
+  - "Pôr uma foto".
+  - Seções recolhíveis no celular.
+  - Alvo de 48 px nas vagas.
+  - Linha redundante do peso removida.
+- **Mantidos de propósito:**
+  - `diffPatch` manda `""` em campo obrigatório esvaziado, para a API recusar em vez de ignorar calada.
+  - A invalidação só da lista, explicada acima.

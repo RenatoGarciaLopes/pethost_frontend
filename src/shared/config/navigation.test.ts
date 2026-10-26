@@ -1,40 +1,55 @@
 import { describe, expect, it } from "vitest";
-import { NAV_ITEMS, navItemsFor, type NavItem } from "./navigation";
+import { NAV_ITEMS, navItemsFor } from "./navigation";
 
-const sample: NavItem[] = [
-  { id: "pets", label: "Meus pets", href: "/pets", roles: ["owner", "host"], spec: "020", available: true },
-  { id: "search", label: "Buscar", href: "/search", roles: ["owner"], spec: "041", available: false },
-  {
-    id: "queue",
-    label: "Verificações",
-    href: "/admin/host-applications",
-    roles: ["admin"],
-    spec: "031",
-    available: true,
-  },
-];
-
-describe("navItemsFor", () => {
-  it("REQ-SHELL-002 cada papel vê só os próprios atalhos, na ordem da tabela", () => {
-    expect(navItemsFor("owner", sample).map((item) => item.id)).toEqual(["pets"]);
-    expect(navItemsFor("host", sample).map((item) => item.id)).toEqual(["pets"]);
-    expect(navItemsFor("admin", sample).map((item) => item.id)).toEqual(["queue"]);
+describe("REQ-SHELL-002 tabela única de atalhos", () => {
+  it("cada papel vê só os seus atalhos", () => {
+    expect(navItemsFor("owner").map((item) => item.href)).toEqual(["/", "/pets", "/owner/bookings", "/conversations"]);
+    expect(navItemsFor("host").map((item) => item.href)).toEqual([
+      "/host",
+      "/host/application",
+      "/pets",
+      "/host/bookings",
+      "/conversations",
+    ]);
+    expect(navItemsFor("admin").map((item) => item.href)).toEqual([
+      "/admin/host-applications",
+      "/admin/users",
+      "/admin/audit-entries",
+    ]);
   });
 
-  it("REQ-SHELL-002 tela ainda não implementada não aparece", () => {
-    expect(navItemsFor("owner", sample).some((item) => item.id === "search")).toBe(false);
+  it("REQ-HVER-001 anfitrião tem o atalho Minha verificação", () => {
+    expect(navItemsFor("host")).toContainEqual({
+      id: "host-application",
+      label: "Minha verificação",
+      href: "/host/application",
+      roles: ["host"],
+    });
   });
-});
 
-describe("NAV_ITEMS", () => {
-  it("REQ-SHELL-002 todo href é interno e todo id é único", () => {
-    for (const item of NAV_ITEMS) expect(item.href).toMatch(/^\/(?!\/)/);
+  it("REQ-UIC-003 Painel do anfitrião vem primeiro", () => {
+    expect(navItemsFor("host")[0]).toEqual({ id: "host-home", label: "Painel", href: "/host", roles: ["host"] });
+  });
+
+  it("todo atalho é interno e tem id único", () => {
+    expect(NAV_ITEMS.every((item) => item.href.startsWith("/") && !item.href.startsWith("//"))).toBe(true);
     expect(new Set(NAV_ITEMS.map((item) => item.id)).size).toBe(NAV_ITEMS.length);
   });
-
-  it("REQ-SHELL-002 admin nunca divide atalho com tutor ou anfitrião", () => {
-    for (const item of NAV_ITEMS.filter((entry) => entry.roles.includes("admin"))) {
-      expect(item.roles).toEqual(["admin"]);
-    }
+});
+it("REQ-HPETS-010 pets da casa fica disponível só para anfitrião", () => {
+  expect(navItemsFor("host")).toContainEqual({
+    id: "host-pets",
+    label: "Pets da casa",
+    href: "/pets",
+    roles: ["host"],
   });
+  expect(navItemsFor("owner").some((item) => item.id === "host-pets")).toBe(false);
+  expect(navItemsFor("admin").some((item) => item.id === "host-pets")).toBe(false);
+});
+
+it("REQ-CHAT-001 tutor e anfitrião têm o atalho Conversas; admin não", () => {
+  const conversations = { id: "conversations", label: "Conversas", href: "/conversations", roles: ["owner", "host"] };
+  expect(navItemsFor("owner")).toContainEqual(conversations);
+  expect(navItemsFor("host")).toContainEqual(conversations);
+  expect(navItemsFor("admin").some((item) => item.id === "conversations")).toBe(false);
 });

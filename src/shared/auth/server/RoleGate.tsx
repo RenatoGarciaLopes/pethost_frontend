@@ -1,14 +1,16 @@
 import "server-only";
 import { Box } from "@mui/material";
+import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { SniffLoader } from "@/shared/ui/brand/SniffLoader";
-import type { AccountRole } from "../contracts/session";
+import type { AccountRole, SessionUser } from "../contracts/session";
 import { requireRole } from "./requireRole";
 
 export interface RoleGateProps {
   /** Papel ou papéis aceitos na área. */
   roles: AccountRole | readonly AccountRole[];
-  children: ReactNode;
+  /** A área; como função, recebe a conta confirmada (a casca usa para o cabeçalho e o menu). */
+  children: ReactNode | ((user: SessionUser) => ReactNode);
 }
 
 /**
@@ -17,6 +19,7 @@ export interface RoleGateProps {
  * com o loader da marca enquanto confere.
  *
  * @example export default function HostLayout({ children }) { return <RoleGate roles="host">{children}</RoleGate>; }
+ * @example <RoleGate roles="host">{(user) => <AppShell user={user}>{children}</AppShell>}</RoleGate>
  */
 export function RoleGate({ roles, children }: RoleGateProps) {
   return (
@@ -33,6 +36,7 @@ export function RoleGate({ roles, children }: RoleGateProps) {
 }
 
 async function ConfirmedArea({ roles, children }: RoleGateProps) {
-  await requireRole(roles);
-  return children;
+  await connection();
+  const user = await requireRole(roles);
+  return typeof children === "function" ? children(user) : children;
 }

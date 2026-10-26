@@ -1,0 +1,33 @@
+import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { Link } from "@mui/material";
+import { shellCopy } from "../lib/shellCopy";
+
+/**
+ * "Pular para o conteúdo" (REQ-SHELL-007): o primeiro foco da página, escondido até receber o foco do teclado,
+ * permanece fixo na viewport para funcionar mesmo após rolar. Leva ao `<main id="conteudo">` da casca.
+ *
+ * @example <SkipLink />
+ */
+export function SkipLink() {
+  return (
+    <Link
+      href="#conteudo"
+      sx={{
+        position: "fixed",
+        left: 16,
+        top: -64,
+        zIndex: "tooltip",
+        px: 2,
+        py: 1,
+        bgcolor: "background.paper",
+        border: 2,
+        borderColor: "text.primary",
+        borderRadius: `${quintalRadii.control}px`,
+        fontWeight: 700,
+        "&:focus": { top: 16 },
+      }}
+    >
+      {shellCopy.skipToContent}
+    </Link>
+  );
+}

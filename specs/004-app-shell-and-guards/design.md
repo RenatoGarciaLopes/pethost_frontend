@@ -1,10 +1,21 @@
 ---
 spec: 004-app-shell-and-guards
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-13
 ---
 
 # 004 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-13)
+
+- **Atalhos só com a primeira tela que os tiver:** nenhuma tela de atalho de cabeçalho existe ainda (meus pets, verificação, fila do admin, busca). `NAV_ITEMS`, `HeaderNav` e a gaveta do celular (REQ-SHELL-002, 006, 008) nascem com o primeiro atalho real (spec 020), para não ficar tabela nem componente sem uso. Hoje o cabeçalho tem o logo e o menu da conta, iguais no computador e no celular.
+- **A casca é dona do `<main id="conteudo">`:** `AppShell` monta "Pular para o conteúdo", o cabeçalho e o `main`. Telas dentro da casca não criam outro: `AccountSettingsLayout` virou `div` e `PasswordScreen` ganhou `inShell` (a troca de conta usa). As telas de entrada (login, cadastro, senha) continuam com o próprio `main`, porque ficam fora da casca.
+- **`RoleGate` entrega a conta confirmada:** `children` pode ser função do usuário (`(user) => <AppShell user={user}>…`); os quatro layouts de área (`(account)`, `(owner)/owner`, `(host)/host`, `(admin)/admin/(panel)`) usam assim. Um só `requireRole` por requisição, sem segundo `GET /users/me`.
+- **Contas vinculadas só ao abrir o menu:** `AccountMenu` busca `/users/me/accounts` na primeira abertura (não a cada página); admin não busca. Falha esconde só o item de troca.
+- **Menu da conta:** "Minha conta" (`/users/profile`, spec 015), "Trocar pra conta de …" (`/users/switch?to=`, spec 014) e "Sair". Frase da conta neutra ("Conta de tutor"), sem campo de tratamento na API.
+- **Logo do cabeçalho:** `NextLink` direto com `aria-label="PetHost"` e símbolo decorativo (o nome não sai duplicado com o "pethost" escrito). Server Component não passa componente como prop para o MUI.
+- **Sem `(public)` ainda:** não há página pública além das de entrada; o grupo nasce com a home (spec 040).
+- **Cor do cabeçalho:** `theme.palette.account` (`accountTones`), por variável CSS do tema.
 
 ## Rotas e layouts
 
@@ -52,7 +63,7 @@ O widget só importa `shared` (e features pelo `index.client`, se precisar). Os 
 
 ## Proxy (`src/proxy.ts`)
 
-1. Caminho público (`/`, `/search`, `/listings/*`, `/login`, `/admin/login`, `/register/*`, `/forgot-password`, `/reset-password`, `/api/*`, estáticos) → segue.
+1. Caminho público (`/`, `/listings/*`, `/login`, `/admin/login`, `/register/*`, `/forgot-password`, `/reset-password`, `/api/*`, estáticos) → segue.
 2. Sem `pethost_at` e sem `pethost_rt` → `/login?next=<rota>` (admin → `/admin/login?next=`).
 3. Com `pethost_at`: `readRoleHint` decodifica a claim `role` **sem verificar a assinatura**. Papel não permitido no prefixo → `homeOf(role)`.
 4. Só com `pethost_rt` (access venceu) → segue; o layout chama `requireRole`, que redireciona para o refresh (REQ-HTTP-016).
@@ -91,3 +102,14 @@ Ajuste na spec 010: ela usa `toSafeInternalPath` (spec 003) e `resolvePostLoginP
 | 012 a 015           | Componente   | `loading.test.tsx`, `error.test.tsx`, `not-found.test.tsx`, `global-error.test.tsx` | status acessível; `traceId` do 5xx; link para a casa; sem tema                                                                          |
 | 001 a 008           | Storybook    | `AppShell.stories.tsx` (tutor, anfitrião, admin, visitante, celular)                | a11y sem violação                                                                                                                       |
 | 009/010/014         | E2E simulado | `e2e/mocked/shell.spec.ts` (desktop e celular)                                      | visitante em `/pets` → login → volta; tutor não entra em `/host`; 404 com link; sair                                                    |
+
+## Revisão 078: cabeçalho fiel à prancha (22/10/2026)
+
+- **Atalhos por papel (`NAV_ITEMS`):** tutor vê "Buscar" (home, que vira a página de resultados; a rota `/search` sai na 079), "Meus pets" e "Minhas estadias"; anfitrião ganha "Pedidos" (`/host/bookings`). "Conversas", "Agenda", "Ganhos" e "Meu cantinho" da prancha esperam telas próprias (não há rota de conversas, agenda, ganhos nem índice do cantinho). Na home, o tutor continua com "Como funciona" e "Minhas estadias" (a busca está na faixa principal).
+- **Item ativo (`HeaderNav`):** contorno de tinta e fundo papel, raio `control`, como na prancha; todos os itens em negrito. Continua com `aria-current="page"` (REQ-SHELL-008: destaque não só por cor).
+- **Conta (`AccountMenu`):** sempre a pílula contornada com avatar e primeiro nome (na casca e na home); abaixo de 900 px só o avatar (REQ-SHELL-006). A prop `appearance` saiu: não havia mais quem usasse o avatar isolado.
+- **Testes:** `navigation.test.ts` (atalhos por papel), `HeaderNav.test.tsx` (`/host/bookings/123` marca "Pedidos"; `/host/payments` cai em "Painel"), `AppHeader.test.tsx` (atalhos e pílula do tutor na casca).
+
+## Revisão 096: cabeçalho fixo
+
+Sticky compartilhado pela home, resultados, contas e cantinho; altura medida em variável CSS para âncoras e painéis. Interface, limites e validação: [sticky-header-096.md](sticky-header-096.md).

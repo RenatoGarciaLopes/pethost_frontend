@@ -1,5 +1,28 @@
 # Validação da base
 
+## 17/10/2026 · Spec 005 · T7 · primeiro lote visual da home
+
+Pranchas Quintal-Visitante e Quintal-Casas abertas antes de implementar. TDD com REQ-UIC-002/003/007/009 e cobertura REQ-HOME preservada; contratos, reuso, interfaces, estados e catálogo provisório em [implementação T7](../specs/005-ui-conformance/home-fidelity-implementation.md). Segundo lote de casas próximas aguarda PR #21 no dev; sem cópia da 041, consulta de listings ou instalação de pacotes neste lote. Vault não editado por instrução do Renato.
+
+- Vermelho: `vitest run` dos quatro novos arquivos antes das implementações; quatro arquivos falharam (módulos ausentes e variantes ainda inexistentes). Registro local `test-results/home-t7-red.log`.
+- Primeira conferência: seis arquivos/20 casos, 19 aprovados e um teste de hover falhando porque a fixture do jsdom não declarava preferência de movimento. O hook compartilhado corretamente usa movimento reduzido quando matchMedia não existe. Corrigida a fixture, sem desligar preferência nem regras de acessibilidade no produto.
+- Consumidores: `vitest run src/shared/ui/brand/DoorScene/HouseScene.test.tsx src/app/page.int.test.tsx src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/AccountMenu.test.tsx --maxWorkers=1 --testTimeout=20000`: **4 arquivos, 31 testes aprovados** (`test-results/home-t7-consumers.log`).
+- Stories: `bash C:/Users/Renato Lopes/Desktop/PetHost/.agent-tools/stories.sh <worktree> src/app/HomeFidelity.stories.tsx src/widgets/home/components/HomeScreen/HomeScreen.stories.tsx src/shared/ui/brand/DoorScene/DoorScene.stories.tsx src/shared/ui/data-display/TrustList/TrustList.stories.tsx src/widgets/app-shell/components/AppShell.stories.tsx`: **5 arquivos, 23 testes aprovados**, Chromium/axe, nenhuma regra desativada. Inclui cabeçalho completo, alinhamento com conteúdo, título em até três linhas desktop, datas legíveis, expansão móvel e largura do tutor com nome/avatar em 390 px. Rodada anterior de 22 casos também aprovada antes da inclusão do tutor móvel.
+- Conferência final: `npm.cmd run typecheck` e ESLint de todos os arquivos TypeScript autorais aprovados. Suíte ampliada `vitest run src/widgets/home src/shared/ui/brand/DoorScene src/shared/ui/data-display/TrustList src/widgets/app-shell src/app/page.int.test.tsx --maxWorkers=1 --testTimeout=20000`: **15 arquivos, 76 testes aprovados**, em 440,44 s (`test-results/home-t7-final.log`). Inclui a navegação por teclado nas quatro células, o modo default da cena e os hooks existentes. O primeiro lint por lista de arquivos encontrou um ENOENT quando o Quill moveu os arquivos de pets para a 005d; repetido somente no escopo T7, sem incluir pets no commit.
+- `git diff --check` e ausência de BOM conferidos nos arquivos autorais.
+
+E2E autorizado em 17/10: `bash .agent-tools/e2e.sh pethost_frontend-005c e2e/mocked/home/home.spec.ts --project=mocked-desktop --project=mocked-mobile`: **10/10 aprovados (3,3 min)**. Primeira rodada: 9/10; a compilação fria de `/search` levou 21 s e excedeu a espera de 15 s. Ajustada somente essa espera para 45 s e repetida a suíte completa, sem retries. ESLint do teste e `git diff --check` aprovados. Prints gerados e abertos: `test-results/home-fidelity/desktop.png` (1440 px) e `mobile.png` (390 px), movimento reduzido e fontes carregadas. Servidores encerrados e portas 3100/5099 conferidas sem listeners. Backend simulado; o destino `/search` ainda responde 404 neste lote, que verifica somente o handoff da home e aguarda a 041. Aceite humano contra as pranchas e lista de casas continuam pendentes. Sem merge, push ou edição do vault.
+
+## 15/10/2026 · Spec 043 · T7 escrita
+
+Na worktree `feat/043-host-payouts`, `npx.cmd vitest run src/features/host-payouts src/test/msw/stripeAccountMock.int.test.ts 'src/app/(host)/host/payments'` passou: **13 arquivos, 57 testes**. `npx.cmd tsc --noEmit -p .` e ESLint nos arquivos da jornada e mock passaram. Prettier foi aplicado aos novos arquivos e checked em seguida. O E2E `e2e/mocked/host/payouts.spec.ts` foi escrito para desktop/celular; Playwright não foi iniciado porque esta entrega deve solicitar e aguardar a liberação das portas.
+
+## 15/10/2026 · Spec 043 (parcial)
+
+Na worktree `feat/043-host-payouts`, `npx.cmd vitest run src/features/host-payouts src/test/msw/stripeAccountMock.int.test.ts 'src/app/(host)/host/payments' src/shared/api/errors/getErrorMessage.test.ts --maxWorkers=2` passou: **14 arquivos, 114 testes**. `npx.cmd tsc --noEmit -p .` passou após corrigir o cache tipado da story. As stories usam `export default meta` e os arquivos da entrega foram verificados sem BOM.
+
+Playwright não foi iniciado: o Renato pediu para solicitar as portas antes de qualquer E2E. Permanecem pendentes a jornada E2E e integração da etapa exportada ao `HostOnboardingPanel` da spec 030 (em trabalho com Lynx). O Renato cuidará da nota e do catálogo do vault. Lint, Prettier, build, Storybook e E2E não foram executados nesta etapa.
+
 Em 11/10/2026, o projeto foi gerado pelo CLI `create-next-app@latest`, com TypeScript, ESLint, App Router, src-dir, npm e sem Tailwind. Next 16.4.0, React 19.3.0, MUI 9.5.0; versões completas no lockfile.
 
 A primeira checagem de TypeScript encontrou `LayoutProps`, tipo gerado pelo Next ainda indisponível antes do primeiro build. O layout foi ajustado para declarar `children: ReactNode`, permitindo checagem independente do build.
@@ -78,3 +101,368 @@ Achados corrigidos nesta rodada:
 Observação de ambiente: no Git Bash, `BACKEND_API_PREFIX=/api/v1` é convertido em caminho do Windows. Suba o Next pelo PowerShell ou com `MSYS_NO_PATHCONV=1`. A validação de ambiente acusa o erro com a mensagem certa.
 
 Dívida de testes (testes novos ficaram para depois, a pedido do Renato): ver a seção de registro de `tasks.md` nas specs 002, 003, 004 e 010.
+
+## 12/10/2026 · Tela de entrar com Motion e limpeza de código morto (specs 002, 003, 004 e 010)
+
+| Verificação                                                                                | Resultado                                                                                                                           |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `npx tsc --noEmit` (agora com `noUnusedLocals` e `noUnusedParameters`)                     | 0 erros                                                                                                                             |
+| `npx eslint .`                                                                             | 0 problemas                                                                                                                         |
+| `npx prettier --check .`                                                                   | tudo formatado                                                                                                                      |
+| `npx vitest run --maxWorkers=2`                                                            | 57 arquivos, 338 testes, todos verdes (saíram os testes de `NAV_ITEMS` e `accountQueryKey`, entrou o das molas do Motion)           |
+| `npm run storybook:test` (a11y em modo `error`)                                            | 29 arquivos, 88 testes verdes (entrou a story do `Reveal`)                                                                          |
+| `next build` (backend simulado)                                                            | compilou; `/login` e `/admin/login` como Partial Prerender                                                                          |
+| `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 18 de 18                                                                                                                            |
+| Conferência visual (Chromium, 1440 × 960 e 390 × 844, movimento reduzido)                  | montagem em ordem, cena interativa, foco preservado ao clicar na cena, `h1` visível no celular, 9 carregamentos sem erro no console |
+
+Observação de ambiente: havia outro `next dev` aberto na mesma pasta (porta 3000, outro processo, apontando para outro backend). O Next 16 não deixa abrir um segundo `next dev` na mesma pasta, então a suíte E2E rodou contra `next build` + `next start -p 3100` com o backend simulado.
+
+## 12/10/2026 · Dívida de cobertura em feat/010-login-motion
+
+Entrega restrita ao worktree `pethost_frontend-010`, com testes e documentação. Código de produção, thresholds de 80%, includes/excludes de cobertura e dependências não foram alterados. Matriz de recursos, paths, níveis aplicáveis e limites na nota `development/resources/auth.md` do vault.
+
+| Verificação                                          | Resultado                                                                                                             |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Baseline `npm.cmd run test:coverage`                 | 57 arquivos, 338 testes passando; cobertura falhou: statements 63,28%, branches 58,16%, funções 58,24%, linhas 62,92% |
+| Final `npm.cmd run test:coverage`                    | 75 arquivos, 455 testes passando; exit 0, todos os thresholds atendidos                                               |
+| Statements                                           | 96,87% (992/1024)                                                                                                     |
+| Branches                                             | 95,22% (758/796)                                                                                                      |
+| Funções                                              | 97,19% (277/285)                                                                                                      |
+| Linhas                                               | 97,57% (887/909)                                                                                                      |
+| `npm.cmd run test:e2e:mocked -- --workers=1`         | 28/28 passando, desktop e celular, Next real com backend MSW simulado                                                 |
+| `npm.cmd run verify`                                 | Exit 0: format, lint, typecheck e 455 testes em 75 arquivos aprovados                                                 |
+| Paths da matriz de documentação e `git diff --check` | Conferidos                                                                                                            |
+
+Foram adicionados 117 casos Vitest em 18 arquivos de suíte e cinco jornadas Playwright executadas nos dois projetos. Conta suspensa mantém frase sem link, conforme pendência de canal de suporte registrada na spec 010 e decisão do usuário. Os testes de reativação verificam credenciais do último envio mesmo após editar os campos, bloqueio de envio duplicado e falha da reativação.
+
+Limitações de ambiente e correções nos testes: Turbopack recusou o link de `node_modules` fora da raiz do worktree; a validação do browser usou `node node_modules/next/dist/bin/next dev --webpack -p 3100`, com `BACKEND_URL=http://localhost:5099` e `BACKEND_API_PREFIX=/api/v1`. O backend simulado já disponível foi reutilizado sem alterar seu processo. O servidor Next iniciado por esta tarefa foi encerrado ao terminar os E2E. As execuções de browser e cobertura foram sequenciadas depois de timeouts sob carga; uma execução E2E anterior perdeu um artefato de trace por sobreposição de runners e foi substituída pela execução completa 28/28. A verificação de fontes aceita ambas as formas de aspas da serialização CSS. O teste da abertura breve da porta usa MutationObserver e casos independentes para porta/capacho, preservando animações Motion reais.
+
+Nenhum E2E contra a API .NET real foi executado; MSW não prova integração completa com o backend. Não foram instaladas dependências, lidas configurações do backend, alterados outros worktrees, feitos push ou ações na porta 3000.
+
+O primeiro verify parou na formatação porque o checkout Windows tinha CRLF (core.autocrlf=true) e o Prettier exige LF. Os finais de linha dos arquivos rastreados foram normalizados apenas na cópia local; o diff confirmou conteúdo versionado de produção e configurações inalterados. O verify completo acima passou após essa normalização.
+
+## 12/10/2026 · Cadastro de tutor (spec 011)
+
+| Verificação                                                                                | Resultado                                                                                                     |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `npx tsc --noEmit`                                                                         | 0 erros                                                                                                       |
+| `npx eslint .`                                                                             | 0 problemas                                                                                                   |
+| `npx prettier --check .`                                                                   | tudo formatado                                                                                                |
+| `npx vitest run --maxWorkers=2`                                                            | 76 arquivos, 459 testes verdes                                                                                |
+| `npm run storybook:test` (a11y em modo `error`)                                            | 32 arquivos, 99 testes verdes                                                                                 |
+| `next build` (backend simulado)                                                            | compilou; `/register` e `/register/owner` como Partial Prerender                                              |
+| `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 24 de 24 (cadastro completo, CEP, cookies HttpOnly e redirecionamento com sessão, no computador e no celular) |
+
+Observação: o `next dev` da porta 3000 é de outro processo; o E2E rodou contra `next build` + `next start -p 3100`, desligado no fim.
+
+## 12/10/2026 · Cadastro de anfitrião (spec 012)
+
+| Verificação                                                                                | Resultado                                                                                                                               |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest), depois do rebase sobre `dev`             | 96 arquivos, 616 testes verdes                                                                                                          |
+| `next build` (backend simulado)                                                            | compilou; `/register/host` como Partial Prerender                                                                                       |
+| `npx playwright test --project=mocked-desktop --project=mocked-mobile` contra `next start` | 30 de 30 (jornada do anfitrião sem CPF, corpo sem `cpf` e sem `role`, 409 com `as=host`, cookies HttpOnly, redirecionamento com sessão) |
+| `npm run test:coverage`                                                                    | 96,75% statements, 94,95% branches, 96,09% funções, 97,33% linhas (meta de 80% atendida depois da dívida da 010 paga)                   |
+| E2E real                                                                                   | não rodado: precisa da API de teste                                                                                                     |
+
+## 13/10/2026 · Recuperação de senha (spec 013)
+
+| Verificação                                                                             | Resultado                                                                                                                        |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest), depois do rebase sobre `dev`          | 107 arquivos, 690 testes verdes                                                                                                  |
+| `npm run test:coverage`                                                                 | 96,82% statements, 94,68% branches, 96,34% funções, 97,54% linhas                                                                |
+| `npx playwright test --project=mocked-desktop --project=mocked-mobile`, antes do rebase | 38 de 38 (14 casos da 013: pedido neutro, troca de senha, token fora da URL, token vencido, `Referrer-Policy`, `?as=` por papel) |
+| `next build`, Storybook e E2E mocked depois do rebase                                   | no CI do PR                                                                                                                      |
+| E2E real                                                                                | não rodado: precisa da API de teste                                                                                              |
+
+O teste de `ForgotPasswordForm` achou um bug: o erro de `role` vindo da API ficava no formulário sem aparecer; corrigido. Cobertura por suíte na nota `development/resources/auth.md` do vault. O mock local da porta 5099 era um processo antigo sem as rotas de senha; o E2E antes do rebase usou um proxy temporário com `e2e/support/handlers/password.mjs`, desligado no fim.
+
+## 13/10/2026 · Trocar de conta (spec 014)
+
+| Verificação                                                                                           | Resultado                                                                                                                          |
+| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                                      | 121 arquivos, 738 testes verdes                                                                                                    |
+| `npm run test:coverage`                                                                               | 96,99% statements, 94,88% branches, 96,64% funções, 97,60% linhas                                                                  |
+| `npx playwright test e2e/mocked/auth/switch.spec.ts --project=mocked-desktop --project=mocked-mobile` | 12 de 12 (troca para `/host` com cookies novos, senha errada, sem a outra conta, pausada, `?to=` inválido, admin, título e robots) |
+| Teste da leitura única das contas depois da troca                                                     | falhou antes da correção (2 leituras), passa depois (1)                                                                            |
+| `next build`, Storybook e E2E completo                                                                | no CI do PR                                                                                                                        |
+| E2E real                                                                                              | não rodado: precisa da API de teste com a mesma pessoa nas duas contas                                                             |
+
+Detalhes por suíte na nota `development/resources/auth.md` do vault. O E2E local usou o mock atual numa porta temporária (5100), porque o da 5099 é um processo antigo sem as rotas novas.
+
+## 13/10/2026 · Minha conta (spec 015)
+
+| Verificação                                                                               | Resultado                                                                                                                                         |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                          | 151 arquivos, 926 testes verdes                                                                                                                   |
+| `npm run test:coverage`                                                                   | 96,83% statements, 93,88% branches, 97,19% funções, 97,91% linhas                                                                                 |
+| `npx playwright test e2e/mocked/account --project=mocked-desktop --project=mocked-mobile` | 22 de 22 (perfil do tutor e do anfitrião PF, PJ e não aprovado, trava do CPF, foto, troca de senha, pausar e voltar pelo login, navegação, admin) |
+| Storybook do `AvatarUploader` (a11y)                                                      | 6 stories sem violação                                                                                                                            |
+| Regressão do CPF travado (`LockedField`)                                                  | falhou antes da correção, passa depois (componente e navegador)                                                                                   |
+| `next build`, Storybook completo e E2E completo                                           | no CI do PR                                                                                                                                       |
+| E2E real                                                                                  | não rodado: precisa da API de teste                                                                                                               |
+
+Detalhes por suíte na nota `development/resources/account.md` do vault.
+
+## 13/10/2026 · Casca do app (spec 004, T6 a T11)
+
+| Verificação                                                                               | Resultado                           |
+| ----------------------------------------------------------------------------------------- | ----------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                          | 160 arquivos, 963 testes verdes     |
+| Cobertura, `next build`, Storybook e E2E mocked completo (com `e2e/mocked/shell.spec.ts`) | no CI do PR                         |
+| E2E real                                                                                  | não rodado: precisa da API de teste |
+
+Detalhes na nota `development/resources/app-shell.md` do vault.
+
+## 13/10/2026 · Meus pets (spec 020)
+
+| Verificação                                                                                      | Resultado                           |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                                                 | 171 arquivos, 1016 testes verdes    |
+| Cobertura, `next build`, Storybook e E2E mocked completo (com `e2e/mocked/pets/my-pets.spec.ts`) | no CI do PR                         |
+| E2E real                                                                                         | não rodado: precisa da API de teste |
+
+Detalhes na nota `development/resources/pets.md` do vault.
+
+## 14/10/2026 · Apresentar o pet (spec 021)
+
+| Verificação                                                                 | Resultado                                                         |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `npm run verify` (Prettier, ESLint, tsc, Vitest)                            | 193 arquivos, 1135 testes verdes                                  |
+| `npm run test:coverage`                                                     | 96,75% statements, 93,55% branches, 96,74% funções, 97,80% linhas |
+| E2E mocked `e2e/mocked/pets/new-pet.spec.ts` (desktop e celular, workers 1) | 10 de 10                                                          |
+| Storybook do `PetWizard` e `PhotoSlots` (a11y)                              | 11 stories sem violação                                           |
+| E2E real                                                                    | não rodado: precisa da API de teste                               |
+
+Detalhes na nota `development/resources/pets.md` do vault.
+
+## 14/10/2026 · Ficha, edição e fotos do pet (spec 022)
+
+| Verificação                                                                                    | Resultado                                                                         |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `npm run verify -- -- --maxWorkers=2` (Prettier, ESLint, tsc, Vitest)                          | 206 arquivos, 1238 testes verdes                                                  |
+| E2E mocked `e2e/mocked/pets/pet-profile.spec.ts` (desktop e celular, workers 1, servidor frio) | 16 de 16                                                                          |
+| E2E mocked de pets inteiro (020, 021 e 022)                                                    | 34 de 34 antes das correções da revisão; a suíte da 022 repetida depois, 16 de 16 |
+| Storybook de `PetProfile`, `PetEditor`, `ConfirmDialog` e `PhotoSlots` (a11y)                  | 17 testes sem violação                                                            |
+| E2E real                                                                                       | não rodado: precisa da API de teste                                               |
+
+Sem `--maxWorkers=2`, nesta máquina o verify estoura o timeout de 5 s em testes longos de outras specs e no `Max-Age` dos cookies da 003, que depende do relógio. Os mesmos testes passam isolados. O E2E local roda com `next dev --webpack -p 3100`, porque o Turbopack recusa a junction de `node_modules` da worktree.
+
+Detalhes na nota `development/resources/pets.md` do vault.
+
+## 15/10/2026 · Pets da casa e vitrine autenticada (spec 023)
+
+Implementação dos REQ-HPETS-001 a 010 na branch `feat/023-host-house-pets`, worktree `pethost_frontend-023`. Detalhes por recurso na nota `development/resources/pets.md` do vault.
+
+| Verificação                                                                           | Resultado real                                                                                                         |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Rodada ampla Vitest de pets e consumidores afetados                                   | 47 arquivos, 300 testes aprovados, 157,91 s com maxWorkers=2                                                           |
+| Regressão final de abertura direta/invalidação                                        | 4 arquivos, 20 testes aprovados (3 novos), 30,05 s                                                                     |
+| Conjunto distinto das duas rodadas, substituindo os resultados repetidos pelos finais | 47 arquivos, 303 testes aprovados, sem falhas; 46 nomes com REQ-HPETS                                                  |
+| Unitário (inclui contratos/copy/navegação/metadata)                                   | 22 arquivos, 177 testes aprovados                                                                                      |
+| Componente (comportamento observável)                                                 | 10 arquivos, 51 testes aprovados                                                                                       |
+| Integração Node/MSW                                                                   | 6 arquivos, 33 testes aprovados                                                                                        |
+| Integração DOM/MSW/providers/cache                                                    | 9 arquivos, 42 testes aprovados                                                                                        |
+| ESLint dos arquivos criados/alterados                                                 | aprovado                                                                                                               |
+| `npx.cmd tsc --noEmit -p .`                                                           | aprovado, incluindo E2E e stories escritos                                                                             |
+| Prettier dos arquivos criados/alterados                                               | aplicado e conferido                                                                                                   |
+| `git diff --check`                                                                    | aprovado                                                                                                               |
+| E2E simulado (Claude Code)                                                            | pets 020 a 023: 38 de 38; casca: 14 de 14 (desktop e celular, workers 1)                                               |
+| E2E real                                                                              | 1 jornada escrita; requer API real e seed aprovado via E2E_HOST_EMAIL/E2E_HOST_PASSWORD; não executada                 |
+| Stories/a11y (Claude Code)                                                            | 7 arquivos de pets, 32 testes, sem violação, depois de corrigir o export das stories e o nome acessível da carteirinha |
+| `npm run verify -- -- --maxWorkers=2` (Claude Code)                                   | 217 arquivos, 1287 testes verdes                                                                                       |
+| Cobertura v8                                                                          | não executada nesta entrega; não foi inferido percentual                                                               |
+
+Comando amplo executado:
+
+```powershell
+npx.cmd vitest run src/features/pets src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/msw/petsMock.int.test.ts 'src/app/(account)/pets' src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2
+```
+
+Regressão final, depois de identificar que uma ficha aberta por URL pode não ter mine no cache:
+
+```powershell
+npx.cmd vitest run src/features/pets/api/petQueries.int.test.ts src/features/pets/hooks/usePetMutations.int.test.tsx src/features/pets/hooks/usePetPhotoMutations.int.test.tsx src/features/pets/components/client/PetWizard.int.test.tsx --maxWorkers=2
+```
+
+Os relatórios JSON temporários (`pethost-023-vitest-results.json` e `pethost-023-cache-vitest-results.json`, no TEMP do runner) permitiram contabilizar o conjunto distinto por arquivo/nível. Não são artefatos versionados. Os testes usam MSW estrito e dados sintéticos; não equivalem à integração completa com API real.
+
+Evidências funcionais: projeção explícita sem dados privados no cache e na desidratação; 404/500 da vitrine silenciosos, inclusive no refetch de dados antigos; logs de desenvolvimento só com status/código; bloqueio de keeper antes do cadastro com sessão autenticada via MSW; contas e perfis distintos; invalidação seletiva após cadastro, edição, transições e fotos, incluindo ficha aberta diretamente; navegação exclusiva de host. Suítes red foram executadas antes das implementações dos recursos e da correção final de invalidação.
+
+A 030/044 não estão nesta base: links ausentes permanecem ocultos, e a confirmação host oferece voltar para `/pets`. A tabela real de navegação não possui available: a entrada host-pets passou a existir. Não foi criada uma página fictícia para a vitrine; o uso em produção depende da 042. Status da spec permanece in-progress para o aceite de navegador e o registro do vault.
+
+## Spec 031: fila e decisão administrativa (15/10/2026)
+
+Implementação na worktree `pethost_frontend-031`, branch `feat/031-admin-verification-queue`, pelo Rivet (Codex). Validação central pelo Claude Code em 15/10: `npm run verify -- -- --maxWorkers=2` com 232 arquivos e 1329 testes verdes; Storybook com a11y dos 7 arquivos novos, 22 testes sem violação; E2E mocked no job `browser` do CI. Documentação no vault (`development/resources/admin-verification.md`).
+
+- Vitest direcionado ao domínio, widgets, recursos shared alterados, mock administrativo, erros, privacidade e consumidores de navegação: **20 arquivos, 109 testes aprovados**, com `--maxWorkers=2`. Por nível do runner: 67 unitários/arquitetura, 27 funcionais de componente, 8 integrações Node e 7 integrações DOM. TDD com falhas iniciais de módulos ausentes/implementação gerada e regressão de filtros repetidos reproduzida antes da correção.
+- Comando: `npx.cmd vitest run src/features/admin-host-applications src/widgets/host-application-review src/shared/lib/pagination src/shared/hooks/useSearchParamsState.test.tsx src/shared/ui/data-display/AdminDataTable src/shared/ui/forms/ReasonField src/test/msw/adminApplicationsMock.int.test.ts src/shared/config/navigation.test.ts src/shared/api/errors/getErrorMessage.test.ts src/test/architecture/no-token-storage.test.ts src/widgets/app-shell/components/AppShell.test.tsx src/widgets/app-shell/components/client/HeaderNav.test.tsx --maxWorkers=2`.
+- `npx.cmd tsc --noEmit -p .`: aprovado, sem erros. ESLint direcionado a todos os arquivos TypeScript/TSX/MJS alterados: aprovado. Prettier no escopo e git diff --check: aprovados.
+- A execução inicial com muitos workers teve timeout em um teste funcional com várias interações. A execução final limita a dois workers na máquina compartilhada. Um teste de prazo futuro revelou overflow de setTimeout; o prazo é limitado ao máximo da plataforma sem expirar a foto antes do expiresAt.
+- Playwright simulado: **escrito, não executado**, por instrução explícita. Quatro casos compartilhados por desktop/celular, incluindo paginação, filtro, foto, decisão, próxima da fila, fraude e UUID inválido. A decisão por fraude é pulada no celular, pois a regra aprovada exige largura >=900px.
+- Playwright real: **escrito, não executado**, condicionado a conta host de teste descartável com cadastro completo/verificado, CPF sintético e admin de teste. Cria a própria solicitação, envia front/back/selfie fictícios e recusa, sem decidir solicitações preexistentes. Variáveis exigidas estão descritas no design da spec. A execução real não usa o mock.
+- Stories: 7 arquivos, cobrindo fila, tabela, motivo, comparação, decisão, foto e detalhe; execução Storybook/a11y e conferência visual desktop/celular **pendentes**. Build, next dev e verify completo não foram executados por instrução explícita de coordenação.
+- MSW estrito cobre contratos reais na borda HTTP, autenticação do prefetch, erro 400 de campo, conflito 409/422, invalidação, próximos itens, autorização do mock e imagens no-store. Isso não equivale a integração com a API .NET.
+- Funções puras não têm E2E isolado: paginação e schemas têm unitários e são exercitados pelas composições/jornadas. O hook de URL é testado com a borda Next simulada, incluindo voltar/avançar e parâmetros repetidos. O viewer tem relógio falso, descarte, cancelamento, foco preso, Esc e nenhuma entrada no Query.
+- O vault foi somente leitura. Conforme orientação recebida, conteúdo e linhas de catálogo seguem no resumo para integração; não foi criada `docs/admin-verification.md`. A integração no vault não está concluída nesta worktree.
+
+## 15/10/2026 · Minha verificação do anfitrião (spec 030)
+
+| Verificação                                                                                                                 | Resultado                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Vitest da 030 (`--maxWorkers=2`): feature, `DocumentSlot`, `StatusTimeline`, imagem, CNPJ, widget, rotas, mock              | 132 testes verdes: 58 unitários, 49 de componente, 16 de integração (Node), 9 de integração (jsdom)       |
+| Vitest das áreas tocadas (inclui `shared/ui/forms`, `shared/api/errors`, `shared/config`, arquitetura e `features/account`) | 74 arquivos, 482 testes verdes                                                                            |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                                    | sem erros                                                                                                 |
+| E2E mocked (Claude Code, 15/10)                                                                                             | host 6 de 6, casca e admin juntos 26 de 27 e, com a espera de 15 s no detalhe do admin, 7 de 7            |
+| Storybook com a11y (Claude Code)                                                                                            | verde depois de o nome da `DocumentSlot` passar a ser o texto visível (axe `label-content-name-mismatch`) |
+| E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                           |
+
+| Verificação                                                                                                                 | Resultado                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Vitest da 030 (`--maxWorkers=2`): feature, `DocumentSlot`, `StatusTimeline`, imagem, CNPJ, widget, rotas, mock              | 132 testes verdes: 58 unitários, 49 de componente, 16 de integração (Node), 9 de integração (jsdom) |
+| Vitest das áreas tocadas (inclui `shared/ui/forms`, `shared/api/errors`, `shared/config`, arquitetura e `features/account`) | 74 arquivos, 482 testes verdes                                                                      |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                                    | sem erros                                                                                           |
+| E2E mocked `e2e/mocked/host/verification.spec.ts`                                                                           | escrito; não rodado pelo agente da spec (regra da máquina compartilhada)                            |
+| Storybook (a11y) de `ApplicationWizard`, `ApplicationStatusView`, `DocumentSlot`, `StatusTimeline`, `HostOnboardingStages`  | escritas; não rodadas pelo agente da spec                                                           |
+| E2E real `e2e/real/host/verification.spec.ts`                                                                               | pulado sem `E2E_HOST_EMAIL`/`E2E_HOST_PASSWORD`                                                     |
+
+## 15/10/2026 · Montar meu cantinho (spec 044)
+
+| Verificação                                                                                                   | Resultado                                                                                            |
+| ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Vitest da 044 (`--maxWorkers=2`): feature, dinheiro, `WeekdayPicker`, `PhotoSlots`, widget, rotas, mock       | 105 testes verdes: 46 unitários, 22 de componente, 14 de integração (Node), 23 de integração (jsdom) |
+| Vitest das áreas tocadas (inclui 030, `shared/ui/forms`, `shared/ui/media`, `shared/api/errors`, arquitetura) | 69 arquivos, 433 testes verdes                                                                       |
+| ESLint, `tsc --noEmit`, Prettier dos arquivos da entrega                                                      | sem erros                                                                                            |
+| E2E mocked `e2e/mocked/host/listing.spec.ts` e Storybook                                                      | escritos; não rodados pelo agente da spec (regra da máquina compartilhada)                           |
+
+## 15/10/2026 · Pedidos e estadias do anfitrião (spec 053)
+
+| Verificação                                                                                                                 | Resultado                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Vitest da 053 (`--maxWorkers=2`): base de `bookings`, lista, detalhe, decisões, widget das fichas, `stayRules`, rotas, mock | 60 testes verdes: 22 unitários, 13 de componente, 10 de integração (Node), 15 de integração (jsdom) |
+| ESLint, `tsc --noEmit`, Prettier                                                                                            | sem erros                                                                                           |
+| E2E mocked `e2e/mocked/bookings/host-requests.spec.ts` e Storybook                                                          | escritos; não rodados pelo agente da spec                                                           |
+
+## 15/10/2026 · Chegou e voltou pra casa (spec 054)
+
+| Verificação                                                                            | Resultado                                 |
+| -------------------------------------------------------------------------------------- | ----------------------------------------- |
+| Vitest: `stayMilestones` (3), `StayMilestones` (9), trilha do tutor em `bookingStatus` | verdes                                    |
+| Vitest de `features/bookings` inteira (053 + 054)                                      | 54 testes verdes                          |
+| ESLint, `tsc --noEmit`, Prettier                                                       | sem erros                                 |
+| E2E mocked `e2e/mocked/bookings/stay-day.spec.ts` e Storybook                          | escritos; não rodados pelo agente da spec |
+
+## 15/10/2026 · Minhas estadias (spec 052)
+
+| Verificação                                                                                                                                                       | Resultado                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Vitest (`--maxWorkers=2`): `features/bookings`, `host-listings`, widgets, tema, `WeekdayPicker`, `ConfirmDialog`, rotas do tutor e do anfitrião, mock de reservas | 57 arquivos, 225 testes verdes                                                    |
+| Por projeto (bookings, rotas do tutor, mock, `ConfirmDialog`)                                                                                                     | 25 unitários, 22 de componente, 12 de integração (Node), 33 de integração (jsdom) |
+| ESLint, `tsc --noEmit`, Prettier                                                                                                                                  | sem erros                                                                         |
+| E2E mocked `e2e/mocked/bookings` (my-stays, host-requests, stay-day), desktop e celular                                                                           | 20/20 na última execução                                                          |
+| Storybook (`StayList`, `StayDetail`, `HostBookingList`, `HostBookingDetail`, `StayMilestones`, `ConfirmDialog`, `WeekdayPicker`)                                  | 31/31                                                                             |
+
+Defeitos achados pelo E2E e pelas stories, corrigidos na 052 (vinham da 044 e da 053):
+
+- `/host` quebrava no servidor: `WEEKDAY_VALUES` saía de um módulo `"use client"` (chegava ao servidor como referência) e quatro componentes de servidor passavam `component={NextLink}` ao `Button`. A constante foi para `WeekdayPicker/weekdays.ts` e o tema define `MuiButtonBase.defaultProps.LinkComponent = NextLink`; no servidor basta `href`.
+- "voltou pra casa" sumia: a `StayMilestones` desmontava quando a estadia virava `completed`. Agora fica montada.
+- Avatar com iniciais sem contraste (axe) na lista e no detalhe do anfitrião: coral com o texto de contraste do tema, como no shell.
+- `host-requests.spec.ts`: espera a hidratação antes de abrir o pedido e dá 60 s à primeira jornada, que compila as rotas a frio no `next dev`.
+
+## 15/10/2026 · Busca de cantinhos (spec 041)
+
+Worktree `pethost_frontend-041`, branch `feat/041-search`. Recursos, interfaces, limites e níveis N/A documentados no [design da spec](../specs/041-search/design.md). T8 (mapa) fora do escopo. Vault somente leitura por coordenação: nota e linhas de catálogo serão enviadas por maestri; o vault não foi alterado.
+
+| Verificação                                             | Resultado                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest da entrega + regressão de errorCopy              | 14 arquivos, 88 testes aprovados: 39 da 041 (16 unitários, 12 componentes, 5 integrações Node, 6 integrações DOM) e 49 regressões existentes de getErrorMessage                                                                                                                                      |
+| Comando                                                 | `npx vitest run --maxWorkers=2 src/features/search src/shared/lib/money src/shared/lib/date/stayRules.test.ts src/shared/ui/forms/DateRangeField src/shared/ui/feedback/SniffingBanner 'src/app/(account)/search' src/test/msw/searchMock.int.test.ts src/shared/api/errors/getErrorMessage.test.ts` |
+| ESLint dos arquivos alterados/criados                   | Aprovado, sem erro nem warning                                                                                                                                                                                                                                                                       |
+| `npx tsc --noEmit -p .`                                 | Aprovado                                                                                                                                                                                                                                                                                             |
+| Storybook/Chromium com axe pelo `scratchpad/stories.sh` | 7 arquivos, 19 testes aprovados, sem violação reportada                                                                                                                                                                                                                                              |
+| E2E mocked desktop/celular                              | Aguardando exclusividade das portas 3100/5099; seis jornadas por projeto escritas em `e2e/mocked/search/search.spec.ts`                                                                                                                                                                              |
+| API .NET real                                           | Não executado; MSW/E2E simulado não valida geocoder ou disponibilidade real                                                                                                                                                                                                                          |
+| BOM e whitespace                                        | Nenhum arquivo novo com BOM; `git diff --check` aprovado                                                                                                                                                                                                                                             |
+
+O primeiro ciclo unitário falhou por módulos ainda inexistentes e passou após implementar regras/parser. A story da composição falhou inicialmente pelo contexto do App Router do Storybook incompatível com Next 16.4; foi corrigida com mock de `useSearchParams` apenas na story, sem alterar produção. Uma rodada Vitest concorrente com Chromium atingiu o timeout padrão de 5 segundos em SearchBar; o mesmo conjunto completo passou com `--maxWorkers=2`. Não foi executado `npm run verify` global, conforme coordenação da máquina compartilhada.
+
+O mock E2E tem teste de contrato/autorização/paginação/filtros/erros em `src/test/msw/searchMock.int.test.ts`. A primeira lista é prefetched no servidor; testes Node conferem cache hidratável e isolamento de conta. DOM confere manter cards durante busca e depois de falha, campos 400, endereços 422, retry 503, filtros/histórico e acumulação.
+
+Em 11/10/2026, o projeto foi gerado pelo CLI `create-next-app@latest`, com TypeScript, ESLint, App Router, src-dir, npm e sem Tailwind. Next 16.4.0, React 19.3.0, MUI 9.5.0; versões completas no lockfile.
+
+A primeira checagem de TypeScript encontrou `LayoutProps`, tipo gerado pelo Next ainda indisponível antes do primeiro build. O layout foi ajustado para declarar `children: ReactNode`, permitindo checagem independente do build.
+
+`npm run lint`, `npm run typecheck` e `npm run build` passaram. O build publicou somente a home estática do scaffold e o not-found interno, conforme esperado; SSR de negócio e integração com a API aguardam implementação.
+
+Features, widgets, shared e bootstrap não contêm arquivos. As rotas planejadas também não têm páginas/handlers implementados. Metadados e idioma foram ajustados no layout gerado; nenhuma tela de produto foi criada.
+
+Após alinhar a nomenclatura à API e ao ER, a estrutura passou a ter 14 features, com `users`, `owners` e `hosts` separados. Todas as pastas de interface estão em inglês; recursos seguem plural/kebab-case, e autenticação usa `auth`, conforme o backend. A conferência de diretórios não encontrou os nomes antigos em português, os links locais da documentação são válidos e as camadas de negócio continuam com zero arquivos. TypeScript e build foram executados novamente após a reorganização.
+
+## 15/10/2026 · Pedir estadia (spec 050)
+
+| Verificação                                                                                            | Resultado                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest (`--maxWorkers=2`): `features/bookings`, rota do pedido, mock de reservas, `stayRules`, `money` | 27 arquivos, 141 testes verdes: 65 unitários, 16 de componente, 15 de integração (Node), 45 de integração (jsdom)                                                                                                                                         |
+| Vitest de `src` inteiro depois do merge com a 042                                                      | 313 arquivos, 1720 testes verdes                                                                                                                                                                                                                          |
+| ESLint, `tsc --noEmit`, Prettier                                                                       | sem erros                                                                                                                                                                                                                                                 |
+| Storybook (`RequestStayForm`, `RequestStayHostNotice`)                                                 | 5/5                                                                                                                                                                                                                                                       |
+| E2E mocked `e2e/mocked/bookings` e `e2e/mocked/search`, desktop e celular                              | request.spec 8/8; my-stays, host-requests, stay-day e search verdes (my-stays caiu uma vez no celular por lentidão de render e passou 10/10 ao repetir); `listing-page.spec` falha 2/2 pelo `component={Link}` da `ListingPageScreen` (042, em andamento) |
+
+### 16/10/2026 · 050 com a 042 corrigida e o dev (005 etapas 1 a 4, 043, 030)
+
+| Verificação                                                                                         | Resultado                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest: `features/bookings`, `features/listing-page`, rotas de `listings`, `test/msw`               | 37 arquivos, 167 testes verdes                                                                                                                                                   |
+| ESLint (inclui `no-numeric-radius`), `tsc --noEmit`, Prettier                                       | sem erros                                                                                                                                                                        |
+| E2E mocked `bookings` e `search` (jornada busca → cantinho → pedido sem `fixme`), desktop e celular | 1ª execução 41/44: compilação da primeira visita no `next dev` (cantinho e `/login`) e rótulos duplicados da busca oculta no celular; testes ajustados, 2ª execução 44/44 verdes |
+
+## Spec 033: auditoria administrativa (15/10/2026)
+
+Validação na worktree `pethost_frontend-033`, branch `feat/033-admin-audit`.
+
+- Vitest direcionado: **16 arquivos, 43 testes aprovados**, com `--maxWorkers=2`. Inclui unitários de schema/mapper/contratos/datas/copy/links, testes funcionais de filtros/tabela/detalhe/explorer e integrações MSW no cliente BFF e prefetch server-side, mais regressão de navegação e consumers do hook 031.
+- Comando: `npx.cmd vitest run src/features/admin-audit src/shared/lib/date/formatDateTime.test.ts src/shared/lib/clipboard/writeClipboard.test.ts src/shared/ui/data-display/CopyButton/CopyButton.test.tsx src/shared/hooks/useSearchParamsState.test.tsx src/shared/config/navigation.test.ts --maxWorkers=2`.
+- `npx.cmd tsc --noEmit -p .`: aprovado, sem erros. ESLint direcionado: aprovado. Prettier check: aprovado. `git diff --check` e inspeção de BOM UTF-8 em 64 arquivos: aprovados.
+- Playwright mockado e real: jornadas escritas; não executadas enquanto aguardamos as portas reservadas.
+- Storybook/a11y, build e verify global: não executados conforme `spec-owner-common.md`; as stories usam `export default meta`.
+- Vault e catálogo: somente leitura e fora desta worktree. Recursos e respectivas linhas estão incluídos no resumo a Claude Code; não declarar integração do vault concluída.
+
+## Admin accounts and audit regression - 2026-10-16
+
+- Local `origin/dev` merged in `2836cd1`; both error-message test groups and host/admin navigation expectations retained.
+- `vitest run` for AccountDetail, AdminDataTable, redirectIfSignedIn, navigation and getErrorMessage: 5 files, 162 tests passed.
+- Mocked `accounts.spec.ts` after merge: 6/6 passed (desktop/mobile), including suspension and CPF release. Executed together with audit (8/12 combined passed before audit selectors were corrected).
+- Mocked `audit.spec.ts` after selecting the exact fixture entry: 6/6 passed (desktop/mobile), including action filtering, details, target href and unauthorized redirect.
+- `tsc --noEmit` passed after merge; final typecheck/lint results recorded below. `git diff --check` passed.
+- Test runner: `.agent-tools/e2e.sh`, one worker, no concurrent E2E. Servers were stopped explicitly after each run because automatic taskkill cleanup did not finish in this sandbox. Ports 3100/5099 released.
+- These E2E suites use the simulated backend; no real API or Storybook execution claimed. Existing HTTP integration tests were not rerun because their contracts did not change. No new pure domain logic was introduced.
+- Vault untouched per user instruction. No fetch/push after the user reserved publishing; commits are local and have no coauthor trailers.
+  Final targeted ESLint and tsc --noEmit: passed (exit 0).
+
+## Revisão PR 17: filtros, cache da trilha e paginação (2026-10-16)
+
+- Regressões iniciais: `npx.cmd vitest run` com os arquivos de código alterados como filtros, `--maxWorkers=2`: **3 arquivos, 18 testes aprovados** (limpar rascunho/erros, paginação full/compact, sete ações com refetch ativo e isolamento de admin/alvo).
+- Suíte ampliada: `npx.cmd vitest run src/features/admin-audit src/widgets/admin-accounts src/shared/api/query/queryClient.test.ts --maxWorkers=2`: **18 arquivos aprovados, 1 com falha; 59/60 testes aprovados**. Única falha: timeout de 5s no caso owner de AccountDetail ao abrir diálogo; nenhuma assertion funcional falhou.
+- Repetição isolada após simplificar a key sem mudar seu formato: `npx.cmd vitest run src/widgets/admin-accounts/hooks/useAccountAction.int.test.tsx src/widgets/admin-accounts/components/AccountDetail.test.tsx src/shared/api/query/queryClient.test.ts --maxWorkers=1`: **3 arquivos, 17 testes aprovados**, incluindo os dois casos de AccountDetail e cobertura unitária do prefixo compartilhado. Não foi necessário aumentar timeout nem alterar o teste existente.
+- `npx.cmd tsc --noEmit` e ESLint de todos os arquivos TS/TSX alterados: **aprovados**, exit 0. O primeiro typecheck apontou fixture antiga com array no lugar de AuditPage; corrigida para reutilizar auditPageModelFixture. Prettier aplicado ao código/spec e `git diff --check` aprovado.
+- Integrações usam MSW/cache TanStack, não API real. E2E/Storybook não executados por instrução sem portas. Nenhum push/fetch ou alteração no vault. Interfaces, limites, migração (N/A: formato de key preservado), níveis de teste e catálogo provisório de adminAuditQueryKey em `specs/033-admin-audit/design.md`.
+
+## Regressão de CI · Início (spec 040)
+
+| Verificação                                                                  | Resultado                |
+| ---------------------------------------------------------------------------- | ------------------------ |
+| `bash .agent-tools/e2e.sh pethost_frontend-040 e2e/mocked/home/home.spec.ts` | 8/8 no desktop e celular |
+
+O E2E escolhe “Cão” e “Gato” por nome exato, sem colidir com o placeholder “Cão ou gato?”. Nos fluxos móveis, expande a pílula antes de preencher os campos e usa o CTA responsivo “Buscar cantinhos”. As portas 3100/5099 foram liberadas ao fim.
+
+## Retomada 16/10/2026 � home
+
+E2E mocked/home: 8/8 aprovados ap�s aguardar hidrata��o e acomodar compila��o fria (60 s por teste; 15 s para navega��o � busca). Integra��o de origin/dev local: 43adc05 (PR #20). tsc --noEmit aprovado antes da atualiza��o do teste; repetido nesta entrega. Fetch/push indispon�veis: conex�o com github.com:443 recusada neste ambiente. Portas 3100/5099 encerradas explicitamente.
+
+## Revisão PR 18: renovação na home (2026-10-16)
+
+- `npx.cmd vitest run src/app/page.int.test.tsx src/shared/auth/server/getSession.int.test.ts src/shared/auth/server/requireSession.int.test.ts src/shared/auth/server/redirectIfSignedIn.test.ts --maxWorkers=2`: **3 arquivos encontrados, 19 testes aprovados**. O filtro requireSession não corresponde a arquivo existente; o leitor e a guarda estão nos outros arquivos. A home tem 11 testes, incluindo refresh, raiz/query repetida e visitante sem refresh.
+- `npx.cmd tsc --noEmit` e ESLint em todos os arquivos TS/TSX alterados: **aprovados**, exit 0. A primeira execução encontrou assinatura opcional incompatível com os tipos gerados da página Next; corrigida e reexecutada com sucesso.
+- Prettier aplicado aos arquivos de código/spec alterados; `git diff --check` aprovado. Consumidores de `getSession()` sem argumento preservam o comportamento anterior.
+- Integração usa MSW e mocks de cookies/redirect do Next; não equivale à API real nem à navegação pelo handler de refresh. E2E/Storybook não executados, conforme instrução sem portas. Vault não editado; documentação e catálogo provisório de `getSession(currentPath?)` em `specs/040-home/design.md`.
+- Rodada final com a assinatura definitiva da página: `npx.cmd vitest run src/app/page.int.test.tsx src/shared/auth/server/getSession.int.test.ts src/shared/auth/server/redirectIfSignedIn.test.ts --maxWorkers=1`: **3 arquivos, 19 testes aprovados**, exit 0.

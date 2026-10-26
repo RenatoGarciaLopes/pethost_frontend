@@ -13,12 +13,12 @@ import * as zod from 'zod';
  * @summary Perfil de anfitrião da conta logada. Só existe depois da aprovação do admin.
  */
 export const GetApiV1HostsMeResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid().describe('Id do anfitrião (o que os outros módulos guardam).'),
   "userId": zod.string().uuid(),
   "personType": zod.string(),
-  "cpf": zod.string().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante).'),
+  "cpf": zod.string().nullish().describe('Só dígitos. É o da própria pessoa (na empresa, o do representante). Nulo depois que a conta foi excluída.'),
   "company": zod.union([zod.null(),zod.object({
   "cnpj": zod.string().describe('Sem máscara, em maiúsculas (aceita o CNPJ alfanumérico).'),
   "legalName": zod.string().describe('Razão social.'),
@@ -39,6 +39,7 @@ export const GetApiV1HostsMeResponse = zod.object({
   "identityReleasedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin liberou o CPF/CNPJ (disputa). Esse perfil não volta mais.'),
   "stripeConnected": zod.boolean().describe('Já existe conta conectada no Stripe (onboarding começou).'),
   "stripePayoutsEnabled": zod.boolean().describe('O Stripe liberou os repasses: o cantinho pode aparecer na busca.'),
+  "stripeStatus": zod.string().describe('Cadastro de recebimento: `not_started`, `in_progress`, `under_review`, `restricted` ou `enabled`.'),
   "createdAt": zod.string().datetime({"offset":true}),
   "user": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
@@ -62,14 +63,9 @@ export const GetApiV1HostsMeResponse = zod.object({
   "suspendedAt": zod.string().datetime({"offset":true}).nullish().describe('Quando o admin suspendeu a conta. Nulo se não está suspensa.'),
   "suspensionReason": zod.string().nullish().describe('Motivo da suspensão, informado pelo admin.')
 }).describe('Dados da conta para exibição. Nunca inclui hash de senha (§15).')]).optional()
-}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('Anfitrião verificado: o perfil (CPF, verificação, situação no Stripe) junto com os dados da\r\nconta, lidos do Auth. Mesmo formato para o próprio anfitrião e para o admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Nunca 404: quem nunca pediu recebe `application` nulo e `canStartNew: true`.
@@ -77,8 +73,8 @@ export const GetApiV1HostsMeResponse = zod.object({
  * @summary A tela "Minha verificação": a solicitação mais recente e se dá para abrir outra.
  */
 export const GetApiV1HostsMeApplicationResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "application": zod.union([zod.null(),zod.object({
   "id": zod.string().uuid(),
   "status": zod.string(),
@@ -116,14 +112,9 @@ export const GetApiV1HostsMeApplicationResponse = zod.object({
   "canStartNew": zod.boolean().describe('Pode abrir uma solicitação nova agora.'),
   "remainingAttempts": zod.number().int().describe('Quantas solicitações ainda pode abrir.'),
   "noticeVersion": zod.string().describe('Versão vigente do aviso de uso das fotos, para o front mostrar o texto certo.')
-}).describe('A tela "Minha verificação": a solicitação mais recente (ou nenhuma) e se dá para abrir outra.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A tela "Minha verificação": a solicitação mais recente (ou nenhuma) e se dá para abrir outra.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Corpo: `cpf`, `documentType` (`rg`, `cnh` ou `cin`) e
@@ -153,8 +144,8 @@ export const PostApiV1HostsMeApplicationBody = zod.object({
 }).describe('Corpo de `POST /hosts/me/application`. O id vem do token; o IP, do servidor.')
 
 export const PostApiV1HostsMeApplicationResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "status": zod.string(),
   "personType": zod.string(),
@@ -187,14 +178,9 @@ export const PostApiV1HostsMeApplicationResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Depois de enviada, nada muda: 422 `HOST_APPLICATION_NOT_EDITABLE`.
@@ -218,8 +204,8 @@ export const PatchApiV1HostsMeApplicationBody = zod.object({
 }).describe('Corpo de `PATCH /hosts/me/application`: só o que vier muda.')
 
 export const PatchApiV1HostsMeApplicationResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "status": zod.string(),
   "personType": zod.string(),
@@ -252,21 +238,16 @@ export const PatchApiV1HostsMeApplicationResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * @summary Desiste da solicitação aberta (rascunho ou em análise). As fotos são apagadas.
  */
 export const DeleteApiV1HostsMeApplicationResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "status": zod.string(),
   "personType": zod.string(),
@@ -299,14 +280,9 @@ export const DeleteApiV1HostsMeApplicationResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * `multipart/form-data` com as partes `front`, `back` e `selfie`
@@ -326,8 +302,8 @@ export const PutApiV1HostsMeApplicationDocumentsBody = zod.object({
 }))
 
 export const PutApiV1HostsMeApplicationDocumentsResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "status": zod.string(),
   "personType": zod.string(),
@@ -360,22 +336,17 @@ export const PutApiV1HostsMeApplicationDocumentsResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 
 /**
  * Faltando foto: 422 `HOST_APPLICATION_DOCUMENTS_MISSING`, dizendo quais.
  * @summary Envia o rascunho para a análise do admin.
  */
 export const PostApiV1HostsMeApplicationSubmissionResponse = zod.object({
-  "success": zod.boolean(),
-  "data": zod.union([zod.null(),zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
   "id": zod.string().uuid(),
   "status": zod.string(),
   "personType": zod.string(),
@@ -408,12 +379,7 @@ export const PostApiV1HostsMeApplicationSubmissionResponse = zod.object({
   "documentsPurgedAt": zod.string().datetime({"offset":true}).nullish(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
-}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.')]).optional(),
-  "error": zod.union([zod.null(),zod.object({
-  "code": zod.string(),
-  "message": zod.string(),
-  "details": zod.unknown().optional()
-}).describe('Estrutura padronizada de erro.')]).optional(),
+}).describe('A solicitação como a própria pessoa vê: status, dados enviados, quais fotos já foram e o\r\nmotivo da recusa. Sem as fotos (nem link) e sem a nota interna do admin.'),
   "timestamp": zod.string().datetime({"offset":true})
-}).describe('Envelope padrão de resposta da API PetHost. Toda resposta usa este formato (§7).')
+}).describe('Resposta de sucesso.')
 

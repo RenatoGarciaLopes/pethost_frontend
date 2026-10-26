@@ -1,7 +1,7 @@
 ---
 spec: 013-password-recovery
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-12
 area: PWD
 ---
 

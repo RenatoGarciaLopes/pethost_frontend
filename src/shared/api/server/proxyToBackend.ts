@@ -15,7 +15,7 @@ import { bffErrorResponse, bffLocalError } from "./bffResponse";
 import { matchBffRoute } from "./bffRoutes";
 
 /** Prefixo das rotas do BFF no Next. */
-export const BFF_PREFIX = "/api";
+const BFF_PREFIX = "/api";
 
 /** Cabeçalhos do navegador que seguem para a API (o resto, inclusive `cookie`, fica no BFF). */
 const FORWARDED_REQUEST_HEADERS = ["accept", "accept-language", "content-type", "content-length"];

@@ -8,6 +8,17 @@ const options = [
   { value: "no", label: "Não" },
   { value: "unknown", label: "Ainda não sei", disabled: true },
 ];
+it("REQ-PNEW-008/010/012 grupo sem resposta é alcançável pelo Tab e setas", async () => {
+  function Example() {
+    const [value, setValue] = useState("");
+    return <SegmentedControl label="Sexo" options={options} value={value} onChange={setValue} />;
+  }
+  const { user } = renderWithProviders(<Example />);
+  await user.tab();
+  expect(screen.getByRole("radio", { name: "Sim" })).toHaveFocus();
+  await user.keyboard("{ArrowRight}");
+  expect(screen.getByRole("radio", { name: "Não" })).toBeChecked();
+});
 it("REQ-DS-010 radio controlado muda por setas e clique", async () => {
   const change = vi.fn();
   function Example() {
@@ -60,4 +71,8 @@ it("REQ-DS-010 grupo desabilitado bloqueia todas as opções", () => {
     <SegmentedControl label="Convivência" options={options} value="yes" onChange={() => {}} disabled />,
   );
   expect(screen.getAllByRole("radio").every((radio) => radio.hasAttribute("disabled"))).toBe(true);
+});
+it("104 rótulo do grupo no peso dos rótulos de campo (negrito)", () => {
+  renderWithProviders(<SegmentedControl label="Tem quintal?" options={options} value="" onChange={() => {}} />);
+  expect(getComputedStyle(screen.getByText("Tem quintal?")).fontWeight).toBe("700");
 });

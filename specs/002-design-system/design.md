@@ -15,7 +15,7 @@ src/shared/theme/
   tokens/radii.ts · tokens/typography.ts
   tokens/springs.ts       `SPRING_ASSENTAR` e `SPRING_ACOLHER` (curvas linear() de design/06-movimento)
   overrides/<Componente>.ts   styleOverrides por componente MUI (Button, TextField, Chip, Card, Paper, Switch, ToggleButton, Tooltip)
-  variants/               variants novas: Button `quiet`; Chip `sticker`, `ok`, `attention`; Paper `panel`
+  variants/               variants novas: Button `quiet`; Chip `ok` (usado pelo `ChipPicker`)
   types/mui.d.ts          module augmentation (cores `grama`, `gema`, `ceu`; variants)
   integrations/stripe/toStripeAppearance.ts
   createQuintalTheme.ts   compõe tudo; exporta `quintalTheme`
@@ -24,6 +24,16 @@ src/shared/theme/
 - `bootstrap/providers/ThemeProviders.tsx` (client) aplica `AppRouterCacheProvider` (`@mui/material-nextjs/v16-appRouter`), `ThemeProvider` e `CssBaseline`.
 - O grão de papel entra como fundo no `CssBaseline`, a partir de um PNG local.
 - As fontes ficam em `src/assets/fonts`, carregadas em `app/layout.tsx` com `next/font/local`; as variáveis CSS vão para a `typography` do tema.
+
+## Ajuste dos campos em 19/10/2026
+
+A pedido do Renato, `shared/theme/overrides/surfaces.ts` deixa de aplicar o contorno azul externo ao `MuiOutlinedInput` focado. A mudança compartilhada alcança `TextField`, senha e demais campos outlined; mantém borda, sombra e borda de erro. Não cria componente ou recurso reutilizável novo.
+
+Regressão de componente em `OutlinedInput.test.tsx`: foco, digitação e borda normal/de erro. Regressão Playwright em `e2e/mocked/design-system.spec.ts`: e-mail e senha com clique e teclado, nos projetos desktop e celular. Unitários e integração com API não se aplicam, pois a mudança é apenas de estilo e não altera lógica ou contratos.
+
+As políticas e o catálogo do vault referenciados em `AGENTS.md` não foram encontrados nos caminhos indicados neste ambiente. Este registro local documenta a alteração; a atualização do Obsidian permanece pendente de acesso ao vault.
+
+Validação: quatro testes de componente aprovados (OutlinedInput e FormLabel), lint e formatação aprovados. A regressão Playwright passou em desktop e celular usando o Chrome instalado e o servidor existente na porta 3000, com configuração temporária fora do repositório; o Chromium gerenciado pelo Playwright não está instalado.
 
 ## Primitivos (`shared/ui`)
 
@@ -72,3 +82,13 @@ src/shared/theme/
 | masks           | Unitário               | `masks.test.ts`                                                                                             | Máscara e desmáscara, entradas parciais e caracteres inválidos                         |
 | 014             | Componente + Storybook | `Hint`, `StatusPill`, `Sticker`, `EmptyState`, `FormActions`, `LockedField` (`*.test.tsx`, `*.stories.tsx`) | render, papel acessível, `FormActions` fixo no celular                                 |
 | 016             | Componente             | `TurmaWalker.test.tsx`, `Celebration.test.tsx`                                                              | toca uma vez, não bloqueia clique, sem animação com `prefers-reduced-motion`           |
+
+## Foco em tinta (072, 22/10/2026)
+
+Token `foco` removido; `focusRing` e Link usam `tinta`, DocumentSlot usa `:focus-visible` nativo. HomeScreen não desenha mais contorno em células por `:focus-within`. A extração da barra para SearchBar deve preservar esta regra. Foco do controle permanece gerenciado pelo navegador e MUI. Story `src/shared/theme/Focus.stories.tsx` cobre botão, chip, link e input. Testes e limites na nota `development/resources/frontend-focus` do vault e decisão `2026-10-22-foco-sem-azul`.
+
+Validação final 072: E2E isolado da home com CI=1 e webpack na 3100/mock 5099, desktop+celular: 2/2 aprovados. Inclui mouse no Select, retorno pelo teclado e foco na célula da data transparente. Servidores encerrados, configs temporários removidos. Demais passes e limites: nota frontend-focus do vault. A comparação visual antes dos controles é reconstruída pela cor do CSS antigo; os prints após são do código entregue.
+
+Revisão do indicador da 072: foco de teclado é representado na célula completa por `:has(:focus-visible)`, raio control 12 px e offset 3 px; outline interno do InputBase é suprimido dentro da barra. Ícone, rótulo e valor ficam dentro do mesmo indicador. Nenhum focus-within colorido e nenhum anel na célula do PET após mouse. O ajuste será preservado pela extração 071.
+
+Revisão visual validada somente na story Visitante da HomeScreen: 1/1 aprovada, screenshots reais de mouse/Tab no PET em 1440/390 em `test-results/072-pet-review/`. E2E atualizado para indicador da célula, sem executar novamente nesta revisão por orientação do coordenador.

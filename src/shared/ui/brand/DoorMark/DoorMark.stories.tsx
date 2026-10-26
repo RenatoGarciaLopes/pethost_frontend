@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { DoorMark } from "./DoorMark";
@@ -20,6 +20,13 @@ export const Cabecalho: Story = { name: "REQ-DS-015 Cabeçalho" };
 export const Assinatura: Story = {
   name: "REQ-DS-015 Assinatura",
   args: { withWordmark: true, title: undefined },
+};
+
+/** A assinatura oficial em papel mantém o contraste sobre a camada funda de terra. */
+export const AssinaturaNaTerra: Story = {
+  args: { withWordmark: true, wordmarkColor: "quintal.papel", title: undefined, interactive: false },
+  parameters: { a11y: { test: "error" } },
+  decorators: [(Story) => <Box sx={{ bgcolor: "scene.soilDeep", p: 3 }}>{Story()}</Box>],
 };
 
 /** Logo grande (traço 6). */

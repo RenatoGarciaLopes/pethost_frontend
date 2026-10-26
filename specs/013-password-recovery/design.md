@@ -1,10 +1,22 @@
 ---
 spec: 013-password-recovery
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-12
 ---
 
 # 013 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-12)
+
+- **Sem `useLogout`:** a 004 ainda não tem o hook. `useResetPasswordMutation` chama o logout do BFF direto (melhor esforço) e depois `queryClient.clear()`.
+- **Etapas sem máquina genérica:** `ForgotPasswordFlow` guarda `{ step: "request" | "sent" }`; `ResetPasswordFlow` deriva a etapa do token (`useUrlSecret`: `undefined` antes de ler, `null` sem token) e de um desfecho (`expired`, `missing`, `done`). Nenhuma combinação impossível de flags.
+- **Peças da feature:** `StepHeading` (o `h1` que recebe o foco na troca de etapa), `ErrorNotice` (aviso que entra com a mola "assentar" e pega o foco só quando aparece) e `useErrorNotice` (429 com contagem e frase genérica), usados pelas três telas.
+- **Rótulos da régua em `shared`:** `formCopy.passwordRules`; o `PasswordStrengthChecklist` lê dali e perdeu a prop `labels` (cadastro e senha nova usam a mesma frase).
+- **`forgotPasswordPath(as?)`** em `appRoutes`; o login passou a usá-lo.
+- **`Referrer-Policy`:** `metadata.referrer` na página e o cabeçalho em `next.config.ts` (`headers()` para `/reset-password`).
+- **Contagem do reenvio:** a parte que conta fica fora da região viva; o leitor de tela ouve "Não chegou? Confere o spam" e, no fim, "ou manda de novo".
+- **Token descartado:** depois do 401, o formulário some e o token não é mais usado; ele só vive na memória do componente até a pessoa sair da página.
+- **Sucesso:** título "Senha nova guardada" e o texto "Por segurança, saímos da sua conta em todos os aparelhos." (a microcopy da spec virou título + texto).
 
 ## Rotas e renderização
 

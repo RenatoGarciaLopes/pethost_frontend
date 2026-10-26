@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { homeOf, loginRedirectPath, refreshRedirectPath, resolvePostLoginPath } from "./appRoutes";
+import {
+  forgotPasswordPath,
+  homeOf,
+  loginRedirectPath,
+  refreshRedirectPath,
+  registerPath,
+  resolvePostLoginPath,
+  switchAccountPath,
+  isLoginNotice,
+  loginNoticePath,
+} from "./appRoutes";
 
 describe("appRoutes", () => {
   it("REQ-HTTP-016 refresh e login levam o next seguro", () => {
@@ -7,6 +17,33 @@ describe("appRoutes", () => {
     expect(refreshRedirectPath("//evil.example")).toBe("/api/auth/sessions/refresh?next=%2F");
     expect(loginRedirectPath("/pets")).toBe("/login?next=%2Fpets");
     expect(loginRedirectPath("https://evil.example")).toBe("/login");
+  });
+
+  it("REQ-AUTH-001 o login pode vir com a conta marcada", () => {
+    expect(loginRedirectPath("/pets", "owner")).toBe("/login?as=owner&next=%2Fpets");
+    expect(loginRedirectPath(null, "host")).toBe("/login?as=host");
+  });
+
+  it("REQ-OREG-001 cadastro leva o next seguro", () => {
+    expect(registerPath()).toBe("/register");
+    expect(registerPath(undefined, "/hosts/42")).toBe("/register?next=%2Fhosts%2F42");
+    expect(registerPath("owner", "/hosts/42")).toBe("/register/owner?next=%2Fhosts%2F42");
+    expect(registerPath("host", "//evil.example")).toBe("/register/host");
+  });
+
+  it("REQ-SWITCH-013 troca de conta com o destino e o next seguro", () => {
+    expect(switchAccountPath("owner", "/listings/42?from=2026-12-20")).toBe(
+      "/users/switch?to=owner&next=%2Flistings%2F42%3Ffrom%3D2026-12-20",
+    );
+    expect(switchAccountPath("host", "//evil.example")).toBe("/users/switch?to=host");
+  });
+});
+
+describe("forgotPasswordPath", () => {
+  it("REQ-PWD-001 marca a conta pelo as, inclusive admin", () => {
+    expect(forgotPasswordPath()).toBe("/forgot-password");
+    expect(forgotPasswordPath("host")).toBe("/forgot-password?as=host");
+    expect(forgotPasswordPath("admin")).toBe("/forgot-password?as=admin");
   });
 });
 
@@ -22,5 +59,18 @@ describe("casa do papel", () => {
     expect(resolvePostLoginPath("host", "https://evil.example")).toBe("/host");
     expect(resolvePostLoginPath("owner", null)).toBe("/");
     expect(resolvePostLoginPath("admin", "/api/users/me")).toBe("/admin/host-applications");
+  });
+});
+
+describe("aviso no login", () => {
+  it("REQ-ACC-024 leva só a chave do aviso e a conta marcada", () => {
+    expect(loginNoticePath("conta-pausada", "host")).toBe("/login?as=host&aviso=conta-pausada");
+    expect(loginNoticePath("conta-pausada")).toBe("/login?aviso=conta-pausada");
+  });
+
+  it("REQ-ACC-024 só reconhece avisos da lista fixa", () => {
+    expect(isLoginNotice("conta-pausada")).toBe(true);
+    expect(isLoginNotice("<script>")).toBe(false);
+    expect(isLoginNotice(undefined)).toBe(false);
   });
 });

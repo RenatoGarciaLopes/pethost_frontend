@@ -1,7 +1,7 @@
 ---
 spec: 012-host-registration
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-12
 area: HREG
 ---
 
@@ -65,4 +65,9 @@ As da 011.
 ## Perguntas em aberto
 
 - **Consentimento LGPD:** o mesmo ponto da 011.
-- **Painel antes da aprovação:** `/host` (casa do anfitrião) ainda não tem spec própria antes da 053; até lá, "Fazer isso depois" leva a `/host/application`? Decidir junto com a 030.
+- **Painel antes da aprovação:** `/host` (casa do anfitrião) ainda não tem spec própria antes da 053. Implementado como REQ-HREG-007 pede ("Fazer isso depois" leva a `/host`, que é 404 até lá); rever junto com a 030.
+- **Textos do endereço do anfitrião:** a spec não trazia a ajuda do passo 2 nem a faixa "o que a gente faz com cada dado" do anfitrião (as da 011 falam de "cantinhos perto de você" e de CPF). Usado, até revisão: "Pro seu cadastro e pra verificação de quem você é." (endereço) e "Pro tutor saber com quem está falando." (nome e celular); a faixa do anfitrião não tem a linha do CPF.
+
+## Revisão 074 (22/10/2026)
+
+Código preparado, aguardando liberação de validação. /register abre o primeiro passo com cartões; tutor vê 3 etapas visuais, sendo pet opcional após criar conta; host mantém 2 sem CPF. APIs e criação da conta ao enviar endereço mantidas. Confirmação de descarte ao trocar papel, sem rascunho compartilhado existente. Detalhes, migração e plano de testes: [cadastro fiel](../005-ui-conformance/register-fidelity-implementation.md).

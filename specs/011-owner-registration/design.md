@@ -1,10 +1,24 @@
 ---
 spec: 011-owner-registration
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-12
 ---
 
 # 011 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-12)
+
+- **Escolha em `/register`:** os cartões do design system são radio (`ChoiceCard` não serve de link), então a escolha marca o cartão e o botão "Continuar como …" leva ao formulário. REQ-OREG-001 ajustado.
+- **Sem `router.refresh()` no sucesso:** a página de cadastro com sessão redireciona (REQ-OREG-015); um refresh tiraria a pessoa da tela de sucesso. A mutação só tira as queries do cache (`removeQueries`); o cache de mutações fica, porque a tela de sucesso lê o resultado.
+- **Guarda das telas de quem não entrou:** `redirectIfSignedIn(next)` em `shared/auth/server`, usada pelo login e pelo login de admin; aguarda `connection()` antes de `getSession()` e fica sob `<Suspense>` (Cache Components).
+- **Links:** `registerPath(role?, next?)` e `loginRedirectPath(next, as?)` em `appRoutes`; o "Criar conta" do login passou a levar o `next`.
+- **Schema de endereço em `shared`:** `createAddressSchema(messages)` (as frases vêm de quem usa), para 012, 015 e 030.
+- **Uma regra de senha só:** `PASSWORD_RULES` e `PASSWORD_MAX` em `shared/lib/validation/password.ts`; a régua, o cadastro e o login (limite de 128) leem dali.
+- **Rótulos:** em tinta com foco e sem asterisco no tema (`overrides/FormLabel.ts`), conforme a regra 6 de `17-cadastros-e-formularios.md`.
+- **`FormActions`** ganhou `busy` (desabilita e marca `aria-busy`) e fica transparente a partir de `sm`.
+- **CSP:** o projeto ainda não tem CSP; quando tiver, liberar `connect-src https://viacep.com.br`.
+- **Depois da 012:** a feature virou tabela de variantes (`REGISTRATION_VARIANTS`); os arquivos `ownerRegistrationSchema.ts` e `toOwnerRegisterBody.ts` da matriz abaixo viraram `registrationSchemas.ts` e `toRegisterBody.ts`, e `registerOwner` virou `registerAccount(path, body)`. Ver `specs/012-host-registration/design.md`.
+- **Re-renderização:** o wizard não assina valores do formulário; a régua da senha fica dentro do `Controller` da senha; `ServerFormError` assina só `errors.root`; `AddressFields` observa só o CEP.
 
 ## Decisão: onde mora o formulário de conta
 
@@ -21,21 +35,21 @@ Os pedaços **sem domínio de cadastro** que outras telas usam vão para `shared
 
 ## Rotas e renderização
 
-| Arquivo                              | Tipo         | Faz                                                                                              |
-| ------------------------------------ | ------------ | ------------------------------------------------------------------------------------------------ |
-| `app/(auth)/register/page.tsx`       | RSC dinâmico | `getSession()` → se houver, `redirect(resolvePostLoginPath(role, next))`; senão `RegisterChoice` |
-| `app/(auth)/register/owner/page.tsx` | RSC dinâmico | mesma guarda; renderiza `RegistrationScreen variant="owner" next={next}`                         |
-| `app/(auth)/layout.tsx`              | RSC (da 010) | cabeçalho simples, `robots: noindex`                                                             |
+| Arquivo                              | Tipo         | Faz                                                                                                               |
+| ------------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `app/(auth)/register/page.tsx`       | RSC dinâmico | `getSession()` → se houver, `redirect(resolvePostLoginPath(role, next))`; senão `RegistrationScreen role="owner"` |
+| `app/(auth)/register/owner/page.tsx` | RSC dinâmico | mesma guarda; renderiza `RegistrationScreen variant="owner" next={next}`                                          |
+| `app/(auth)/layout.tsx`              | RSC (da 010) | cabeçalho simples, `robots: noindex`                                                                              |
 
 Sem `'use cache'` (lê sessão). A ilha é o `RegistrationWizard`.
 
 ## Árvore de componentes
 
 ```
-RegisterChoice (features/registration · server)
-└─ ChoiceCardGroup (shared/ui/forms) como links            REQ-OREG-001
+RegisterChoice (features/registration · client)           cartões de papel dentro do passo 1
+└─ ButtonBase + RoleIllustration internos                  navegação com confirmação no wizard
 
-RegistrationScreen (features/registration · server)       título, texto lateral do computador
+RegistrationScreen (features/registration · server)       composição responsiva sem card ou coluna lateral
 └─ RegistrationWizard (features/registration · client)    estado do passo, RHF único para os 2 passos
    ├─ WizardProgress (shared/ui/navigation)               REQ-OREG-002
    ├─ PersonStep (client)                                  nome, e-mail, PasswordField + PasswordStrengthChecklist,
@@ -63,7 +77,7 @@ Regras dos campos: as da API (`modulo-auth.md` seção 5.1), repetidas no Zod s�
 ## Fluxo de dados
 
 - `registerOwner(values)` em `features/registration/api/client/registration.client.ts`: `bffClient.request({ method: "POST", path: "/owners/register", body }, sessionResultSchema)`.
-- `useRegisterMutation(variant)`: no sucesso, `queryClient.clear()`, guarda o primeiro nome para a tela de sucesso e chama `router.refresh()` (a casca passa a ver a sessão). Navegação só nos botões da tela de sucesso.
+- `useRegisterMutation()`: no sucesso, `queryClient.removeQueries()`; a tela de sucesso lê o nome do resultado da mutação. Sem `router.refresh()` (ver Decisões). Navegação só nos botões da tela de sucesso, que já carregam a página nova com a sessão.
 - `useCepLookup(cep)` (`shared/hooks`): `useQuery` com chave `["cep", cep]`, `enabled` com 8 dígitos, `staleTime` infinito, sem `retry`, tempo limite de 4 s; preenche só campos que a pessoa não editou (`getFieldState(...).isDirty`).
 - Validação por passo: `form.trigger(REGISTRATION_STEPS[i].fields)`.
 
@@ -94,16 +108,16 @@ Sem ajuste, essas rotas respondem 502 `CONTRACT_MISMATCH`. Proposta: `createSess
 
 ## Cria de reutilizável
 
-| Recurso                                            | Vai para                            | Quem mais usa                                                                            |
-| -------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| `AddressFields`                                    | `shared/ui/forms`                   | 012, 015, 030 (endereço da empresa)                                                      |
-| `fetchAddressByCep` + `viaCepResponseSchema`       | `shared/api/external/viaCep.ts`     | `useCepLookup`                                                                           |
-| `useCepLookup`                                     | `shared/hooks`                      | `AddressFields`                                                                          |
-| `isValidCpf`                                       | `shared/lib/documents`              | 015, 030                                                                                 |
-| `isAdult(birthDate, today)` e `parseBrazilianDate` | `shared/lib/date`                   | 012, 015                                                                                 |
-| `strongPasswordSchema` + `PASSWORD_RULES`          | `shared/lib/validation/password.ts` | 012, 013, 015; o `PasswordStrengthChecklist` passa a ler `PASSWORD_RULES` (uma regra só) |
-| `BirthDateField`, `CpfField`                       | `shared/ui/forms`                   | 012 (nascimento), 015, 030 (CPF)                                                         |
-| `features/registration` (variantes)                | feature                             | 012                                                                                      |
+| Recurso                                            | Vai para                            | Quem mais usa                                                                   |
+| -------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
+| `AddressFields`                                    | `shared/ui/forms`                   | 012, 015, 030 (endereço da empresa)                                             |
+| `fetchAddressByCep` (schema interno)               | `shared/api/external/viaCep.ts`     | `useCepLookup`                                                                  |
+| `useCepLookup`                                     | `shared/hooks`                      | `AddressFields`                                                                 |
+| `isValidCpf`                                       | `shared/lib/documents`              | 015, 030                                                                        |
+| `isAdult(birthDate, today)` e `parseBrazilianDate` | `shared/lib/date`                   | 012, 015                                                                        |
+| `isStrongPassword` + `PASSWORD_RULES`              | `shared/lib/validation/password.ts` | 012, 013, 015; o `PasswordStrengthChecklist` lê `PASSWORD_RULES` (uma regra só) |
+| `BirthDateField`, `CpfField`                       | `shared/ui/forms`                   | 012 (nascimento), 015, 030 (CPF)                                                |
+| `features/registration` (variantes)                | feature                             | 012                                                                             |
 
 ## Segurança e privacidade
 
@@ -121,7 +135,7 @@ Sem ajuste, essas rotas respondem 502 `CONTRACT_MISMATCH`. Proposta: `createSess
 | 003                         | Unitário                | `ownerRegistrationSchema.test.ts`                             | cada limite da API; "S/N"; UF minúscula normaliza; complemento opcional                                                                                                |
 | 008                         | Unitário                | `toOwnerRegisterBody.test.ts`                                 | sem máscaras, data ISO, complemento vazio omitido, texto aparado                                                                                                       |
 | 005                         | Integração (MSW)        | `useCepLookup.int.test.tsx`                                   | CEP válido preenche; `{ erro: true }` avisa; timeout de 4 s avisa; não sobrescreve campo editado                                                                       |
-| 001                         | Componente              | `RegisterChoice.test.tsx`                                     | dois links certos, `next` preservado e sanitizado                                                                                                                      |
+| 001                         | Componente              | `RegisterChoice.test.tsx`                                     | papel atual e delegação da troca; next/confirm no wizard                                                                                                               |
 | 002/003/004/006/007/016/017 | Componente              | `RegistrationWizard.test.tsx`                                 | validação no blur e no continuar; voltar mantém; ajuda do CPF e do endereço; `autocomplete`; texto do botão                                                            |
 | 008/009/010/011/012         | Componente (MSW no BFF) | `RegistrationWizard.errors.test.tsx`                          | payload enviado; envio único; 400 de `address.zipCode` volta ao passo 2 e 400 de `email` ao passo 1 com foco; 409 de e-mail e de CPF; 429 com contagem (relógio falso) |
 | 013                         | Componente              | `RegistrationSuccess.test.tsx`                                | primeiro nome; botões com e sem `next`; movimento reduzido sem animação                                                                                                |
@@ -132,3 +146,7 @@ Sem ajuste, essas rotas respondem 502 `CONTRACT_MISMATCH`. Proposta: `createSess
 | 008/013                     | E2E real                | `e2e/real/registration/owner.spec.ts`                         | cadastro com e-mail único por execução no ambiente de teste da API (nunca produção)                                                                                    |
 | Visual                      | Storybook               | `RegistrationWizard.stories.tsx`, `AddressFields.stories.tsx` | passo 1, passo 2, CEP buscando e não achado, cada erro, sucesso, celular; a11y sem violação                                                                            |
 | 018                         | Integração (RSC)        | `app/(auth)/register/owner/page.test.ts`                      | `metadata.title` e `robots.index = false`                                                                                                                              |
+
+## Revisão 074 (22/10/2026)
+
+Código preparado, aguardando liberação de validação. /register abre o primeiro passo com cartões; tutor vê 3 etapas visuais, sendo pet opcional após criar conta; host mantém 2 sem CPF. APIs e criação da conta ao enviar endereço mantidas. Confirmação de descarte ao trocar papel, sem rascunho compartilhado existente. Detalhes, migração e plano de testes: [cadastro fiel](../005-ui-conformance/register-fidelity-implementation.md).

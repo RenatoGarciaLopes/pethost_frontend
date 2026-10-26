@@ -2,12 +2,17 @@
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { OkIcon } from "@/shared/ui/feedback/feedbackIcons";
+import { visuallyHidden } from "../../a11y/visuallyHidden";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { hardShadow } from "@/shared/theme/tokens/shadows";
 
 export interface WizardStep {
   /** Identificador estável do passo. */
   id: string;
   /** Nome curto ("Você", "Onde você mora"). */
   label: string;
+  /** Apoio opcional da trilha; não é uma etapa extra nem um controle. */
+  description?: string;
 }
 
 export type WizardProgressVariant = "trail" | "ring" | "auto";
@@ -23,6 +28,8 @@ export interface WizardProgressProps {
   variant?: WizardProgressVariant;
   /** Nome acessível da navegação (padrão "Etapas"). */
   label?: string;
+  /** Cards da trilha de cadastro; o anel compacto mantém a mesma interface. */
+  appearance?: "connected" | "cards";
 }
 
 type StepState = "feito" | "atual" | "falta";
@@ -35,7 +42,13 @@ const stateText: Record<StepState, string> = { feito: "concluído", atual: "pass
  *
  * @example <WizardProgress steps={[{ id: "voce", label: "Você" }, { id: "endereco", label: "Onde você mora" }]} currentIndex={0} />
  */
-export function WizardProgress({ steps, currentIndex, variant = "auto", label = "Etapas" }: WizardProgressProps) {
+export function WizardProgress({
+  steps,
+  currentIndex,
+  variant = "auto",
+  label = "Etapas",
+  appearance = "connected",
+}: WizardProgressProps) {
   const theme = useTheme();
   const narrow = useMediaQuery(theme.breakpoints.down("md"));
   const resolved = variant === "auto" ? (narrow ? "ring" : "trail") : variant;
@@ -100,7 +113,10 @@ export function WizardProgress({ steps, currentIndex, variant = "auto", label = 
 
   return (
     <Box component="nav" aria-label={label}>
-      <Box component="ol" sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: 0 }}>
+      <Box
+        component="ol"
+        sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: appearance === "cards" ? 0.5 : 0 }}
+      >
         {steps.map((step, index) => {
           const state = stateOf(index);
           const last = index === steps.length - 1;
@@ -110,7 +126,22 @@ export function WizardProgress({ steps, currentIndex, variant = "auto", label = 
               key={step.id}
               aria-current={state === "atual" ? "step" : undefined}
               data-state={state}
-              sx={{ display: "grid", gridTemplateColumns: "32px 1fr", columnGap: 1.5, minHeight: last ? 32 : 56 }}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "32px 1fr",
+                columnGap: 1.5,
+                minHeight: last ? 32 : 56,
+                ...(appearance === "cards"
+                  ? {
+                      p: 1.5,
+                      border: "2px solid",
+                      borderColor: state === "atual" ? "text.primary" : "transparent",
+                      borderRadius: `${quintalRadii.field}px`,
+                      bgcolor: state === "atual" ? "background.paper" : "transparent",
+                      boxShadow: state === "atual" ? hardShadow(3) : "none",
+                    }
+                  : {}),
+              }}
             >
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <Box
@@ -125,18 +156,26 @@ export function WizardProgress({ steps, currentIndex, variant = "auto", label = 
                     fontSize: "0.9rem",
                     border: `2px solid ${theme.palette.quintal.tinta}`,
                     backgroundColor:
-                      state === "feito"
-                        ? theme.palette.success.main
-                        : state === "atual"
-                          ? theme.palette.primary.main
-                          : theme.palette.background.paper,
-                    boxShadow: state === "atual" ? `2px 2px 0 ${theme.palette.quintal.tinta}` : "none",
+                      appearance === "cards"
+                        ? state === "atual"
+                          ? theme.palette.text.primary
+                          : "transparent"
+                        : state === "feito"
+                          ? theme.palette.success.main
+                          : state === "atual"
+                            ? theme.palette.primary.main
+                            : theme.palette.background.paper,
+                    color: appearance === "cards" && state === "atual" ? theme.palette.background.paper : "inherit",
+                    boxShadow:
+                      appearance === "connected" && state === "atual"
+                        ? `2px 2px 0 ${theme.palette.quintal.tinta}`
+                        : "none",
                     "& svg": { width: 18, height: 18 },
                   }}
                 >
                   {state === "feito" ? <OkIcon /> : index + 1}
                 </Box>
-                {last ? null : (
+                {last || appearance === "cards" ? null : (
                   <Box
                     aria-hidden="true"
                     sx={{
@@ -148,20 +187,25 @@ export function WizardProgress({ steps, currentIndex, variant = "auto", label = 
                   />
                 )}
               </Box>
-              <Typography
-                component="span"
-                sx={{
-                  pt: "4px",
-                  fontWeight: state === "atual" ? 800 : 500,
-                  color: state === "falta" ? "text.secondary" : "text.primary",
-                }}
-              >
-                {step.label}
-                <Box component="span" sx={visuallyHidden}>
-                  {" "}
-                  ({stateText[state]})
-                </Box>
-              </Typography>
+              <Box>
+                <Typography
+                  component="span"
+                  sx={{
+                    pt: "4px",
+                    fontWeight: state === "atual" ? 800 : 500,
+                    color: state === "falta" ? "text.secondary" : "text.primary",
+                  }}
+                >
+                  {step.label}
+                  <Box component="span" sx={visuallyHidden}>
+                    {" "}
+                    ({stateText[state]})
+                  </Box>
+                </Typography>
+                {step.description && (
+                  <Typography sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}>{step.description}</Typography>
+                )}
+              </Box>
             </Box>
           );
         })}
@@ -169,15 +213,3 @@ export function WizardProgress({ steps, currentIndex, variant = "auto", label = 
     </Box>
   );
 }
-
-const visuallyHidden = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;

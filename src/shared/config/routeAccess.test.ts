@@ -2,18 +2,12 @@ import { describe, expect, it } from "vitest";
 import { accessFor } from "./routeAccess";
 
 describe("accessFor", () => {
-  it.each([
-    "/",
-    "/search",
-    "/listings/abc",
-    "/login",
-    "/admin/login",
-    "/register/owner",
-    "/forgot-password",
-    "/reset-password",
-  ])("REQ-SHELL-009 %s é público", (path) => {
-    expect(accessFor(path)).toEqual({ kind: "public" });
-  });
+  it.each(["/", "/listings/abc", "/login", "/admin/login", "/register/owner", "/forgot-password", "/reset-password"])(
+    "REQ-SHELL-009 %s é público",
+    (path) => {
+      expect(accessFor(path)).toEqual({ kind: "public" });
+    },
+  );
 
   it("REQ-SHELL-009 áreas de cada papel", () => {
     expect(accessFor("/host/application")).toEqual({ kind: "protected", roles: ["host"], loginPath: "/login" });

@@ -1,7 +1,7 @@
 import "server-only";
 import type { NextRequest, NextResponse } from "next/server";
 import { NextResponse as Next } from "next/server";
-import { z } from "zod";
+import { emptyDataSchema } from "@/shared/api/contracts/emptyData";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
 import { createBackendClient, forwardedForOf, type BackendCallContext } from "@/shared/api/server/backendClient";
 import { bffErrorResponse, bffSuccessResponse } from "@/shared/api/server/bffResponse";
@@ -20,9 +20,6 @@ import { isAllowedMutation } from "./csrf";
 import { getSessionGateway, type AccessResolution, type SessionGateway } from "./sessionGateway";
 import { clearSessionCookies, isSecureOrigin, readSessionTokens, setSessionCookies } from "./sessionCookies";
 import { applyAccessResolution, csrfRejectedResponse, sessionExpiredResponse } from "./sessionResponses";
-
-/** `data: {}` das rotas sem retorno (logout). */
-const emptyDataSchema = z.object({}).passthrough().optional();
 
 export interface SessionHandlerDeps {
   gateway?: SessionGateway;

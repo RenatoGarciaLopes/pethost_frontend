@@ -1,59 +1,59 @@
-import type { ApiError } from "./ApiError";
-
-/** Contexto opcional que muda a frase (ex.: o tipo de conta da tela). */
-export interface ErrorCopyContext {
-  role?: "owner" | "host";
-}
-
-type CopyEntry = string | ((error: ApiError, context: ErrorCopyContext) => string);
-
-export const GENERIC_ERROR_MESSAGE = "Deu um problema do nosso lado. Tenta de novo; se continuar, fala com a gente.";
-
-const roleLabel = { owner: "tutor", host: "anfitrião" } as const;
+import { accountErrorCopy } from "./copy/accountErrorCopy";
+import { bookingErrorCopy } from "./copy/bookingErrorCopy";
+import { commonErrorCopy } from "./copy/commonErrorCopy";
+import { hostApplicationErrorCopy } from "./copy/hostApplicationErrorCopy";
+import { hostPayoutsErrorCopy } from "./copy/hostPayoutsErrorCopy";
+import { conversationErrorCopy } from "./copy/conversationErrorCopy";
+import { listingErrorCopy } from "./copy/listingErrorCopy";
+import { localErrorCopy } from "./copy/localErrorCopy";
+import { paymentErrorCopy } from "./copy/paymentErrorCopy";
+import { petErrorCopy } from "./copy/petErrorCopy";
+import { reviewErrorCopy } from "./copy/reviewErrorCopy";
+import { authValidationCopy } from "./copy/validation/authValidationCopy";
+import { bookingValidationCopy } from "./copy/validation/bookingValidationCopy";
+import { commonValidationCopy } from "./copy/validation/commonValidationCopy";
+import { conversationValidationCopy } from "./copy/validation/conversationValidationCopy";
+import { hostValidationCopy } from "./copy/validation/hostValidationCopy";
+import { listingValidationCopy } from "./copy/validation/listingValidationCopy";
+import { petValidationCopy } from "./copy/validation/petValidationCopy";
+import { reviewValidationCopy } from "./copy/validation/reviewValidationCopy";
+import type { CopyEntry } from "./copyTypes";
+import type { ApiErrorCode } from "../generated/errorCodes";
 
 /**
- * Código de erro → frase da PetHost. Fonte única da microcopy de erro
- * (antes em `produto/contrato-api.md` no vault, que agora aponta para cá).
- * Motivos de recusa da verificação ficam na feature de verificação.
+ * Código de erro → frase da PetHost: a composição estática dos catálogos por domínio (`copy/`). É a única fonte da
+ * microcopy de erro, de topo e de campo; só `translateError.ts` a lê. O tipo `Record<TranslatedErrorCode, ...>` vem do enum `ApiErrorCode` do OpenAPI: código novo na API sem frase quebra o tsc.
+ * Domínio novo = arquivo novo em `copy/` e uma linha aqui. Os catálogos moram em `shared` porque `shared` não pode importar `features`.
  */
-export const errorCopy: Record<string, CopyEntry> = {
-  // Autenticação e conta
-  AUTH_INVALID_CREDENTIALS:
-    "E-mail ou senha não batem com essa conta. Confere se você é tutor ou anfitrião aqui em cima.",
-  AUTH_ACCOUNT_DEACTIVATED: "Essa conta está pausada. Quer reativar? É só confirmar a senha.",
-  AUTH_ACCOUNT_SUSPENDED: "Essa conta está suspensa. Fala com a gente pelo suporte.",
-  AUTH_EMAIL_ALREADY_REGISTERED: (_error, { role }) =>
-    role ? `Esse e-mail já tem conta de ${roleLabel[role]}. Quer entrar?` : "Esse e-mail já tem conta. Quer entrar?",
-  OWNER_CPF_ALREADY_REGISTERED:
-    "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
-  HOST_CPF_ALREADY_REGISTERED: "Esse CPF já está em outra conta. Se ele é seu, fala com o suporte que a gente resolve.",
-  AUTH_LINKED_ACCOUNT_NOT_FOUND: "Não deu pra abrir a outra conta. Confere a senha dela.",
-  AUTH_PASSWORD_RESET_TOKEN_INVALID: "Esse link já venceu. Pede outro, leva um minuto.",
+/** Códigos que nascem no front (transporte e BFF) e por isso não estão no enum da API. */
+type LocalErrorCode = "NETWORK_ERROR" | "SESSION_EXPIRED" | "CSRF_REJECTED";
 
-  // Pets
-  PET_PHOTO_LIMIT_REACHED: "Já tem 3 fotos. Tira uma pra colocar outra.",
-  PET_PHOTO_ALREADY_EXISTS: "Essa foto já está na ficha.",
-  PET_MICROCHIP_ALREADY_REGISTERED: "Esse microchip já está em outro pet. Se é o seu, fala com o suporte.",
-  PET_KEEPER_NOT_FOUND: "Os pets da casa entram depois que sua verificação for aprovada.",
+/** Todo código que tem frase: os da API (enum do OpenAPI) mais os locais. */
+export type TranslatedErrorCode = ApiErrorCode | LocalErrorCode;
 
-  // Verificação de anfitrião
-  HOST_APPLICATION_ATTEMPTS_EXCEEDED: "Já foram 3 tentativas. Agora a gente continua pelo suporte, com calma.",
-  HOST_APPLICATION_BLOCKED: "Não foi possível confirmar sua identidade. Fala com o suporte.",
-  HOST_APPLICATION_DOCUMENT_ALREADY_EXISTS: "Essa foto já foi usada em outra vaga. Tira uma foto nova.",
-  HOST_IDENTITY_LOCKED: "Nome, nascimento e CPF ficam travados depois da verificação. Pra mudar, fala com o suporte.",
-
-  // Transversais da API
-  VALIDATION_ERROR: "Alguns campos precisam de ajuste. Confere as mensagens embaixo de cada um.",
-  UNAUTHORIZED: "Sua sessão terminou. Entra de novo pra continuar.",
-  FORBIDDEN: "Essa parte não está disponível pra sua conta.",
-  TOO_MANY_REQUESTS: ({ retryAfterSeconds: seconds }) =>
-    seconds === undefined
-      ? "Muitas tentativas seguidas. Respira e tenta de novo daqui a pouco."
-      : `Muitas tentativas seguidas. Respira e tenta de novo em ${seconds} ${seconds === 1 ? "segundo" : "segundos"}.`,
-  UNEXPECTED_ERROR: GENERIC_ERROR_MESSAGE,
-
-  // Locais (transporte e BFF)
-  NETWORK_ERROR: "Parece que a conexão caiu. Confere a internet e tenta de novo.",
-  SESSION_EXPIRED: "Sua sessão terminou. Entra de novo pra continuar.",
-  CSRF_REJECTED: "Por segurança, recarrega a página e tenta de novo.",
+/**
+ * Código de erro → frase da PetHost: a composição estática dos catálogos por domínio (`copy/`). É a única fonte da
+ * microcopy de erro, de topo e de campo; só `translateError.ts` a lê. O tipo `Record<TranslatedErrorCode, ...>` vem do enum `ApiErrorCode` do OpenAPI: código novo na API sem frase quebra o tsc.
+ * Domínio novo = arquivo novo em `copy/` e uma linha aqui. Os catálogos moram em `shared` porque `shared` não pode importar `features`.
+ */
+export const errorCopy: Record<TranslatedErrorCode, CopyEntry> = {
+  ...accountErrorCopy,
+  ...petErrorCopy,
+  ...hostApplicationErrorCopy,
+  ...hostPayoutsErrorCopy,
+  ...listingErrorCopy,
+  ...bookingErrorCopy,
+  ...conversationErrorCopy,
+  ...paymentErrorCopy,
+  ...reviewErrorCopy,
+  ...authValidationCopy,
+  ...bookingValidationCopy,
+  ...commonValidationCopy,
+  ...conversationValidationCopy,
+  ...hostValidationCopy,
+  ...listingValidationCopy,
+  ...petValidationCopy,
+  ...reviewValidationCopy,
+  ...commonErrorCopy,
+  ...localErrorCopy,
 };

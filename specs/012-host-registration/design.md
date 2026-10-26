@@ -1,10 +1,20 @@
 ---
 spec: 012-host-registration
-status: draft
-updated: 2026-10-11
+status: in-progress
+updated: 2026-10-12
 ---
 
 # 012 · Design técnico
+
+## Decisões tomadas na implementação (2026-10-12)
+
+- **A variante vive numa tabela** (`lib/registrationVariants.ts`): papel, rota do BFF, resolver, passos, campos, ajudas, faixa de dados e sucesso. Wizard, passos, sucesso e tela leem dali com `role`; a 011 passou a ler da mesma tabela.
+- **O resolver já devolve o corpo da API:** schema da variante seguido do mapper (`.transform(toHostRegisterBody)`). O formulário, a mutação e o cliente não conhecem a variante: `registerAccount(path, body)` e `useRegisterMutation(path)`. Isso evita união de tipos espalhada e mantém um caminho de envio só.
+- **Um formulário só:** `RegistrationInput` tem `cpf` nas duas variantes; o anfitrião não mostra o campo, o resolver dele aceita o `cpf` vazio e o mapper não o leva (REQ-HREG-004).
+- **`toOwnerRegisterBody` = `toHostRegisterBody` + CPF:** uma normalização só para as duas contas.
+- **Passos:** `registrationSteps(personFields)` monta os dois passos; `stepIndexOf(steps, fields)` recebe os passos da variante.
+- **Páginas:** `app/(auth)/register/RegistrationPage.tsx` guarda a sessão e monta a tela; `owner/page.tsx` e `host/page.tsx` só dão o título e o papel.
+- **Sem `strongPasswordSchema`:** a regra de senha é `isStrongPassword` (`shared/lib/validation/password.ts`), já usada pela 011.
 
 ## Rotas e renderização
 
@@ -67,3 +77,7 @@ Tudo da 011: `features/registration`, `AddressFields`, `BirthDateField`, `strong
 | Visual      | Storybook        | `RegistrationWizard.stories.tsx` (variante host) | a11y sem violação                                             |
 | 008         | Arquitetura      | `src/test/architecture/no-token-storage.test.ts` | senha fora de storage, log e URL (padrão `password            | senha` já coberto) |
 | 010         | Integração (RSC) | `app/(auth)/register/host/page.test.ts`          | `metadata.title` e `robots.index = false`                     |
+
+## Revisão 074 (22/10/2026)
+
+Código preparado, aguardando liberação de validação. /register abre o primeiro passo com cartões; tutor vê 3 etapas visuais, sendo pet opcional após criar conta; host mantém 2 sem CPF. APIs e criação da conta ao enviar endereço mantidas. Confirmação de descarte ao trocar papel, sem rascunho compartilhado existente. Detalhes, migração e plano de testes: [cadastro fiel](../005-ui-conformance/register-fidelity-implementation.md).

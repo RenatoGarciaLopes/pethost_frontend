@@ -9,13 +9,6 @@ const meta = {
   parameters: { design: { board: "Fluxo-Conta" } },
   args: {
     password: "",
-    labels: {
-      length: "De 8 a 128 caracteres",
-      uppercase: "Uma letra maiúscula",
-      lowercase: "Uma letra minúscula",
-      digit: "Um número",
-      special: "Um símbolo",
-    },
   },
 } satisfies Meta<typeof PasswordStrengthChecklist>;
 export default meta;
@@ -26,3 +19,5 @@ export const Empty: Story = { name: "REQ-DS-018 Empty" };
 export const Partial: Story = { name: "REQ-DS-018 Partial", args: { password: "abc" } };
 /** Board state: Complete. */
 export const Complete: Story = { name: "REQ-DS-018 Complete", args: { password: "Abcdef1!" } };
+
+export const Celular: Story = { globals: { viewport: { value: "celular", isRotated: false } } };

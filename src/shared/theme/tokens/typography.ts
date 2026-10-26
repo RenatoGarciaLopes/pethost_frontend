@@ -9,4 +9,6 @@ export const quintalTypography = {
   h3: { fontFamily: "var(--font-display, 'Caprasimo'), serif", fontWeight: 400, fontSize: "2rem" },
   h4: { fontFamily: "var(--font-display, 'Caprasimo'), serif", fontWeight: 400, fontSize: "1.5rem" },
   button: { fontSize: "1.0625rem", fontWeight: 700, textTransform: "none" as const },
+  // Sobretítulo das pranchas ("SUA RESPOSTA", "PEDIDO DA CAMILA · RESPONDA ATÉ…"); o MUI já põe em caixa alta.
+  overline: { fontSize: "0.8rem", fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1.5 },
 };

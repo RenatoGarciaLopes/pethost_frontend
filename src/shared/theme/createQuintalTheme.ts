@@ -10,11 +10,13 @@ import { quintalSwitch } from "./overrides/Switch";
 import { quintalToggleButton } from "./overrides/ToggleButton";
 import { quintalTooltip } from "./overrides/Tooltip";
 import { quintalLink } from "./overrides/Link";
+import { quintalFormLabel } from "./overrides/FormLabel";
 import { createTheme, type Shadows } from "@mui/material/styles";
 import { quintalColors as c } from "./tokens/colors";
-import { accountTones, feedbackColors, sceneColors, surfaceColors } from "./tokens/semantic";
+import { accountTones, avatarTones, feedbackColors, sceneColors, surfaceColors } from "./tokens/semantic";
 import { quintalTypography } from "./tokens/typography";
 import { hardShadow } from "./tokens/shadows";
+import { quintalRadii } from "./tokens/radii";
 
 /**
  * Tema Quintal do MUI (claro, com variáveis CSS). Mapeamento da paleta conforme o vault
@@ -38,13 +40,15 @@ export const quintalTheme = createTheme({
     warning: { main: feedbackColors.warning, contrastText: c.tinta },
     error: { main: feedbackColors.error, contrastText: "#FFFFFF" },
     account: accountTones,
+    avatar: avatarTones,
     scene: sceneColors,
     text: { primary: c.tinta, secondary: c.texto2 },
     background: { default: surfaceColors.page, paper: surfaceColors.paper },
     divider: c.linha,
   },
   typography: quintalTypography,
-  shape: { borderRadius: 18 },
+  shape: { borderRadius: quintalRadii.field },
+  quintal: { radius: quintalRadii },
   shadows: [
     "none",
     ...Array.from({ length: 24 }, (_, index) => hardShadow(index < 8 ? 3 : index < 16 ? 5 : 8)),
@@ -62,5 +66,6 @@ export const quintalTheme = createTheme({
     MuiToggleButton: quintalToggleButton,
     MuiTooltip: quintalTooltip,
     MuiLink: quintalLink,
+    MuiFormLabel: quintalFormLabel,
   },
 });

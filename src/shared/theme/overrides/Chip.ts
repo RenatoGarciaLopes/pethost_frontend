@@ -1,8 +1,8 @@
 import type { Components, Theme } from "@mui/material/styles";
 import { quintalColors as c } from "../tokens/colors";
 import { hardShadow } from "../tokens/shadows";
-import { focusRing } from "./Button";
-import { chipVariants } from "../variants/quintalVariants";
+import { focusRing, keyboardFocus } from "../focus";
+import { okChipVariant } from "../variants/quintalVariants";
 
 /** Quintal Chip styling; compose through quintalTheme instead of per-feature overrides. */
 export const quintalChip = {
@@ -12,8 +12,8 @@ export const quintalChip = {
       boxShadow: hardShadow(3),
       minHeight: 48,
       color: c.tinta,
-      "&:focus-visible": focusRing,
+      [keyboardFocus()]: focusRing,
     },
   },
-  variants: chipVariants,
+  variants: [okChipVariant],
 } satisfies Components<Theme>["MuiChip"];

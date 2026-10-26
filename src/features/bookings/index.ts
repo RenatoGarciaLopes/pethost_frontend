@@ -1,0 +1,18 @@
+/**
+ * API pública neutra de bookings (specs 050 a 054).
+ * Exporte aqui tipos, schemas e funções puras compartilháveis entre ambientes.
+ * Não exporte hooks, componentes client ou recursos exclusivos do servidor.
+ */
+export { bookingCopy } from "./lib/bookingCopy";
+export { isBookingId } from "./lib/bookingId";
+export { ownerBookingPaymentPath } from "./lib/bookingPaths";
+export { paymentCopy } from "./lib/paymentCopy";
+export { paymentSchema, paymentSessionSchema } from "./api/paymentContracts";
+export type { BookingPaymentData, PaymentSession } from "./api/paymentContracts";
+export { statusLabel } from "./lib/bookingStatus";
+export { formatPeriod } from "./lib/formatStay";
+export type { Booking, BookingStatus } from "./types";
+export { BOOKING_STATUSES } from "./api/contracts";
+
+export { bookingDtoSchema } from "./api/contracts";
+export { toBooking } from "./api/mappers";

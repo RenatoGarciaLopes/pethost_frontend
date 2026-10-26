@@ -1,0 +1,55 @@
+/** Textos por papel da lista, abertura e vitrine (020/023). Erros vêm de translateError. @example petsCopy.host.title */
+export const petsCopy = {
+  owner: {
+    title: "Meus pets",
+    newPet: "Apresentar outro pet",
+    empty: { title: "Apresenta seu pet pra gente? Leva uns 3 minutos.", action: "Apresentar meu pet" },
+    opening: "Que bicho é o seu?",
+    another: "Apresentar outro pet",
+    myPets: "Ver meus pets",
+  },
+  host: {
+    title: "Pets da casa",
+    newPet: "Apresentar um pet da casa",
+    empty: {
+      title: "Tem bicho morando com você? Apresenta pra quem vai se hospedar aí.",
+      action: "Apresentar um pet da casa",
+    },
+    opening: "Quem mora com você?",
+    another: "Apresentar outro pet da casa",
+    myPets: "Ver pets da casa",
+  },
+  keeperPending: "Os pets da casa entram depois que sua verificação for aprovada.",
+  verification: "Ver minha verificação",
+  residents: {
+    title: "Quem mora aqui",
+    dogs: "cachorro",
+    cats: "gato",
+    kids: "crianças",
+    coexistence: (company: string) => `Se dá bem com ${company}`,
+  },
+  /** Começo do nome acessível da carteirinha, só para o leitor de tela: "Ficha de" + espaço + nome. */
+  cardPrefix: "Ficha de",
+  inactive: {
+    title: (count: number) => `Fora da lista (${count})`,
+    help: "As fichas continuam aqui. As estadias antigas também.",
+  },
+  loadError: "Não deu pra ver seus pets agora.",
+  loading: "Buscando seus pets",
+  fieldErrors: {
+    species: "Escolhe que bicho é o seu.",
+    speciesDescription: "Conta que bicho é o seu.",
+    name: "Falta o nome do pet.",
+    sex: "Escolhe o sexo ou marca Não sei.",
+    size: "Escolhe o porte do cachorro.",
+    boolean: "Marca Sim ou Não.",
+    max60: "Use até 60 caracteres.",
+    max1000: "Use até 1000 caracteres.",
+    max160: "Use até 160 caracteres.",
+    max2000: "Use até 2000 caracteres.",
+    birthDate: "Use uma data válida, sem ser no futuro.",
+    weight: "O peso precisa ser maior que zero, até 150 kg, com até 3 casas decimais.",
+    weightRequired: "Dá pra trocar o peso, mas não deixar em branco.",
+    microchip: "O microchip tem 15 números.",
+  },
+} as const;
