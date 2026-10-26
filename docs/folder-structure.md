@@ -1,5 +1,9 @@
 # Estrutura real do frontend
 
+## Prévia de links (29/10/2026)
+
+`src/app/opengraph-image.png` + `.alt.txt` e `src/app/apple-icon.png` seguem a convenção de arquivos de metadados do Next, ao lado de `icon.svg`/`favicon.ico`. São gerados por `scripts/generate-share-images.mjs` (`npm run brand:share-images`). Sem nova pasta. Contratos e validação: [link-preview.md](link-preview.md).
+
 ## Loader no primeiro acesso (29/10/2026)
 
 `src/shared/ui/brand/turmaPosters.ts` contém os primeiros quadros consumidos por `TurmaWalker/TurmaDog.tsx`; `scripts/generate-turma-posters.mjs` os deriva dos WebPs em `public/brand/turma/`. A lógica de exibição permanece na composição existente. Sem nova pasta/provider. Contratos e validação: [loader-first-visit.md](loader-first-visit.md).

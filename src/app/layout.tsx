@@ -23,13 +23,17 @@ const atkinsonHyperlegibleNext = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pethost.cfd"),
   title: "PetHost",
   description: "Hospedagem de pets perto de casa.",
+  openGraph: { type: "website", siteName: "PetHost", locale: "pt_BR" },
+  twitter: { card: "summary_large_image" },
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
     ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 

@@ -14,7 +14,7 @@ import { TURMA_MEMBERS, turmaSrc } from "@/shared/ui/brand/turma";
 vi.mock("react-dom", async (original) => ({ ...(await original<typeof import("react-dom")>()), preload: vi.fn() }));
 
 describe("RootLayout metadata & brand favicon", () => {
-  it("exporta metadata com title, description e icons configurados para SVG e ICO", () => {
+  it("exporta metadata com title, description e icons configurados para SVG, ICO e iPhone", () => {
     expect(metadata.title).toBe("PetHost");
     expect(metadata.description).toBe("Hospedagem de pets perto de casa.");
     expect(metadata.icons).toEqual({
@@ -22,7 +22,26 @@ describe("RootLayout metadata & brand favicon", () => {
         { url: "/icon.svg", type: "image/svg+xml" },
         { url: "/favicon.ico", sizes: "any" },
       ],
+      apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
     });
+  });
+
+  it("prévia de link usa a imagem grande do site com URL absoluta", () => {
+    expect(metadata.metadataBase).toEqual(new URL("https://pethost.cfd"));
+    expect(metadata.openGraph).toEqual({ type: "website", siteName: "PetHost", locale: "pt_BR" });
+    expect(metadata.twitter).toEqual({ card: "summary_large_image" });
+    expect(fs.readFileSync(path.resolve(__dirname, "opengraph-image.alt.txt"), "utf-8")).toMatch(/^PetHost: porta/);
+  });
+
+  it.each([
+    ["opengraph-image.png", 1200, 630],
+    ["apple-icon.png", 180, 180],
+  ])("%s é PNG %ix%i leve o bastante para o WhatsApp", (file, width, height) => {
+    const png = fs.readFileSync(path.resolve(__dirname, file));
+    expect(png.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    expect(png.readUInt32BE(16)).toBe(width);
+    expect(png.readUInt32BE(20)).toBe(height);
+    expect(png.length).toBeLessThan(300_000);
   });
 
   it("icon.svg reutiliza a porta do DoorMark conforme especificação de marca para favicon", () => {
