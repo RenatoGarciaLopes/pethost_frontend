@@ -1,22 +1,11 @@
 "use client";
 
-import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { markConversationRead, sendMessage, sendPhotoMessage } from "../api/client/conversations.client";
 import { toMessage } from "../api/mappers";
 import { conversationQueries } from "../api/queries";
-import type { ComposedMessage, ConversationMessage, MessagePage } from "../types";
-
-/** Põe a mensagem gravada no topo da primeira página (a mais recente), sem repetir se a consulta já trouxe. */
-function withNewMessage<TPageParam>(
-  data: InfiniteData<MessagePage, TPageParam> | undefined,
-  message: ConversationMessage,
-) {
-  if (!data) return data;
-  const [first, ...rest] = data.pages;
-  if (!first) return data;
-  const items = [message, ...first.items.filter((item) => item.id !== message.id)];
-  return { ...data, pages: [{ ...first, items }, ...rest] };
-}
+import type { ComposedMessage } from "../types";
+import { withNewMessage } from "../lib/withNewMessage";
 
 /**
  * Envia texto ou foto com legenda (REQ-CHAT-008 e 009). A mensagem gravada entra na hora na conversa aberta e a

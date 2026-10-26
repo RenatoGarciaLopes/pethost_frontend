@@ -19,3 +19,4 @@ export { useMarkConversationRead, useSendMessage } from "./hooks/useConversation
 export { openConversation } from "./api/client/conversations.client";
 
 export { UnreadBadge } from "./components/client/UnreadBadge";
+export { useConversationsRealtime, useConversationPolling } from "./hooks/useConversationsRealtime";

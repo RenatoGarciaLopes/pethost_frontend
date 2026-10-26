@@ -1,6 +1,7 @@
 "use client";
 
 import { ConversationLoading } from "../ConversationsShell";
+import { useConversationPolling } from "@/features/conversations/index.client";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import {
@@ -36,8 +37,12 @@ export interface ConversationRoomProps {
  * @example <ConversationRoom accountId={user.id} viewer={user.role} conversationId={id} stay={stay} />
  */
 export function ConversationRoom({ accountId, viewer, conversationId, stay }: ConversationRoomProps) {
-  const detail = useQuery(conversationQueries.detail(accountId, conversationId));
-  const messages = useInfiniteQuery(conversationQueries.messages(accountId, conversationId));
+  const polling = useConversationPolling(accountId);
+  const detail = useQuery({ ...conversationQueries.detail(accountId, conversationId), refetchInterval: polling.list });
+  const messages = useInfiniteQuery({
+    ...conversationQueries.messages(accountId, conversationId),
+    refetchInterval: polling.thread,
+  });
   const send = useSendMessage(accountId, conversationId);
   const { mutate: markRead } = useMarkConversationRead(accountId, conversationId);
 

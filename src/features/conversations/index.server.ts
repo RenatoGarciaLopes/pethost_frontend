@@ -6,3 +6,4 @@ import "server-only";
  * Não importe este índice em componentes client.
  */
 export { getConversation, prefetchMessages, prefetchMyConversations } from "./api/server/conversations.server";
+export { conversationStream } from "./api/server/conversationStream";

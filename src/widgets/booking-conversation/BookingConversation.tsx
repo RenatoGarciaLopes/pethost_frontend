@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
 import { bookingQueries } from "@/features/bookings/index.client";
 import { conversationPath, conversationQueries, conversationsCopy, CONVERSATIONS_PATH } from "@/features/conversations";
-import { UnreadBadge } from "@/features/conversations/index.client";
+import { UnreadBadge, useConversationPolling } from "@/features/conversations/index.client";
 import { translateError } from "@/shared/api/errors/translateError";
 import { Notice } from "@/shared/ui/feedback/Notice";
 
@@ -26,8 +26,10 @@ export function BookingConversation({
   side: "owner" | "host";
 }) {
   const booking = useQuery(bookingQueries.detail(accountId, bookingId));
+  const polling = useConversationPolling(accountId);
   const conversations = useQuery({
     ...conversationQueries.mine(accountId),
+    refetchInterval: polling.list,
     enabled: side === "host" && !!booking.data,
   });
   if (!booking.data) return null;

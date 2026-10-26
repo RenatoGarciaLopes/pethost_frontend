@@ -1,5 +1,22 @@
 # Estrutura real do frontend
 
+## Tempo real de conversas
+
+```text
+src/app/api/conversations/realtime/route.ts         GET SSE, runtime Node
+src/features/conversations/
+  api/server/conversationStream.ts                 autenticação e ponte SignalR→SSE
+  api/server/conversationStream.int.test.ts         protocolo, sessão e cleanup
+  api/client/conversationRealtime.ts               assinatura, cache e reconexão
+  api/client/conversationRealtime.test.ts           eventos e isolamento por conta
+  hooks/useConversationsRealtime.ts                conexão e intervalos reativos
+  hooks/useConversationsRealtime.test.tsx           fallback/ativo/fallback
+  lib/withNewMessage.ts                            merge comum a REST e eventos
+  lib/withNewMessage.test.ts                        deduplicação e cursores
+```
+
+AppHeader monta a assinatura via índice client; a rota usa índice server. Não há dependência npm nova nem implementação de envio pelo hub. Contratos e limites: `development/resources/conversations-realtime.md` no vault.
+
 ## Caixa de entrada persistente
 
 ```text

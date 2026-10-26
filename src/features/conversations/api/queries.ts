@@ -14,8 +14,8 @@ const unreadCountSchema = unwrapData(GetApiV1ConversationsMeUnreadCountResponse)
 const conversationPath = (conversationId: string) => `/conversations/${encodeURIComponent(conversationId)}`;
 
 /**
- * Conversas por conta (spec 055). Sem o hub de tempo real (decisão pendente com a API), a lista e a conversa aberta
- * se atualizam por consulta periódica. O transporte vem de fora: `bffClient` no navegador, `backendForRequest` no
+ * Conversas por conta: polling fica como fallback enquanto o hub estiver desconectado.
+ * O transporte vem de fora: `bffClient` no navegador, `backendForRequest` no
  * prefetch.
  *
  * @example useQuery(conversationQueries.mine(user.id))
@@ -23,6 +23,7 @@ const conversationPath = (conversationId: string) => `/conversations/${encodeURI
  */
 export const conversationQueries = {
   all: (accountId: string) => accountQueryKey(accountId, "conversations"),
+  realtime: (accountId: string) => [...conversationQueries.all(accountId), "realtime"] as const,
   /** Tudo que muda quando chega ou sai mensagem: a lista e o contador. */
   summaries: (accountId: string) => [...conversationQueries.all(accountId), "summary"] as const,
   mine: (accountId: string, transport: Transport = bffClient) =>

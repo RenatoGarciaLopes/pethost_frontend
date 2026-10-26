@@ -2,7 +2,7 @@
 export const MAX_MESSAGE_LENGTH = 2000;
 
 /**
- * Sem o hub de tempo real, a conversa aberta se atualiza a cada 5 s e a lista e o contador a cada 15 s. Fica bem abaixo
+ * Fallback quando o hub está desconectado: conversa a cada 5 s, lista e contador a cada 15 s. Fica bem abaixo
  * do limite geral da API (120 por minuto por conta).
  */
 export const THREAD_POLL_MS = 5_000;

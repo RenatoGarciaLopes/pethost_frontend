@@ -9,6 +9,7 @@ import { conversationPath } from "../../../lib/conversationPaths";
 import { conversationsCopy } from "../../../lib/conversationsCopy";
 import type { ConversationSide } from "../../../types";
 import { ConversationList } from "../ConversationList";
+import { useConversationPolling } from "../../../hooks/useConversationsRealtime";
 
 export interface MyConversationsProps {
   /** Conta da sessão: separa o cache de cada conta. */
@@ -28,7 +29,8 @@ export interface MyConversationsProps {
  * @example <MyConversations accountId={user.id} viewer={user.role} selectedId={conversationId} />
  */
 export function MyConversations({ accountId, viewer, selectedId }: MyConversationsProps) {
-  const query = useQuery(conversationQueries.mine(accountId));
+  const polling = useConversationPolling(accountId);
+  const query = useQuery({ ...conversationQueries.mine(accountId), refetchInterval: polling.list });
   if (query.isPending)
     return (
       <Stack spacing={1} role="status" aria-label={conversationsCopy.loadingList}>
