@@ -21,7 +21,7 @@ export interface PickablePet {
 }
 
 export interface PetPickCardsProps {
-  /** Nome do grupo ("Quem vai?"). */
+  /** Nome do grupo ("Quem vai se hospedar?"). */
   label: string;
   pets: readonly PickablePet[];
   value: readonly string[];
@@ -42,7 +42,7 @@ function fitText(pet: PickablePet): string {
  * Os pets do tutor como cartões marcáveis (REQ-REQST-002): cada um diz se combina com o cantinho; o que não combina
  * fica travado, com o motivo visível. Checkbox nativo dentro do cartão: o nome acessível é o próprio texto do cartão.
  *
- * @example <PetPickCards label="Quem vai?" pets={pets} value={petIds} onChange={setPetIds} />
+ * @example <PetPickCards label="Quem vai se hospedar?" pets={pets} value={petIds} onChange={setPetIds} />
  */
 export function PetPickCards({ label, pets, value, onChange, error, disabled = false }: PetPickCardsProps) {
   const id = useId();

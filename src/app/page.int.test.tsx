@@ -156,7 +156,7 @@ it("REQ-HOME-002 tutor sem pet recebe a escolha de espécie sem passo de cadastr
 it("REQ-HOME-004 anfitrião não consulta lista pessoal de pets na home", async () => {
   authenticate("host");
   renderWithProviders(await resolveHomeContent(), { theme: quintalTheme });
-  expect(screen.getByText("Quantos pets viajam com você?")).toBeVisible();
+  expect(screen.getByText("Quantos pets vão se hospedar?")).toBeVisible();
   expect(requestState.events).toEqual(["connection", "session"]);
   const footer = within(screen.getByRole("contentinfo"));
   expect(footer.getByRole("link", { name: "Painel" })).toHaveAttribute("href", "/host");

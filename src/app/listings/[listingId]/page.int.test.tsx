@@ -61,7 +61,7 @@ it("REQ-LPAGE-012 visitante abre o cantinho sem login, sem o que exige conta, e 
   renderWithProviders(content, { theme: quintalTheme });
   expect(screen.getByRole("heading", { level: 1, name: listing.title })).toBeVisible();
   expect(within(screen.getByRole("banner")).getByRole("link", { name: "Entrar" })).toBeVisible();
-  expect(screen.queryByRole("group", { name: "Quem vai" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("group", { name: "Quem vai se hospedar" })).not.toBeInTheDocument();
   expect(screen.getByLabelText("Chegada e saída")).toBeVisible();
 
   for (const link of screen.getAllByRole("link", { name: "Pedir estadia" })) {

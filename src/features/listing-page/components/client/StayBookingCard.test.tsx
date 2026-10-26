@@ -85,10 +85,10 @@ it.each([
   ["REQ-LPAGE-012 visitante", "visitor", "/login", "as"],
   ["REQ-LPAGE-007 anfitrião", "host", "/users/switch", "to"],
 ] as const)(
-  "%s vê o card de compra sem 'Quem vai'; só o pedir leva à conta de tutor, voltando à página",
+  "%s vê o card de compra sem 'Quem vai se hospedar'; só o pedir leva à conta de tutor, voltando à página",
   (_, account, pathname, roleParam) => {
     render({ account, pets: [], petIds: [], count: 1, search: "where=Zona+7&from=2026-12-20&to=2026-12-25" });
-    expect(screen.queryByText("Quem vai")).not.toBeInTheDocument();
+    expect(screen.queryByText("Quem vai se hospedar")).not.toBeInTheDocument();
     expect(screen.queryByText(/Pra pedir|Trocar de conta/)).not.toBeInTheDocument();
     expect(screen.getByText(/R\$\s60,00 × 5 noites × 1 pet/)).toBeVisible();
     for (const link of screen.getAllByRole("link", { name: "Pedir estadia" })) {

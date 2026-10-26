@@ -15,7 +15,7 @@ import { stayTotal } from "../../lib/stayTotal";
 import { listingPageCopy as copy } from "../../lib/listingPageCopy";
 import { NightlyPrice } from "../NightlyPrice";
 
-/** Pet ativo do tutor, como aparece na pílula de "Quem vai". */
+/** Pet ativo do tutor, como aparece na pílula de "Quem vai se hospedar". */
 export interface StayBookingPet {
   id: string;
   name: string;
@@ -26,7 +26,7 @@ export interface StayBookingPet {
 export interface StayBookingCardProps {
   listingId: string;
   /**
-   * Quem vê o card. O tutor escolhe "Quem vai" e pede direto; o visitante passa pelo login de tutor e o anfitrião
+   * Quem vê o card. O tutor escolhe "Quem vai se hospedar" e pede direto; o visitante passa pelo login de tutor e o anfitrião
    * pela troca para a conta de tutor, os dois voltando a esta página com as datas.
    */
   account: "owner" | "host" | "visitor";
@@ -41,7 +41,7 @@ export interface StayBookingCardProps {
   petIds: string[];
   /** "Quantos pets" da busca, usado na conta quando nenhum pet foi escolhido. */
   count?: number;
-  /** Pets ativos do tutor, para "Quem vai"; vazio fora da conta de tutor. */
+  /** Pets ativos do tutor, para "Quem vai se hospedar"; vazio fora da conta de tutor. */
   pets: StayBookingPet[];
   /** Dias da semana em que o cantinho recebe: os outros ficam riscados no calendário. */
   availableWeekdays: readonly string[];
@@ -54,7 +54,7 @@ export interface StayBookingCardProps {
  * vai" com os pets em pílula (escolhido em amarelo com ✓, os outros tracejados), a conta da estadia, "Pedir
  * estadia" e o recado de pagamento. Cada escolha vai para a URL (`router.replace`), então a compatibilidade e o
  * pedido usam as mesmas datas e pets. No celular o botão sai do card e vai para a barra fixa no rodapé. Visitante e
- * anfitrião veem o mesmo card sem "Quem vai"; só o clique em "Pedir estadia" leva ao login ou à troca de conta.
+ * anfitrião veem o mesmo card sem "Quem vai se hospedar"; só o clique em "Pedir estadia" leva ao login ou à troca de conta.
  * @example <StayBookingCard {...props} />
  */
 export function StayBookingCard({
