@@ -17,3 +17,5 @@ export type { MessageThreadProps } from "./components/client/MessageThread";
 export { useMarkConversationRead, useSendMessage } from "./hooks/useConversationMutations";
 
 export { openConversation } from "./api/client/conversations.client";
+
+export { UnreadBadge } from "./components/client/UnreadBadge";

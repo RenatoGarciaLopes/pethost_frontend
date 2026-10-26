@@ -56,7 +56,7 @@ export async function markConversationRead(conversationId: string, transport: Ht
   return total;
 }
 
-/** Tutor only: creates or returns the existing pair conversation, without automatic retries.
+/** Cria ou devolve a conversa da dupla pelo tutor, sem nova tentativa automática.
  * @example await openConversation(listingId)
  */
 export function openConversation(listingId: string, transport: HttpTransport = bffClient) {

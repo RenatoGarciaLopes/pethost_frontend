@@ -2,6 +2,8 @@
 
 ## Conversa na reserva (105)
 
+R1: `src/features/conversations/components/client/UnreadBadge.tsx` concentra o selo antes privado de ConversationList, público por `index.client.ts` e reutilizado no widget. `conversationsCopy.booking` reúne os textos no arquivo de copy existente. Sem nova pasta técnica.
+
 ```text
 src/widgets/booking-conversation/
   BookingConversation.tsx           composição client bookings + conversations

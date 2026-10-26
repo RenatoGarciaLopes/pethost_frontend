@@ -101,7 +101,8 @@ function NowPanel({ now, booking }: { now: StayNow; booking: Booking }) {
 }
 
 export interface StayDetailProps {
-  /** Application-composed chat action beside the other party. */
+  /** Ação de conversa composta pela rota, junto da outra pessoa.
+   * @example conversation={<BookingConversation accountId={id} bookingId={bookingId} side="owner" />} */
   conversation?: ReactNode;
   accountId: string;
   bookingId: string;

@@ -66,7 +66,8 @@ function BillRow({ label, value, strong = false }: { label: string; value: strin
 }
 
 export interface HostBookingDetailProps {
-  /** Application-composed chat action beside the other party. */
+  /** Ação de conversa composta pela rota, junto da outra pessoa.
+   * @example conversation={<BookingConversation accountId={id} bookingId={bookingId} side="host" />} */
   conversation?: ReactNode;
   accountId: string;
   bookingId: string;

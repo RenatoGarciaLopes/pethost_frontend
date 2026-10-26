@@ -1,5 +1,14 @@
 # Validação — 105
 
+## Revisão r1 — 25/10/2026
+
+- Copy centralizada em `conversationsCopy.booking`; `UnreadBadge` extraído da lista e compartilhado via índice público client; comentários novos traduzidos para português com exemplos.
+- `npx vitest run src/widgets/booking-conversation src/features/conversations src/features/bookings/components/client/StayDetail.test.tsx src/features/bookings/components/client/HostBookingDetail.int.test.tsx`: **16 arquivos, 87 testes aprovados**. Depois do ajuste final do nome acessível, `npx vitest run src/widgets/booking-conversation`: **10 testes aprovados**. Cobrem contador zero, singular e plural, número visual no selo e ausência do sufixo entre parênteses. Lista existente continua usando o mesmo componente extraído.
+- `npx vitest run --config vitest.105.tmp.config.ts src/app/BookingConversationPreview.stories.tsx src/features/conversations/components/client/ConversationList/ConversationList.stories.tsx src/features/bookings/components/client/StayDetail.stories.tsx src/features/bookings/components/client/HostBookingDetail.stories.tsx`: **4 arquivos, 19 stories aprovadas**, incluindo a11y. O nome acessível é derivado do conteúdo do link e da frase oculta do selo, gerada por `conversationsCopy.unread(count)`; não há `aria-label` sobrepondo o conteúdo, evitando divergência com o texto visível.
+- Prints `test-results/105/anfitriao-1440.png` e `anfitriao-390.png` refeitos pelo runner de stories e revisados; texto do botão e selo em uma linha no cenário de 390. Demais prints preservados.
+- Typecheck, ESLint dos arquivos alterados e diff-check aprovados. Config temporário com `server.fs.allow` e setup de captura removidos. UTF-8 sem BOM.
+- Documentação e catálogo do vault atualizados para copy e selo compartilhado. Níveis funcional/integração e stories cobrem esta apresentação trivial; unitário isolado do selo não acrescentaria regra distinta. E2E não executado, conforme brief. Limites de API da entrega inicial permanecem.
+
 Executado em 25/10/2026, worktree `pethost_frontend-105`, branch `feat/105-chat-na-reserva`. Sem instalação de dependências; junction de node_modules preservada.
 
 ## Comportamento

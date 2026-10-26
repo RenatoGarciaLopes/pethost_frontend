@@ -12,7 +12,8 @@ import { BOOKING_ID, bookingDto } from "@/test/fixtures/bookings";
 import { conversationDto } from "@/test/fixtures/conversations";
 import { bookingDtoSchema, toBooking } from "@/features/bookings";
 
-/** Route composition preview, deterministic cache and no backend. */
+/** Prévia da composição das rotas, com cache determinístico e sem backend.
+ * @example <Preview side="host" hasConversation /> */
 function Preview({ side, hasConversation }: { side: "owner" | "host"; hasConversation: boolean }) {
   const [client] = useState(() => {
     const cache = new QueryClient({

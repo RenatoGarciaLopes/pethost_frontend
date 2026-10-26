@@ -1,5 +1,5 @@
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse, delay } from "msw";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { translateError } from "@/shared/api/errors/translateError";
@@ -73,13 +73,28 @@ describe("BookingConversation", () => {
     );
     expect(push).not.toHaveBeenCalled();
   });
-  it("host links by ownerId even without display party, retains unread count and blocked link", async () => {
-    list([conversationDto({ ownerId: booking.ownerId, owner: null, blocked: true })]);
+  it.each([1, 2])(
+    "host links by ownerId with a badge and accessible unread count %i, including blocked conversations",
+    async (unreadCount) => {
+      list([conversationDto({ ownerId: booking.ownerId, owner: null, blocked: true, unreadCount })]);
+      setup("host");
+      const link = await screen.findByRole("link", {
+        name:
+          unreadCount === 1
+            ? "Conversar com Camila Souza 1 mensagem não lida"
+            : "Conversar com Camila Souza 2 mensagens não lidas",
+      });
+      expect(link).toHaveAttribute("href", "/conversations/" + CIDA_CONVERSATION_ID);
+      expect(within(link).getByText(String(unreadCount))).toHaveAttribute("aria-hidden");
+      expect(link).not.toHaveTextContent("(" + unreadCount);
+    },
+  );
+  it("host without unread messages has no badge or unread phrase", async () => {
+    list([conversationDto({ ownerId: booking.ownerId, unreadCount: 0 })]);
     setup("host");
-    expect(await screen.findByRole("link", { name: /Conversar com Camila Souza.*2 não lidas/ })).toHaveAttribute(
-      "href",
-      "/conversations/" + CIDA_CONVERSATION_ID,
-    );
+    const link = await screen.findByRole("link", { name: "Conversar com Camila Souza" });
+    expect(within(link).queryByText("0")).not.toBeInTheDocument();
+    expect(link).not.toHaveTextContent("mensage");
   });
   it("host without matching conversation sees explanation and no chat action", async () => {
     list([conversationDto()]);

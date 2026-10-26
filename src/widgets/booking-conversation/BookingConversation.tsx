@@ -5,13 +5,15 @@ import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { bookingQueries } from "@/features/bookings/index.client";
-import { conversationPath, conversationQueries, CONVERSATIONS_PATH } from "@/features/conversations";
-import { openConversation } from "@/features/conversations/index.client";
+import { conversationPath, conversationQueries, conversationsCopy, CONVERSATIONS_PATH } from "@/features/conversations";
+import { openConversation, UnreadBadge } from "@/features/conversations/index.client";
 import { translateError } from "@/shared/api/errors/translateError";
 import { Notice } from "@/shared/ui/feedback/Notice";
 
-/** Application boundary between bookings and chat. Host lookup covers the 50 most recent conversations.
- * Requires a session-scoped QueryClient; compose beside the other party in the booking header.
+const copy = conversationsCopy.booking;
+
+/** Compõe reserva e conversa sem imports entre features. A busca do anfitrião cobre as 50 conversas mais recentes.
+ * Requer QueryClient da conta; componha junto da outra pessoa no cabeçalho da reserva.
  * @example <BookingConversation accountId={id} bookingId={bookingId} side="owner" />
  */
 export function BookingConversation({
@@ -34,8 +36,8 @@ export function BookingConversation({
   const [error, setError] = useState<unknown>(null);
   if (!booking.data) return null;
   const data = booking.data;
-  const name = side === "owner" ? (data.host?.name ?? "o anfitrião") : (data.owner?.name ?? "o tutor");
-  const label = "Conversar com " + name;
+  const name = side === "owner" ? (data.host?.name ?? copy.host) : (data.owner?.name ?? copy.owner);
+  const label = copy.action(name);
   const chatIcon = (
     <SvgIcon aria-hidden="true">
       <path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Zm0 14H5.17L4 17.17V4h16Z" />
@@ -71,13 +73,13 @@ export function BookingConversation({
         {error != null && <Notice tone="atencao" title={translateError(error)} />}
       </Stack>
     );
-  if (conversations.isPending) return <Typography role="status">Buscando conversa…</Typography>;
+  if (conversations.isPending) return <Typography role="status">{copy.loading}</Typography>;
   if (conversations.isError)
     return (
       <Notice
         tone="atencao"
         title={translateError(conversations.error)}
-        action={<Button onClick={() => void conversations.refetch()}>Tentar novamente</Button>}
+        action={<Button onClick={() => void conversations.refetch()}>{copy.retry}</Button>}
       />
     );
   const conversation = conversations.data.find((item) => item.ownerId === data.ownerId);
@@ -88,22 +90,27 @@ export function BookingConversation({
         href={conversationPath(conversation.id)}
         variant="outlined"
         startIcon={chatIcon}
-        sx={buttonStyle}
+        endIcon={conversation.unreadCount > 0 ? <UnreadBadge count={conversation.unreadCount} /> : undefined}
+        sx={{
+          ...buttonStyle,
+          fontSize: { xs: 14, sm: 16 },
+          px: 1.5,
+          gap: 1,
+          "& .MuiButton-icon": { m: 0 },
+          whiteSpace: "nowrap",
+        }}
       >
         {label}
-        {conversation.unreadCount > 0 ? " (" + conversation.unreadCount + " não lidas)" : ""}
       </Button>
     );
   return (
     <Stack spacing={0.5}>
       <Typography variant="body2">
-        {conversations.data.length < 50
-          ? "A conversa abre quando " + name + " mandar a primeira mensagem."
-          : "A conversa com " + name + " não aparece entre as 50 mais recentes."}
+        {conversations.data.length < 50 ? copy.empty(name) : copy.outsideRecent(name)}
       </Typography>
       {conversations.data.length >= 50 && (
         <Link component={NextLink} href={CONVERSATIONS_PATH}>
-          Ver conversas
+          {copy.viewConversations}
         </Link>
       )}
     </Stack>
