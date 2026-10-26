@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110">
+  <path
+    d="M10 104V46A40 40 0 0 1 90 46V104Z"
+    fill="#FFE9B0"
+    stroke="#1F1A17"
+    stroke-width="14"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M50 104V46A20 40 0 0 1 90 46V104Z"
+    fill="#F26B3A"
+    stroke="#1F1A17"
+    stroke-width="14"
+    stroke-linejoin="round"
+  />
+</svg>
