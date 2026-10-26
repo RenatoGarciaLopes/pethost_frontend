@@ -78,6 +78,23 @@ function setup(
 }
 
 describe("checkout da estadia", { timeout: 15000 }, () => {
+  it.each([
+    { name: "plano disponível", payment: paymentFixture(), label: "Trocar o plano" },
+    { name: "plano travado", payment: paymentFixture({ options: null }), label: "Voltar" },
+    { name: "pagamento parcial", payment: paymentFixture({ paidAmount: 50 }), label: "Voltar" },
+    {
+      name: "segunda parcela",
+      payment: paymentFixture({ installments: [{ ...paymentFixture().installments[0]!, number: 2 }] }),
+      label: "Voltar",
+    },
+  ])("102 retorno com $name usa $label e fecha a sessão", async ({ payment, label }) => {
+    const { user } = setup(payment);
+    await user.click(await screen.findByRole("button", { name: "Continuar para o pagamento" }));
+    const back = await screen.findByRole("button", { name: label });
+    await user.click(back);
+    expect(await screen.findByRole("button", { name: "Continuar para o pagamento" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Confirmar no Stripe simulado" })).not.toBeInTheDocument();
+  });
   it("REQ-PAY-002/006 mostra resumo e lembrete sem repetir aceite obrigatório", async () => {
     setup();
     expect(await screen.findByRole("heading", { name: "Confirme e pague" })).toBeVisible();

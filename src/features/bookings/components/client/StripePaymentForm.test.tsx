@@ -16,6 +16,17 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("Stripe Payment Element", () => {
+  it("102 mostra prazo apenas no Pix e acompanha mudanças do Payment Element", async () => {
+    const { user } = renderWithProviders(
+      <StripePaymentForm session={paymentSessionFixture} returnPath="/payment" onSubmitted={vi.fn()} />,
+    );
+    expect(screen.getByText(/No Pix, o código vale até/)).toBeVisible();
+    await user.click(await screen.findByRole("radio", { name: "Cartão de crédito" }));
+    expect(screen.queryByText(/No Pix, o código vale até/)).not.toBeInTheDocument();
+    await user.click(screen.getByRole("radio", { name: "Pix" }));
+    expect(screen.getByText(/No Pix, o código vale até/)).toBeVisible();
+    expect(confirmPayment).not.toHaveBeenCalled();
+  });
   it("REQ-PAY-005/006 só envia após SDK pronto, sem segredo na URL de retorno", async () => {
     let resolve!: (result: unknown) => void;
     confirmPayment.mockImplementation(
