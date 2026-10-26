@@ -41,7 +41,8 @@ export const PostApiV1ConversationsResponse = zod.object({
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
   "body": zod.string().nullish().describe('Texto ou legenda da foto. Omitido em foto sem legenda.'),
-  "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
+  "imageUrl": zod.string().nullish().describe('Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL pública, sem vencimento). Omitida em mensagem só de texto.'),
+  "imageUrlExpiresAt": zod.number().int().nullish().describe('Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, peça outro em\r\n`GET .../messages/{messageId}/photo`. Omitido sem foto ou em foto antiga.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('A mensagem mais recente. Omitida enquanto ninguém escreveu.')]).optional(),
@@ -88,7 +89,8 @@ export const GetApiV1ConversationsMeResponse = zod.object({
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
   "body": zod.string().nullish().describe('Texto ou legenda da foto. Omitido em foto sem legenda.'),
-  "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
+  "imageUrl": zod.string().nullish().describe('Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL pública, sem vencimento). Omitida em mensagem só de texto.'),
+  "imageUrlExpiresAt": zod.number().int().nullish().describe('Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, peça outro em\r\n`GET .../messages/{messageId}/photo`. Omitido sem foto ou em foto antiga.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('A mensagem mais recente. Omitida enquanto ninguém escreveu.')]).optional(),
@@ -177,7 +179,8 @@ export const GetApiV1ConversationsConversationIdResponse = zod.object({
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
   "body": zod.string().nullish().describe('Texto ou legenda da foto. Omitido em foto sem legenda.'),
-  "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
+  "imageUrl": zod.string().nullish().describe('Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL pública, sem vencimento). Omitida em mensagem só de texto.'),
+  "imageUrlExpiresAt": zod.number().int().nullish().describe('Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, peça outro em\r\n`GET .../messages/{messageId}/photo`. Omitido sem foto ou em foto antiga.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('A mensagem mais recente. Omitida enquanto ninguém escreveu.')]).optional(),
@@ -215,7 +218,8 @@ export const GetApiV1ConversationsConversationIdMessagesResponse = zod.object({
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
   "body": zod.string().nullish().describe('Texto ou legenda da foto. Omitido em foto sem legenda.'),
-  "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
+  "imageUrl": zod.string().nullish().describe('Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL pública, sem vencimento). Omitida em mensagem só de texto.'),
+  "imageUrlExpiresAt": zod.number().int().nullish().describe('Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, peça outro em\r\n`GET .../messages/{messageId}/photo`. Omitido sem foto ou em foto antiga.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.')),
@@ -249,7 +253,8 @@ export const PostApiV1ConversationsConversationIdMessagesResponse = zod.object({
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
   "body": zod.string().nullish().describe('Texto ou legenda da foto. Omitido em foto sem legenda.'),
-  "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
+  "imageUrl": zod.string().nullish().describe('Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL pública, sem vencimento). Omitida em mensagem só de texto.'),
+  "imageUrlExpiresAt": zod.number().int().nullish().describe('Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, peça outro em\r\n`GET .../messages/{messageId}/photo`. Omitido sem foto ou em foto antiga.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.'),
@@ -257,9 +262,31 @@ export const PostApiV1ConversationsConversationIdMessagesResponse = zod.object({
 }).describe('Resposta de sucesso.')
 
 /**
+ * As fotos do chat ficam no bucket privado: a listagem traz `imageUrl` assinada, que vence em
+ * `imageUrlExpiresAt`. Venceu (o bucket responde 403): peça outra aqui. Só quem é da conversa;
+ * a resposta vai com `Cache-Control: no-store`.
+ * @summary Um link novo para a foto de uma mensagem.
+ */
+export const GetApiV1ConversationsConversationIdMessagesMessageIdPhotoParams = zod.object({
+  "conversationId": zod.string().uuid(),
+  "messageId": zod.string().uuid()
+})
+
+export const GetApiV1ConversationsConversationIdMessagesMessageIdPhotoResponse = zod.object({
+  "success": zod.literal(true).describe('Sempre true no sucesso.'),
+  "data": zod.object({
+  "messageId": zod.string().uuid(),
+  "url": zod.string().describe('URL assinada do bucket privado (ou a URL pública, nas fotos antigas).'),
+  "expiresAt": zod.number().int().nullish().describe('Vencimento da URL, em Unix time (segundos, UTC). Omitido nas fotos antigas.')
+}).describe('Link da foto de uma mensagem.'),
+  "timestamp": zod.string().datetime({"offset":true})
+}).describe('Resposta de sucesso.')
+
+/**
  * `multipart/form-data` com a imagem na parte `file` (JPG/JPEG, PNG ou WebP, até 5 MB;
  *         os metadados, como GPS, são removidos) e a legenda opcional na parte `body`. A foto vai
- *         para o bucket público. Conversa de outra pessoa (404) ou outro lado suspenso
+ *         para o bucket privado e só abre por URL assinada. Prefira o upload direto
+ *         (`POST /api/v1/uploads`, `purpose: chat-photo`): o arquivo não passa pela API. Conversa de outra pessoa (404) ou outro lado suspenso
  *         (403 `CONVERSATION_RECIPIENT_SUSPENDED`): nada é enviado ao bucket. Arquivo inválido: 400
  *         no campo `file`. Conta no mesmo limite das mensagens de texto (`chat-messages`).
  * @summary Envia uma foto, com legenda opcional. O outro lado recebe na hora pelo hub.
@@ -281,7 +308,8 @@ export const PostApiV1ConversationsConversationIdMessagesPhotoResponse = zod.obj
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
   "body": zod.string().nullish().describe('Texto ou legenda da foto. Omitido em foto sem legenda.'),
-  "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
+  "imageUrl": zod.string().nullish().describe('Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL pública, sem vencimento). Omitida em mensagem só de texto.'),
+  "imageUrlExpiresAt": zod.number().int().nullish().describe('Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, peça outro em\r\n`GET .../messages/{messageId}/photo`. Omitido sem foto ou em foto antiga.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('Uma mensagem como sai na API e no hub. Sem `readAt`: o remetente não vê se foi lida.'),
@@ -338,7 +366,8 @@ export const PutApiV1ConversationsConversationIdBlockResponse = zod.object({
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
   "body": zod.string().nullish().describe('Texto ou legenda da foto. Omitido em foto sem legenda.'),
-  "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
+  "imageUrl": zod.string().nullish().describe('Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL pública, sem vencimento). Omitida em mensagem só de texto.'),
+  "imageUrlExpiresAt": zod.number().int().nullish().describe('Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, peça outro em\r\n`GET .../messages/{messageId}/photo`. Omitido sem foto ou em foto antiga.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('A mensagem mais recente. Omitida enquanto ninguém escreveu.')]).optional(),
@@ -382,7 +411,8 @@ export const DeleteApiV1ConversationsConversationIdBlockResponse = zod.object({
   "conversationId": zod.string().uuid(),
   "sentBy": zod.string().describe('`owner` (tutor) ou `host` (anfitrião).'),
   "body": zod.string().nullish().describe('Texto ou legenda da foto. Omitido em foto sem legenda.'),
-  "imageUrl": zod.string().nullish().describe('Foto no bucket público. Omitida em mensagem só de texto.'),
+  "imageUrl": zod.string().nullish().describe('Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL pública, sem vencimento). Omitida em mensagem só de texto.'),
+  "imageUrlExpiresAt": zod.number().int().nullish().describe('Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, peça outro em\r\n`GET .../messages/{messageId}/photo`. Omitido sem foto ou em foto antiga.'),
   "bookingId": zod.string().uuid().nullish().describe('Reserva em andamento quando a mensagem foi enviada (histórico da reserva).'),
   "createdAt": zod.string().datetime({"offset":true})
 }).describe('A mensagem mais recente. Omitida enquanto ninguém escreveu.')]).optional(),
@@ -402,7 +432,8 @@ export const DeleteApiV1ConversationsConversationIdBlockResponse = zod.object({
  * `other`). Só quem recebeu: a própria mensagem dá 422 `CONVERSATION_REPORT_OWN_MESSAGE`.
  * Uma denúncia por mensagem: 409 `CONVERSATION_REPORT_ALREADY_EXISTS`. Mensagem que não é
  * desta conversa: 404 `CONVERSATION_MESSAGE_NOT_FOUND`. Não bloqueia a conversa (é o
- * `PUT .../block`).
+ * `PUT .../block`). Cada denúncia avisa o admin por e-mail: limite próprio
+ * (`reports`, o mesmo das avaliações), 429 `TOO_MANY_REQUESTS`.
  * @summary Denuncia uma mensagem recebida, para o admin analisar.
  */
 export const PostApiV1ConversationsConversationIdMessagesMessageIdReportParams = zod.object({

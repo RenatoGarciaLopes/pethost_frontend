@@ -1,3 +1,4 @@
+import { uploadErrorCopy } from "./copy/uploadErrorCopy";
 import { accountErrorCopy } from "./copy/accountErrorCopy";
 import { bookingErrorCopy } from "./copy/bookingErrorCopy";
 import { commonErrorCopy } from "./copy/commonErrorCopy";
@@ -26,7 +27,7 @@ import type { ApiErrorCode } from "../generated/errorCodes";
  * Domínio novo = arquivo novo em `copy/` e uma linha aqui. Os catálogos moram em `shared` porque `shared` não pode importar `features`.
  */
 /** Códigos que nascem no front (transporte e BFF) e por isso não estão no enum da API. */
-type LocalErrorCode = "NETWORK_ERROR" | "SESSION_EXPIRED" | "CSRF_REJECTED";
+type LocalErrorCode = "NETWORK_ERROR" | "SESSION_EXPIRED" | "CSRF_REJECTED" | "UPLOAD_TRANSFER_FAILED";
 
 /** Todo código que tem frase: os da API (enum do OpenAPI) mais os locais. */
 export type TranslatedErrorCode = ApiErrorCode | LocalErrorCode;
@@ -56,4 +57,5 @@ export const errorCopy: Record<TranslatedErrorCode, CopyEntry> = {
   ...reviewValidationCopy,
   ...commonErrorCopy,
   ...localErrorCopy,
+  ...uploadErrorCopy,
 };

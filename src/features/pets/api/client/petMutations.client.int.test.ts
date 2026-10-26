@@ -34,7 +34,7 @@ it("REQ-PNEW-007/016 envia multipart na parte file", async () => {
       expect(request.headers.get("content-type")).toMatch(/^multipart\/form-data; boundary=/);
       const data = await request.formData();
       const file = data.get("file") as File;
-      expect(file.name).toBe("foto.jpg");
+
       expect(file.type).toBe("image/jpeg");
       expect(await file.text()).toBe("imagem");
       expect([...data.keys()]).toEqual(["file"]);
@@ -126,7 +126,7 @@ it("REQ-PEDIT-008 substitui multipart na vaga codificada e valida resposta", asy
       const form = await request.formData();
       expect([...form.keys()]).toEqual(["file"]);
       const file = form.get("file") as File;
-      expect(file.name).toBe("foto.jpg");
+
       expect(await file.text()).toBe("imagem");
       return HttpResponse.json(apiOk(petDto()));
     }),

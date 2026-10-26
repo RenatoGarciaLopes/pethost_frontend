@@ -64,7 +64,12 @@ describe("useConversationMutations", () => {
   });
 
   it("REQ-CHAT-009 com foto, vai pela rota de foto", async () => {
-    const sent = messageDto({ sentBy: "owner", body: undefined, imageUrl: "https://bucket/foto.jpg" });
+    const sent = messageDto({
+      sentBy: "owner",
+      body: undefined,
+      imageUrl: "https://bucket/foto.jpg",
+      createdAt: "2026-12-21T19:30:00Z",
+    });
     server.use(
       http.post(`${path}/messages/photo`, () => HttpResponse.json(apiOk(sent), { status: 201 })),
       ...summaryHandlers,

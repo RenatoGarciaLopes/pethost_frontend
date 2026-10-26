@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { recordUnhandledRequest, server, takeUnhandledRequests } from "../msw/server";
+import { resetDirectUploads } from "../../../e2e/support/handlers/directUploads.mjs";
 
 /**
  * Setup comum dos projetos Vitest (spec 001).
@@ -19,6 +20,7 @@ beforeAll(() => {
 
 afterEach(async () => {
   server.resetHandlers();
+  resetDirectUploads();
   if (typeof document !== "undefined") {
     const { cleanup } = await import("@testing-library/react");
     cleanup();

@@ -4,6 +4,34 @@ import { loginAccount } from "../../support/account";
 import { waitForHydration } from "../../support/hydration";
 import { openSearch } from "../../support/search";
 
+test("chips compactos preservam toque, rolagem e selecao no celular", async ({ page }, testInfo) => {
+  const mobile = testInfo.project.name.includes("mobile");
+  await page.setViewportSize({ width: mobile ? 360 : 1440, height: 900 });
+  await page.goto("/?where=Maring%C3%A1&hasKids=false");
+  const yard = page.getByRole("button", { name: "Casa com quintal", exact: true });
+  await expect(yard).toBeVisible();
+  await waitForHydration(yard);
+  await expect(yard).toHaveCSS("font-size", mobile ? "13px" : "14px");
+  const bounds = (await yard.boundingBox())!;
+  expect(bounds.height).toBeCloseTo(mobile ? 44 : 40.5, 0);
+  if (mobile) {
+    expect(bounds.width).toBeLessThan(150);
+    expect(
+      await yard.evaluate((element) => {
+        const row = element.parentElement!;
+        return getComputedStyle(row).overflowX === "auto" && row.scrollWidth > row.clientWidth;
+      }),
+    ).toBe(true);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(mobile ? 360 : 1440);
+  const apartment = page.getByRole("button", { name: "Apartamento", exact: true });
+  await apartment.scrollIntoViewIfNeeded();
+  await apartment.click();
+  await expect(apartment).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/homeType=apartment/);
+  await expect(page.getByRole("button", { name: "Sem criança", exact: true })).toHaveAttribute("aria-pressed", "true");
+});
+
 test("079 resultados e chips na home em 1440 e 390", async ({ page, baseURL }, testInfo) => {
   await loginAccount(page, baseURL!);
   const width = testInfo.project.name.includes("mobile") ? 390 : 1440;

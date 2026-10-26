@@ -1,5 +1,20 @@
 # Estrutura real do frontend
 
+## Upload direto de mídias (29/10/2026)
+
+```text
+src/shared/api/client/uploadDirect.ts              ticket, PUT direto e confirmação (individual/lote)
+src/shared/api/client/uploadDirect.int.test.ts     contrato HTTP, falhas e ausência de credenciais
+src/shared/api/generated/uploads/                 schemas Orval do backend real
+src/shared/api/errors/copy/uploadErrorCopy.ts      mensagens de erro de upload
+src/features/conversations/components/client/MessageThread/
+  MessagePhoto.tsx                                 expiração/renovação de fotos privadas
+  MessagePhoto.int.test.tsx                        regressão HTTP/DOM
+e2e/support/handlers/directUploads.mjs             adaptador de protocolo sintético para MSW/E2E
+```
+
+Os clientes existentes de conta, pets, cantinhos, documentos e chat continuam em suas features e reutilizam a infraestrutura shared. Não há provider/store paralelo. `bffRoutes` permite metadados/confirmação e nega uploads binários antigos. `FilterChips` continua na pasta existente da busca, com ajuste móvel e regressão E2E. Uso e limites: [direct-media-uploads.md](direct-media-uploads.md), [search-filter-chips.md](search-filter-chips.md). `.claude/worktrees` contém outros checkouts locais, não código deste frontend; lint/typecheck/formatação o excluem.
+
 ## Edição de cantinho por seções
 
 `src/features/host-listings/components/client/ListingEditor.tsx` compõe a navegação livre com `WizardProgress`, fotos e `ListingSections.tsx`. `sections/ListingSectionHost.tsx` mantém os formulários montados, preserva rascunhos e salva cada seção. Nenhuma pasta nova: campos, schemas e mutations existentes continuam na feature. Documentação: `development/resources/listing-editor-tabs.md` no vault.

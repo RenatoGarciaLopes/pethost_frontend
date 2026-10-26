@@ -169,41 +169,20 @@ describe("proxy do BFF", () => {
     expect(cookies.pethost_rt).toMatch(/Max-Age=0/);
   });
 
-  it("REQ-HTTP-014 multipart de 4,9 MB chega inteiro e em streaming; 413 da API é repassado", async () => {
-    const size = Math.floor(4.9 * 1024 * 1024);
-    let receivedBytes = 0;
-    let receivedType = "";
-    server.use(
-      http.put(`${API}/owners/me/avatar`, async ({ request }) => {
-        const form = await request.formData();
-        const file = form.get("file") as File;
-        receivedBytes = file.size;
-        receivedType = request.headers.get("content-type") ?? "";
-        return HttpResponse.json(apiOk({ avatarUrl: "https://cdn.test/a.webp" }));
+  it("rejects legacy binary uploads before forwarding to the API", async () => {
+    const form = new FormData();
+    form.set("file", new File([new Uint8Array(4_900_000)], "foto.jpg", { type: "image/jpeg" }));
+    const encoded = new Request("http://x", { method: "PUT", body: form });
+    const response = await PUT(
+      bffRequest("/owners/me/avatar", {
+        method: "PUT",
+        body: encoded.body!,
+        contentType: encoded.headers.get("content-type")!,
+        cookies: { pethost_at: freshAccess(), pethost_rt: "rt" },
       }),
-      http.put(`${API}/hosts/me/avatar`, () => HttpResponse.json(apiFail("PAYLOAD_TOO_LARGE"), { status: 413 })),
     );
-    const upload = (path: string) => {
-      const form = new FormData();
-      form.set("file", new File([new Uint8Array(size)], "foto.jpg", { type: "image/jpeg" }));
-      const encoded = new Request("http://x", { method: "PUT", body: form });
-      return PUT(
-        bffRequest(path, {
-          method: "PUT",
-          body: encoded.body!,
-          contentType: encoded.headers.get("content-type")!,
-          cookies: { pethost_at: freshAccess(), pethost_rt: "rt" },
-        }),
-      );
-    };
-
-    const ok = await upload("/owners/me/avatar");
-    const tooLarge = await upload("/hosts/me/avatar");
-
-    expect(ok.status).toBe(200);
-    expect(receivedBytes).toBe(size);
-    expect(receivedType).toMatch(/^multipart\/form-data; boundary=/);
-    expect(tooLarge.status).toBe(413);
+    expect(response.status).toBe(404);
+    expect((await response.json()).error.code).toBe("ROUTE_NOT_ALLOWED");
   });
 
   it("REQ-HTTP-004 API fora do ar → 502 UPSTREAM_UNAVAILABLE", async () => {

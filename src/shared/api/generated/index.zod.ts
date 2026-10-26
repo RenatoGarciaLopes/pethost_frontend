@@ -23,4 +23,5 @@ export * from './reviews/reviews.zod';
 export * from './sessions/sessions.zod';
 export * from './stripe-webhooks/stripe-webhooks.zod';
 export * from './support/support.zod';
+export * from './uploads/uploads.zod';
 export * from './users/users.zod';

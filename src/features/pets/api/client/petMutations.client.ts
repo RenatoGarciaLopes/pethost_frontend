@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import { bffClient } from "@/shared/api/client/bffClient";
-import { withSessionRetry } from "@/shared/api/client/withSessionRetry";
+import { uploadDirect } from "@/shared/api/client/uploadDirect";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
 import { PostApiV1PetsBody } from "@/shared/api/generated/pets/pets.zod";
 import { petDtoSchema, type PetDto } from "../contracts";
@@ -12,13 +12,9 @@ export function createPet(
 ): Promise<PetDto> {
   return transport.request({ method: "POST", path: "/pets", body: PostApiV1PetsBody.parse(body) }, petDtoSchema);
 }
-/** Envia uma foto na parte file, renovando sessão uma vez se necessário. @example await uploadPetPhoto(pet.id, file); */
+/** Direct upload and confirmation of one pet photo. @example await uploadPetPhoto(pet.id, file); */
 export function uploadPetPhoto(petId: string, file: File, transport: HttpTransport = bffClient): Promise<PetDto> {
-  return withSessionRetry(() => {
-    const body = new FormData();
-    body.append("file", file);
-    return transport.request({ method: "POST", path: `/pets/${encodeURIComponent(petId)}/photos`, body }, petDtoSchema);
-  }, transport);
+  return uploadDirect(file, { purpose: "pet-photo", resourceId: petId }, petDtoSchema, transport);
 }
 
 /** Atualiza campos alterados da ficha. @example await updatePet(id, body); */
@@ -37,21 +33,14 @@ export function deactivatePet(petId: string, transport: HttpTransport = bffClien
 export function reactivatePet(petId: string, transport: HttpTransport = bffClient): Promise<PetDto> {
   return transport.request({ method: "DELETE", path: `/pets/${encodeURIComponent(petId)}/deactivation` }, petDtoSchema);
 }
-/** Substitui foto na mesma vaga com renovação única. @example await replacePetPhoto(id, photoId, file); */
+/** Replaces one photo through direct upload and confirmation. @example await replacePetPhoto(id, photoId, file); */
 export function replacePetPhoto(
   petId: string,
   photoId: string,
   file: File,
   transport: HttpTransport = bffClient,
 ): Promise<PetDto> {
-  return withSessionRetry(() => {
-    const body = new FormData();
-    body.append("file", file);
-    return transport.request(
-      { method: "PATCH", path: `/pets/${encodeURIComponent(petId)}/photos/${encodeURIComponent(photoId)}`, body },
-      petDtoSchema,
-    );
-  }, transport);
+  return uploadDirect(file, { purpose: "pet-photo", resourceId: petId, photoId }, petDtoSchema, transport);
 }
 /** Remove foto. @example await removePetPhoto(id, photoId); */
 export function removePetPhoto(petId: string, photoId: string, transport: HttpTransport = bffClient): Promise<PetDto> {

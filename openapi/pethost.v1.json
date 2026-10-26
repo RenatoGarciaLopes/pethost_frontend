@@ -3964,13 +3964,108 @@
         }
       }
     },
+    "/api/v1/conversations/{conversationId}/messages/{messageId}/photo": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Um link novo para a foto de uma mensagem.",
+        "description": "As fotos do chat ficam no bucket privado: a listagem traz \u0060imageUrl\u0060 assinada, que vence em\r\n\u0060imageUrlExpiresAt\u0060. Venceu (o bucket responde 403): pe\u00E7a outra aqui. S\u00F3 quem \u00E9 da conversa;\r\na resposta vai com \u0060Cache-Control: no-store\u0060.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfMessagePhotoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem token, token inv\u00E1lido ou expirado, ou credenciais erradas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Authentication is required to access this resource."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sem permiss\u00E3o para esta a\u00E7\u00E3o, ou conta inativa/suspensa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "You do not have permission to access this resource."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso n\u00E3o encontrado (ou n\u00E3o vis\u00EDvel para quem pediu).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "NOT_FOUND",
+                    "message": "The requested resource was not found."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/conversations/{conversationId}/messages/photo": {
       "post": {
         "tags": [
           "Conversations"
         ],
         "summary": "Envia uma foto, com legenda opcional. O outro lado recebe na hora pelo hub.",
-        "description": "\u0060multipart/form-data\u0060 com a imagem na parte \u0060file\u0060 (JPG/JPEG, PNG ou WebP, at\u00E9 5 MB;\r\n        os metadados, como GPS, s\u00E3o removidos) e a legenda opcional na parte \u0060body\u0060. A foto vai\r\n        para o bucket p\u00FAblico. Conversa de outra pessoa (404) ou outro lado suspenso\r\n        (403 \u0060CONVERSATION_RECIPIENT_SUSPENDED\u0060): nada \u00E9 enviado ao bucket. Arquivo inv\u00E1lido: 400\r\n        no campo \u0060file\u0060. Conta no mesmo limite das mensagens de texto (\u0060chat-messages\u0060).",
+        "description": "\u0060multipart/form-data\u0060 com a imagem na parte \u0060file\u0060 (JPG/JPEG, PNG ou WebP, at\u00E9 5 MB;\r\n        os metadados, como GPS, s\u00E3o removidos) e a legenda opcional na parte \u0060body\u0060. A foto vai\r\n        para o bucket privado e s\u00F3 abre por URL assinada. Prefira o upload direto\r\n        (\u0060POST /api/v1/uploads\u0060, \u0060purpose: chat-photo\u0060): o arquivo n\u00E3o passa pela API. Conversa de outra pessoa (404) ou outro lado suspenso\r\n        (403 \u0060CONVERSATION_RECIPIENT_SUSPENDED\u0060): nada \u00E9 enviado ao bucket. Arquivo inv\u00E1lido: 400\r\n        no campo \u0060file\u0060. Conta no mesmo limite das mensagens de texto (\u0060chat-messages\u0060).",
         "parameters": [
           {
             "name": "conversationId",
@@ -4461,7 +4556,7 @@
           "Conversations"
         ],
         "summary": "Denuncia uma mensagem recebida, para o admin analisar.",
-        "description": "Corpo: \u0060reason\u0060 (\u0060spam\u0060, \u0060harassment\u0060, \u0060scam\u0060, \u0060inappropriate\u0060 ou\r\n\u0060other\u0060) e \u0060description\u0060 (opcional, at\u00E9 1.000 caracteres; obrigat\u00F3ria em\r\n\u0060other\u0060). S\u00F3 quem recebeu: a pr\u00F3pria mensagem d\u00E1 422 \u0060CONVERSATION_REPORT_OWN_MESSAGE\u0060.\r\nUma den\u00FAncia por mensagem: 409 \u0060CONVERSATION_REPORT_ALREADY_EXISTS\u0060. Mensagem que n\u00E3o \u00E9\r\ndesta conversa: 404 \u0060CONVERSATION_MESSAGE_NOT_FOUND\u0060. N\u00E3o bloqueia a conversa (\u00E9 o\r\n\u0060PUT .../block\u0060).",
+        "description": "Corpo: \u0060reason\u0060 (\u0060spam\u0060, \u0060harassment\u0060, \u0060scam\u0060, \u0060inappropriate\u0060 ou\r\n\u0060other\u0060) e \u0060description\u0060 (opcional, at\u00E9 1.000 caracteres; obrigat\u00F3ria em\r\n\u0060other\u0060). S\u00F3 quem recebeu: a pr\u00F3pria mensagem d\u00E1 422 \u0060CONVERSATION_REPORT_OWN_MESSAGE\u0060.\r\nUma den\u00FAncia por mensagem: 409 \u0060CONVERSATION_REPORT_ALREADY_EXISTS\u0060. Mensagem que n\u00E3o \u00E9\r\ndesta conversa: 404 \u0060CONVERSATION_MESSAGE_NOT_FOUND\u0060. N\u00E3o bloqueia a conversa (\u00E9 o\r\n\u0060PUT .../block\u0060). Cada den\u00FAncia avisa o admin por e-mail: limite pr\u00F3prio\r\n(\u0060reports\u0060, o mesmo das avalia\u00E7\u00F5es), 429 \u0060TOO_MANY_REQUESTS\u0060.",
         "parameters": [
           {
             "name": "conversationId",
@@ -4628,6 +4723,24 @@
                   "error": {
                     "code": "BUSINESS_RULE_VIOLATION",
                     "message": "The request violates a business rule."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Muitas requisi\u00E7\u00F5es. Espere o tempo do header Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "TOO_MANY_REQUESTS",
+                    "message": "Too many requests. Try again in 60 seconds."
                   },
                   "timestamp": "2026-10-21T12:00:00\u002B00:00"
                 }
@@ -16614,6 +16727,401 @@
         }
       }
     },
+    "/api/v1/uploads": {
+      "post": {
+        "tags": [
+          "Uploads"
+        ],
+        "summary": "Pede uma URL assinada para enviar um arquivo direto ao bucket.",
+        "description": "Confere a permiss\u00E3o antes de assinar (posse do pet, vaga livre, conversa aberta...), com as\r\nmesmas regras e erros do caso de uso. A URL s\u00F3 aceita o \u0060Content-Type\u0060 e o tamanho\r\ndeclarados (v\u00E3o na assinatura). Depois do \u0060PUT\u0060, confirme em\r\n\u0060POST /api/v1/uploads/{uploadId}/confirm\u0060.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUploadRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUploadRequest"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Criado. O header Location aponta para o recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUploadTicketResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inv\u00E1lidos. Cada campo vem em error.details, com o c\u00F3digo est\u00E1vel de cada regra em errors.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "VALIDATION_ERROR",
+                    "message": "Validation failed",
+                    "details": [
+                      {
+                        "field": "email",
+                        "messages": [
+                          "Email is required."
+                        ],
+                        "errors": [
+                          {
+                            "code": "AUTH_EMAIL_REQUIRED"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem token, token inv\u00E1lido ou expirado, ou credenciais erradas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Authentication is required to access this resource."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sem permiss\u00E3o para esta a\u00E7\u00E3o, ou conta inativa/suspensa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "You do not have permission to access this resource."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso n\u00E3o encontrado (ou n\u00E3o vis\u00EDvel para quem pediu).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "NOT_FOUND",
+                    "message": "The requested resource was not found."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de neg\u00F3cio impede a a\u00E7\u00E3o. O motivo vem em error.code.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "BUSINESS_RULE_VIOLATION",
+                    "message": "The request violates a business rule."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Muitas requisi\u00E7\u00F5es. Espere o tempo do header Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "TOO_MANY_REQUESTS",
+                    "message": "Too many requests. Try again in 60 seconds."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{uploadId}/confirm": {
+      "post": {
+        "tags": [
+          "Uploads"
+        ],
+        "summary": "Confirma o upload: confere o arquivo que chegou ao bucket e o aplica ao recurso.",
+        "description": "Idempotente: confirmar de novo um upload conclu\u00EDdo devolve a mesma resposta, sem duplicar\r\nfoto nem mensagem. Corpo opcional; \u0060body\u0060 \u00E9 a legenda da foto do chat.",
+        "parameters": [
+          {
+            "name": "uploadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ConfirmUploadRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ConfirmUploadRequest"
+                  }
+                ]
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ConfirmUploadRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUploadConfirmationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inv\u00E1lidos. Cada campo vem em error.details, com o c\u00F3digo est\u00E1vel de cada regra em errors.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "VALIDATION_ERROR",
+                    "message": "Validation failed",
+                    "details": [
+                      {
+                        "field": "email",
+                        "messages": [
+                          "Email is required."
+                        ],
+                        "errors": [
+                          {
+                            "code": "AUTH_EMAIL_REQUIRED"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem token, token inv\u00E1lido ou expirado, ou credenciais erradas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Authentication is required to access this resource."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sem permiss\u00E3o para esta a\u00E7\u00E3o, ou conta inativa/suspensa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "You do not have permission to access this resource."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso n\u00E3o encontrado (ou n\u00E3o vis\u00EDvel para quem pediu).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "NOT_FOUND",
+                    "message": "The requested resource was not found."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual (duplicado ou alterado por outro pedido).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "CONFLICT",
+                    "message": "The request conflicts with the current state of the resource."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de neg\u00F3cio impede a a\u00E7\u00E3o. O motivo vem em error.code.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "BUSINESS_RULE_VIOLATION",
+                    "message": "The request violates a business rule."
+                  },
+                  "timestamp": "2026-10-21T12:00:00\u002B00:00"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/documents/confirm": {
+      "post": {
+        "tags": [
+          "Uploads"
+        ],
+        "summary": "Confirms one to three host document slots atomically.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmDocumentsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmDocumentsRequest"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmDocumentsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUploadConfirmationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/stripe/webhooks": {
       "post": {
         "tags": [
@@ -17005,13 +17513,14 @@
           "CONVERSATION_DESCRIPTION_TOO_LONG",
           "CONVERSATION_HOST_DEACTIVATED",
           "CONVERSATION_HOST_NOT_FOUND",
-          "CONVERSATION_IMAGE_URL_INVALID",
-          "CONVERSATION_IMAGE_URL_TOO_LONG",
+          "CONVERSATION_IMAGE_KEY_INVALID",
+          "CONVERSATION_IMAGE_KEY_TOO_LONG",
           "CONVERSATION_INACTIVITY_DAYS_INVALID",
           "CONVERSATION_LISTING_ID_REQUIRED",
           "CONVERSATION_LISTING_NOT_FOUND",
           "CONVERSATION_MESSAGE_ID_REQUIRED",
           "CONVERSATION_MESSAGE_NOT_FOUND",
+          "CONVERSATION_MESSAGE_PHOTO_NOT_FOUND",
           "CONVERSATION_NOTE_INVALID_CHARACTERS",
           "CONVERSATION_NOTE_REQUIRED",
           "CONVERSATION_NOTE_TOO_LONG",
@@ -17108,6 +17617,7 @@
           "IMAGE_FILE_EMPTY",
           "IMAGE_FILE_REQUIRED",
           "IMAGE_FILE_TOO_LARGE",
+          "IMAGE_PREFLIGHT_PASSED",
           "IMAGE_UNSUPPORTED_FORMAT",
           "LISTING_ACCEPTED_SPECIES_INVALID",
           "LISTING_ACCEPTED_SPECIES_REQUIRED",
@@ -17349,6 +17859,27 @@
           "UNAUTHORIZED",
           "UNEXPECTED_ERROR",
           "UNSUPPORTED_MEDIA_TYPE",
+          "UPLOAD_ALREADY_REJECTED",
+          "UPLOAD_CONFIRMATION_CONFLICT",
+          "UPLOAD_CONTENT_TYPE_INVALID",
+          "UPLOAD_CONTENT_TYPE_REQUIRED",
+          "UPLOAD_DOCUMENT_BATCH_INVALID",
+          "UPLOAD_EXPIRED",
+          "UPLOAD_FILE_NOT_RECEIVED",
+          "UPLOAD_KIND_INVALID",
+          "UPLOAD_KIND_NOT_ALLOWED",
+          "UPLOAD_KIND_REQUIRED",
+          "UPLOAD_NOT_FOUND",
+          "UPLOAD_PENDING_LIMIT_REACHED",
+          "UPLOAD_PHOTO_ID_NOT_ALLOWED",
+          "UPLOAD_PURPOSE_FORBIDDEN",
+          "UPLOAD_PURPOSE_INVALID",
+          "UPLOAD_PURPOSE_REQUIRED",
+          "UPLOAD_RESOURCE_ID_NOT_ALLOWED",
+          "UPLOAD_RESOURCE_ID_REQUIRED",
+          "UPLOAD_SIZE_INVALID",
+          "UPLOAD_SIZE_REQUIRED",
+          "UPLOAD_SIZE_TOO_LARGE",
           "VALIDATION_ERROR"
         ],
         "type": "string",
@@ -18031,6 +18562,34 @@
           },
           "data": {
             "$ref": "#/components/schemas/MessagePageResponse"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Resposta de sucesso."
+      },
+      "ApiResponseOfMessagePhotoResponse": {
+        "required": [
+          "success",
+          "data",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "examples": [
+              true
+            ],
+            "enum": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Sempre true no sucesso."
+          },
+          "data": {
+            "$ref": "#/components/schemas/MessagePhotoResponse"
           },
           "timestamp": {
             "type": "string",
@@ -18935,6 +19494,62 @@
         },
         "description": "Resposta de sucesso."
       },
+      "ApiResponseOfUploadConfirmationResponse": {
+        "required": [
+          "success",
+          "data",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "examples": [
+              true
+            ],
+            "enum": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Sempre true no sucesso."
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadConfirmationResponse"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Resposta de sucesso."
+      },
+      "ApiResponseOfUploadTicketResponse": {
+        "required": [
+          "success",
+          "data",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "examples": [
+              true
+            ],
+            "enum": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Sempre true no sucesso."
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadTicketResponse"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Resposta de sucesso."
+      },
       "ApproveHostApplicationRequest": {
         "required": [
           "reason"
@@ -19731,6 +20346,41 @@
           }
         },
         "description": "Um aviso. O app monta o texto a partir do c\u00F3digo e dos nomes."
+      },
+      "ConfirmDocumentsRequest": {
+        "required": [
+          "uploadIds"
+        ],
+        "type": "object",
+        "properties": {
+          "uploadIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "One to three direct uploads of distinct host document slots, confirmed atomically."
+      },
+      "ConfirmUploadRequest": {
+        "required": [
+          "body"
+        ],
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Legenda da foto do chat, at\u00E9 2.000 caracteres. Ignorada nas outras finalidades."
+          }
+        },
+        "description": "Corpo (opcional) de \u0060POST /api/v1/uploads/{uploadId}/confirm\u0060."
       },
       "ConversationBlockResponse": {
         "required": [
@@ -21397,6 +22047,7 @@
         },
         "description": "Os objetos da parcela no Stripe."
       },
+      "JsonElement": {},
       "KeeperPetsResponse": {
         "required": [
           "keeper",
@@ -22248,6 +22899,35 @@
         },
         "description": "Uma p\u00E1gina de mensagens, da mais nova para a mais antiga. Para a p\u00E1gina seguinte (mais\r\nantiga), o cliente manda o id da \u00FAltima mensagem desta em \u0060before\u0060."
       },
+      "MessagePhotoResponse": {
+        "required": [
+          "messageId",
+          "url",
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL assinada do bucket privado (ou a URL p\u00FAblica, nas fotos antigas)."
+          },
+          "expiresAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Vencimento da URL, em Unix time (segundos, UTC). Omitido nas fotos antigas.",
+            "format": "int64"
+          }
+        },
+        "description": "Link da foto de uma mensagem."
+      },
       "MessageReportResponse": {
         "required": [
           "id",
@@ -22365,6 +23045,7 @@
           "sentBy",
           "body",
           "imageUrl",
+          "imageUrlExpiresAt",
           "bookingId",
           "createdAt"
         ],
@@ -22394,7 +23075,17 @@
               "null",
               "string"
             ],
-            "description": "Foto no bucket p\u00FAblico. Omitida em mensagem s\u00F3 de texto."
+            "description": "Link da foto: URL assinada do bucket privado, que vence em ImageUrlExpiresAt\r\n(fotos antigas: URL p\u00FAblica, sem vencimento). Omitida em mensagem s\u00F3 de texto."
+          },
+          "imageUrlExpiresAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Quando o link da foto vence, em Unix time (segundos, UTC). Depois disso, pe\u00E7a outro em\r\n\u0060GET .../messages/{messageId}/photo\u0060. Omitido sem foto ou em foto antiga.",
+            "format": "int64"
           },
           "bookingId": {
             "type": [
@@ -24252,6 +24943,67 @@
         },
         "description": "Corpo de \u0060POST /api/v1/reviews/{reviewId}/report\u0060."
       },
+      "RequestUploadRequest": {
+        "required": [
+          "purpose",
+          "contentType",
+          "sizeBytes",
+          "resourceId",
+          "photoId",
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Finalidade: \u0060owner-avatar\u0060, \u0060host-avatar\u0060, \u0060pet-photo\u0060, \u0060listing-photo\u0060, \u0060chat-photo\u0060 ou \u0060host-document\u0060."
+          },
+          "contentType": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "\u0060image/jpeg\u0060, \u0060image/png\u0060 ou \u0060image/webp\u0060: o mesmo que vai no \u0060PUT\u0060."
+          },
+          "sizeBytes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Tamanho exato do arquivo (\u0060file.size\u0060), at\u00E9 5 MB.",
+            "format": "int64"
+          },
+          "resourceId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "O pet, o cantinho ou a conversa, conforme a finalidade.",
+            "format": "uuid"
+          },
+          "photoId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Foto a substituir (pet e cantinho). Sem ele, a foto \u00E9 adicionada.",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Documento do anfitri\u00E3o: \u0060front\u0060, \u0060back\u0060 ou \u0060selfie\u0060."
+          }
+        },
+        "description": "Corpo de \u0060POST /api/v1/uploads\u0060."
+      },
       "ResetPasswordCommand": {
         "required": [
           "token",
@@ -25277,6 +26029,98 @@
           }
         },
         "description": "Corpo de \u0060PATCH /api/v1/reviews/{reviewId}\u0060: s\u00F3 muda o que vier."
+      },
+      "UploadConfirmationResponse": {
+        "required": [
+          "uploadId",
+          "purpose",
+          "status",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "Sempre \u0060completed\u0060."
+          },
+          "result": {
+            "description": "A resposta do caso de uso da finalidade: o tutor, o anfitri\u00E3o, o pet, o cantinho, a mensagem ou a solicita\u00E7\u00E3o.",
+            "$ref": "#/components/schemas/JsonElement"
+          }
+        },
+        "description": "Upload confirmado."
+      },
+      "UploadTicketResponse": {
+        "required": [
+          "uploadId",
+          "purpose",
+          "uploadUrl",
+          "method",
+          "headers",
+          "sizeBytes",
+          "expiresAt",
+          "confirmBy"
+        ],
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "description": "URL assinada de \u0060PUT\u0060. Vale at\u00E9 ExpiresAt."
+          },
+          "method": {
+            "type": "string",
+            "description": "Sempre \u0060PUT\u0060."
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Headers obrigat\u00F3rios do \u0060PUT\u0060 (o \u0060Content-Type\u0060 declarado). Outro valor: 403 no bucket."
+          },
+          "sizeBytes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "O corpo do \u0060PUT\u0060 precisa ter exatamente este tamanho (vai na assinatura).",
+            "format": "int64"
+          },
+          "expiresAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Vencimento da URL, em Unix time (segundos, UTC).",
+            "format": "int64"
+          },
+          "confirmBy": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Prazo para confirmar, em Unix time (segundos, UTC). Depois disso o upload vence.",
+            "format": "int64"
+          }
+        },
+        "description": "O que o front precisa para enviar o arquivo direto ao bucket."
       }
     },
     "securitySchemes": {
@@ -25368,6 +26212,9 @@
     },
     {
       "name": "ReviewModeration"
+    },
+    {
+      "name": "Uploads"
     },
     {
       "name": "StripeWebhooks"

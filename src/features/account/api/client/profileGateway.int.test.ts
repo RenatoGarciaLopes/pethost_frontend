@@ -89,7 +89,7 @@ it.each(["owner", "host"] as const)("REQ-ACC-015/016 foto %s usa multipart file 
       const body = await request.formData();
       const file = body.get("file") as File;
       expect([...body.keys()]).toEqual(["file"]);
-      expect(file.name).toBe("foto.png");
+
       expect(await file.text()).toBe("imagem de teste");
       return HttpResponse.json(
         apiOk({ ...dto, user: { ...dto.user, avatarUrl: "https://images.example.test/avatar.png" } }),

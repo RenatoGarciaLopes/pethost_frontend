@@ -15,6 +15,7 @@ export function toMessage(dto: MessageDto): ConversationMessage {
     sentBy: dto.sentBy,
     body: dto.body ?? null,
     imageUrl: dto.imageUrl ?? null,
+    imageUrlExpiresAt: dto.imageUrlExpiresAt ?? null,
     bookingId: dto.bookingId ?? null,
     createdAt: dto.createdAt,
   };

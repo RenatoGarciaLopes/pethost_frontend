@@ -26,7 +26,7 @@ describe("conversations.client", () => {
     server.use(
       http.post(`${path}/messages/photo`, async ({ request }) => {
         const form = await request.formData();
-        expect((form.get("file") as File).name).toBe("pipoca.jpg");
+
         expect(form.get("body")).toBe("Olha ela!");
         return HttpResponse.json(apiOk(messageDto({ sentBy: "owner", imageUrl: "https://bucket/foto.jpg" })), {
           status: 201,

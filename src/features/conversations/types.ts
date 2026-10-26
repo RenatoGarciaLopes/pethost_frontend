@@ -17,6 +17,8 @@ export interface ConversationMessage {
   body: string | null;
   /** Foto no bucket público; `null` em mensagem só de texto. */
   imageUrl: string | null;
+  /** Unix seconds for private photo URLs; absent on public legacy images. */
+  imageUrlExpiresAt?: number | null;
   /** Estadia em andamento quando a mensagem saiu (histórico da reserva). */
   bookingId: string | null;
   createdAt: string;

@@ -12,8 +12,6 @@ export const conversationValidationCopy = {
   CONVERSATION_DESCRIPTION_INVALID_CHARACTERS: invalidCharacters("a descrição"),
   CONVERSATION_DESCRIPTION_REQUIRED: required("a descrição"),
   CONVERSATION_DESCRIPTION_TOO_LONG: tooLong("a descrição"),
-  CONVERSATION_IMAGE_URL_INVALID: invalid("o endereço da imagem"),
-  CONVERSATION_IMAGE_URL_TOO_LONG: tooLong("o endereço da imagem"),
   CONVERSATION_INACTIVITY_DAYS_INVALID: invalid("os dias de inatividade"),
   CONVERSATION_LISTING_ID_REQUIRED: required("o cantinho"),
   CONVERSATION_MESSAGE_ID_REQUIRED: required("a mensagem"),

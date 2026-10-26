@@ -4,7 +4,7 @@ import {
   PostApiV1ConversationsResponse,
 } from "@/shared/api/generated/conversations/conversations.zod";
 import { bffClient } from "@/shared/api/client/bffClient";
-import { withSessionRetry } from "@/shared/api/client/withSessionRetry";
+import { uploadDirect } from "@/shared/api/client/uploadDirect";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
 import { readMarkerSchema, sentMessageSchema, sentPhotoMessageSchema } from "../contracts";
 
@@ -23,8 +23,7 @@ export function sendMessage(conversationId: string, body: string, transport: Htt
 }
 
 /**
- * Envia uma foto com legenda opcional (REQ-CHAT-009): `file` e `body` em multipart. Renova a sessão uma vez se
- * precisar (o corpo é refeito em memória).
+ * Sends a photo directly to private storage, then confirms the message and optional caption.
  * @example await sendPhotoMessage(conversation.id, file, "Olha ela!");
  */
 export function sendPhotoMessage(
@@ -33,15 +32,13 @@ export function sendPhotoMessage(
   caption: string,
   transport: HttpTransport = bffClient,
 ) {
-  return withSessionRetry(() => {
-    const body = new FormData();
-    body.append("file", file);
-    if (caption) body.append("body", caption);
-    return transport.request(
-      { method: "POST", path: `${conversationPath(conversationId)}/messages/photo`, body },
-      sentPhotoMessageSchema,
-    );
-  }, transport);
+  return uploadDirect(
+    file,
+    { purpose: "chat-photo", resourceId: conversationId },
+    sentPhotoMessageSchema,
+    transport,
+    caption,
+  );
 }
 
 /**

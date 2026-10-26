@@ -269,7 +269,7 @@ describe("translateFieldErrors", () => {
 
 describe("exaustividade do catálogo", () => {
   it("REQ-HTTP-005 todo código do enum ApiErrorCode tem frase e nenhuma frase é de código que não existe", () => {
-    const local = ["NETWORK_ERROR", "SESSION_EXPIRED", "CSRF_REJECTED"];
+    const local = ["NETWORK_ERROR", "SESSION_EXPIRED", "CSRF_REJECTED", "UPLOAD_TRANSFER_FAILED"];
     expect(API_ERROR_CODES.filter((code) => !(code in errorCopy))).toEqual([]);
     expect(
       Object.keys(errorCopy).filter(

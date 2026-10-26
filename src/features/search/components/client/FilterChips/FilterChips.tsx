@@ -9,7 +9,8 @@ export interface FilterChipsProps {
   pets?: SearchPet[];
   onChange: (query: SearchQuery) => void;
 }
-/** Pílulas contornadas; limpar preserva lugar, datas e pets.
+/** Pílulas contornadas, compactas no celular e com alvo de toque de 44px;
+ * limpar preserva lugar, datas e pets. A faixa mantém rolagem horizontal.
  * @example <FilterChips query={query} pets={pets} onChange={search} />
  */
 export function FilterChips({ query, pets = [], onChange }: FilterChipsProps) {
@@ -26,12 +27,14 @@ export function FilterChips({ query, pets = [], onChange }: FilterChipsProps) {
     filters.some(([key]) => query[key] !== undefined) || query.species.length > 0 || query.sizes.length > 0;
   const style = {
     borderRadius: `${quintalRadii.pill}px`,
-    px: 2,
-    py: 0.75,
-    minHeight: 40,
+    px: { xs: 1.5, md: 2 },
+    py: { xs: 0.5, md: 0.75 },
+    minHeight: { xs: 44, md: 40 },
+    height: { xs: 44, md: "auto" },
     borderColor: "text.primary",
     color: "text.primary",
-    fontSize: 14,
+    fontSize: { xs: 13, md: 14 },
+    lineHeight: { xs: "20px", md: 1.75 },
     fontWeight: 600,
     flexShrink: 0,
     whiteSpace: "nowrap",
@@ -59,7 +62,8 @@ export function FilterChips({ query, pets = [], onChange }: FilterChipsProps) {
       useFlexGap
       sx={{
         flexWrap: "nowrap",
-        gap: 1,
+        gap: { xs: 0.75, md: 1 },
+        alignItems: "center",
         overflowX: "auto",
         py: 0.5,
         scrollbarWidth: "none",
@@ -88,6 +92,7 @@ export function FilterChips({ query, pets = [], onChange }: FilterChipsProps) {
       )}
       {hasFilters && (
         <Button
+          sx={{ ...style, borderColor: "transparent" }}
           onClick={() =>
             onChange({
               ...query,

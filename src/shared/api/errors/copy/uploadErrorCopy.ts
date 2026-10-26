@@ -1,0 +1,31 @@
+import type { CopyCatalog } from "../copyTypes";
+
+/** Direct upload errors, including failures returned directly by the storage provider. */
+export const uploadErrorCopy = {
+  IMAGE_PREFLIGHT_PASSED: "Não deu para concluir o envio da foto. Tenta de novo.",
+  CONVERSATION_IMAGE_KEY_INVALID: "Não deu para guardar essa foto. Tenta enviar de novo.",
+  CONVERSATION_IMAGE_KEY_TOO_LONG: "Não deu para guardar essa foto. Tenta enviar de novo.",
+  CONVERSATION_MESSAGE_PHOTO_NOT_FOUND: "Essa foto não está mais disponível.",
+  UPLOAD_TRANSFER_FAILED: "Não deu para enviar a foto. Tenta de novo.",
+  UPLOAD_PURPOSE_FORBIDDEN: "Sua conta não pode enviar essa foto por aqui.",
+  UPLOAD_PENDING_LIMIT_REACHED: "Há fotos aguardando envio. Aguarda um pouco e tenta de novo.",
+  UPLOAD_NOT_FOUND: "Esse envio não está disponível. Escolhe a foto de novo.",
+  UPLOAD_EXPIRED: "O prazo do envio terminou. Escolhe a foto de novo.",
+  UPLOAD_ALREADY_REJECTED: "Essa foto foi recusada. Escolhe outra para continuar.",
+  UPLOAD_CONFIRMATION_CONFLICT: "A foto ainda está sendo confirmada. Aguarda um pouco e tenta de novo.",
+  UPLOAD_FILE_NOT_RECEIVED: "A foto ainda não chegou. Tenta enviar de novo.",
+  UPLOAD_DOCUMENT_BATCH_INVALID: "Confere as fotos dos documentos e tenta de novo.",
+  UPLOAD_PURPOSE_REQUIRED: "Escolhe onde enviar a foto.",
+  UPLOAD_PURPOSE_INVALID: "Esse tipo de envio não está disponível.",
+  UPLOAD_CONTENT_TYPE_REQUIRED: "Escolhe uma imagem JPEG, PNG ou WebP.",
+  UPLOAD_CONTENT_TYPE_INVALID: "Escolhe uma imagem JPEG, PNG ou WebP.",
+  UPLOAD_SIZE_REQUIRED: "Não deu para conferir o tamanho da foto. Escolhe de novo.",
+  UPLOAD_SIZE_INVALID: "O arquivo está vazio. Escolhe outra foto.",
+  UPLOAD_SIZE_TOO_LARGE: "A foto precisa ter até 5 MB.",
+  UPLOAD_RESOURCE_ID_REQUIRED: "Reabre a tela e tenta enviar a foto de novo.",
+  UPLOAD_RESOURCE_ID_NOT_ALLOWED: "Reabre a tela e tenta enviar a foto de novo.",
+  UPLOAD_PHOTO_ID_NOT_ALLOWED: "Reabre a tela e tenta enviar a foto de novo.",
+  UPLOAD_KIND_REQUIRED: "Escolhe a frente, o verso ou a selfie.",
+  UPLOAD_KIND_INVALID: "Escolhe a frente, o verso ou a selfie.",
+  UPLOAD_KIND_NOT_ALLOWED: "Reabre a tela e tenta enviar a foto de novo.",
+} satisfies CopyCatalog;

@@ -81,6 +81,7 @@ test("REQ-ACC-011 anfitrião sem aprovação fica só para leitura", async ({ pa
   await expect(page.getByText(/No PetHost desde/)).toHaveCount(0);
 });
 test("REQ-ACC-014/015/016 tutor envia e remove a foto com confirmação", async ({ page, baseURL }) => {
+  test.setTimeout(90_000); // The first dev navigation may compile profile and BFF routes on a cold server.
   const image = await mockProfileImage(page);
   await loginAccount(page, baseURL!);
   await page.goto("/users/profile");
@@ -88,7 +89,20 @@ test("REQ-ACC-014/015/016 tutor envia e remove a foto com confirmação", async 
   await waitForHydration(input);
   await input.setInputFiles({ name: "foto.png", mimeType: "image/png", buffer: image });
   await expect(page.getByAltText("Prévia da sua foto")).toBeVisible();
+  const uploaded = page.waitForResponse(
+    (response) => response.request().method() === "PUT" && response.url().includes("/__mock/uploads/"),
+  );
+  const confirmed = page.waitForResponse(
+    (response) => response.request().method() === "POST" && /\/api\/uploads\/[^/]+\/confirm$/.test(response.url()),
+  );
   await page.getByRole("button", { name: "Usar esta foto" }).click();
+  const transfer = await uploaded;
+  expect(transfer.status()).toBe(200);
+  const headers = transfer.request().headers();
+  expect(headers.authorization).toBeUndefined();
+  expect(headers.cookie).toBeUndefined();
+  expect(headers["x-pethost-request"]).toBeUndefined();
+  expect((await confirmed).status()).toBe(200);
   await expect(page.getByAltText("Sua foto do perfil")).toBeVisible();
   await page.getByRole("button", { name: "Tirar foto" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Tirar", exact: true }).click();

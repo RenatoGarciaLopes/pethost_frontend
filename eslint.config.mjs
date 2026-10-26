@@ -98,6 +98,7 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   globalIgnores([
+    ".claude/worktrees/**",
     ".next/**",
     "out/**",
     "build/**",

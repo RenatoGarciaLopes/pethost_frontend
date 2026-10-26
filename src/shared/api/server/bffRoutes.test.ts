@@ -24,7 +24,7 @@ describe("matchBffRoute", () => {
   it("REQ-HTTP-009 casa padrões com parâmetros", () => {
     expect(matchBffRoute("GET", "/pets/me")).toMatchObject({ pattern: "/pets/me" });
     expect(
-      matchBffRoute("PATCH", "/pets/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c/photos/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1d"),
+      matchBffRoute("DELETE", "/pets/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1c/photos/0199c5a2-7f3e-7a41-9b1c-2d4e6f8a0b1d"),
     ).toMatchObject({ pattern: "/pets/{petId}/photos/{photoId}" });
     expect(matchBffRoute("get", "/users/me")).toBeDefined();
   });

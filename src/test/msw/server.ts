@@ -1,16 +1,17 @@
 import { setupServer } from "msw/node";
+import { directUploadHandlers } from "../../../e2e/support/handlers/directUploads.mjs";
 
 /**
  * Servidor MSW compartilhado pelos testes Vitest.
  *
- * Começa sem handlers: cada teste registra os seus com `server.use(...)`, e o setup
+ * Provides only the shared direct-upload protocol adapter by default. Resource handlers remain explicit.
  * reseta tudo após cada teste. Requisição sem handler é registrada aqui e reprova o
  * teste no `afterEach` (REQ-TOOL-002), configurado em `src/test/setup/vitest.setup.ts`.
  *
  * @example
  * server.use(http.get("http://api.test/api/v1/pets/me", () => HttpResponse.json(body)));
  */
-export const server = setupServer();
+export const server = setupServer(...directUploadHandlers);
 
 const unhandledRequests: string[] = [];
 

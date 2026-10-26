@@ -48,6 +48,34 @@ const publicReviewsNoScreen =
  * chamar a rota, ela sai daqui e entra em `bffRoutes` na mesma entrega.
  */
 export const deniedRoutes: readonly DeniedRoute[] = [
+  denied("PUT", "/owners/me/avatar", "Multipart API compatibility only; this frontend uses direct signed uploads."),
+  denied("PUT", "/hosts/me/avatar", "Multipart API compatibility only; this frontend uses direct signed uploads."),
+  denied(
+    "PUT",
+    "/hosts/me/application/documents",
+    "Multipart API compatibility only; this frontend uses direct signed uploads.",
+  ),
+  denied(
+    "POST",
+    "/listings/{listingId}/photos",
+    "Multipart API compatibility only; this frontend uses direct signed uploads.",
+  ),
+  denied(
+    "PATCH",
+    "/listings/{listingId}/photos/{photoId}",
+    "Multipart API compatibility only; this frontend uses direct signed uploads.",
+  ),
+  denied("POST", "/pets/{petId}/photos", "Multipart API compatibility only; this frontend uses direct signed uploads."),
+  denied(
+    "PATCH",
+    "/pets/{petId}/photos/{photoId}",
+    "Multipart API compatibility only; this frontend uses direct signed uploads.",
+  ),
+  denied(
+    "POST",
+    "/conversations/{conversationId}/messages/photo",
+    "Multipart API compatibility only; this frontend uses direct signed uploads.",
+  ),
   denied("GET", "/payments/payouts/me", "Ganhos do anfitrião ainda não tem tela consumidora."),
   denied("GET", "/payments/issues", adminNoScreen),
   // Admin
@@ -106,21 +134,18 @@ export const bffRoutes: readonly BffRoute[] = [
   // Tutor
   route("GET", "/owners/me"),
   route("PATCH", "/owners/me"),
-  route("PUT", "/owners/me/avatar"),
   route("DELETE", "/owners/me/avatar"),
   route("POST", "/owners/me/deactivate"),
 
   // Anfitrião
   route("GET", "/hosts/me"),
   route("PATCH", "/hosts/me"),
-  route("PUT", "/hosts/me/avatar"),
   route("DELETE", "/hosts/me/avatar"),
   route("POST", "/hosts/me/deactivate"),
   route("GET", "/hosts/me/application"),
   route("POST", "/hosts/me/application"),
   route("PATCH", "/hosts/me/application"),
   route("DELETE", "/hosts/me/application"),
-  route("PUT", "/hosts/me/application/documents"),
   route("POST", "/hosts/me/application/submission"),
   route("GET", "/hosts/{hostId}/pets"),
   route("GET", "/hosts/me/stripe-account"),
@@ -136,9 +161,7 @@ export const bffRoutes: readonly BffRoute[] = [
   route("PATCH", "/listings/{listingId}"),
   route("POST", "/listings/{listingId}/deactivation"),
   route("DELETE", "/listings/{listingId}/deactivation"),
-  route("POST", "/listings/{listingId}/photos"),
   route("PUT", "/listings/{listingId}/photos/order"),
-  route("PATCH", "/listings/{listingId}/photos/{photoId}"),
   route("DELETE", "/listings/{listingId}/photos/{photoId}"),
   route("GET", "/listings/{listingId}/compatibility"),
   route("GET", "/listings/{listingId}/availability-blocks"),
@@ -163,6 +186,10 @@ export const bffRoutes: readonly BffRoute[] = [
 
   // Conversas (a escrita é REST; o aviso em tempo real é o hub, fora do proxy)
   route("POST", "/conversations"),
+  route("POST", "/uploads"),
+  route("POST", "/uploads/documents/confirm"),
+  route("POST", "/uploads/{uploadId}/confirm"),
+  route("GET", "/conversations/{conversationId}/messages/{messageId}/photo"),
   route("GET", "/conversations/me"),
   route("GET", "/conversations/me/unread-count"),
   route("GET", "/conversations/me/notification-settings"),
@@ -170,7 +197,6 @@ export const bffRoutes: readonly BffRoute[] = [
   route("GET", "/conversations/{conversationId}"),
   route("GET", "/conversations/{conversationId}/messages"),
   route("POST", "/conversations/{conversationId}/messages"),
-  route("POST", "/conversations/{conversationId}/messages/photo"),
   route("POST", "/conversations/{conversationId}/messages/{messageId}/report"),
   route("PUT", "/conversations/{conversationId}/read-marker"),
   route("PUT", "/conversations/{conversationId}/block"),
@@ -186,8 +212,6 @@ export const bffRoutes: readonly BffRoute[] = [
   route("PATCH", "/pets/{petId}"),
   route("POST", "/pets/{petId}/deactivation"),
   route("DELETE", "/pets/{petId}/deactivation"),
-  route("POST", "/pets/{petId}/photos"),
-  route("PATCH", "/pets/{petId}/photos/{photoId}"),
   route("DELETE", "/pets/{petId}/photos/{photoId}"),
   route("PUT", "/pets/{petId}/photos/order"),
 

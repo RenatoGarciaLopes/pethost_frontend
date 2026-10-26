@@ -1,16 +1,12 @@
+import { uploadDirect } from "@/shared/api/client/uploadDirect";
 import { bffClient } from "@/shared/api/client/bffClient";
 import { unwrapData } from "@/shared/api/contracts/unwrapData";
 import { hasErrorCode } from "@/shared/api/errors/ApiError";
 import { translateCode } from "@/shared/api/errors/translateError";
-import {
-  PatchApiV1OwnersMeBody,
-  PostApiV1OwnersMeDeactivateResponse,
-  PutApiV1OwnersMeAvatarBody,
-} from "@/shared/api/generated/owners/owners.zod";
+import { PatchApiV1OwnersMeBody, PostApiV1OwnersMeDeactivateResponse } from "@/shared/api/generated/owners/owners.zod";
 import {
   PatchApiV1HostsMeBody,
   PostApiV1HostsMeDeactivateResponse,
-  PutApiV1HostsMeAvatarBody,
 } from "@/shared/api/generated/host-profile/host-profile.zod";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
 import type { PersonalRole } from "@/shared/auth/contracts/session";
@@ -91,12 +87,8 @@ function createProfileGateway(role: PersonalRole, transport: HttpTransport): Pro
         },
         schemas.save,
       ),
-    uploadAvatar: (file) => {
-      (role === "owner" ? PutApiV1OwnersMeAvatarBody : PutApiV1HostsMeAvatarBody).parse({ file });
-      const body = new FormData();
-      body.append("file", file);
-      return transport.request({ method: "PUT", path: `${path}/avatar`, body }, schemas.upload);
-    },
+    uploadAvatar: (file) =>
+      uploadDirect(file, { purpose: role === "owner" ? "owner-avatar" : "host-avatar" }, schemas.upload, transport),
     removeAvatar: () => transport.request({ method: "DELETE", path: `${path}/avatar` }, schemas.remove),
     async deactivate() {
       await transport.request(

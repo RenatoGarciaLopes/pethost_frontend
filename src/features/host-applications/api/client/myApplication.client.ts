@@ -1,5 +1,5 @@
 import { bffClient } from "@/shared/api/client/bffClient";
-import { withSessionRetry } from "@/shared/api/client/withSessionRetry";
+import { stageDirectUpload, confirmDocumentUploads } from "@/shared/api/client/uploadDirect";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
 import { DOCUMENT_KINDS, hostApplicationDtoSchema, type HostApplicationDto } from "../contracts";
 import type { PatchApplicationRequest, StartApplicationRequest } from "../toApplicationRequest";
@@ -33,23 +33,23 @@ export function patchApplication(
 }
 
 /**
- * Manda as fotos num pedido só (REQ-HVER-008), uma parte por vaga, na ordem frente, verso, selfie. O `FormData` é
- * montado na hora, a partir dos `File` da memória: no 401, renova a sessão uma vez e monta de novo. Tudo ou nada na
- * API: o erro aponta a vaga (`fieldIssues.back`).
+ * Stages document files independently and confirms all selected slots atomically.
  * @example await uploadDocuments({ front, back, selfie });
  */
-export function uploadDocuments(
+export async function uploadDocuments(
   files: DocumentFiles,
   transport: HttpTransport = bffClient,
 ): Promise<HostApplicationDto> {
-  return withSessionRetry(() => {
-    const body = new FormData();
-    for (const kind of DOCUMENT_KINDS) {
-      const file = files[kind];
-      if (file) body.append(kind, file);
-    }
-    return transport.request({ method: "PUT", path: `${PATH}/documents`, body }, hostApplicationDtoSchema);
-  }, transport);
+  const tickets = [];
+  for (const kind of DOCUMENT_KINDS) {
+    const file = files[kind];
+    if (file) tickets.push(await stageDirectUpload(file, { purpose: "host-document", kind }, transport));
+  }
+  return confirmDocumentUploads(
+    tickets.map((ticket) => ticket.uploadId),
+    hostApplicationDtoSchema,
+    transport,
+  );
 }
 
 /**

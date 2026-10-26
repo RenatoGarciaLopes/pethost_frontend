@@ -1,5 +1,5 @@
 import { bffClient } from "@/shared/api/client/bffClient";
-import { withSessionRetry } from "@/shared/api/client/withSessionRetry";
+import { uploadDirect } from "@/shared/api/client/uploadDirect";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
 import { listingDtoSchema, type ListingDto } from "../contracts";
 import type { CreateListingRequest, UpdateListingRequest } from "../mappers";
@@ -7,15 +7,6 @@ import type { CreateListingRequest, UpdateListingRequest } from "../mappers";
 const listingPath = (listingId: string) => `/listings/${encodeURIComponent(listingId)}`;
 const photoPath = (listingId: string, photoId: string) =>
   `${listingPath(listingId)}/photos/${encodeURIComponent(photoId)}`;
-
-/** Monta o multipart na hora (no 401, o reenvio monta de novo a partir do `File` da memória). */
-function sendPhoto(path: string, method: "POST" | "PATCH", file: File, transport: HttpTransport) {
-  return withSessionRetry(() => {
-    const body = new FormData();
-    body.append("file", file);
-    return transport.request({ method, path, body }, listingDtoSchema);
-  }, transport);
-}
 
 /**
  * Cadastra o cantinho, já ativo, num pedido só (REQ-LIST-011). Não repete sozinho.
@@ -58,7 +49,7 @@ export function reactivateListing(listingId: string, transport: HttpTransport = 
  * @example await addListingPhoto(id, file);
  */
 export function addListingPhoto(listingId: string, file: File, transport: HttpTransport = bffClient) {
-  return sendPhoto(`${listingPath(listingId)}/photos`, "POST", file, transport);
+  return uploadDirect(file, { purpose: "listing-photo", resourceId: listingId }, listingDtoSchema, transport);
 }
 
 /**
@@ -71,7 +62,7 @@ export function replaceListingPhoto(
   file: File,
   transport: HttpTransport = bffClient,
 ) {
-  return sendPhoto(photoPath(listingId, photoId), "PATCH", file, transport);
+  return uploadDirect(file, { purpose: "listing-photo", resourceId: listingId, photoId }, listingDtoSchema, transport);
 }
 
 /**

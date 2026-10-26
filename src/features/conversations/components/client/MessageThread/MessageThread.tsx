@@ -3,7 +3,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
-import { hardShadow } from "@/shared/theme/tokens/shadows";
+import { MessagePhoto } from "./MessagePhoto";
 import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
 import { buildTimeline, type TimelineEvent } from "../../../lib/buildTimeline";
 import { conversationsCopy } from "../../../lib/conversationsCopy";
@@ -51,26 +51,7 @@ function MessageItem({ message, mine, otherName }: { message: ConversationMessag
       <Box component="span" sx={visuallyHidden}>
         {mine ? copy.youSaid : copy.saidBy(otherName)}
       </Box>
-      {message.imageUrl && (
-        <Box
-          component="img"
-          src={message.imageUrl}
-          alt={mine ? copy.photoAlt(copy.you) : copy.photoAlt(otherName)}
-          sx={{
-            display: "block",
-            width: "min(340px, 85%)",
-            aspectRatio: "4 / 3",
-            objectFit: "cover",
-            border: "2px solid",
-            borderColor: "text.primary",
-            borderRadius: `${quintalRadii.media}px`,
-            boxShadow: hardShadow(5),
-            bgcolor: "quintal.cartao",
-            transform: mine ? "rotate(1deg)" : "rotate(-1deg)",
-            mb: 0.75,
-          }}
-        />
-      )}
+      {message.imageUrl && <MessagePhoto message={message} mine={mine} otherName={otherName} />}
       {message.body && <Box sx={bubble(mine)}>{message.body}</Box>}
       <Typography component="span" sx={{ fontSize: "0.78rem", color: "text.secondary" }}>
         <time dateTime={message.createdAt}>{formatMessageTime(message.createdAt)}</time>

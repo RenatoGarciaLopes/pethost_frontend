@@ -1,6 +1,8 @@
 /** Textos das conversas (spec 055, em rascunho), na voz da PetHost. Sem gênero presumido. */
 export const conversationsCopy = {
   heading: "Conversas",
+  retryPhoto: "Tentar carregar a foto",
+  loadingPhoto: "Carregando foto...",
   booking: {
     action: (name: string) => `Conversar com ${name}`,
     host: "o anfitrião",
