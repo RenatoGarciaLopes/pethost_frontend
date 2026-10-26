@@ -5,7 +5,7 @@ import type { Coordinates } from "@/shared/hooks/useGeolocation";
 import type { HttpTransport } from "@/shared/api/transport/HttpTransport";
 import type { SearchPet, SearchQuery } from "../types";
 import { toApiSearch } from "../lib/searchParams";
-import { compatibilitySchema, searchPageSchema } from "./contracts";
+import { compatibilitySchema, listingPhotosSchema, searchPageSchema } from "./contracts";
 
 /** Raio e tamanho da vitrine "perto de você" da home. */
 export const NEARBY_RADIUS_KM = 10;
@@ -13,6 +13,16 @@ export const NEARBY_PAGE_SIZE = 6;
 
 /** Consultas isoladas por conta; servidor e navegador usam a mesma chave e contrato. @example useInfiniteQuery(searchQueries.infinite(accountId, query, pets)) */
 export const searchQueries = {
+  /** Fotos públicas, carregadas apenas pelo card em hover; independentes de conta e filtros. */
+  photos: (listingId: string) =>
+    queryOptions({
+      queryKey: ["listing-photos", listingId] as const,
+      queryFn: async ({ signal }) =>
+        (await bffClient.request({ method: "GET", path: `/listings/${listingId}`, signal }, listingPhotosSchema))
+          .photos,
+      staleTime: 300_000,
+      retry: false,
+    }),
   infinite: (
     accountId: string,
     query: SearchQuery,

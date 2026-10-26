@@ -1,6 +1,11 @@
 "use client";
 import Link from "next/link";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { usePrefersReducedMotion } from "@/shared/lib/motion/usePrefersReducedMotion";
+import { quintalRadii } from "@/shared/theme/tokens/radii";
+import { searchQueries } from "../../../api/queries";
 import { Sticker } from "@/shared/ui/feedback/Sticker";
 import {
   ListingCardFace,
@@ -60,6 +65,50 @@ function formatAverage(average: number): string {
  * @example <ListingCard listing={listing} query={query} petCount={2} compatibility={{ accountId, pets }} />
  */
 export function ListingCard({ listing, query, petCount, compatibility }: ListingCardProps) {
+  const reducedMotion = usePrefersReducedMotion();
+  const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
+  const [hovered, setHovered] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const [failedPhotos, setFailedPhotos] = useState<string[]>([]);
+  const [loadedPhotos, setLoadedPhotos] = useState<string[]>([]);
+  const active = hovered && canHover && !reducedMotion;
+  const gallery = useQuery({ ...searchQueries.photos(listing.id), enabled: active });
+  const photos = useMemo(
+    () =>
+      [
+        ...new Set([
+          ...(listing.coverPhotoUrl ? [listing.coverPhotoUrl] : []),
+          ...[...(gallery.data ?? [])].sort((a, b) => a.position - b.position).map((photo) => photo.url),
+        ]),
+      ]
+        .filter((url) => !failedPhotos.includes(url))
+        .slice(0, 5),
+    [listing.coverPhotoUrl, gallery.data, failedPhotos],
+  );
+  const currentPhoto = active && photos.length ? photoIndex % photos.length : 0;
+  const frames = active ? photos : photos.slice(0, 1);
+  useEffect(() => {
+    if (!active || photos.length < 2) return;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const updateTimer = () => {
+      clearInterval(timer);
+      if (!document.hidden)
+        timer = setInterval(
+          () =>
+            setPhotoIndex((index) => {
+              const next = (index + 1) % photos.length;
+              return loadedPhotos.includes(photos[next]) ? next : index;
+            }),
+          2200,
+        );
+    };
+    updateTimer();
+    document.addEventListener("visibilitychange", updateTimer);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", updateTimer);
+    };
+  }, [active, photos, loadedPhotos]);
   const nights = query.from && query.to ? nightsBetween(query.from, query.to) : 0;
   const hasTotal = nights > 0 && petCount > 0;
   const params = queryToSearchParams({
@@ -76,7 +125,25 @@ export function ListingCard({ listing, query, petCount, compatibility }: Listing
     <Box
       component={Link}
       href={`/listings/${listing.id}${params.size ? `?${params}` : ""}`}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") setHovered(true);
+      }}
+      onPointerLeave={() => {
+        setHovered(false);
+        setPhotoIndex(0);
+      }}
+      onBlur={() => {
+        setHovered(false);
+        setPhotoIndex(0);
+      }}
       sx={{
+        position: "relative",
+        transition: "transform 180ms ease",
+        transformOrigin: "center center",
+        "@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)": {
+          "&:hover": { transform: "scale(1.025)", zIndex: 1 },
+        },
+        "@media (prefers-reduced-motion: reduce)": { transition: "none" },
         display: "block",
         color: "text.primary",
         textDecoration: "none",
@@ -86,13 +153,59 @@ export function ListingCard({ listing, query, petCount, compatibility }: Listing
     >
       <ListingCardFace
         cover={
-          listing.coverPhotoUrl ? (
-            <Box
-              component="img"
-              src={listing.coverPhotoUrl}
-              alt={searchCopy.photoAlt(listing.title)}
-              sx={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
-            />
+          photos.length ? (
+            <Box sx={{ position: "absolute", inset: 0 }}>
+              {frames.map((url, index) => (
+                <Box
+                  key={url}
+                  component="img"
+                  src={url}
+                  alt={index === currentPhoto ? searchCopy.photoAlt(listing.title) : ""}
+                  aria-hidden={index !== currentPhoto}
+                  onLoad={() => setLoadedPhotos((loaded) => (loaded.includes(url) ? loaded : [...loaded, url]))}
+                  onError={() => setFailedPhotos((failed) => (failed.includes(url) ? failed : [...failed, url]))}
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    opacity: index === currentPhoto ? 1 : 0,
+                    transition: active ? "opacity 300ms ease" : "none",
+                  }}
+                />
+              ))}
+              {active && photos.length > 1 && (
+                <Box
+                  aria-hidden="true"
+                  sx={{
+                    position: "absolute",
+                    top: 12,
+                    left: 12,
+                    display: "flex",
+                    gap: 0.5,
+                    p: 0.75,
+                    borderRadius: `${quintalRadii.pill}px`,
+                    bgcolor: "rgba(0,0,0,.5)",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {photos.map((url, index) => (
+                    <Box
+                      key={url}
+                      component="span"
+                      sx={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        bgcolor: "#fff",
+                        opacity: index === currentPhoto ? 1 : 0.4,
+                      }}
+                    />
+                  ))}
+                </Box>
+              )}
+            </Box>
           ) : (
             <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>{searchCopy.noPhoto}</Box>
           )

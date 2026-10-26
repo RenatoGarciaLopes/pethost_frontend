@@ -1,6 +1,9 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { listingFixture, searchQueryFixture } from "@/test/fixtures/search";
+import { listingPhotosFixture } from "@/test/fixtures/listingPage";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+import { searchCopy } from "../../../lib/searchCopy";
 import type { ListingSummary } from "../../../api/contracts";
 import { searchQueries } from "../../../api/queries";
 import { ListingCard } from "./ListingCard";
@@ -53,6 +56,34 @@ type Story = StoryObj<typeof meta>;
 
 /** Visitante, sem datas: só a diária, sem chip de compatibilidade. */
 export const Visitante: Story = {};
+export const SlideNoHover: Story = {
+  name: "Hover com prévia das fotos",
+  args: { listing: listingFixture({ coverPhotoUrl: listingPhotosFixture[0].url }) },
+  decorators: [
+    (Story, context) => {
+      const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const { listing } = context.args as { listing: ListingSummary };
+      client.setQueryData(searchQueries.photos(listing.id).queryKey, listingPhotosFixture);
+      return (
+        <QueryClientProvider client={client}>
+          <Story />
+        </QueryClientProvider>
+      );
+    },
+  ],
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole("link");
+    const image = () => canvas.getByRole("img", { name: searchCopy.photoAlt(args.listing.title) });
+    await expect(image()).toHaveAttribute("src", args.listing.coverPhotoUrl);
+    await userEvent.hover(link);
+    await waitFor(() => expect(new DOMMatrix(getComputedStyle(link).transform).a).toBeGreaterThan(1));
+    await waitFor(() => expect(image()).not.toHaveAttribute("src", args.listing.coverPhotoUrl), { timeout: 3500 });
+    await userEvent.unhover(link);
+    await expect(image()).toHaveAttribute("src", args.listing.coverPhotoUrl);
+    await expect(canvas.getAllByRole("link")).toHaveLength(1);
+  },
+};
 export const SemFoto: Story = { args: { listing: listingFixture({ coverPhotoUrl: null }) } };
 export const SemNota: Story = { args: { listing: listingFixture({ coverPhotoUrl: photo }) } };
 export const SeloVizinho: Story = { args: { listing: listingFixture({ coverPhotoUrl: photo, badges: ["neighbor"] }) } };

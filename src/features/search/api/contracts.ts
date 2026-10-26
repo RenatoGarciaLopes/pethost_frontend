@@ -4,9 +4,12 @@ import { LISTING_BADGES } from "@/shared/config/listingBadges";
 import {
   GetApiV1ListingsListingIdCompatibilityResponse,
   GetApiV1ListingsResponse,
+  GetApiV1ListingsListingIdResponse,
 } from "@/shared/api/generated/listings/listings.zod";
 
 const page = unwrapData(GetApiV1ListingsResponse);
+/** Recorte público do detalhe: a prévia do card não guarda endereço ou dados da conta. */
+export const listingPhotosSchema = unwrapData(GetApiV1ListingsListingIdResponse).pick({ photos: true });
 /** Espécies documentadas da API, compartilhadas entre URL e resposta. @example listingSpeciesSchema.parse("dog") */
 export const listingSpeciesSchema = z.enum([
   "dog",

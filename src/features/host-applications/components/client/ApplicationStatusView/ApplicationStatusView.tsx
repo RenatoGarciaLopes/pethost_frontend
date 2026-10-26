@@ -181,7 +181,10 @@ export function ApplicationStatusView({ accountId }: { accountId: string }) {
 
   const { application } = query.data;
   return (
-    <Stack spacing={3}>
+    <Stack
+      spacing={3}
+      sx={application?.status === "approved" ? { textAlign: "center", alignItems: "center" } : undefined}
+    >
       {flash && <Notice tone="ok" title={flash} />}
       {application && (
         <Box>

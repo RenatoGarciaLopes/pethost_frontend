@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { getRouter } from "@storybook/nextjs-vite/router.mock";
-import { fn } from "storybook/test";
+import { expect, fn, within } from "storybook/test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { FlashMessageProvider } from "@/shared/hooks/useFlashMessage";
@@ -79,6 +79,14 @@ export const SoSuporte: Story = {
 export const Aprovada: Story = {
   name: "REQ-HVER-016 Aprovada",
   args: { mine: withApplication({ status: "approved" }, { canStartNew: false }) },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const title = await canvas.findByRole("heading", { name: "Verificação aprovada!" });
+    await expect(getComputedStyle(title).textAlign).toBe("center");
+    await expect(getComputedStyle(canvas.getByText("Agora é só dizer como você quer receber.")).textAlign).toBe(
+      "center",
+    );
+  },
 };
 export const Vencida: Story = { name: "REQ-HVER-017 Vencida", args: { mine: withApplication({ status: "expired" }) } };
 export const Desistencia: Story = {
