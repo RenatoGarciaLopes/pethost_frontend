@@ -161,6 +161,8 @@ describe("ListingDraft em passos", { timeout: 20000 }, () => {
     const { user } = renderDraft();
     await stepHeading("guests");
     expect(screen.queryByRole("group", { name: copy.guests.sizes })).not.toBeInTheDocument();
+    // "Outro bicho" no padrão dos portes: rótulo curto e o "aceito conversar" como descrição.
+    expect(screen.getByRole("checkbox", { name: "Outro bicho. aceito conversar" })).toBeInTheDocument();
     await user.click(screen.getByRole("checkbox", { name: "Cachorro" }));
     await user.click(continueButton());
     const sizes = await screen.findByRole("group", { name: copy.guests.sizes });

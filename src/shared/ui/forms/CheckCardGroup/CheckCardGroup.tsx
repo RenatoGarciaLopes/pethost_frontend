@@ -56,6 +56,8 @@ export function CheckCardGroup({
           mt: 1,
           display: "grid",
           gap: 1.5,
+          // Linhas da mesma altura: a mais alta (rótulo de duas linhas) dita todas.
+          gridAutoRows: "1fr",
           gridTemplateColumns: Object.fromEntries(
             Object.entries(columns).map(([breakpoint, count]) => [breakpoint, `repeat(${count}, minmax(0, 1fr))`]),
           ),

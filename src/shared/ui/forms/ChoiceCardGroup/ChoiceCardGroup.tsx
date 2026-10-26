@@ -9,7 +9,8 @@ export interface ChoiceCardGroupProps {
   /** Ordered unique options; checked state comes from value. */ options: readonly Omit<ChoiceCardProps, "checked">[];
   /** Selected option. */ value: string;
   /** Next selected option from click or arrows. */ onChange: (value: string) => void;
-  /** Equal columns from md; stacked on mobile. */ layout?: "stacked" | "responsive";
+  /** `responsive`: equal columns from md, stacked on mobile. `row`: equal columns at every width (two short choices). */
+  layout?: "stacked" | "responsive" | "row";
   /** Section heading for the visible group label; body preserves existing forms. */ labelVariant?: "body" | "section";
   /** Disable all choices. */ disabled?: boolean;
 }
@@ -36,7 +37,8 @@ export function ChoiceCardGroup({
         sx={
           labelVariant === "section"
             ? { typography: "h2", fontSize: 20, fontWeight: 700, color: "text.primary" }
-            : undefined
+            : // No peso dos rótulos de campo do tema (TextField), como os grupos da prancha.
+              { fontWeight: 700 }
         }
       >
         {label}
@@ -51,6 +53,10 @@ export function ChoiceCardGroup({
           ...(layout === "responsive" && {
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: `repeat(${options.length}, minmax(0, 1fr))` },
+          }),
+          ...(layout === "row" && {
+            display: "grid",
+            gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
           }),
         }}
       >

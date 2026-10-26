@@ -22,13 +22,20 @@
 
 ## O que ainda difere
 
-- **Rótulos de grupo** ("Sua casa é…", "Tem quintal?", perguntas de Sim/Não) saem no peso regular do `FormLabel` do tema; os campos de texto do cadastro e as legendas novas (espécies, portes, dias) são em negrito. Mudar o `FormLabel` mexe em todos os formulários; ficou para uma decisão de tema.
 - **Largura do passo** no computador é ~528 px (com a coluna ao vivo, para caber na grade de 1136 px do cabeçalho); no cadastro de conta o passo vai até 720 px. Entre 900 e 1199 px a coluna ao vivo some e o passo volta à largura do cadastro.
-- **Espécies**: os cartões compactos não têm desenho (só o nome), como em "Que bicho é o seu?" do cadastro do pet; o nome "Outro bicho (aceito conversar)" ocupa três linhas e alonga a última fileira.
 - **Prancha `telas-cantinho.png`** mostra o painel de seções (superado pela decisão); a revisão reaproveita o resumo por bloco e o check, mas em lista de uma coluna.
 - **Referência de preço da cidade** (nota 19) continua fora: a API não tem esse dado.
 - O cadastro de conta tem rodapé "Já tem conta? Entrar"; o do cantinho não tem rodapé.
 - Celular: nas capturas de página inteira a barra fixa e o cabeçalho aparecem no meio (efeito da captura); por isso os prints de 390 são da tela visível.
+
+## Revisão, rodada 1 (25/10/2026)
+
+- **Rótulos de grupo em negrito.** `SegmentedControl` e `ChoiceCardGroup` (variante `body`) passam a dar o rótulo em 700, o peso dos rótulos de campo do tema (`TextField`) e do "Você entra como" da prancha `telas-conta`. Vale para todos os consumidores (cadastro do pet, verificação, decisões de reserva, checkout); o cadastro de conta não usa esses dois componentes e não muda. Passos 1, 3, 4 e 7 conferidos nos prints.
+- **Passo 1 no 390.** `ChoiceCardGroup` ganhou `layout="row"` (colunas iguais em qualquer largura) e o `ChoiceCard` em coluna fica mais baixo no celular (112 px, desenho de 40 px, título 16 px). Casa e Apartamento lado a lado; "Tem quintal?" e o Sim/Não aparecem sem rolar em 390x844 (`passos/01c-sua-casa-respondida-390.png`). Legenda do apartamento encurtada para "Prédio ou condomínio".
+- **Grade de espécies.** `CheckCardGroup` com `grid-auto-rows: 1fr` (linhas iguais). "Outro bicho" com "aceito conversar" como descrição, no padrão dos portes. Cartão compacto em 15 px com `hyphens: manual`: medido na fonte do site, "Porquinho-da-índia" tem 135 px e o cartão do celular deixa 145 px, então fica numa linha. Para liberar a largura, o selo ✓ do cartão compacto fica pendurado na quina, com aro de papel (`SelectedBadge placement="corner"`).
+- **Local no card.** "Centro · São Paulo" não é fallback: é o endereço da conta no backend simulado (CEP 01001000, `e2e/support/handlers/accountProfile.mjs`), que é o começo do rascunho. O "Zona 01 · Maringá" do passo 8 vinha do meu script de captura, que respondia Maringá para qualquer CEP, e o `AddressFields` reescrevia os campos. O script agora responde o endereço do próprio CEP da conta e o card mostra o mesmo local do passo 1 ao 9. Sem bairro, o card já mostrava "Seu bairro · sua cidade" (nunca cidade inventada).
+- **Testes.** `npx vitest run src/shared/ui/forms src/features/host-listings src/features/pets src/features/host-applications --maxWorkers 2`: 89 arquivos, 500 testes aprovados (novos: peso do rótulo no `SegmentedControl`, `layout="row"` no `ChoiceCardGroup`, nome do cartão "Outro bicho. aceito conversar"). Stories (config temporária com `server.fs.allow`, removida): host-listings, `shared/ui/forms`, registration, `ApplicationWizard` e `PetWizard`, 110 stories em 26 arquivos; 109 passaram e "REQ-HVER-004 Seus dados" falhou uma vez (`h1` ainda vazio no `toBeVisible`, sob carga paralela). Isolada, a story da verificação passou 5/5 duas vezes seguidas. `tsc`, `eslint`, `prettier --check` e `git diff --check` aprovados.
+- **Prints.** Todos os passos refeitos em 1440 e 390 em `test-results/104/passos/` (cópia em `r1/`), incluindo 1, 4 e 9; comparações `comparar-*.png` regeneradas. Rolagem horizontal em 390: `scrollWidth` 390 nas 12 capturas.
 
 ## Documentação
 

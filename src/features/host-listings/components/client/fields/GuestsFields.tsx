@@ -10,7 +10,9 @@ import type { HostKind } from "../../../types";
 
 const copy = listingCopy.guests;
 const CAPACITY_MAX = { person: 10, company: 200 } as const;
-const SPECIES_OPTIONS = LISTING_SPECIES.map((value) => ({ value, label: listingCopy.species[value] }));
+const SPECIES_OPTIONS = LISTING_SPECIES.map((value) =>
+  value === "exotic" ? { value, ...copy.exotic } : { value, label: listingCopy.species[value] },
+);
 const SIZES = ["small", "medium", "large"] as const;
 const SIZE_FIELD = { small: "acceptsSmall", medium: "acceptsMedium", large: "acceptsLarge" } as const;
 const SIZE_OPTIONS = SIZES.map((value) => ({ value, label: copy[value], description: copy.sizeHelp[value] }));

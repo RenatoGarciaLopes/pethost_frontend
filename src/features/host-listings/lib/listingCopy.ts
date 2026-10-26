@@ -44,7 +44,7 @@ export const listingCopy = {
 
   home: {
     homeType: "Sua casa é…",
-    homeTypeHelp: { house: "Térrea ou sobrado", apartment: "Em prédio ou condomínio" },
+    homeTypeHelp: { house: "Térrea ou sobrado", apartment: "Prédio ou condomínio" },
     hasYard: "Tem quintal?",
     title: "Título do cantinho",
     titleHelp: "É o nome que os tutores veem na busca.",
@@ -68,6 +68,8 @@ export const listingCopy = {
     medium: "Médio",
     large: "Grande",
     sizeHelp: { small: "até 10 kg", medium: "10 a 25 kg", large: "mais de 25 kg" },
+    /** O cartão de "Outro bicho" no padrão dos portes: rótulo curto e o "aceito conversar" embaixo. */
+    exotic: { label: "Outro bicho", description: "aceito conversar" },
     capacity: "Quantos pets ao mesmo tempo?",
     capacityHelp: "Somando todos os tutores",
   },

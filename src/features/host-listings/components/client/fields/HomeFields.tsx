@@ -18,8 +18,8 @@ const HOME_OPTIONS = HOME_TYPES.map((value) => ({
 }));
 
 /**
- * "Sua casa é…" (REQ-LIST-005): Casa · Apartamento em cartões grandes com desenho, lado a lado (um sobre o outro no
- * celular). Só pessoa física. Precisa de `FormProvider`.
+ * "Sua casa é…" (REQ-LIST-005): Casa · Apartamento em cartões com desenho, lado a lado também no celular (mais
+ * baixos, para "Tem quintal?" caber na primeira tela). Só pessoa física. Precisa de `FormProvider`.
  * @example {kind === "person" && <HomeTypeField />}
  */
 export function HomeTypeField() {
@@ -36,7 +36,7 @@ export function HomeTypeField() {
             options={HOME_OPTIONS}
             value={field.value}
             onChange={field.onChange}
-            layout="responsive"
+            layout="row"
           />
           {fieldState.error && <FormHelperText error>{fieldState.error.message}</FormHelperText>}
         </Stack>

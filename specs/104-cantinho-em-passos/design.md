@@ -27,11 +27,16 @@ Prop opcional `aside?: ReactNode`. Com ela, a partir de `lg` a grade vira `240px
 na grade do cabeçalho (1136 px); a coluna fica presa ao rolar e some abaixo de `lg`. Sem `aside`, a casca é a de antes
 (272 | até 720), então cadastro e verificação não mudam. Consumidor: `ListingDraft`.
 
+### ChoiceCardGroup (shared/ui/forms) — `layout="row"` e rótulo em negrito (rodada 1)
+
+Colunas iguais em qualquer largura para duas escolhas curtas (tipo de casa); o rótulo `body` passa a 700, como o `SegmentedControl` e os rótulos de campo.
+
 ### ChoiceCard (shared/ui/forms) — `control`, `orientation`, `density`
 
 - `control="checkbox"` + `onCheckedChange` (para `CheckCardGroup`); padrão `radio`, como antes.
 - `orientation="column"`: desenho grande em cima, centralizado, 152 px (o cartão de papel do cadastro).
-- `density="compact"`: 56 px, com espaço para o selo ✓ (listas longas).
+- `density="compact"`: 56 px, texto em 15 px sem hifenização automática e selo ✓ pendurado na quina com aro de papel (`SelectedBadge placement="corner"`), para o texto ter a largura toda (listas longas).
+- Em coluna, no celular: 112 px, desenho de 40 px, título 16 px (dois cartões lado a lado).
   Padrões preservam os consumidores (pets, verificação, checkout).
 
 ### CheckCardGroup (shared/ui/forms) — novo

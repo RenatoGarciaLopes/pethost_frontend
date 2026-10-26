@@ -19,9 +19,10 @@ export interface ChoiceCardProps {
   /** `radio` (default, inside RadioGroup) or `checkbox` (multiple choice, inside CheckCardGroup). */
   control?: "radio" | "checkbox";
   /** Checkbox only: receives the next checked state. */ onCheckedChange?: (checked: boolean) => void;
-  /** `row` (default): icon on the left. `column`: large icon on top, centered (home type, account role). */
+  /** `row` (default): icon on the left. `column`: large icon on top, centered (home type); smaller on phones. */
   orientation?: "row" | "column";
-  /** `compact`: 56 px tall, for grids with many options (species). */ density?: "regular" | "compact";
+  /** `compact`: 56 px tall, check hung on the corner (full width for the text), for grids with many options (species). */
+  density?: "regular" | "compact";
 }
 /**
  * Illustrated native radio (or checkbox) label with a green pressed selection and visible check.
@@ -53,10 +54,8 @@ export function ChoiceCard({
       disabled={disabled}
       sx={{
         width: "100%",
-        minHeight: column ? 152 : compact ? 56 : 80,
-        p: column ? 2.5 : compact ? 1.5 : 2,
-        // O selo do escolhido fica no canto: o texto do cartão compacto não passa por baixo dele.
-        pr: compact ? 5 : undefined,
+        minHeight: column ? { xs: 112, sm: 152 } : compact ? 56 : 80,
+        p: column ? { xs: 1.5, sm: 2.5 } : compact ? 1.5 : 2,
         gap: column ? 1 : compact ? 1.5 : 2,
         flexDirection: column ? "column" : "row",
         justifyContent: column ? "center" : "flex-start",
@@ -84,9 +83,26 @@ export function ChoiceCard({
       ) : (
         <Radio value={value} checked={checked} disabled={disabled} slotProps={{ input: inputProps }} sx={hidden} />
       )}
-      {icon && <Box aria-hidden="true">{icon}</Box>}
+      {icon && (
+        <Box
+          aria-hidden="true"
+          // Em coluna, o desenho encolhe no celular para dois cartões caberem lado a lado.
+          sx={column ? { lineHeight: 0, "& svg": { width: { xs: 40, sm: 56 }, height: "auto" } } : undefined}
+        >
+          {icon}
+        </Box>
+      )}
       <Box>
-        <Typography component="span" sx={{ fontWeight: column ? 800 : 700, fontSize: column ? 18 : undefined }}>
+        <Typography
+          component="span"
+          sx={{
+            fontWeight: column ? 800 : 700,
+            // Compacto em 15 px: no celular (2 colunas, 145 px de texto) "Porquinho-da-índia" cabe numa linha.
+            fontSize: column ? { xs: 16, sm: 18 } : compact ? 15 : undefined,
+            // Sem hifenização automática: nada de "Porqui-nho".
+            hyphens: "manual",
+          }}
+        >
           {label}
         </Typography>
         {description && (
@@ -101,7 +117,7 @@ export function ChoiceCard({
           </Typography>
         )}
       </Box>
-      {checked && <SelectedBadge />}
+      {checked && <SelectedBadge placement={compact ? "corner" : "inside"} />}
     </ButtonBase>
   );
 }
