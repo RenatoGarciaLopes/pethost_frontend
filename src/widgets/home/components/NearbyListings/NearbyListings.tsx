@@ -106,7 +106,7 @@ export function NearbyListings({ scope, pets = [], from, to, count }: NearbyList
           </Box>
         </>
       ) : (
-        <Surface elevation="md" sx={{ p: { xs: 2.5, md: 3.5 } }}>
+        <Surface elevation="md" sx={{ p: { xs: 2.5, md: 3.5 }, textAlign: "center" }}>
           <Typography component="h2" variant="h3" id="nearby-title" sx={{ mb: 1 }}>
             {copy.askTitle}
           </Typography>
@@ -130,7 +130,7 @@ export function NearbyListings({ scope, pets = [], from, to, count }: NearbyList
             location.status === "asking" ||
             (location.status === "failed" && !waitingAll)) && (
             <>
-              <Typography sx={{ mb: 2, maxWidth: "56ch" }}>
+              <Typography sx={{ mb: 2, mx: "auto", maxWidth: "56ch" }}>
                 {location.status === "failed" ? copy.failed : copy.askBody}
               </Typography>
               <Button
