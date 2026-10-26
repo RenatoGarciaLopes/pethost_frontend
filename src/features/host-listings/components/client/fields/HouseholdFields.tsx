@@ -1,10 +1,9 @@
 "use client";
 
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useWatch } from "react-hook-form";
 import { listingCopy } from "../../../lib/listingCopy";
-import { ListingSection } from "./ListingSectionHost";
 import { ListingYesNo } from "./ListingYesNo";
 
 const copy = listingCopy.household;
@@ -28,22 +27,18 @@ function IntroducePets() {
 }
 
 /**
- * "Quem mora com você" (REQ-LIST-006): cachorro, gato e criança. Com cachorro ou gato, o atalho "Apresentar quem mora
- * aqui"; o rascunho fica na sessão, então nada se perde na ida.
+ * "Quem mora com você" (REQ-LIST-006): cachorro, gato e criança em Sim/Não. Com cachorro ou gato, o atalho "Apresentar
+ * quem mora aqui"; o rascunho fica na sessão (com o passo), então nada se perde na ida. Precisa de `FormProvider`.
  *
- * @example <HouseholdSection />
+ * @example <HouseholdFields />
  */
-export function HouseholdSection() {
+export function HouseholdFields() {
   return (
-    <ListingSection id="household">
-      {() => (
-        <>
-          <ListingYesNo name="hasDogs" label={copy.hasDogs} />
-          <ListingYesNo name="hasCats" label={copy.hasCats} />
-          <ListingYesNo name="hasKids" label={copy.hasKids} />
-          <IntroducePets />
-        </>
-      )}
-    </ListingSection>
+    <Stack spacing={3}>
+      <ListingYesNo name="hasDogs" label={copy.hasDogs} />
+      <ListingYesNo name="hasCats" label={copy.hasCats} />
+      <ListingYesNo name="hasKids" label={copy.hasKids} />
+      <IntroducePets />
+    </Stack>
   );
 }

@@ -26,6 +26,16 @@ export const formCopy = {
     saturday: "Sábado",
     sunday: "Domingo",
   },
+  /** Abreviados na tela do `WeekdayPicker`; o nome inteiro (acima) vai para o leitor de tela. */
+  weekdaysShort: {
+    monday: "Seg",
+    tuesday: "Ter",
+    wednesday: "Qua",
+    thursday: "Qui",
+    friday: "Sex",
+    saturday: "Sáb",
+    sunday: "Dom",
+  },
   allWeekdays: "Todos os dias",
   /** Endereço brasileiro (`AddressFields`): rótulos genéricos, iguais em qualquer tela. */
   address: {

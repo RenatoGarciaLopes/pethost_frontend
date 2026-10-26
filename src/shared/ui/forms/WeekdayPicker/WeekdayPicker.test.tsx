@@ -21,11 +21,12 @@ function Harness({ initial = [] as Weekday[], onChange = vi.fn() }) {
 }
 
 describe("WeekdayPicker", () => {
-  it("REQ-LIST-010 os 7 dias, de segunda a domingo, num grupo com nome", () => {
+  it("REQ-LIST-010 'Todos os dias' e os 7 dias, de segunda a domingo, num grupo com nome", () => {
     renderWithProviders(<Harness initial={["saturday"]} />, { theme: quintalTheme });
     const group = screen.getByRole("group", { name: "Dias que recebe" });
     const days = within(group).getAllByRole("checkbox");
-    expect(days.map((day) => day.getAttribute("aria-label") ?? day.closest("label")?.textContent)).toEqual([
+    expect(days.map((day) => day.getAttribute("aria-label"))).toEqual([
+      "Todos os dias",
       "Segunda",
       "Terça",
       "Quarta",
@@ -46,10 +47,12 @@ describe("WeekdayPicker", () => {
     expect(onChange).toHaveBeenLastCalledWith(["monday"]);
   });
 
-  it("REQ-LIST-010 'Todos os dias' marca a semana inteira", async () => {
+  it("REQ-LIST-010 'Todos os dias' marca a semana inteira, fica parcial com parte dela e desmarca tudo", async () => {
     const onChange = vi.fn();
-    const { user } = renderWithProviders(<Harness onChange={onChange} />, { theme: quintalTheme });
-    await user.click(screen.getByRole("button", { name: "Todos os dias" }));
+    const { user } = renderWithProviders(<Harness initial={["monday"]} onChange={onChange} />, { theme: quintalTheme });
+    const all = screen.getByRole("checkbox", { name: "Todos os dias" });
+    expect(all).toHaveProperty("indeterminate", true);
+    await user.click(all);
     expect(onChange).toHaveBeenLastCalledWith([
       "monday",
       "tuesday",
@@ -59,6 +62,9 @@ describe("WeekdayPicker", () => {
       "saturday",
       "sunday",
     ]);
+    expect(all).toBeChecked();
+    await user.click(all);
+    expect(onChange).toHaveBeenLastCalledWith([]);
   });
 
   it("REQ-LIST-010 erro descreve o grupo", () => {

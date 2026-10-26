@@ -124,8 +124,8 @@ const toRateCents = <T extends { nightlyRate: string }>({ nightlyRate, ...rest }
 });
 
 /**
- * Os schemas do cantinho para o tipo de anfitrião (REQ-LIST-003 a 010): um por seção (o painel marca "pronta" quando
- * a seção passa) e o do cantinho inteiro (abrir e editar). Pessoa física exige o tipo da casa e vai até 10 pets;
+ * Os schemas do cantinho para o tipo de anfitrião (REQ-LIST-003 a 010): um por seção (o passo do cadastro e a seção da
+ * edição se validam por eles, `listingResolver`) e o do cantinho inteiro (abrir e editar). Pessoa física exige o tipo da casa e vai até 10 pets;
  * empresa não tem tipo e vai até 200. A saída troca a diária em texto por `nightlyRateCents`.
  *
  * @example const { sections, listing } = createListingSchemas("person"); sections.home.safeParse(values).success

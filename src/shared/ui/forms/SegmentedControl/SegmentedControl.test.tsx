@@ -72,3 +72,7 @@ it("REQ-DS-010 grupo desabilitado bloqueia todas as opções", () => {
   );
   expect(screen.getAllByRole("radio").every((radio) => radio.hasAttribute("disabled"))).toBe(true);
 });
+it("104 rótulo do grupo no peso dos rótulos de campo (negrito)", () => {
+  renderWithProviders(<SegmentedControl label="Tem quintal?" options={options} value="" onChange={() => {}} />);
+  expect(getComputedStyle(screen.getByText("Tem quintal?")).fontWeight).toBe("700");
+});

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { ListingFormValues, ListingSectionId } from "../schemas/listingSchema";
-import { LISTING_SECTIONS } from "./listingSections";
+import type { ListingFormValues } from "../schemas/listingSchema";
+import { LISTING_STEP_IDS } from "./listingSteps";
 
 const yesNo = z.boolean().nullable();
 const valuesSchema: z.ZodType<ListingFormValues> = z.object({
@@ -37,12 +37,14 @@ const valuesSchema: z.ZodType<ListingFormValues> = z.object({
 export const listingDraftKey = (accountId: string): string => `pethost:listing-draft:${accountId}`;
 
 /**
- * O rascunho: os valores e as seções que a pessoa já salvou. Desconhecido é descartado na leitura.
- * @example listingDraftSchema.parse({ values, done: ["home"] })
+ * O rascunho: os valores e o passo em que a pessoa parou (104). O formato antigo, do painel de seções (`done`, sem
+ * `step`), continua valendo: o `done` é descartado na leitura e a retomada vai ao primeiro passo que falta.
+ * Desconhecido é descartado na leitura.
+ * @example listingDraftSchema.parse({ values, step: "address" })
  */
 export const listingDraftSchema = z.object({
   values: valuesSchema,
-  done: z.array(z.enum(LISTING_SECTIONS as [ListingSectionId, ...ListingSectionId[]])),
+  step: z.enum(LISTING_STEP_IDS).optional(),
 });
 
 export type ListingDraft = z.output<typeof listingDraftSchema>;

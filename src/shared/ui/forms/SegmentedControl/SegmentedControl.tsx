@@ -62,7 +62,10 @@ export function SegmentedControl({
   }
   return (
     <FormControl fullWidth={fullWidth}>
-      <FormLabel id={id}>{label}</FormLabel>
+      {/* Rótulo de grupo no peso dos rótulos de campo (prancha telas-conta: "Você entra como"). */}
+      <FormLabel id={id} sx={{ fontWeight: 700 }}>
+        {label}
+      </FormLabel>
       <ToggleButtonGroup
         ref={groupRef}
         role="radiogroup"

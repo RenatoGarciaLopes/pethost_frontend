@@ -17,3 +17,19 @@ export const Default: Story = { name: "REQ-DS-018 Default" };
 export const Selected: Story = { name: "REQ-DS-018 Selected", args: { checked: true } };
 /** Board state: Disabled. */
 export const Disabled: Story = { name: "REQ-DS-018 Disabled", args: { disabled: true } };
+/** Ícone grande em cima, centralizado (tipo de casa no cantinho). */
+export const Coluna: Story = {
+  name: "REQ-DS-018 Coluna",
+  args: { orientation: "column", checked: true, description: "Térrea ou sobrado" },
+};
+/** Cartão compacto de escolha múltipla (espécies). */
+export const CompactoCheckbox: Story = {
+  name: "REQ-DS-018 Compacto checkbox",
+  args: {
+    control: "checkbox",
+    density: "compact",
+    label: "Porquinho-da-índia",
+    icon: undefined,
+    description: undefined,
+  },
+};
