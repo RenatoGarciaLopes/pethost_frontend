@@ -40,7 +40,8 @@ it("REQ-UIC-009 movimento reduzido deixa dois cães parados, sem travessia", () 
     vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
   );
   const { container } = renderWithProviders(<DoorScene variant="house" />, { theme: quintalTheme });
-  expect(container.querySelectorAll("canvas")).toHaveLength(2);
-  expect(container.querySelector("img")).not.toBeInTheDocument();
+  const dogs = Array.from(container.querySelectorAll("img"));
+  expect(dogs).toHaveLength(2);
+  for (const dog of dogs) expect(dog.src).toMatch(/^data:image\/webp;base64,/);
   expect(container.querySelector("svg")).toHaveAttribute("focusable", "false");
 });

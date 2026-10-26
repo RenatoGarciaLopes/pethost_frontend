@@ -1,5 +1,7 @@
 # Listing route loading (29/10/2026)
 
+Cold-cache behavior was updated in [loader-first-visit.md](loader-first-visit.md): actual embedded first frames replace the empty image state, then switch to animated WebPs after decoding. Reduced motion uses embedded images instead of canvas. The earlier description below of waiting for external assets is superseded by this correction.
+
 ## Purpose and implementation
 
 The public listing route no longer wraps its async content in Suspense with a null fallback. That inner boundary previously hid the global loader while session, listing, reviews, pets, calendar and compatibility were pending.

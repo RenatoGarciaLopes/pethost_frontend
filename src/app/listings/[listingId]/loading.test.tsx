@@ -3,7 +3,8 @@ import { act, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
-import { TURMA_MEMBERS, turmaSrc } from "@/shared/ui/brand/turma";
+import { TURMA_MEMBERS } from "@/shared/ui/brand/turma";
+import { turmaPosters } from "@/shared/ui/brand/turmaPosters";
 import AppLoading from "../../loading";
 import ListingLoading from "./loading";
 
@@ -28,7 +29,7 @@ it("shows the full application loader while listing content waits and replaces i
   );
   expect(screen.getByRole("status")).toHaveTextContent("Farejando");
   const images = Array.from(container.querySelectorAll("img"));
-  expect(images.map((image) => image.getAttribute("src"))).toEqual(TURMA_MEMBERS.map(turmaSrc));
+  expect(images.map((image) => image.getAttribute("src"))).toEqual(TURMA_MEMBERS.map((member) => turmaPosters[member]));
   for (const image of images) {
     expect(image).toHaveAttribute("loading", "eager");
     expect(image).toHaveAttribute("fetchpriority", "high");

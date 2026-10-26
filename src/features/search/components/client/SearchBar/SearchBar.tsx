@@ -166,21 +166,41 @@ export function SearchBar({
             gap: { xs: 1, md: 0 },
           }}
         >
-          <Box sx={{ ...cell, ...separator }}>
-            <FormLabel htmlFor={`${ids}-where`} sx={label}>
-              {copy.where}
-            </FormLabel>
-            <InputBase
-              id={`${ids}-where`}
-              inputProps={{
-                "aria-invalid": Boolean(fieldErrors.where),
-                "aria-describedby": fieldErrors.where ? `${ids}-where-error` : undefined,
-              }}
-              placeholder={copy.nearby}
-              value={where}
-              onChange={(event) => setWhere(event.target.value)}
-              sx={control}
-            />
+          <Box sx={{ ...cell, ...separator, display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              component="svg"
+              viewBox="0 0 24 24"
+              width={24}
+              height={24}
+              aria-hidden="true"
+              focusable="false"
+              sx={{ flexShrink: 0, color: "text.primary" }}
+            >
+              <path
+                d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+              <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" strokeWidth="2" />
+            </Box>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <FormLabel htmlFor={`${ids}-where`} sx={label}>
+                {copy.where}
+              </FormLabel>
+              <InputBase
+                id={`${ids}-where`}
+                inputProps={{
+                  "aria-invalid": Boolean(fieldErrors.where),
+                  "aria-describedby": fieldErrors.where ? `${ids}-where-error` : undefined,
+                }}
+                placeholder={copy.nearby}
+                value={where}
+                onChange={(event) => setWhere(event.target.value)}
+                sx={control}
+              />
+            </Box>
           </Box>
           <Box sx={{ ...dateCell, display: "flex", alignItems: "center", gap: 1 }}>
             <Box sx={{ display: "flex", flexShrink: 0, color: "text.primary" }}>

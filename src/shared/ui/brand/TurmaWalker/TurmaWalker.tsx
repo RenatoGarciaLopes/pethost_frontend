@@ -65,7 +65,7 @@ export function TurmaWalker({
                   bottom: 0,
                   left: -dogWidth,
                   visibility: "hidden",
-                  animation: `${walk} ${period}ms linear ${index * intervalMs}ms ${repeat === "loop" ? "infinite" : 1} both`,
+                  animation: `${walk} ${period}ms linear ${index * intervalMs - (repeat === "loop" ? crossingMs * 0.4 : 0)}ms ${repeat === "loop" ? "infinite" : 1} both`,
                 }
           }
         >

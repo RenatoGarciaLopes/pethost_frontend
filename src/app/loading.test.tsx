@@ -13,8 +13,8 @@ it.each([false, true])("REQ-SHELL-012 carregamento anuncia Farejando com movimen
   expect(screen.getAllByRole("status")).toHaveLength(1);
   expect(screen.getByRole("status")).toHaveTextContent("Farejando");
   expect(screen.queryByRole("img")).not.toBeInTheDocument();
-  expect(container.querySelectorAll("canvas")).toHaveLength(reduced ? 3 : 0);
-  expect(container.querySelectorAll("img")).toHaveLength(reduced ? 0 : 3);
+  expect(container.querySelectorAll("img")).toHaveLength(3);
+  for (const dog of container.querySelectorAll("img")) expect(dog.src).toMatch(/^data:image\/webp;base64,/);
   if (reduced) {
     const rules = Array.from(document.styleSheets)
       .flatMap((sheet) => Array.from(sheet.cssRules))

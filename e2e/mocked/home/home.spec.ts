@@ -105,14 +105,14 @@ test("REQ-UIC-002/003/007/009 home tem casa, faixa única, confiança e composi�
   }
   const scene = main.locator('svg[viewBox="0 0 520 300"]');
   await expect(scene).toBeVisible();
-  await expect(scene.locator("canvas")).toHaveCount(2);
+  const dogs = scene.locator("img");
+  await expect(dogs).toHaveCount(2);
   await expect
     .poll(() =>
-      scene.locator("canvas").evaluateAll((canvases) =>
-        canvases.every((element) => {
-          const canvas = element as HTMLCanvasElement;
-          const drawing = canvas.getContext("2d")?.getImageData(0, 0, canvas.width, canvas.height).data;
-          return drawing?.some((value, index) => index % 4 === 3 && value > 0);
+      dogs.evaluateAll((images) =>
+        images.every((element) => {
+          const image = element as HTMLImageElement;
+          return image.src.startsWith("data:image/webp;base64,") && image.complete && image.naturalWidth > 0;
         }),
       ),
     )

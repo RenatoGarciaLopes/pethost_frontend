@@ -1,79 +1,105 @@
-import { act } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import { act, fireEvent, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
 import { TurmaWalker } from "./TurmaWalker";
 import { TurmaDog } from "./TurmaDog";
+import { turmaPosters } from "../turmaPosters";
 
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
+beforeEach(() =>
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
+  ),
+);
+afterEach(() => vi.unstubAllGlobals());
+
 it.each(["loop", "once"] as const)(
-  "REQ-DS-016 desfile %s respeita membros, dimensões e não bloqueia interação",
+  "decorative parade %s preserves size and starts at the expected position",
   (repeat) => {
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
-    );
     const { container } = renderWithProviders(
       <TurmaWalker members={["corgi", "golden"]} dogHeight={40} crossingMs={1000} intervalMs={2000} repeat={repeat} />,
     );
-    const track = container.querySelector('[aria-hidden="true"]')!;
-    expect(track).toHaveStyle({ height: "40px", pointerEvents: "none" });
+    expect(container.firstChild).toHaveStyle({ height: "40px", pointerEvents: "none" });
     const dogs = container.querySelectorAll("img");
     expect(dogs).toHaveLength(2);
     expect(dogs[0]).toHaveAttribute("height", "40");
-    expect(dogs[0]).toHaveAttribute("alt", "");
-    expect(dogs[0].parentElement).toHaveStyle({ visibility: "hidden" });
-    expect(getComputedStyle(dogs[0].parentElement!).animation).toContain(repeat === "loop" ? "infinite" : "1 both");
+    expect(dogs[0]).toHaveAttribute("src", turmaPosters.corgi);
+    expect(getComputedStyle(dogs[0].parentElement!).animation).toContain(
+      repeat === "loop" ? "-400ms infinite" : "0ms 1 both",
+    );
   },
 );
-it("REQ-DS-008 movimento reduzido usa canvas e desenha primeiro quadro", () => {
+
+it("reduced motion shows embedded dogs immediately without downloading animations", () => {
   vi.stubGlobal(
     "matchMedia",
     vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
   );
-  const images: { onload: (() => void) | null; src: string }[] = [];
+  const download = vi.fn();
+  vi.stubGlobal("Image", download);
+  const { container } = renderWithProviders(<TurmaWalker />);
+  const dogs = container.querySelectorAll("img");
+  expect(dogs).toHaveLength(3);
+  expect(dogs[0]).toHaveAttribute("src", turmaPosters.corgi);
+  expect(dogs[0].parentElement).not.toHaveStyle({ visibility: "hidden" });
+  expect(download).not.toHaveBeenCalled();
+});
+
+it("keeps the first frame until decode completes and restores it after an image failure", async () => {
+  let loaded: (() => Promise<void>) | null = null;
+  let finish!: () => void;
+  const decoded = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
   vi.stubGlobal(
     "Image",
     class {
-      onload: (() => void) | null = null;
+      onload: (() => Promise<void>) | null = null;
+      decode = () => decoded;
+      set src(_value: string) {
+        loaded = this.onload;
+      }
+    },
+  );
+  const { container } = renderWithProviders(<TurmaDog member="corgi" height={66} still={false} />);
+  const dog = container.querySelector("img")!;
+  expect(dog).toHaveAttribute("src", turmaPosters.corgi);
+  const pending = loaded!();
+  expect(dog).toHaveAttribute("src", turmaPosters.corgi);
+  await act(async () => {
+    finish();
+    await pending;
+  });
+  await waitFor(() => expect(dog).toHaveAttribute("src", "/brand/turma/corgi.webp"));
+  fireEvent.error(dog);
+  expect(dog).toHaveAttribute("src", turmaPosters.corgi);
+});
+
+it("decode rejection preserves the embedded frame and unmount cancels late completion", async () => {
+  const images: { onload: (() => Promise<void>) | null; decode: () => Promise<void> }[] = [];
+  vi.stubGlobal(
+    "Image",
+    class {
+      onload: (() => Promise<void>) | null = null;
       src = "";
+      decode = vi.fn().mockRejectedValue(new Error("invalid image"));
       constructor() {
         images.push(this);
       }
     },
   );
-  const context = { clearRect: vi.fn(), drawImage: vi.fn() };
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(context as unknown as CanvasRenderingContext2D);
-  const { container, unmount } = renderWithProviders(<TurmaWalker />);
-  expect(container.querySelectorAll("canvas")).toHaveLength(3);
-  expect(container.querySelector("img")).not.toBeInTheDocument();
-  const canvas = container.querySelector("canvas")!;
-  expect(canvas).toHaveAttribute("height", "84");
-  act(() => {
-    images[0].onload?.();
+  const { container, unmount } = renderWithProviders(<TurmaDog member="golden" height={50} still={false} />);
+  await act(async () => {
+    await images[0].onload!();
   });
-  expect(context.drawImage).toHaveBeenCalledWith(images[0], 0, 0, Number(canvas.width), 84);
-  expect(context.clearRect).toHaveBeenCalledWith(0, 0, canvas.width, 84);
-  expect(canvas.parentElement).not.toHaveStyle({ visibility: "hidden" });
+  expect(container.querySelector("img")).toHaveAttribute("src", turmaPosters.golden);
   unmount();
-  expect(images.every((image) => image.onload === null)).toBe(true);
+  expect(images[0].onload).toBeNull();
 });
-it("REQ-DS-008 still explícito permite imagem animada ou quadro estático", () => {
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
-  );
-  vi.stubGlobal(
-    "Image",
-    class {
-      onload = null;
-      src = "";
-    },
-  );
-  const { container, rerender } = renderWithProviders(<TurmaDog member="pastor" height={50} still={false} />);
-  expect(container.querySelector("img")).toHaveAttribute("height", "50");
-  rerender(<TurmaDog member="pastor" height={50} still />);
-  expect(container.querySelector("canvas")).toHaveAttribute("height", "50");
-  expect(container.querySelector("img")).not.toBeInTheDocument();
+
+it("explicit still overrides the motion preference", () => {
+  const { container, rerender } = renderWithProviders(<TurmaDog member="pastor" height={50} still />);
+  expect(container.querySelector("img")).toHaveAttribute("src", turmaPosters.pastor);
+  rerender(<TurmaDog member="corgi" height={50} still />);
+  expect(container.querySelector("img")).toHaveAttribute("src", turmaPosters.corgi);
 });

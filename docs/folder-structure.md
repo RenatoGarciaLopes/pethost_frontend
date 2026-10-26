@@ -1,5 +1,9 @@
 # Estrutura real do frontend
 
+## Loader no primeiro acesso (29/10/2026)
+
+`src/shared/ui/brand/turmaPosters.ts` contém os primeiros quadros consumidos por `TurmaWalker/TurmaDog.tsx`; `scripts/generate-turma-posters.mjs` os deriva dos WebPs em `public/brand/turma/`. A lógica de exibição permanece na composição existente. Sem nova pasta/provider. Contratos e validação: [loader-first-visit.md](loader-first-visit.md).
+
 ## Upload direto de mídias (29/10/2026)
 
 ```text
