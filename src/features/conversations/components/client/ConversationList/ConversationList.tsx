@@ -5,7 +5,7 @@ import NextLink from "next/link";
 import { useState } from "react";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { hardShadow } from "@/shared/theme/tokens/shadows";
-import { visuallyHidden } from "@/shared/ui/a11y/visuallyHidden";
+import { UnreadBadge } from "../UnreadBadge";
 import { EmptyState } from "@/shared/ui/feedback/EmptyState";
 import { lastMessagePreview, otherParty, otherPartyName } from "../../../lib/conversationParties";
 import { conversationsCopy } from "../../../lib/conversationsCopy";
@@ -25,34 +25,6 @@ export interface ConversationListProps {
   hrefOf: (conversationId: string) => string;
   /** "Agora" para hora e dia; padrão: o momento da montagem. */
   now?: Date;
-}
-
-/** O contador de não lidas: número no círculo coral, frase completa para o leitor de tela. */
-function UnreadBadge({ count }: { count: number }) {
-  return (
-    <Box
-      component="span"
-      sx={{
-        display: "inline-grid",
-        placeItems: "center",
-        minWidth: 24,
-        height: 24,
-        px: 0.5,
-        borderRadius: `${quintalRadii.pill}px`,
-        border: "2px solid",
-        borderColor: "text.primary",
-        bgcolor: "primary.main",
-        fontSize: "0.8rem",
-        fontWeight: 700,
-        lineHeight: 1,
-      }}
-    >
-      <span aria-hidden>{count}</span>
-      <Box component="span" sx={visuallyHidden}>
-        {copy.unread(count)}
-      </Box>
-    </Box>
-  );
 }
 
 /**

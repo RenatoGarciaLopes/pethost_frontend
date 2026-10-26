@@ -56,6 +56,8 @@ describe("stayContext", () => {
 
   it("REQ-CHAT-011 a reserva vira o contexto do painel; sem cantinho, nada", () => {
     const booking: Booking = {
+      listingId: "listing",
+      ownerId: "owner",
       id: "0199f0a0-0000-7000-8000-0000000000d1",
       status: "in_progress",
       listing: {

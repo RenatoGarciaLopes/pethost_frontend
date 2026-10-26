@@ -4,6 +4,10 @@ import { conversationDtoSchema, messageDtoSchema, messagePageSchema } from "./co
 import { toConversation, toMessage, toMessagePage } from "./mappers";
 
 describe("conversations mappers", () => {
+  it("preserves ownerId when the optional owner display object is absent", () => {
+    const dto = conversationDto({ owner: null });
+    expect(toConversation(conversationDtoSchema.parse(dto))).toMatchObject({ ownerId: dto.ownerId, owner: null });
+  });
   it("REQ-CHAT-005 mensagem: campos omitidos pela API viram null", () => {
     const message = toMessage(messageDtoSchema.parse(messageDto({ body: undefined, imageUrl: "/foto.webp" })));
     expect(message).toMatchObject({ body: null, imageUrl: "/foto.webp", bookingId: null, sentBy: "host" });

@@ -1,5 +1,20 @@
 # Estrutura real do frontend
 
+## Conversa na reserva (105)
+
+R1: `src/features/conversations/components/client/UnreadBadge.tsx` concentra o selo antes privado de ConversationList, público por `index.client.ts` e reutilizado no widget. `conversationsCopy.booking` reúne os textos no arquivo de copy existente. Sem nova pasta técnica.
+
+```text
+src/widgets/booking-conversation/
+  BookingConversation.tsx           composição client bookings + conversations
+  BookingConversation.int.test.tsx  MSW: criação, falhas, lookup e limite
+  index.ts                         export público do widget
+src/app/BookingConversationPreview.stories.tsx  duas telas, três cenários
+specs/105-chat-na-reserva/           requirements, design, tasks, validation
+```
+
+As rotas existentes `(owner)/owner/bookings/[bookingId]/page.tsx` e `(host)/host/bookings/[bookingId]/page.tsx` compõem o widget no slot `conversation` dos Screens e detalhes. O POST fica no cliente existente de conversations; IDs continuam nos mapeadores existentes das features. Sem provider/store ou utilitário de teste reutilizável novo. [Interfaces e limites](../specs/105-chat-na-reserva/design.md), [validação](../specs/105-chat-na-reserva/validation.md).
+
 ## Pagamento da estadia (066)
 
 Implementação na feature bookings existente, em validação. Não há módulo global novo de pagamentos.

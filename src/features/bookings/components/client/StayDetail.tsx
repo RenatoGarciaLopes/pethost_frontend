@@ -4,7 +4,7 @@ import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Box, Button, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import NextLink from "next/link";
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { translateError } from "@/shared/api/errors/translateError";
 import { maskCep, maskPhone } from "@/shared/lib/masks";
 import { formatBRL, fromCents } from "@/shared/lib/money";
@@ -101,6 +101,9 @@ function NowPanel({ now, booking }: { now: StayNow; booking: Booking }) {
 }
 
 export interface StayDetailProps {
+  /** Ação de conversa composta pela rota, junto da outra pessoa.
+   * @example conversation={<BookingConversation accountId={id} bookingId={bookingId} side="owner" />} */
+  conversation?: ReactNode;
   accountId: string;
   bookingId: string;
   /** "Agora" para o prazo; padrão: o momento da montagem. */
@@ -114,7 +117,7 @@ export interface StayDetailProps {
  *
  * @example <StayDetail accountId={user.id} bookingId={id} />
  */
-export function StayDetail({ accountId, bookingId, now }: StayDetailProps) {
+export function StayDetail({ accountId, bookingId, now, conversation }: StayDetailProps) {
   const [moment] = useState(() => now ?? new Date());
   const [conflict, setConflict] = useState<string | null>(null);
   const query = useQuery(bookingQueries.detail(accountId, bookingId));
@@ -158,6 +161,7 @@ export function StayDetail({ accountId, bookingId, now }: StayDetailProps) {
           )}
         </Stack>
       </Stack>
+      {conversation}
       {conflict && <Notice tone="atencao" title={conflict} />}
       <Box
         sx={{

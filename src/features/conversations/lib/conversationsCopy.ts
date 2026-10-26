@@ -1,6 +1,16 @@
 /** Textos das conversas (spec 055, em rascunho), na voz da PetHost. Sem gênero presumido. */
 export const conversationsCopy = {
   heading: "Conversas",
+  booking: {
+    action: (name: string) => `Conversar com ${name}`,
+    host: "o anfitrião",
+    owner: "o tutor",
+    loading: "Buscando conversa…",
+    retry: "Tentar novamente",
+    empty: (name: string) => `A conversa abre quando ${name} mandar a primeira mensagem.`,
+    outsideRecent: (name: string) => `A conversa com ${name} não aparece entre as 50 mais recentes.`,
+    viewConversations: "Ver conversas",
+  },
   pageTitle: "Conversas · PetHost",
   loadingList: "Buscando suas conversas",
   listLoadError: "Não deu pra abrir suas conversas.",

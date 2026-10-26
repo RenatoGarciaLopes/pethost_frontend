@@ -25,6 +25,7 @@ export interface ConversationMessage {
 /** Uma conversa vista por um dos lados (o papel da sessão decide qual). */
 export interface Conversation {
   id: string;
+  ownerId: string;
   owner: ConversationParty | null;
   host: ConversationParty | null;
   lastMessage: ConversationMessage | null;

@@ -13,3 +13,6 @@ export { statusLabel } from "./lib/bookingStatus";
 export { formatPeriod } from "./lib/formatStay";
 export type { Booking, BookingStatus } from "./types";
 export { BOOKING_STATUSES } from "./api/contracts";
+
+export { bookingDtoSchema } from "./api/contracts";
+export { toBooking } from "./api/mappers";

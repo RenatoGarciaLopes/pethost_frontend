@@ -17,10 +17,12 @@ export async function HostBookingDetailScreen({
   accountId,
   bookingId,
   petProfiles,
+  conversation,
 }: {
   accountId: string;
   bookingId: string;
   petProfiles: ReactNode;
+  conversation?: ReactNode;
 }) {
   const queryClient = getQueryClient();
   queryClient.setQueryData(
@@ -30,7 +32,12 @@ export async function HostBookingDetailScreen({
   return (
     <PageContainer>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <HostBookingDetail accountId={accountId} bookingId={bookingId} petProfiles={petProfiles} />
+        <HostBookingDetail
+          conversation={conversation}
+          accountId={accountId}
+          bookingId={bookingId}
+          petProfiles={petProfiles}
+        />
       </HydrationBoundary>
     </PageContainer>
   );

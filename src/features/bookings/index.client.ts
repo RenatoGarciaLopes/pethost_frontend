@@ -9,3 +9,6 @@ export type { RequestStayFormProps, RequestStayListing } from "./components/clie
 export type { PickablePet } from "./components/client/PetPickCards";
 export { useStayUpdates } from "./hooks/useStayUpdates";
 export { bookingQueries } from "./api/queries";
+
+export { StayDetail } from "./components/client/StayDetail";
+export { HostBookingDetail } from "./components/client/HostBookingDetail";

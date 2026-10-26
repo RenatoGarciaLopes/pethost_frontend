@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Container } from "@mui/material";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/shared/api/query/queryClient";
@@ -11,7 +12,15 @@ import { StayDetail } from "./client/StayDetail";
  *
  * @example <OwnerStayDetailScreen accountId={user.id} bookingId={id} />
  */
-export async function OwnerStayDetailScreen({ accountId, bookingId }: { accountId: string; bookingId: string }) {
+export async function OwnerStayDetailScreen({
+  accountId,
+  bookingId,
+  conversation,
+}: {
+  accountId: string;
+  bookingId: string;
+  conversation?: ReactNode;
+}) {
   const queryClient = getQueryClient();
   queryClient.setQueryData(
     bookingQueries.detail(accountId, bookingId).queryKey,
@@ -20,7 +29,7 @@ export async function OwnerStayDetailScreen({ accountId, bookingId }: { accountI
   return (
     <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 } }}>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <StayDetail accountId={accountId} bookingId={bookingId} />
+        <StayDetail conversation={conversation} accountId={accountId} bookingId={bookingId} />
       </HydrationBoundary>
     </Container>
   );

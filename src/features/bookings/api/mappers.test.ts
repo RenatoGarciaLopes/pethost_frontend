@@ -4,6 +4,15 @@ import { bookingDtoSchema, bookingPageSchema } from "./contracts";
 import { toBooking, toBookingPage } from "./mappers";
 
 describe("toBooking", () => {
+  it("preserves chat identifiers when display objects are absent", () => {
+    const dto = bookingDto({ listing: null, owner: null });
+    expect(toBooking(bookingDtoSchema.parse(dto))).toMatchObject({
+      listingId: dto.listingId,
+      ownerId: dto.ownerId,
+      listing: null,
+      owner: null,
+    });
+  });
   it("REQ-HREQ-002 a reserva vira o modelo da tela: valores em centavos, tutor, pets e prazo", () => {
     const booking = toBooking(bookingDtoSchema.parse(bookingDto()));
     expect(booking).toMatchObject({
