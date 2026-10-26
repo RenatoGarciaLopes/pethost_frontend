@@ -23,6 +23,12 @@ const atkinsonHyperlegibleNext = localFont({
 export const metadata: Metadata = {
   title: "PetHost",
   description: "Hospedagem de pets perto de casa.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
