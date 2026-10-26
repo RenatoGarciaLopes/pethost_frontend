@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { quintalTheme } from "@/shared/theme/createQuintalTheme";
 import { pickCalendarDays } from "@/test/calendar";
 import { BOOKING_ID, bookingDto, PIPOCA_ID, THOR_ID } from "@/test/fixtures/bookings";
@@ -14,6 +14,10 @@ import type { PickablePet } from "./PetPickCards";
 import { RequestStayForm, type RequestStayFormProps } from "./RequestStayForm";
 
 const copy = bookingCopy.request;
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 const LISTING_ID = "0199e0a0-0000-7000-8000-0000000000c1";
 const NOW = new Date("2026-12-10T15:00:00Z");
 const MEL_ID = "0199f0a0-0000-7000-8000-0000000000e3";
@@ -253,4 +257,35 @@ describe("RequestStayForm", { timeout: 15000 }, () => {
     expect(screen.getByText(copy.noPets)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: copy.addPet })).toHaveAttribute("href", "/pets/new");
   });
+
+  it.each([false, true])(
+    "empty pets notice focuses and repeats feedback without sending; reduced motion %s",
+    async (reduced) => {
+      vi.stubGlobal(
+        "matchMedia",
+        vi.fn(() => ({ matches: reduced, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
+      );
+      const cancel = vi.fn();
+      const animate = vi.fn(() => ({ cancel }) as unknown as Animation);
+      const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "animate");
+      Object.defineProperty(HTMLElement.prototype, "animate", { configurable: true, value: animate });
+      try {
+        const bodies = serve(() => HttpResponse.json(apiOk(bookingDto()), { status: 201 }));
+        const { user, unmount } = setup({ pets: [] });
+        await checkCare(user);
+        const notice = screen.getByText(copy.noPets).closest('[role="status"]')!;
+        await user.click(screen.getByRole("button", { name: copy.submit }));
+        expect(notice).toHaveFocus();
+        expect(animate).toHaveBeenCalledTimes(reduced ? 0 : 1);
+        await user.click(screen.getByRole("button", { name: copy.submit }));
+        expect(animate).toHaveBeenCalledTimes(reduced ? 0 : 2);
+        expect(bodies).toHaveLength(0);
+        unmount();
+        if (!reduced) expect(cancel).toHaveBeenCalledTimes(2);
+      } finally {
+        if (original) Object.defineProperty(HTMLElement.prototype, "animate", original);
+        else Reflect.deleteProperty(HTMLElement.prototype, "animate");
+      }
+    },
+  );
 });

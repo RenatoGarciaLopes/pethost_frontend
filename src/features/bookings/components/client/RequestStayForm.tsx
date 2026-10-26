@@ -9,6 +9,7 @@ import { hasErrorCode } from "@/shared/api/errors/ApiError";
 import { applyFieldErrors } from "@/shared/api/errors/applyFieldErrors";
 import { earliestRequestCheckIn, nightsBetween } from "@/shared/lib/date/stayRules";
 import { formatBRL } from "@/shared/lib/money";
+import { usePrefersReducedMotion } from "@/shared/lib/motion/usePrefersReducedMotion";
 import { quintalRadii } from "@/shared/theme/tokens/radii";
 import { Notice } from "@/shared/ui/feedback/Notice";
 import type { CalendarClosedDay } from "@/shared/ui/forms/Calendar";
@@ -186,6 +187,10 @@ export function RequestStayForm({
   const [checkIn, checkOut, petIds] = useWatch({ control, name: ["checkIn", "checkOut", "petIds"] });
   const request = useRequestBooking(accountId);
   const sending = useRef(false);
+  const noPetsNotice = useRef<HTMLDivElement>(null);
+  const noPetsAnimation = useRef<Animation | null>(null);
+  const reducedMotion = usePrefersReducedMotion();
+  useEffect(() => () => noPetsAnimation.current?.cancel(), []);
   const [sent, setSent] = useState<Booking | null>(null);
   const [notice, setNotice] = useState<{ message: string; listingGone: boolean } | null>(null);
   const hostName = listing.hostName ?? copy.theHost;
@@ -215,7 +220,25 @@ export function RequestStayForm({
   const revalidate = formState.isSubmitted;
 
   return (
-    <Stack component="form" noValidate spacing={4} onSubmit={(event) => void handleSubmit(send)(event)}>
+    <Stack
+      component="form"
+      noValidate
+      spacing={4}
+      onSubmit={(event) =>
+        void handleSubmit(send, () => {
+          if (pets.length !== 0) return;
+          const element = noPetsNotice.current;
+          element?.focus({ preventScroll: true });
+          element?.scrollIntoView?.({ block: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+          noPetsAnimation.current?.cancel();
+          if (!reducedMotion && element?.animate)
+            noPetsAnimation.current = element.animate(
+              [0, -6, 6, -4, 4, 0].map((x) => ({ transform: `translateX(${x}px)` })),
+              { duration: 320, easing: "ease-in-out" },
+            );
+        })(event)
+      }
+    >
       <Typography variant="h1" sx={{ fontSize: { xs: 30, md: 40 } }}>
         {copy.heading}
       </Typography>
@@ -254,6 +277,7 @@ export function RequestStayForm({
           </Box>
           {pets.length === 0 ? (
             <Notice
+              ref={noPetsNotice}
               tone="info"
               title={copy.noPets}
               action={
