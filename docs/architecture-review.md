@@ -88,7 +88,7 @@ Com Cache Components ligado, qualquer leitura de cookie torna o trecho dinâmico
 | Falta                 | Proposta                                                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Validação de ambiente | `shared/config/env.server.ts` com Zod (`BACKEND_URL`, `BACKEND_API_PREFIX`, segredos de cookie); a subida falha se faltar algo |
-| Fontes da marca       | `next/font/local` com Caprasimo e Atkinson Hyperlegible Next em `src/assets/fonts`                                             |
+| Fontes da marca       | `next/font/local` com Caprasimo e Atkinson Hyperlegible Next em `public/fonts`                                                 |
 | Ícones desenhados     | `shared/ui/icons` (SVG em componente, `aria-hidden` por padrão)                                                                |
 | Datas                 | `date-fns`; data de estadia trafega como `yyyy-MM-dd` (string), nunca `Date` com fuso                                          |
 | Dinheiro              | `shared/lib/money` (`formatCents`, `sumCents`); nunca `float`                                                                  |

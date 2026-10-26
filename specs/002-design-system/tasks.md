@@ -7,7 +7,7 @@ updated: 2026-10-11
 # 002 · Tarefas
 
 - [x] (2026-10-11) **T1 · Tokens e contraste** (REQ-DS-001, 002): `colors.test.ts`, `contrast.test.ts` → `tokens/*`, `shared/lib/color/contrastRatio.ts` (movido para `src/test/a11y/` em 2026-10-12: só teste usa)
-- [x] (2026-10-11) **T2 · Fontes locais** (REQ-DS-003): baixar os arquivos com licença OFL para `src/assets/fonts`, `app/layout.tsx`, `tokens/typography.ts`; E2E de fontes
+- [x] (2026-10-11) **T2 · Fontes locais** (REQ-DS-003): baixar os arquivos com licença OFL para `public/fonts`, `app/layout.tsx`, `tokens/typography.ts`; E2E de fontes
 - [x] (2026-10-11) **T3 · Tema + providers** (REQ-DS-004 a 007): `overrides/Button.test.tsx` → `createQuintalTheme.ts`, `overrides/*`, `variants/*`, `types/mui.d.ts`, `bootstrap/providers/ThemeProviders.tsx`; trocar a home do scaffold por uma página de verificação do tema (temporária; removida em 2026-10-12, os E2E do tema usam `/login`)
 - [x] (2026-10-11) **T4 · Movimento** (REQ-DS-008): `usePrefersReducedMotion`, `tokens/springs.ts`
 - [x] (2026-10-11) **T5 · Máscaras** (base para a 011): `masks.test.ts` → `shared/lib/masks`

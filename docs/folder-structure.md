@@ -318,11 +318,18 @@ pethost_frontend/
   public/
     animations/
     brand/
+      email-logo.png
       turma/
         corgi.webp
         golden.webp
         pastor.webp
     fonts/
+      atkinson-hyperlegible-next-latin-400-italic.woff2
+      atkinson-hyperlegible-next-latin-400-normal.woff2
+      atkinson-hyperlegible-next-latin-700-normal.woff2
+      AtkinsonHyperlegibleNext-OFL.txt
+      caprasimo-latin-400-normal.woff2
+      Caprasimo-OFL.txt
     images/
       brand/
       illustrations/
@@ -332,6 +339,8 @@ pethost_frontend/
     vercel.svg
     window.svg
   scripts/
+    email-brand-assets.test.ts
+    generate-email-logo.mjs
     api-check.mjs
     api-sync.mjs
     openapi-transformer.mjs
@@ -366,14 +375,6 @@ pethost_frontend/
       layout.tsx
       page.module.css
       page.tsx
-    assets/
-      fonts/
-        atkinson-hyperlegible-next-latin-400-italic.woff2
-        atkinson-hyperlegible-next-latin-400-normal.woff2
-        atkinson-hyperlegible-next-latin-700-normal.woff2
-        AtkinsonHyperlegibleNext-OFL.txt
-        caprasimo-latin-400-normal.woff2
-        Caprasimo-OFL.txt
     shared/
       api/
         contracts/

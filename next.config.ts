@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   async headers() {
     // O link de senha nova traz o token na URL: nada da página o repassa a terceiros (REQ-PWD-013).
     return [
+      { source: "/fonts/:path*", headers: [{ key: "Access-Control-Allow-Origin", value: "*" }] },
       { source: "/reset-password", headers: [{ key: "Referrer-Policy", value: "no-referrer" }] },
       { source: "/owner/bookings/:bookingId/payment", headers: [{ key: "Referrer-Policy", value: "no-referrer" }] },
     ];

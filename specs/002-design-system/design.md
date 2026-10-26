@@ -23,7 +23,7 @@ src/shared/theme/
 
 - `bootstrap/providers/ThemeProviders.tsx` (client) aplica `AppRouterCacheProvider` (`@mui/material-nextjs/v16-appRouter`), `ThemeProvider` e `CssBaseline`.
 - O grão de papel entra como fundo no `CssBaseline`, a partir de um PNG local.
-- As fontes ficam em `src/assets/fonts`, carregadas em `app/layout.tsx` com `next/font/local`; as variáveis CSS vão para a `typography` do tema.
+- As fontes ficam em `public/fonts`, carregadas em `app/layout.tsx` com `next/font/local`; as variáveis CSS vão para a `typography` do tema.
 
 ## Ajuste dos campos em 19/10/2026
 
